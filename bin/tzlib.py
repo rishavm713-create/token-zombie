@@ -14,8 +14,27 @@ except Exception:
     _conf = {}
 
 
+# Mode profiles (config.json "mode"). full = DEFAULTS. Only differences are listed; `hard`/`plan_stop` safety fires in every mode.
+ADVICE = ('pack_hints', 'read_nudge', 'dup_advice', 'next_task')
+PROFILES = {
+    'off': {'advice': ()},
+    'lite': {'limit': 150000, 'hard': 175000, 'read_warn': 100000, 'advice': ('read_nudge', 'next_task')},
+    'full': {'advice': ADVICE},
+    'ultra': {'limit': 60000, 'hard': 120000, 'read_warn': 20000, 'plan_warn': 80, 'plan_stop': 95, 'advice': ADVICE},
+}
+
+
+def mode():
+    m = _conf.get('mode')
+    return m.strip().lower() if isinstance(m, str) and m.strip().lower() in PROFILES else 'full'
+
+
+def advice(name):
+    return name in PROFILES[mode()]['advice']
+
+
 def cfg(key):
-    return int(os.environ.get(f'TZ_{key.upper()}') or _conf.get(key) or DEFAULTS[key])
+    return int(os.environ.get(f'TZ_{key.upper()}') or _conf.get(key) or PROFILES[mode()].get(key) or DEFAULTS[key])
 
 
 LIMIT, HARD = cfg('limit'), cfg('hard')

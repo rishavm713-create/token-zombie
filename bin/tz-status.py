@@ -3,7 +3,7 @@
 # "TZ <growth>k/<limit>k | off N skills ~Xk/chat saved". --report prints the same numbers as plain lines;
 # --history [days] prints per-day tokens by model from the local chat logs.
 # --startup [N] audits what a new chat loads before any work (advice only; see tzstartup.py).
-import json, os, subprocess, sys
+import json, os, subprocess, sys, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from tzlib import chat_tokens, skills_off, LIMIT
 
@@ -68,6 +68,17 @@ try:
     data = json.loads(raw) if raw else {}
 except Exception:
     data = {}
+
+try:  # host-measured cost for the panel; never breaks the statusline
+    c = data.get('cost')
+    if isinstance(c, dict) and isinstance(c.get('total_cost_usd'), (int, float)):
+        hd = os.path.expanduser('~/.claude/token-zombie'); os.makedirs(hd, exist_ok=True)
+        hf = os.path.join(hd, 'host.json'); tmp = hf + '.tmp%d' % os.getpid()
+        json.dump({'session': data.get('session_id'), 'cost_usd': c['total_cost_usd'], 'duration_ms': c.get('total_duration_ms'),
+                   'api_duration_ms': c.get('total_api_duration_ms'), 'ts': int(time.time())}, open(tmp, 'w'))
+        os.replace(tmp, hf)
+except Exception:
+    pass
 
 path = data.get('transcript_path')
 if report and not path:  # newest chat log of any project

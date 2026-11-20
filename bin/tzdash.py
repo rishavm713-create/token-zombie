@@ -33,10 +33,35 @@ def bench_results(ev=None):
     return out
 
 
+def metrics(bus, now=None):
+    """The four headline numbers. Each: (value, tag, note). tag = MEASURED | EST | UNKNOWN; never a made-up number."""
+    import time
+    from tzlib import skills_off
+    now = now or time.time()
+    ag = _j('agents.json', {})
+    fresh = isinstance(ag.get('ts'), (int, float)) and now - ag['ts'] <= 180 and isinstance(ag.get('running'), int)
+    agents = (ag['running'], 'MEASURED', 'subagents running (Mods agent.list)') if fresh else ('—', 'UNKNOWN', 'needs the in-chat panel loaded')
+    sk = os.path.expanduser('~/.claude/skills')
+    on = sum(os.path.isfile(os.path.join(sk, d, 'SKILL.md')) for d in os.listdir(sk)) if os.path.isdir(sk) else 0
+    off_n, off_tok = skills_off()
+    skills = (on, 'MEASURED', f'enabled on disk; {off_n} kept off (~{off_tok} tok/chat startup) [EST]')
+    led = [x for x in _j('ledger.json', []) if isinstance(x, dict) and isinstance(x.get('tok'), (int, float))]
+    done = [x for x in led if x.get('basis') == 'measured' and not str(x.get('kind', '')).startswith('overhead')]
+    over = sum(x['tok'] for x in led if str(x.get('kind', '')).startswith('overhead'))
+    net = sum(x['tok'] for x in done) - over
+    saved = (f'{net:,}' if led else '0', 'EST', 'output cut by tz (MEASURED chars / 4), net of hook overhead; no A/B baseline, not a proven saving')
+    opts = (len(done), 'MEASURED', 'filters/optimizations actually applied (ledger)')
+    recent = any(isinstance(x.get('t'), (int, float)) and now - x['t'] <= 120 and x['tok'] > 0 for x in done)
+    return {'agents': agents, 'skills': skills, 'saved': saved, 'opts': opts}, recent
+
+
 def render():
     import tzbus
+    from tzzombie import svg_zombie, visual_state, CSS as ZCSS
     s = tzbus.read_bus()
     st = mascot_state(s)
+    m, recent = metrics(s)
+    vs = os.environ.get('TZ_MASCOT_STATE') or visual_state(s, st, m['agents'][0] if isinstance(m['agents'][0], int) else 0, recent)
     led = _j('ledger.json', [])[-20:]
     reg = {k: r for k, r in _j('registry.json', {}).items() if isinstance(r, dict)}
     e = html.escape
@@ -44,13 +69,45 @@ def render():
     b = bench_results()
     brow = ''.join(f'<tr><td>{e(f)}</td><td>{t}</td><td>{e(str(x))}</td></tr>' for f, t, x in b) or '<tr><td colspan=3>no A/B evidence: UNKNOWN (not run)</td></tr>'
     rrow = ''.join(f"<tr><td>{e(k)}</td><td>{e(r.get('grade',''))}</td><td>{e(r.get('license',''))}</td></tr>" for k, r in reg.items()) or '<tr><td colspan=3>empty</td></tr>'
-    return f"""<!doctype html><meta charset=utf-8><title>TOKEN ZOMBIE</title>
-<style>body{{font:14px system-ui;margin:2em;background:#111;color:#ddd}}td{{padding:2px 10px;border-bottom:1px solid #333}}h2{{color:#9c6}}</style>
-<h1>TOKEN ZOMBIE {svg(st)} <small>{e(st)} {e(ASCII[st])}</small></h1>
-<h2>Status (bus; ctx% actual/est, minutes est)</h2><table>{rows or '<tr><td>no status: run tz sup tick</td></tr>'}</table>
-<h2>Ledger</h2><pre>{e(json.dumps(led, indent=1)[:2000])}</pre>
-<h2>A/B benchmark evidence (MEASURED only if present)</h2><table>{brow}</table>
-<h2>Registry</h2><table>{rrow}</table>"""
+    mode = _j('config.json', {}).get('mode') or 'full'
+    ctx = s.get('ctx_pct')
+    ctxs = f'{ctx}%' if isinstance(ctx, (int, float)) else '—'
+    tile = lambda key, label: (f'<div class="tile"><div class="lab">{label}</div><div class="val">{e(str(m[key][0]))}</div>'
+                               f'<div class="tag t-{m[key][1].lower()}">{m[key][1]}</div><div class="note">{e(m[key][2])}</div></div>')
+    return f"""<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=refresh content=15><title>TOKEN ZOMBIE</title>
+<style>
+:root{{--bg:#07090c;--card:#0f1418;--card2:#131a20;--line:#1f2a31;--txt:#dce6dd;--dim:#7c8b84;--acc:#9dff3a;--amber:#ffb020;--zh:clamp(210px,34vw,300px)}}
+*{{box-sizing:border-box}}body{{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#16301a 0,#07090c 55%) fixed;color:var(--txt);font:14px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}}
+.wrap{{max-width:980px;margin:0 auto;padding:calc(var(--zh)*.56) 16px 40px}}
+.card{{position:relative;background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:16px;box-shadow:0 30px 60px -30px #000,inset 0 1px 0 #ffffff0d}}
+.card:before{{content:"";position:absolute;inset:0 0 auto 0;height:2px;border-radius:16px 16px 0 0;background:linear-gradient(90deg,transparent,#9dff3a55,transparent)}}
+.zwrap{{position:absolute;right:18px;top:calc(var(--zh)*-0.53125);width:calc(var(--zh)*.8125);height:var(--zh);pointer-events:none;z-index:2;filter:drop-shadow(0 18px 18px #0009)}}
+.head{{min-height:calc(var(--zh)*.47 + 8px);padding:18px 20px 0;padding-right:calc(var(--zh)*.8125 + 30px)}}
+h1{{margin:0;font-size:20px;letter-spacing:.14em;font-weight:800}}h1 b{{color:var(--acc)}}
+.chips{{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}}.chip{{border:1px solid var(--line);background:#0b1014;border-radius:999px;padding:2px 10px;font-size:12px;color:var(--dim)}}.chip b{{color:var(--txt);font-weight:600}}
+.st-alert b{{color:var(--amber)}}
+.grid{{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px 16px 18px}}
+.tile{{background:#0a0f12;border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}}
+.lab{{font-size:11px;letter-spacing:.12em;color:var(--dim);font-weight:700}}.val{{font-size:30px;font-weight:800;margin:4px 0 2px;color:#f2fff0;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}}
+.tag{{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;border-radius:4px;padding:0 5px}}.t-measured{{background:#9dff3a22;color:var(--acc)}}.t-est{{background:#ffb02022;color:var(--amber)}}.t-unknown{{background:#ffffff14;color:var(--dim)}}
+.note{{font-size:11.5px;color:var(--dim);margin-top:6px}}
+details{{margin:12px 0 0;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 14px}}summary{{cursor:pointer;color:var(--dim);font-weight:600}}
+table{{border-collapse:collapse;width:100%;margin:8px 0}}td{{padding:3px 10px 3px 0;border-bottom:1px solid var(--line);font-size:12.5px;overflow-wrap:anywhere}}pre{{white-space:pre-wrap;font-size:12px;color:var(--dim)}}
+@media (max-width:760px){{.grid{{grid-template-columns:repeat(2,1fr)}}}}
+@media (max-width:520px){{:root{{--zh:200px}}.head{{padding-right:20px;min-height:calc(var(--zh)*.47 + 70px)}}.chips{{max-width:calc(100% - var(--zh)*.8125 + 40px)}}.zwrap{{right:4px}}.val{{font-size:24px}}}}
+{ZCSS}
+</style>
+<div class=wrap><div class=card>
+<div class=zwrap>{svg_zombie(vs)}</div>
+<div class=head><h1>TOKEN <b>ZOMBIE</b></h1>
+<div class=chips><span class="chip st-{e(vs)}">mascot <b>{e(st)}</b> · {e(vs)}</span><span class=chip>mode <b>{e(str(mode)).upper()}</b></span><span class=chip>context <b>{e(ctxs)}</b></span><span class=chip>level <b>{e(str(s.get('level', '—')))}</b></span><span class=chip>supervisor <b>{e(str(s.get('state', '—')))}</b></span></div></div>
+<div class=grid>{tile('agents', 'AGENTS RUNNING')}{tile('skills', 'SKILLS IN USE')}{tile('saved', 'TOKENS SAVED')}{tile('opts', 'OPTIMIZATIONS EXECUTED')}</div>
+</div>
+<details><summary>Status bus (ctx% actual/est, minutes est)</summary><table>{rows or '<tr><td>no status: run tz sup tick</td></tr>'}</table></details>
+<details><summary>Ledger (last 20)</summary><pre>{e(json.dumps(led, indent=1)[:2000])}</pre></details>
+<details><summary>A/B benchmark evidence (MEASURED only if present)</summary><table>{brow}</table></details>
+<details><summary>Registry</summary><table>{rrow}</table></details>
+</div></html>"""
 
 
 def main(argv):

@@ -10,10 +10,14 @@ def load(name):
 
 
 def rules_text():
-    p = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'SKILL.md')
-    try:
-        t = open(p, encoding='utf-8').read()
-    except OSError:
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    for p in (os.path.join(root, 'skills', 'token-zombie', 'SKILL.md'), os.path.join(root, 'SKILL.md')):
+        try:
+            t = open(p, encoding='utf-8').read()
+            break
+        except OSError:
+            continue
+    else:
         return ''
     t = re.sub(r'^---.*?---\s*', '', t, count=1, flags=re.S)
     parts = re.split(r'(?m)^(?=## )', t)

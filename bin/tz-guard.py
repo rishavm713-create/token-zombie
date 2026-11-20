@@ -4,7 +4,7 @@
 # PostToolUse: from HARD growth, once per 25k step, "write handoff and move the rest of this task to a fresh session now".
 import json, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from tzlib import chat_tokens, cfg, LIMIT, HARD
+from tzlib import chat_tokens, cfg, LIMIT, HARD, advice
 
 # prompt words -> skill pack (~/.claude/skillpack). Hint printed once per pack per chat, so it costs ~30 tokens only when matched.
 PACKS = {'video': 'video|caption|shorts|reel|podcast|youtube edit', 'motion': 'motion graphic|explainer|animated|manim|launch film',
@@ -72,6 +72,8 @@ try:
         f = ti.get('file_path') or ''
         if (ti.get('limit') or ti.get('offset') or not os.path.isfile(f) or os.path.getsize(f) <= cfg('read_warn')
                 or f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp', '.pdf', '.ipynb'))):
+            if not advice('dup_advice'):
+                sys.exit(0)
             try:  # advice only, never a block: same file+range already read this session and unchanged
                 from tzopt import read_advice, ledger
                 adv = read_advice(data.get('session_id', 'x'), f, ti.get('limit'), ti.get('offset')) if os.path.isfile(f) else ''
@@ -80,6 +82,8 @@ try:
                     print(json.dumps({'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'additionalContext': adv}}))
             except Exception:
                 pass
+            sys.exit(0)
+        if not advice('read_nudge'):
             sys.exit(0)
         state = os.path.expanduser(f"~/.claude/token-zombie/read-{data.get('session_id', 'x')}")
         seen = open(state).read().splitlines() if os.path.exists(state) else []
@@ -113,9 +117,11 @@ try:
                'else tell the owner: "new chat, say: read <handoff path> and continue").')
     else:
         if used < LIMIT:
-            hint = pack_hint(data)
+            hint = pack_hint(data) if advice('pack_hints') else ''
             if hint:
                 print(json.dumps({'hookSpecificOutput': {'hookEventName': ev, 'additionalContext': hint}}))
+            sys.exit(0)
+        if not advice('next_task'):
             sys.exit(0)
         msg = (f'TOKEN ZOMBIE: chat is {k}k tokens past start. If this prompt continues the unfinished task, keep going until it is done, '
                'no big reads or images. If it is a NEW task: write the handoff first, then start it in a fresh session '

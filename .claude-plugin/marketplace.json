@@ -1,0 +1,11 @@
+{
+  "name": "token-zombie",
+  "owner": {"name": "TOKEN ZOMBIE contributors"},
+  "plugins": [
+    {
+      "name": "token-zombie",
+      "source": "./",
+      "description": "Local-first token saver for Claude Code: guard hooks, supervisor, handoffs, optimizer, skill audit."
+    }
+  ]
+}

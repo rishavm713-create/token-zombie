@@ -24,6 +24,7 @@ HELP = """tz <command> [args]
   bench [--chat-tokens N] [--json]               before/after on a synthetic project: MEASURED / EST / UNKNOWN, net of tz overhead
   instructions                                   size + duplicates of CLAUDE.md files loaded every chat
   profile <prompt> [--yes]                       which parked skill packs this task needs; --yes runs your skillpack
+  mode [off|lite|full|ultra]                     show or set the mode profile (backs up config.json)
   config                                         effective settings and where each comes from
   report                                         status + optimize + stats + capabilities in one view
   sup start|tick|status|next-session|task      supervisor: usage level -> auto checkpoint -> status bus (status.json)
@@ -87,6 +88,9 @@ def main(argv):
             return tzbench.main(rest)
         if c == 'startup':
             return run_script('tz-status.py', ['--startup', *rest])
+        if c == 'mode':
+            import tzmode
+            return tzmode.main(rest)
         if c == 'config':
             return config()
         if c == 'report':

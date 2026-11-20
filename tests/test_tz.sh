@@ -93,7 +93,7 @@ HOME="$T/h2" bash "$Z/install.sh" >/dev/null 2>&1; r=$?
 ok "installer refuses invalid settings, leaves file as is" '[ $r != 0 ] && cmp -s "$T/bad.json" "$T/h2/.claude/settings.json"'
 
 # 8. skill description stays tiny
-d=$(sed -n 's/^description: //p' "$Z/SKILL.md" | head -1 | wc -c | tr -d ' ')
+d=$(sed -n 's/^description: //p' "$Z/skills/token-zombie/SKILL.md" | head -1 | wc -c | tr -d ' ')
 ok "description <= 200 chars ($d)" '[ "$d" -le 201 ]'
 
 # 9. compaction: PreCompact saves git + last test + next step; SessionStart(compact) injects only that

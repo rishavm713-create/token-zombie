@@ -1,0 +1,10 @@
+{
+  "name": "token-zombie",
+  "version": "0.3.0",
+  "description": "Local-first token saver for Claude Code: guard hooks, supervisor, handoffs, checkpoints, optimizer, skill audit. No network, no telemetry.",
+  "author": {
+    "name": "TOKEN ZOMBIE contributors"
+  },
+  "types": "./types/index.d.ts",
+  "license": "MIT"
+}

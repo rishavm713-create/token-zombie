@@ -2,6 +2,7 @@
 # Token-zombie installer: wires guard (prompt/tool/stop/session-end/precompact), lean-start, compaction-note and statusline hooks into ~/.claude/settings.json.
 # Safe by design: backs up settings first, refuses unparseable/odd-shaped settings or config, atomic write + re-read verification (auto-restores on mismatch),
 # idempotent, touches only commands containing token-zombie/bin/ (or the old chat-size-guard.py). Flags: --dry-run | --uninstall | --restore | --check
+# | --statusline-only (sets only statusLine; for the plugin install, whose hooks come from hooks/hooks.json)
 # Test hook: TZ_INSTALL_CRASH=1 kills the installer right before the final replace (simulates power loss).
 DIR="$(cd "$(dirname "$0")" && pwd)"
 SET="$HOME/.claude/settings.json"
@@ -17,7 +18,7 @@ python3 - "$SET" "$DIR" "$MODE" <<'PY'
 import json, os, shutil, sys, time
 path, d, mode = sys.argv[1], sys.argv[2], sys.argv[3]
 conf_p = os.path.expanduser('~/.claude/token-zombie/config.json')
-dry, check = mode == '--dry-run', mode == '--check'
+dry, check, slo = mode == '--dry-run', mode == '--check', mode == '--statusline-only'
 die = lambda m: sys.exit(m)
 for stale in (path + '.tz-tmp', conf_p + '.tz-tmp'):  # leftovers of an interrupted run
     if not dry and not check and os.path.exists(stale):
@@ -51,7 +52,7 @@ if check:
     sl = 'tz-status.py' in s.get('statusLine', {}).get('command', '')
     print(f"installed events: {', '.join(installed()) or 'none'}; statusline: {'tz' if sl else 'not tz'}")
     sys.exit(0)
-for ev in list(h):  # drop only our own commands; keep foreign hooks, even inside the same group
+for ev in ([] if slo else list(h)):  # drop only our own commands; keep foreign hooks, even inside the same group
     groups = []
     for g in h[ev]:
         g['hooks'] = [x for x in g.get('hooks', []) if not mine(x.get('command', ''))]
@@ -75,7 +76,7 @@ if mode == '--uninstall':
 else:
     plan = (('UserPromptSubmit', None, guard), ('PostToolUse', '', guard), ('PreToolUse', 'Read', guard), ('SessionStart', None, start),
             ('PreCompact', None, guard), ('PreCompact', None, compact), ('Stop', None, guard), ('SessionEnd', None, guard))
-    for ev, m, cmd in plan:
+    for ev, m, cmd in (() if slo else plan):
         g = {'hooks': [{'type': 'command', 'command': cmd, 'timeout': 5}]}
         if m is not None:
             g['matcher'] = m
@@ -84,7 +85,7 @@ else:
     if 'tz-status.py' not in cur:
         conf['prev_statusline'] = cur
     s['statusLine'] = {'type': 'command', 'command': status}
-    msg = 'token-zombie installed: guard + supervisor (prompt/tool/stop/session-end/precompact), pack hints, lean start, compaction note, statusline. Open a new chat to see it.'
+    msg = 'token-zombie statusline set (hooks come from the plugin).' if slo else 'token-zombie installed: guard + supervisor (prompt/tool/stop/session-end/precompact), pack hints, lean start, compaction note, statusline. Open a new chat to see it.'
 if dry:
     import difflib
     print('\n'.join(difflib.unified_diff(before, json.dumps(s, indent=2, sort_keys=True).splitlines(), 'settings.json now', 'settings.json after', lineterm='', n=1)))
