@@ -6,6 +6,7 @@
 import json, os, subprocess, sys, time
 
 SESSION_CAP, AGG_CAP = 1_500_000, 5_000_000
+LEAKY_ENV = ('ANTHROPIC_AUTH_TOKEN', 'ANTHROPIC_API_KEY', 'ANTHROPIC_BASE_URL', 'CLAUDE_CODE_OAUTH_TOKEN', 'CLAUDECODE')
 
 
 def usage_total(u):
@@ -44,7 +45,9 @@ def run_session(name, cwd, cfg, prompt, evidence, model='sonnet', cap=SESSION_CA
     limit = min(cap, agg_cap - used)
     why = 'cap-session' if cap <= agg_cap - used else 'cap-aggregate'
     claude = claude or os.environ.get('TZ_AB_CLAUDE') or 'claude'
-    env = dict(os.environ, CLAUDE_CONFIG_DIR=cfg)
+    # inherited provider env (desktop app token, gateway URL) overrides the isolated login and caused '401 Invalid bearer token'
+    env = {k: v for k, v in os.environ.items() if k not in LEAKY_ENV}
+    env['CLAUDE_CONFIG_DIR'] = cfg
     path = os.path.join(evidence, f'{name}.stream.jsonl')
     parts = dict(input_tokens=0, output_tokens=0, cache_read_input_tokens=0, cache_creation_input_tokens=0)
     seen, total, status = {}, 0, 'ok'
