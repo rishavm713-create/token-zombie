@@ -8,6 +8,7 @@ import json,os,sys
 n=int(os.environ.get('STUB_REPLIES','3')); per=int(os.environ.get('STUB_TOK','1000'))
 open(os.environ['STUB_CFGLOG'],'w').write(os.environ.get('CLAUDE_CONFIG_DIR',''))
 open(os.environ['STUB_CFGLOG']+'.env','w').write(' '.join(k for k in os.environ if k.startswith(('ANTHROPIC_','CLAUDE')) and k!='CLAUDE_CONFIG_DIR'))
+print(json.dumps({"type":"system","message":"plain-text notice"}),flush=True)  # real streams carry text messages too
 for i in range(n):
     u={"input_tokens":per//4,"output_tokens":per//4,"cache_read_input_tokens":per//4,"cache_creation_input_tokens":per//4}
     print(json.dumps({"type":"assistant","message":{"id":f"m{i}","usage":u}}),flush=True)

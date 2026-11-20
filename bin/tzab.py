@@ -71,7 +71,7 @@ def run_session(name, cwd, cfg, prompt, evidence, model='sonnet', cap=SESSION_CA
                     m = json.loads(line).get('message') or {}
                 except Exception:
                     continue
-                u = m.get('usage')
+                u = m.get('usage') if isinstance(m, dict) else None  # some events carry message as plain text
                 if isinstance(u, dict) and m.get('id'):
                     seen[m['id']] = u  # last usage per reply id wins (streamed replies repeat)
                     total = sum(usage_total(x) for x in seen.values())
