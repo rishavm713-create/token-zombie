@@ -55,7 +55,9 @@ def run_session(name, cwd, cfg, prompt, evidence, model='sonnet', cap=SESSION_CA
     if os.path.exists(own_partial_old):  # re-run of an interrupted name: its old partial is already inside `used`; keep it as recorded spend
         json.dump({'total': agg_recorded(evidence) + json.load(open(own_partial_old)).get('total', 0)}, open(os.path.join(evidence, 'aggregate.json'), 'w'))
         os.remove(own_partial_old)
-    cmd = [claude, '-p', prompt, '--model', model, '--output-format', 'stream-json', '--verbose', *extra]
+    # headless runs cannot answer permission prompts: allow edits in the fixture copy and only the commands the tasks need
+    perms = ['--permission-mode', 'acceptEdits', '--allowedTools', 'Bash(python3:*)', 'Bash(python:*)', 'Bash(pytest:*)', 'Bash(git diff:*)', 'Bash(git status:*)', 'Bash(ls:*)']
+    cmd = [claude, '-p', prompt, '--model', model, '--output-format', 'stream-json', '--verbose', *perms, *extra]
     pr = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     import threading
     wall = threading.Timer(int(os.environ.get('TZ_AB_WALL_SECONDS') or 3600), pr.kill)  # silent hang cannot run forever
