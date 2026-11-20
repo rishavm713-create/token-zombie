@@ -72,17 +72,36 @@ def render():
     mode = _j('config.json', {}).get('mode') or 'full'
     ctx = s.get('ctx_pct')
     ctxs = f'{ctx}%' if isinstance(ctx, (int, float)) else '—'
+    state = 'Alert' if vs == 'alert' else 'Off' if mode == 'off' else 'Idle' if vs == 'sleep' else 'Active'
+    def bnum(key, label, cls=''):
+        v = m[key][0]
+        if key == 'saved' and isinstance(v, str) and v.replace(',', '').lstrip('-').isdigit():
+            n = int(v.replace(',', ''))
+            v = f'{n / 1e6:.1f}M' if abs(n) >= 1e6 else f'{round(n / 1e3)}K' if abs(n) >= 1e4 else f'{n / 1e3:.1f}K' if abs(n) >= 1e3 else str(n)
+        tag = ' <i>EST</i>' if m[key][1] == 'EST' else ''
+        return f'<span class="bm{cls}"><b class=bn>{e(str(v))}</b><span class=bl>{label}{tag}</span></span>'
     tile = lambda key, label: (f'<div class="tile"><div class="lab">{label}</div><div class="val">{e(str(m[key][0]))}</div>'
                                f'<div class="tag t-{m[key][1].lower()}">{m[key][1]}</div><div class="note">{e(m[key][2])}</div></div>')
     return f"""<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=refresh content=15><title>TOKEN ZOMBIE</title>
 <style>
 :root{{--bg:#07090c;--card:#0f1418;--card2:#131a20;--line:#1f2a31;--txt:#dce6dd;--dim:#7c8b84;--acc:#9dff3a;--amber:#ffb020;--zh:clamp(210px,34vw,300px)}}
 *{{box-sizing:border-box}}body{{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#16301a 0,#07090c 55%) fixed;color:var(--txt);font:14px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}}
-.wrap{{max-width:980px;margin:0 auto;padding:calc(var(--zh)*.56) 16px 40px}}
+.wrap{{max-width:980px;margin:0 auto;padding:52px 16px 40px}}
+.tzx{{margin:0;padding:0;background:none;border:0}}.tzx>summary{{list-style:none}}.tzx>summary::-webkit-details-marker{{display:none}}
+.tzbar{{position:relative;display:flex;align-items:center;gap:18px;min-height:58px;padding:9px 14px 9px 78px;background:linear-gradient(180deg,#15191d,#101316);border:1px solid #262d32;border-radius:14px;box-shadow:0 14px 30px -18px #000,inset 0 1px 0 #ffffff0a;cursor:pointer;color:var(--txt)}}
+.tzbar:focus-visible{{outline:2px solid var(--acc);outline-offset:2px}}
+.bz{{position:absolute;left:12px;top:-37px;width:56px;height:69px;pointer-events:none;filter:drop-shadow(0 6px 6px #0008)}}
+.bt{{display:flex;align-items:center;gap:8px;flex:none;white-space:nowrap}}.bt h1{{font-size:14px;letter-spacing:.08em;font-weight:700;margin:0}}
+.pill{{font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--acc);background:#9dff3a1a;border:1px solid #9dff3a33;border-radius:999px;padding:1px 8px}}.pill.off{{color:var(--dim);background:#ffffff0d;border-color:#ffffff1a}}
+.bms{{display:flex;flex:1;min-width:0;justify-content:space-around;gap:12px}}
+.bm{{display:flex;flex-direction:column;min-width:0}}.bn{{font-size:19px;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums;color:#f2fff0}}.bm.g .bn{{color:var(--acc)}}
+.bl{{font-size:9.5px;letter-spacing:.11em;color:var(--dim);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}.bl i{{font-style:normal;color:var(--amber);margin-left:4px}}
+.bs{{display:flex;align-items:center;gap:6px;flex:none;font-size:12px;color:var(--dim)}}.dot{{width:7px;height:7px;border-radius:50%;background:var(--acc);box-shadow:0 0 6px var(--acc)}}.dot.alert{{background:var(--amber);box-shadow:0 0 6px var(--amber)}}.dot.off,.dot.idle{{background:#5c6a64;box-shadow:none}}
+.chev{{width:9px;height:9px;border-right:2px solid var(--dim);border-bottom:2px solid var(--dim);transform:rotate(45deg) translateY(-3px);margin:0 4px 0 8px;transition:transform .2s}}.tzx[open] .chev{{transform:rotate(-135deg) translateX(-3px)}}
+.full{{margin-top:12px}}
 .card{{position:relative;background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:16px;box-shadow:0 30px 60px -30px #000,inset 0 1px 0 #ffffff0d}}
 .card:before{{content:"";position:absolute;inset:0 0 auto 0;height:2px;border-radius:16px 16px 0 0;background:linear-gradient(90deg,transparent,#9dff3a55,transparent)}}
-.zwrap{{position:absolute;right:18px;top:calc(var(--zh)*-0.53125);width:calc(var(--zh)*.8125);height:var(--zh);pointer-events:none;z-index:2;filter:drop-shadow(0 18px 18px #0009)}}
-.head{{min-height:calc(var(--zh)*.47 + 8px);padding:18px 20px 0;padding-right:calc(var(--zh)*.8125 + 30px)}}
+.head{{padding:16px 20px 0}}
 h1{{margin:0;font-size:20px;letter-spacing:.14em;font-weight:800}}h1 b{{color:var(--acc)}}
 .chips{{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}}.chip{{border:1px solid var(--line);background:#0b1014;border-radius:999px;padding:2px 10px;font-size:12px;color:var(--dim)}}.chip b{{color:var(--txt);font-weight:600}}
 .st-alert b{{color:var(--amber)}}
@@ -94,19 +113,24 @@ h1{{margin:0;font-size:20px;letter-spacing:.14em;font-weight:800}}h1 b{{color:va
 details{{margin:12px 0 0;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 14px}}summary{{cursor:pointer;color:var(--dim);font-weight:600}}
 table{{border-collapse:collapse;width:100%;margin:8px 0}}td{{padding:3px 10px 3px 0;border-bottom:1px solid var(--line);font-size:12.5px;overflow-wrap:anywhere}}pre{{white-space:pre-wrap;font-size:12px;color:var(--dim)}}
 @media (max-width:760px){{.grid{{grid-template-columns:repeat(2,1fr)}}}}
-@media (max-width:520px){{:root{{--zh:200px}}.head{{padding-right:20px;min-height:calc(var(--zh)*.47 + 70px)}}.chips{{max-width:calc(100% - var(--zh)*.8125 + 40px)}}.zwrap{{right:4px}}.val{{font-size:24px}}}}
+@media (max-width:640px){{.tzbar{{flex-wrap:wrap;row-gap:8px;padding:9px 12px 9px 74px}}.bt{{flex:1}}.bms{{order:3;flex:1 0 100%;margin-left:-62px;justify-content:space-between}}.bn{{font-size:16px}}.bl{{font-size:8.5px;letter-spacing:.06em}}.val{{font-size:24px}}}}
 {ZCSS}
 </style>
-<div class=wrap><div class=card>
-<div class=zwrap>{svg_zombie(vs)}</div>
-<div class=head><h1>TOKEN <b>ZOMBIE</b></h1>
-<div class=chips><span class="chip st-{e(vs)}">mascot <b>{e(st)}</b> · {e(vs)}</span><span class=chip>mode <b>{e(str(mode)).upper()}</b></span><span class=chip>context <b>{e(ctxs)}</b></span><span class=chip>level <b>{e(str(s.get('level', '—')))}</b></span><span class=chip>supervisor <b>{e(str(s.get('state', '—')))}</b></span></div></div>
+<div class=wrap>
+<details class=tzx><summary class=tzbar aria-label="TOKEN ZOMBIE bar: open details"><span class=bz>{svg_zombie(vs)}</span>
+<span class=bt><h1>TOKEN ZOMBIE</h1><span class="pill{' off' if mode == 'off' else ''}">{e(str(mode)).upper()}</span></span>
+<span class=bms>{bnum('agents', 'AGENTS')}{bnum('skills', 'SKILLS')}{bnum('saved', 'TOKENS SAVED', ' g')}{bnum('opts', 'OPTIMIZATIONS')}</span>
+<span class=bs><span class="dot {e(state.lower())}"></span>{state}<span class=chev></span></span></summary>
+<div class=full><div class=card>
+<div class=head>
+<div class=chips style="margin-top:0"><span class="chip st-{e(vs)}">mascot <b>{e(st)}</b> · {e(vs)}</span><span class=chip>mode <b>{e(str(mode)).upper()}</b></span><span class=chip>context <b>{e(ctxs)}</b></span><span class=chip>level <b>{e(str(s.get('level', '—')))}</b></span><span class=chip>supervisor <b>{e(str(s.get('state', '—')))}</b></span></div></div>
 <div class=grid>{tile('agents', 'AGENTS RUNNING')}{tile('skills', 'SKILLS IN USE')}{tile('saved', 'TOKENS SAVED')}{tile('opts', 'OPTIMIZATIONS EXECUTED')}</div>
 </div>
 <details><summary>Status bus (ctx% actual/est, minutes est)</summary><table>{rows or '<tr><td>no status: run tz sup tick</td></tr>'}</table></details>
 <details><summary>Ledger (last 20)</summary><pre>{e(json.dumps(led, indent=1)[:2000])}</pre></details>
 <details><summary>A/B benchmark evidence (MEASURED only if present)</summary><table>{brow}</table></details>
 <details><summary>Registry</summary><table>{rrow}</table></details>
+</div></details>
 </div></html>"""
 
 

@@ -7,19 +7,33 @@ const PANE = {
   props: { title: 'TOKEN ZOMBIE', isFocused: false, bodyColumns: 60, placement: 'dock', scroll: { offset: 0, bodyRows: 30 }, view: {} },
 } as const
 
+const BAND = {
+  plugin: 'token-zombie',
+  component: 'AbovePrompt',
+  props: { hasSurvey: false, isCollapsed: false, isWorking: false, maxRows: 20, bodyColumns: 120, scroll: { offset: 0, bodyRows: 20 }, view: {} },
+} as const
+
 const NOW = 1_800_000_000
 const STATUS = JSON.stringify({ ts: NOW - 30, level: 'ELEVATED', ctx_pct: 66, state: 'ok', risk: 'medium', activity: 'idle', open_tasks: 2, actions: ['a'] })
 const HOST = JSON.stringify({ session: 's1', cost_usd: 1.5, duration_ms: 1, api_duration_ms: 1, ts: NOW - 5 })
 
 type Files = Record<string, string>
-type Opt = { ran?: string[][]; copies?: string[]; cmds?: any[]; placed?: boolean; denyCmd?: boolean; status?: string[] }
+type Opt = { ran?: string[][]; copies?: string[]; cmds?: any[]; placed?: boolean; denyCmd?: boolean; status?: string[]; agents?: number; skills?: string[]; opened?: string[] }
 const world = (on: any, files: Files, o: Opt = {}) => {
   const { ran = [], copies = [], cmds = [], placed = true } = o
   on('env.get', () => ({ value: '/h' }))
   on('clock.now', () => ({ value: NOW * 1000 }))
   on('clock.every', () => ({ value: undefined }))
   on('command.register', () => ({ value: { command: 'tz' } }))
-  on('ui.open', () => ({ value: { isPlaced: placed } }))
+  on('ui.open', (_: any, e: any) => {
+    o.opened?.push(e.id)
+    return { value: { isPlaced: placed } }
+  })
+  if (o.agents !== undefined) on('agent.list', () => ({ value: Array.from({ length: o.agents! }, (_, i) => ({ id: `a${i}`, status: 'running' })) }))
+  if (o.skills) {
+    on('fs.list', () => ({ value: [...o.skills!.map(name => ({ name, kind: 'dir' })), { name: 'README.md', kind: 'file' }] }))
+    on('fs.exists', (_: any, e: any) => ({ value: !e.path.includes('/nope/') }))
+  }
   on('ui.status', (_: any, e: any) => {
     o.status?.push(String(e.text))
     return { value: undefined }
@@ -162,4 +176,68 @@ test('/tz opens the pane; an unplaced pane falls back to the status line', async
   const r = await $.command.run({ command: 'tz' })
   expect(r.text).toMatch(/status line/)
   expect(status.join('|')).toMatch(/TZ full ctx/)
+})
+
+const LEDGER = JSON.stringify([
+  { t: NOW - 10, kind: 'filter', tok: 500, basis: 'measured' },
+  { t: 1, kind: 'dup-read-flagged', tok: 900, basis: 'est' },
+  { t: 1, kind: 'overhead-hook', tok: 20, basis: 'measured' },
+])
+
+test('slim bar: one row on terminal, no feed, unknowns as dashes', async ($, on) => {
+  world(on, {})
+  await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
+  const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
+  expect(await ui.find({ type: 'Text', text: /^TOKEN ZOMBIE$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^FULL$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /— agents/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /— skills/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /recent|none yet|supervisor|model/ })).toBeUndefined()
+  expect(await ui.find({ type: 'Button', key: 'tz-expand' })).toBeDefined()
+  await ui.unmount()
+})
+
+test('slim bar on desktop: real numbers, green saved, svg mascot, chevron opens the pane', async ($, on) => {
+  const opened: string[] = []
+  world(
+    on,
+    { 'ledger.json': LEDGER, 'config.json': '{"mode":"ultra"}', 'zombie-excited.svg': '<svg>excited</svg>' },
+    { agents: 3, skills: ['a', 'b', 'nope'], opened },
+  )
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  const ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
+  const val = async (label: RegExp) => {
+    const all = await ui.findAll({ type: 'Text' })
+    const i = all.findIndex(x => label.test(x.text))
+    return all[i - 1]
+  }
+  expect((await val(/^AGENTS$/))?.text).toBe('3')
+  expect((await val(/^SKILLS$/))?.text).toBe('2')
+  const saved = await val(/^TOKENS SAVED · EST$/)
+  expect(saved?.text).toBe('480')
+  expect(saved?.props.color).toBe('green')
+  expect((await val(/^OPTIMIZATIONS$/))?.text).toBe('1')
+  expect(await ui.find({ type: 'Text', text: /^ULTRA$/ })).toBeDefined()
+  const svg = await ui.find({ type: 'Svg' })
+  expect(svg?.props.source).toBe('<svg>excited</svg>')
+  expect(svg?.props.alt).toMatch(/mascot: excited/)
+  expect(await ui.find({ type: 'Text', text: /recent|none yet/ })).toBeUndefined()
+  await ui.press({ plugin: 'token-zombie', key: 'tz-expand' })
+  expect(opened).toEqual(['token-zombie'])
+  await ui.unmount()
+})
+
+test('slim bar: working state while a turn runs; yields to a survey', async ($, on) => {
+  world(on, { 'zombie-working.svg': '<svg>w</svg>' })
+  on('ui.render', ($: any, e: any) => {
+    const { Box } = $.ui.resolve(e)
+    return <Box key="none" />
+  })
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  const ui = await $.ui.mount({ ...BAND, surface: 'desktop', props: { ...BAND.props, isWorking: true } })
+  expect((await ui.find({ type: 'Svg' }))?.props.alt).toMatch(/working/)
+  await ui.unmount()
+  const q = await $.ui.mount({ ...BAND, surface: 'desktop', props: { ...BAND.props, hasSurvey: true } })
+  expect(await q.find({ type: 'Text', text: /TOKEN ZOMBIE/ })).toBeUndefined()
+  await q.unmount()
 })

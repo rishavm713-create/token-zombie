@@ -1,7 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { Register } from 'claude-code'
 
-import type { Act, Files, Note, Stats } from '../types'
+import type { Act, Bar, Files, Note, Stats } from '../types'
 
 const PANE = 'token-zombie'
 const STALE_S = 600
@@ -16,6 +16,8 @@ const stats = atom(ST, { inp: 0, out: 0, cr: 0, cw: 0, ms: 0, turns: 0, spawns: 
 const files = atom(FI, { sig: '', status: null, isStale: false, host: null, isHostFresh: false, mode: 'full' }, { shape: 'files-1' })
 const acts = atom(AC, [], { shape: 'acts-1' })
 const note = atom(NO, { label: '', lines: [], err: '' }, { shape: 'note-1' })
+const BA = { plugin: 'token-zombie', key: 'bar' } as const
+const bar = atom(BA, { sig: '', agents: null, skills: null, saved: 0, opts: 0, hasLedger: false, recentAt: 0 } as Bar, { shape: 'bar-1' })
 
 let isPlaced = true // module copy of ui.open's answer; a reload resets it, harmless
 
@@ -44,18 +46,52 @@ const readOr = async ($: any, p: string) => {
 // Real running-subagent count for the HTML dashboard (it cannot see the host): $.agent.list(), written only on change.
 let lastAgents = ''
 let lastAgentsAt = 0
-async function writeAgents($: any, d: string, now: number) {
+async function writeAgents($: any, d: string, now: number): Promise<number | null> {
   try {
     const list: any[] = await $.agent.list()
     const running = list.filter(a => a && a.status === 'running').length
     // rewrite on change, else once a minute so the dashboard can tell fresh from stale
-    if (String(running) === lastAgents && now - lastAgentsAt < 60) return
+    if (String(running) === lastAgents && now - lastAgentsAt < 60) return running
     lastAgents = String(running)
     lastAgentsAt = now
     await $.fs.write(`${d}/agents.json`, JSON.stringify({ running, total: list.length, ts: Math.round(now), src: 'mods agent.list' }))
+    return running
   } catch {
-    /* host without agent.list: dashboard shows UNKNOWN */
+    return null /* host without agent.list: dashboard shows UNKNOWN */
   }
+}
+
+// SKILLS = ~/.claude/skills/*/SKILL.md on disk; listed at most once a minute.
+let skillsN: number | null = null
+let skillsAt = -1e9
+async function countSkills($: any, home: string, now: number) {
+  if (now - skillsAt < 60) return skillsN
+  skillsAt = now
+  try {
+    const dir = `${home}/.claude/skills`
+    const ents: any[] = await $.fs.list(dir)
+    const has = await Promise.all(ents.filter(x => x.kind !== 'file').map(x => $.fs.exists(`${dir}/${x.name}/SKILL.md`).catch(() => false)))
+    skillsN = has.filter(Boolean).length
+  } catch {
+    skillsN = null
+  }
+  return skillsN
+}
+
+// Same rule as bin/tzdash.py metrics(): measured non-overhead cuts minus overhead (EST); opts = measured entries.
+function ledger(t: string) {
+  let l: unknown
+  try {
+    l = JSON.parse(t)
+  } catch {
+    l = null
+  }
+  const led = (Array.isArray(l) ? l : []).filter((x: any) => x && typeof x === 'object' && num(x.tok) !== undefined) as any[]
+  const isOver = (x: any) => String(x.kind ?? '').startsWith('overhead')
+  const done = led.filter(x => x.basis === 'measured' && !isOver(x))
+  const over = led.filter(isOver).reduce((a, x) => a + x.tok, 0)
+  const lastAt = Math.max(0, ...done.filter(x => x.tok > 0).map(x => num(x.t) ?? 0))
+  return { saved: done.reduce((a, x) => a + x.tok, 0) - over, opts: done.length, hasLedger: led.length > 0, recentAt: lastAt }
 }
 
 async function poll($: any) {
@@ -63,7 +99,12 @@ async function poll($: any) {
     const home = await $.env.get('HOME')
     if (!home) return
     const d = `${home}/.claude/token-zombie`
-    const [s, h, c] = await Promise.all([readOr($, `${d}/status.json`), readOr($, `${d}/host.json`), readOr($, `${d}/config.json`)])
+    const [s, h, c, lg] = await Promise.all([
+      readOr($, `${d}/status.json`),
+      readOr($, `${d}/host.json`),
+      readOr($, `${d}/config.json`),
+      readOr($, `${d}/ledger.json`),
+    ])
     const now = (await $.clock.now()) / 1000
     const status = obj(s)
     const ts = num(status?.ts)
@@ -75,7 +116,11 @@ async function poll($: any) {
     const isHostFresh = host !== null && now - hts <= STALE_S
     const m = obj(c)?.mode
     const mode = typeof m === 'string' && m ? m : 'full'
-    await writeAgents($, d, now)
+    const agents = await writeAgents($, d, now)
+    const skills = await countSkills($, home, now)
+    const b = { agents, skills, ...ledger(lg) }
+    const bsig = JSON.stringify(b)
+    if (bsig !== (await read($, bar)).sig) await update($, bar, () => ({ sig: bsig, ...b }))
     const sig = JSON.stringify([s, h, mode, isStale, isHostFresh])
     if (sig === (await read($, files)).sig) return
     await update($, files, () => ({ sig, status, isStale, host, isHostFresh, mode }))
@@ -120,6 +165,25 @@ async function open($: any) {
   isPlaced = r.isPlaced !== false
   await poll($)
   if (!isPlaced) void $.ui.status(await oneliner($))
+}
+
+// Mascot visual state: same order as bin/tzzombie.py visual_state() over bin/tzmascot.py mascot_state().
+function visual(f: Files, b: Bar, isWorking: boolean, now: number) {
+  const s = f.status
+  const ts = num(s?.ts)
+  if (s && ['CRITICAL', 'EXHAUSTED', 'APPROACHING LIMIT'].includes(String(s.level)) || s?.risk === 'high') return 'alert'
+  if (s?.task_just_done || (b.recentAt > 0 && now - b.recentAt <= 120)) return 'excited'
+  if (isWorking || (b.agents ?? 0) > 0 || s?.level === 'ELEVATED' || s?.activity === 'working') return 'working'
+  if (!s || ts === undefined || now - ts > 1800 || s.level !== 'NORMAL') return 'sleep'
+  return 'idle'
+}
+
+const big = (n: number) => (Math.abs(n) >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : Math.abs(n) >= 1e4 ? Math.round(n / 1e3) + 'K' : Math.abs(n) >= 1e3 ? (n / 1e3).toFixed(1) + 'K' : String(n))
+const svgs = new Map<string, string>() // asset text by state; a reload re-reads, harmless
+
+async function mascot($: any, vs: string) {
+  if (!svgs.has(vs)) svgs.set(vs, await readOr($, `${$.plugin.root}/assets/zombie-${vs}.svg`))
+  return svgs.get(vs)!
 }
 
 export const register: Register = on => {
@@ -182,6 +246,99 @@ export const register: Register = on => {
     }
     return ran
   }).catch(($, e, next) => next(e))
+
+  // Default view: one slim bar above the prompt. The chevron opens the detailed pane (same as /tz).
+  on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
+    if (e.props.hasSurvey) return next(e)
+    const { Box, Text, Button } = $.ui.resolve(e)
+    const f = await read($, files)
+    const b = await read($, bar)
+    const now = (await $.clock.now()) / 1000
+    const vs = visual(f, b, e.props.isWorking, now)
+    const G = 'green'
+    const mode = f.mode.toUpperCase()
+    const isOff = f.mode === 'off'
+    const dot = vs === 'alert' ? 'yellow' : isOff || f.isStale ? 'gray' : G
+    const state = vs === 'alert' ? 'Alert' : isOff ? 'Off' : f.isStale ? 'Stale' : 'Active'
+    const nums: [string, string, string, boolean][] = [
+      ['agents', b.agents === null ? '—' : String(b.agents), 'AGENTS', false],
+      ['skills', b.skills === null ? '—' : String(b.skills), 'SKILLS', false],
+      ['saved', b.hasLedger ? big(b.saved) : '0', 'TOKENS SAVED · EST', true],
+      ['opts', String(b.opts), 'OPTIMIZATIONS', false],
+    ]
+    const expand = (
+      <Button key="tz-expand" label="Open TOKEN ZOMBIE details" plain onPress={() => void open($)}>
+        ⌄
+      </Button>
+    )
+
+    if (e.surface === 'terminal') {
+      // shortcut: the terminal band has no Svg; Image would need a PNG raster of the mascot. Emoji stands in.
+      return (
+        <Box flexDirection="row" gap={1}>
+          <Text>🧟</Text>
+          <Text bold>TOKEN ZOMBIE</Text>
+          <Text color={isOff ? undefined : G} dimColor={isOff}>{mode}</Text>
+          {nums.map(([k, v, l, isG]) => (
+            <Text key={`t-${k}`}>
+              <Text bold color={isG ? G : undefined}>{v}</Text>
+              <Text dimColor> {l.toLowerCase()}</Text>
+            </Text>
+          ))}
+          <Text color={dot}>●</Text>
+          {expand}
+        </Box>
+      )
+    }
+
+    const { Svg } = $.ui.resolve(e)
+    const src = await mascot($, vs)
+    return (
+      <Box flexDirection="column" paddingTop={1}>
+        <Box
+          borderStyle="round"
+          borderColor="gray"
+          flexDirection="row"
+          alignItems="center"
+          justifyContent="space-between"
+          gap="md"
+          paddingX="sm"
+        >
+          <Box flexDirection="row" alignItems="center" gap="sm" flexShrink={0}>
+            <Box width={5} />
+            <Text weight="semibold">TOKEN ZOMBIE</Text>
+            <Text size="caption" weight="semibold" color={isOff ? undefined : G} dimColor={isOff}>
+              {mode}
+            </Text>
+          </Box>
+          {nums.map(([k, v, l, isG]) => (
+            <Box key={`n-${k}`} flexDirection="column" flexShrink={1}>
+              <Text weight="semibold" tabular color={isG ? G : undefined}>
+                {v}
+              </Text>
+              <Text size="caption" dimColor wrap="truncate-end">
+                {l}
+              </Text>
+            </Box>
+          ))}
+          <Box flexDirection="row" alignItems="center" gap="sm" flexShrink={0}>
+            <Text color={dot}>●</Text>
+            <Text size="caption" dimColor>{state}</Text>
+            {expand}
+          </Box>
+        </Box>
+        {src ? (
+          <Box key="tz-mascot" position="absolute" top={0} left={1}>
+            <Svg source={src} alt={`TOKEN ZOMBIE mascot: ${vs}`} width={34} height={42} />
+          </Box>
+        ) : (
+          <Box key="tz-mascot" position="absolute" top={1} left={1}>
+            <Text>🧟</Text>
+          </Box>
+        )}
+      </Box>
+    )
+  })
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Text, Button } = $.ui.resolve(e)

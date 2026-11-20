@@ -17,6 +17,16 @@ export type Files = {
   isHostFresh: boolean
   mode: string
 }
+// The slim bar's four headline numbers; null = unknown (shown as an em dash), never a made-up number.
+export type Bar = {
+  sig: string
+  agents: number | null
+  skills: number | null
+  saved: number
+  opts: number
+  hasLedger: boolean
+  recentAt: number
+}
 export type Act = { id: string; tool: string; isDone: boolean }
 export type Note = { label: string; lines: string[]; err: string }
 
@@ -27,6 +37,7 @@ declare module 'claude-code' {
       files: Shaped<Files>
       acts: Shaped<Act[]>
       note: Shaped<Note>
+      bar: Shaped<Bar>
     }
   }
 }

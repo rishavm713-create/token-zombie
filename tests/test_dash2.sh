@@ -41,5 +41,18 @@ for v in idle working excited alert sleep; do
   ok "svg state $v renders, has both hands + legs" "HOME='$H' python3 -c \"import sys;sys.path.insert(0,'$Z/bin');import tzzombie as z;s=z.svg_zombie('$v');assert s.count('tz-hand')==2 and s.count('tz-leg ')==2 and 'tz-$v' in s\""
 done
 ok "unknown state falls back to idle" "HOME='$H' python3 -c \"import sys;sys.path.insert(0,'$Z/bin');import tzzombie as z;assert 'tz-idle' in z.svg_zombie('nope')\""
+# slim bar default view (v0.3.1): one bar is the <summary>, full detail behind <details>, one mascot inside the bar
+ok "bar: details collapsed by default, bar is its summary" 'grep -q "<details class=tzx><summary class=tzbar" "$T/m.html" && ! grep -q "class=tzx open" "$T/m.html"'
+ok "bar: mascot sits inside the bar, drawn once" 'grep -q "<span class=bz><svg class=\"tz-zombie" "$T/m.html" && [ "$(grep -o "<svg class=\"tz-zombie" "$T/m.html" | wc -l | tr -d " ")" = 1 ]'
+for l in AGENTS SKILLS "TOKENS SAVED" OPTIMIZATIONS; do ok "bar label: $l" "grep -q 'class=bl>$l' '$T/m.html'"; done
+ok "bar: saved is green and EST-tagged (480)" 'grep -q "<span class=\"bm g\"><b class=bn>480</b><span class=bl>TOKENS SAVED <i>EST</i>" "$T/m.html"'
+ok "bar: agents 3, opts 1" 'grep -q "<b class=bn>3</b><span class=bl>AGENTS" "$T/m.html" && grep -q "<b class=bn>1</b><span class=bl>OPTIMIZATIONS" "$T/m.html"'
+ok "bar: mode pill + status dot + chevron" 'grep -q "class=\"pill\">FULL<" "$T/m.html" && grep -q "class=\"dot " "$T/m.html" && grep -q "class=chev" "$T/m.html"'
+ok "bar: no description/notes/feed in the summary" '! sed -n "/<summary class=tzbar/,/<\/summary>/p" "$T/m.html" | grep -qE "class=note|class=tile|<table|Ledger"'
+ok "bar: big numbers abbreviated (12345 -> 12K)" 'printf "[{\"t\":1,\"kind\":\"filter\",\"tok\":12345,\"basis\":\"measured\"}]" >"$S/ledger.json" && tz dash --out "$T/k.html" >/dev/null && grep -q "<b class=bn>12K</b>" "$T/k.html"'
+printf '{"mode":"off"}' >"$S/config.json"
+ok "bar: mode off => dim pill + Off state" 'tz dash --out "$T/o.html" >/dev/null && grep -q "class=\"pill off\">OFF<" "$T/o.html" && grep -q "class=\"dot off\"" "$T/o.html"'
+rm -f "$S/config.json"
+ok "Mod mascot assets match bin/tzzombie.py (regen: python3 bin/tzzombie.py assets)" 'python3 "$Z/bin/tzzombie.py" "$T/as" && diff -r "$T/as" "$Z/assets" >/dev/null && grep -q "<style>" "$Z/assets/zombie-idle.svg" && [ $(wc -c <"$Z/assets/zombie-excited.svg") -lt 131072 ]'
 ok "mascot override env for previews" 'TZ_MASCOT_STATE=alert tz dash --out "$T/a.html" >/dev/null && grep -q "tz-zombie tz-alert" "$T/a.html"'
 echo "dash2: pass $pass fail $fail"; rm -rf "$T"; [ $fail = 0 ]

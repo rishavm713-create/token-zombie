@@ -237,3 +237,17 @@ def visual_state(bus, mascot_state, agents_running=0, saved_recent=False, now=No
     if mascot_state == 'SLEEP' or not isinstance(ts, (int, float)) or now - ts > 1800:
         return 'sleep'
     return 'idle'
+
+
+def svg_file(vs='idle'):
+    """Standalone SVG (xmlns + its own <style>) for surfaces that draw it as an image, e.g. the Mod's band."""
+    s = svg_zombie(vs).replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ', 1)
+    return s.replace(DEFS, DEFS + '<style>' + CSS.replace('\n', '') + '</style>', 1)
+
+
+if __name__ == '__main__':  # python3 bin/tzzombie.py assets/  -> writes zombie-<state>.svg for the Mod
+    import os, sys
+    out = sys.argv[1] if len(sys.argv) > 1 else 'assets'
+    os.makedirs(out, exist_ok=True)
+    for v in VSTATES:
+        open(os.path.join(out, f'zombie-{v}.svg'), 'w').write(svg_file(v))
