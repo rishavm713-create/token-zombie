@@ -1,0 +1,1 @@
+{"limit": 100000, "hard": 175000, "ctx_window": 200000, "plan_warn": 90, "plan_stop": 97}

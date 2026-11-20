@@ -1,0 +1,1 @@
+Phase 1 of 2. Add a function `format_csv(summary)` to statlib/formatting.py returning CSV text: header line `metric,value` then one `name,value` line per key (value formatted like format_text). Add a unit test for it in tests/test_formatting.py. Do NOT touch the CLI yet. Stop when phase 1 is done.

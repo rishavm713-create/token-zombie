@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+# tz: one CLI over the token-zombie modules. Shared config/state: ~/.claude/token-zombie/ (config.json, env TZ_<KEY>).
+# Old scripts (tz-guard.py, tz-status.py, tz-start.py, tz-compact.py, tz-vet.sh) are unchanged and still work alone.
+import os, subprocess, sys
+D = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, D)
+
+HELP = """tz <command> [args]
+  status [--transcript F] [--rate-limits JSON]   context %, tokens, burn, 5h/7d only if provided, warn state
+  forecast                                       burn-rate + limit forecast lines only
+  startup [N]                                    what a new chat loads (startup audit)
+  optimize [--transcript F]                      duplicate reads / repeated commands in the chat log
+  filter [--lines N] < text                      shrink noisy command output
+  classify <prompt words>                        task mode + cheapest capable model advice
+  stats                                          savings: measured vs estimated, minus tz overhead
+  handoff --task T --done D --left L --next N [--test CMD] [--remember FACT]
+  task-wrap [--test CMD] [--summary S] [--remember DECISION] [--force]   close task only if test passes; logs DAILY/MASTER
+  checkpoint                                     refresh git snapshot of the active task (no commands run)
+  resume [--run-test]                            verify handoff vs git/tests, print next action
+  skills [prompt words]                          skills loaded/parked; relevance advice
+  capabilities                                   skills/plugins/MCP inventory, overlaps
+  security <dir>                                 GREEN/YELLOW/RED scan of a skill/plugin/repo
+  audit                                          security grade of every installed skill
+  bench [--chat-tokens N] [--json]               before/after on a synthetic project: MEASURED / EST / UNKNOWN, net of tz overhead
+  instructions                                   size + duplicates of CLAUDE.md files loaded every chat
+  profile <prompt> [--yes]                       which parked skill packs this task needs; --yes runs your skillpack
+  config                                         effective settings and where each comes from
+  report                                         status + optimize + stats + capabilities in one view
+  sup start|tick|status|next-session|task      supervisor: usage level -> auto checkpoint -> status bus (status.json)
+  route <prompt> [--model M]                    model advice + complexity (EST), logged; cannot switch the running chat
+  adapters [--rules NAME [--out F]]             supported agents + honest capabilities, rules file generation
+  reg [list|add <localdir>|show <name>]         local GitHub-repo registry (no network)
+  dash --out F | --serve                        HTML dashboard (127.0.0.1 only)
+  companion [--port N]                          local status server with token auth (native overlay not built)
+  mascot                                        zombie state line
+  overlay build|run                             native always-on-top status window (macOS, swiftc from Command Line Tools)
+  bench results [dir]                           A/B evidence into view
+  help"""
+
+
+def run_script(name, args):
+    return subprocess.call([sys.executable, os.path.join(D, name), *args])
+
+
+def config():
+    from tzlib import DEFAULTS, cfg, _conf
+    for k in DEFAULTS:
+        src = 'env' if os.environ.get(f'TZ_{k.upper()}') else 'config.json' if _conf.get(k) else 'default'
+        print(f'{k} = {cfg(k)} ({src})')
+    return 0
+
+
+def main(argv):
+    if not argv or argv[0] in ('help', '-h', '--help'):
+        print(HELP)
+        return 0
+    c, rest = argv[0], argv[1:]
+    try:
+        if c in ('status', 'forecast'):
+            import tzusage
+            return tzusage.main([c, *rest])
+        if c in ('optimize', 'stats', 'filter', 'classify'):
+            import tzopt
+            return tzopt.main([c, *rest])
+        if c in ('handoff', 'resume', 'task-wrap', 'checkpoint'):
+            import tzhandoff
+            return tzhandoff.main([c, *rest])
+        if c in ('skills', 'capabilities', 'security', 'audit', 'instructions', 'profile'):
+            import tzcap
+            return tzcap.main([c, *rest])
+        mods = {'sup': 'tzsup', 'route': 'tzroute', 'adapters': 'tzadapters', 'reg': 'tzreg', 'dash': 'tzdash', 'companion': 'tzcompanion', 'mascot': 'tzmascot'}
+        if c in mods:
+            return __import__(mods[c]).main(rest)
+        if c == 'overlay':  # build/run the native always-on-top window (Command Line Tools swiftc; installs nothing)
+            ov = os.path.join(D, '..', 'overlay')
+            if rest[:1] == ['build']:
+                return subprocess.call(['bash', os.path.join(ov, 'build.sh')])
+            exe = os.path.join(ov, 'build', 'TZOverlay')
+            if rest[:1] == ['run'] and os.path.exists(exe):
+                subprocess.Popen([exe], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+                print('overlay started (kill it with: pkill TZOverlay)')
+                return 0
+            print('usage: tz overlay build | run   (run needs a prior build)', file=sys.stderr)
+            return 2
+        if c == 'bench':
+            import tzbench
+            return tzbench.main(rest)
+        if c == 'startup':
+            return run_script('tz-status.py', ['--startup', *rest])
+        if c == 'config':
+            return config()
+        if c == 'report':
+            for title, cmd in (('STATUS', ['status']), ('OPTIMIZE', ['optimize']), ('SAVINGS', ['stats']), ('CAPABILITIES', ['capabilities'])):
+                print(f'== {title}')
+                main(cmd + rest if cmd == ['status'] else cmd)
+            return 0
+    except SystemExit as e:
+        return e.code if isinstance(e.code, int) else 2
+    except Exception as e:  # one clear line, no traceback
+        print(f'tz {c}: {type(e).__name__}: {e}', file=sys.stderr)
+        return 1
+    print(f'tz: unknown command "{c}". Run `tz help`.', file=sys.stderr)
+    return 2
+
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv[1:]))

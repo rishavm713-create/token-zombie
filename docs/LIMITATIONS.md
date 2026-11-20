@@ -1,0 +1,18 @@
+# Limitations (honest list)
+- Savings are NOT yet measured end-to-end. `tz stats` counts only events tz recorded (filter runs, flagged duplicate reads); flagged reads are [est]. No with/without benchmark exists. Guard messages (limit/hard warnings) are not yet counted as overhead.
+- 5h/7d and resets: shown only when Claude Code passes rate_limits to the statusline; otherwise "not provided". Cost estimate in $ not implemented.
+- ctx_window (default 200k) is a setting, not read from the provider: context % is [est].
+- MCP/plugin tool-schema cost is UNKNOWN (not in config).
+- tz cannot switch the main model, start sessions or enable/disable skills by itself; it advises. Parked-skill activation is `skillpack on`, with your approval.
+- Duplicate-read detection by hook is advice; a local cache does not reduce provider tokens already spent.
+- Classification and overlap detection are keyword/word-overlap heuristics.
+- Benchmark (`tz bench`): synthetic project; filter bytes and resume size are MEASURED, duplicate-read saving and the replaced-chat size are assumptions (EST), startup context and provider cache are UNKNOWN. No real with/without session A/B yet.
+- `tz profile --yes` runs your own `skillpack`; a running chat does not reload skills (host limit), effect starts in a new chat. MCP/plugin enable/disable is not automated.
+- `tz handoff/task-wrap --test CMD` runs the command you type.
+- Hooks are fed documented hook JSON in tests; a live Claude Code session has NOT been run with the installer (nothing is installed). Autonomous operation is therefore unverified (see docs/STATUS.md).
+- Activity (working/idle) is MEASURED from hook events only (Stop/SessionEnd => idle; no event for 15 min while working => UNKNOWN). Without installed hooks it is UNKNOWN.
+- The supervisor cannot force the host to open a fresh session: `tz sup next-session` prints the command; `--yes` launches a headless `claude -p` only on your say-so.
+- Adapters: only claude is REAL. The other 7 generate rules files and declare unverified capabilities.
+- Overlay: built with Command Line Tools swiftc, selftest + process-alive tested; the on-screen look was not visually verified.
+- Registry never fetches URLs. A/B experiment not run (isolated login 401); needs your approval and a cost estimate.
+- Not built: RTK integration beyond coexisting, subagent cost tracking, $ cost estimate, real A/B results.

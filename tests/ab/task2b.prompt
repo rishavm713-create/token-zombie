@@ -1,0 +1,1 @@
+Phase 2 of 2: finish the feature. Add `--format {text,csv}` (default text) to statlib/cli.py using format_csv, add a CLI test for csv in tests/test_cli.py, keep default output unchanged. Stop when done.

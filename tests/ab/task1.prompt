@@ -1,0 +1,1 @@
+In this repo, `python3 -m unittest discover -s tests` has failing tests. Fix the bugs in the source under statlib/ so all tests pass. Do not edit anything under tests/. Keep changes minimal. Stop when done.
