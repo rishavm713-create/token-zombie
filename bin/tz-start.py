@@ -20,7 +20,7 @@ def head(path, n, stop_at_rule):
 try:
     d = json.load(sys.stdin)
     cwd = d.get('cwd') or os.getcwd()
-    parts = []
+    parts, pk = [], ''
     if d.get('source') == 'compact':  # after compaction: only the continuation note tz-compact.py saved
         note = os.path.expanduser(f"~/.claude/token-zombie/compact-{d.get('session_id', 'x')}.md")
         if os.path.isfile(note):
@@ -33,9 +33,15 @@ try:
     daily = sorted(glob.glob(os.path.join(cwd, 'handoffs', '*.md')), key=os.path.getmtime)
     if daily:
         parts.append(f'## {daily[-1]} (newest handoff)\n' + head(daily[-1], DAILY, False))
-    if parts:
+    try:  # active task pack (<=2k tok), when handoffs/tasks has one
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import tznext
+        pk = tznext.pack(cwd)
+    except Exception:
+        pass
+    if parts or pk:
         txt = ('TOKEN ZOMBIE start context. Use this; do not read the full HANDOFF.md unless the step needs a detail.\n'
-               + '\n\n'.join(parts))[:CAP]
+               + '\n\n'.join(parts))[:CAP] + ('\n\n' + pk if pk else '')
         print(json.dumps({'hookSpecificOutput': {'hookEventName': 'SessionStart', 'additionalContext': txt}}))
 except Exception:
     sys.exit(0)

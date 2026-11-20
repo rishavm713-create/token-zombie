@@ -79,6 +79,7 @@ def task_path(cwd, task=''):
 def newest_task(cwd):
     import glob
     fs = glob.glob(os.path.join(hdir(cwd), 'tasks', '*.json'))
+    fs = [f for f in fs if not os.path.basename(f).startswith('T-')]  # T-*.json = tznext tasks
     return max(fs, key=os.path.getmtime) if fs else None
 
 

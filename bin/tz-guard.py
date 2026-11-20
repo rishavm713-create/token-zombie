@@ -156,8 +156,20 @@ try:
                     sys.exit(0)
             except Exception:
                 _diag('out', ev)
+    if ev == 'PostToolUse':  # verified test pass -> task record + checkpoint (silent)
+        try:
+            import tznext
+            tznext.on_tool(data)
+        except Exception:
+            _diag('next', ev)
     used = used_tokens(data)
     k = used // 1000
+    if used >= HARD and ev in ('PostToolUse', 'UserPromptSubmit'):  # before the limit: cheap safe checkpoint, no commands run
+        try:
+            import tznext
+            tznext.checkpoint(data.get('cwd') or os.getcwd(), 'before-limit')
+        except Exception:
+            _diag('next', ev)
     if ev == 'PostToolUse':
         if used < HARD:
             sys.exit(0)

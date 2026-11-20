@@ -8,6 +8,7 @@ sys.path.insert(0, D)
 HELP = """tz <command> [args]
   status [--transcript F] [--rate-limits JSON]   context %, tokens, burn, 5h/7d only if provided, warn state
   forecast                                       burn-rate + limit forecast lines only
+  next [add|start|done|pack|checkpoint|measure]  dependency-aware tasks, task pack, gates, per-session token split
   startup [N]                                    what a new chat loads (startup audit)
   optimize [--transcript F]                      duplicate reads / repeated commands in the chat log
   filter [--lines N] < text                      shrink noisy command output
@@ -73,7 +74,7 @@ def main(argv):
         if c in ('skills', 'capabilities', 'security', 'audit', 'instructions', 'profile'):
             import tzcap
             return tzcap.main([c, *rest])
-        mods = {'sup': 'tzsup', 'route': 'tzroute', 'adapters': 'tzadapters', 'reg': 'tzreg', 'dash': 'tzdash', 'companion': 'tzcompanion', 'mascot': 'tzmascot', 'hooks': 'tzhooks', 'live': 'tzlive', 'preflight': 'tzpreflight', 'recall': 'tzout'}
+        mods = {'sup': 'tzsup', 'route': 'tzroute', 'adapters': 'tzadapters', 'reg': 'tzreg', 'dash': 'tzdash', 'companion': 'tzcompanion', 'mascot': 'tzmascot', 'hooks': 'tzhooks', 'live': 'tzlive', 'preflight': 'tzpreflight', 'recall': 'tzout', 'next': 'tznext'}
         if c in mods:
             return __import__(mods[c]).main(rest)
         if c == 'overlay':  # build/run the native always-on-top window (Command Line Tools swiftc; installs nothing)
