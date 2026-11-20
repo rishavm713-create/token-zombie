@@ -42,6 +42,8 @@ def read_advice(session, path, limit=None, offset=None):
     h = hashlib.sha1(open(path, 'rb').read(2_000_000)).hexdigest()[:12]
     old = c.get(key)
     c[key] = {'mt': st.st_mtime, 'h': h, 'n': (old['n'] + 1 if old else 1) if (not old or old['h'] == h) else 1}
+    if old and old['h'] == h:  # keep read-guard flags (trimmed / already denied once) while the file is unchanged
+        c[key].update({k: old[k] for k in ('trim', 'den') if k in old})
     _save(p, c)
     if old and old['h'] == h:
         ledger('dup-read-flagged', st.st_size, 'est', session)
@@ -158,6 +160,51 @@ def classify(prompt):
     return mode, MODEL[mode], mode in ('RESEARCH', 'AUDIT') or len(p) > 600
 
 
+DENY_MIN = 2000  # chars: below this a re-read costs less than the risk of a wrong deny
+
+
+def read_decision(data):
+    """PreToolUse Read -> hookSpecificOutput or None. Config read_guard: 'advice' (default) | 'deny' | 'off'.
+    deny: same file+range, unchanged hash, not trimmed, main agent only, >= DENY_MIN chars -> denied ONCE; an identical
+    retry is allowed (Claude decided it needs it). tzlive deletes reads-<session>.json on PreCompact, so nothing is denied
+    after the summary dropped the old result."""
+    try:
+        mode = _load(os.path.join(STATE, 'config.json'), {}).get('read_guard', 'advice')
+        ti, s = data.get('tool_input') or {}, data.get('session_id', 'x')
+        f = ti.get('file_path') or ''
+        if mode == 'off' or not os.path.isfile(f):
+            return None
+        p = os.path.join(STATE, f'reads-{s}.json')
+        key = f'{f}|{ti.get("limit") or ""}|{ti.get("offset") or ""}'
+        prev = _load(p, {}).get(key, {})
+        adv = read_advice(s, f, ti.get('limit'), ti.get('offset'))
+        if not adv:
+            return None
+        if (mode == 'deny' and not data.get('agent_id') and not prev.get('trim') and not prev.get('den')
+                and os.path.getsize(f) >= DENY_MIN):
+            c = _load(p, {})
+            c.setdefault(key, {})['den'] = 1
+            _save(p, c)
+            ledger('dup-read-denied', os.path.getsize(f), 'measured', s)
+            return {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny', 'permissionDecisionReason':
+                    adv + ' Denied once to save tokens; repeat the same Read if you truly need it again.'}
+        return {'hookEventName': 'PreToolUse', 'additionalContext': adv}
+    except Exception:
+        return None
+
+
+def rtk_gain():
+    """rtk's own MEASURED Bash savings (`rtk gain -f json`). Kept apart from TZ numbers: never added to TZ totals."""
+    import shutil, subprocess
+    if not shutil.which('rtk'):
+        return None
+    try:
+        out = subprocess.run(['rtk', 'gain', '-f', 'json'], capture_output=True, text=True, timeout=5).stdout
+        return json.loads(out[out.index('{'):]).get('summary')
+    except Exception:
+        return None
+
+
 def stats():
     L = _load(os.path.join(STATE, 'ledger.json'), [])
     s = {'measured': 0, 'est': 0, 'overhead': 0}
@@ -215,6 +262,10 @@ def main(argv):
         print(f"saved [measured] {s['measured']} tok | saved [est] {s['est']} tok | overhead [measured] {s['overhead']} tok")
         print(f"NET measured-only {s['net_measured']} tok | NET incl. estimates {s['net_est']} tok")
         print('Note: guard hook messages are not yet counted as overhead; savings are only counted for events this tool recorded.')
+        g = rtk_gain()
+        if g:  # separate tool, separate count: Bash output is rtk's, TZ never filters Bash, so nothing is double-counted
+            print(f"rtk (Bash, separate tool) [measured by rtk]: saved {g['total_saved']} of {g['total_input']} tok "
+                  f"({g['avg_savings_pct']:.1f}%) over {g['total_commands']} commands, avg {g['avg_time_ms']} ms")
     elif a.cmd == 'filter':
         txt = sys.stdin.read()
         out, b, af = filter_output(txt, a.lines)

@@ -9,8 +9,12 @@ fresh() { rm -rf "$1"; mkdir -p "$(dirname "$1")"; cp -R "$AB/fixture" "$1"; git
 BS="$EV/b-settings.json"; python3 - "$Z" "$ST" "$BS" <<'PY'
 import json,sys
 z,st,out=sys.argv[1:4]; c=lambda s: f'HOME={st} python3 "{z}/bin/{s}"'
-h=lambda cmd,m=None:{**({'matcher':m} if m is not None else {}),'hooks':[{'type':'command','command':cmd,'timeout':5}]}
-json.dump({'hooks':{'UserPromptSubmit':[h(c('tz-guard.py'))],'PostToolUse':[h(c('tz-guard.py'),'')],'PreToolUse':[h(c('tz-guard.py'),'Read')],'SessionStart':[h(c('tz-start.py'))],'PreCompact':[h(c('tz-compact.py'))]}},open(out,'w'),indent=1)
+# B hooks = the plugin's own hooks/hooks.json (same events + matchers), state redirected: tz preflight checks parity
+d=json.load(open(f'{z}/hooks/hooks.json'))['hooks']
+for gs in d.values():
+    for g in gs:
+        for x in g['hooks']: x['command']=f'HOME={st} '+x['command'].replace('${CLAUDE_PLUGIN_ROOT}',z)
+json.dump({'hooks':d},open(out,'w'),indent=1)
 PY
 mkdir -p "$ST/.claude" "$EV"
 W="$EV/work"; rm -rf "$W"

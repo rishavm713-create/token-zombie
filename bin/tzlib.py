@@ -50,22 +50,21 @@ def _usage(line):
     return (u.get('input_tokens') or 0) + (u.get('cache_read_input_tokens') or 0) + (u.get('cache_creation_input_tokens') or 0)
 
 
-def chat_tokens(path):
-    """(first reply size, latest size) in tokens; (0, 0) if unknown."""
+def chat_tokens(path, base=None):
+    """(first reply size, latest size) in tokens; (0, 0) if unknown. A known base (cached by the caller) skips the head scan."""
     if not path or not os.path.exists(path):
         return 0, 0
     size = os.path.getsize(path)
-    base = 0
     with open(path, 'rb') as f:
         # first reply can sit past big startup lines (hooks, attachments): stream until found
-        for raw in f:
+        for raw in ([] if base else f):
             base = _usage(raw.decode('utf-8', 'ignore'))
             if base or f.tell() > 20_000_000:
                 break
         f.seek(max(0, size - 400000))
         tail = f.read().decode('utf-8', 'ignore').splitlines()
     last = next((n for n in map(_usage, reversed(tail)) if n), 0)
-    return base, last
+    return base or 0, last
 
 
 def skills_off(root=os.path.expanduser('~/.claude/skills-off')):

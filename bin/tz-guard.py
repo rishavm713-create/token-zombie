@@ -2,7 +2,8 @@
 # Token-zombie guard: task limit, not number limit. Big chat never stops a task; it moves the rest to a fresh session.
 # UserPromptSubmit: from LIMIT growth, each new prompt gets "finish task, then handoff + fresh session for a new task".
 # PostToolUse: from HARD growth, once per 25k step, "write handoff and move the rest of this task to a fresh session now".
-import json, os, sys
+import json, os, sys, time
+T0 = time.perf_counter()
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from tzlib import chat_tokens, cfg, LIMIT, HARD, advice
 
@@ -29,6 +30,11 @@ def pack_hint(data):
         return ''
     os.makedirs(os.path.dirname(state), exist_ok=True)
     open(state, 'a').write(' '.join(hit) + ' ')
+    try:
+        import tzlive
+        tzlive.discovered(data.get('session_id', 'x'), hit)
+    except Exception:
+        pass
     return ('TOKEN ZOMBIE (suggestion): skill pack(s) that match words in this prompt: ' + ', '.join(hit)
             + '. Turn one on (~/.claude/skillpack on <pack>) only if the task really needs it and installed skills do not cover it; off when done.')
 
@@ -55,17 +61,56 @@ def _diag(where, ev=''):
 
 
 ev = ''
+data = {}
+OUT = [0]  # chars TZ injects this event (its own token overhead)
+LIVE = ['']  # live-ledger advice (dedupe, old agents), merged into this event's additionalContext
+
+
+def emit(obj):
+    hs = obj.get('hookSpecificOutput') or {}
+    if LIVE[0] and 'permissionDecision' not in hs:
+        hs['additionalContext'] = (hs.get('additionalContext', '') + '\n' + LIVE[0]).strip()
+    LIVE[0] = ''  # one JSON object per hook run: pending advice goes out here or not at all
+    t = json.dumps(obj); OUT[0] += len(t); print(t)
+
+
+def used_tokens(data):
+    """Tokens past the chat start. First-reply size never changes: cached per session so only the log tail is parsed."""
+    st = os.path.expanduser(f"~/.claude/token-zombie/base-{data.get('session_id', 'x')}")
+    try:
+        base = int(open(st).read())
+    except (OSError, ValueError):
+        base = None
+    b, last = chat_tokens(data.get('transcript_path'), base)
+    if base is None and b:
+        os.makedirs(os.path.dirname(st), exist_ok=True); open(st, 'w').write(str(b))
+    return max(0, last - b)
+
+
 try:
     data = json.load(sys.stdin)
-    base, last = chat_tokens(data.get('transcript_path'))
-    used = max(0, last - base)
     ev = data.get('hook_event_name') or 'UserPromptSubmit'
-    try:  # supervisor: records the lifecycle event (measured activity) and ticks on prompt/compact/stop; silent, never blocks
-        import tzsup
-        tzsup.on_event(data)
+    try:  # supervisor: full tick only on prompt/compact/stop; tool events just record activity (no heavy imports on every call)
+        if ev in ('UserPromptSubmit', 'PreCompact', 'Stop', 'SessionEnd'):
+            import tzsup
+            tzsup.on_event(data)
+        elif os.environ.get('TZ_SUP') != '0':
+            import tzbus
+            tzbus.record_event(ev, data.get('session_id', ''))
     except Exception:
         _diag('supervisor', ev)
+    try:  # live ledger: skill states, agent lifecycle, conservative dedupe (advice only)
+        import tzlive
+        LIVE[0] = tzlive.on_event(data) or ''
+        if LIVE[0] and ev == 'PreToolUse' and not advice('dup_advice'):
+            LIVE[0] = ''
+    except Exception:
+        _diag('live', ev)
     if ev in ('Stop', 'SessionEnd', 'PreCompact', 'SubagentStop'):
+        sys.exit(0)
+    if ev == 'PreToolUse' and data.get('tool_name', 'Read') != 'Read':
+        if LIVE[0]:
+            emit({'hookSpecificOutput': {'hookEventName': 'PreToolUse'}})
         sys.exit(0)
     if ev == 'PreToolUse':  # big Read: nudge once, never block twice (whole file may be truly needed)
         ti = data.get('tool_input') or {}
@@ -74,12 +119,12 @@ try:
                 or f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp', '.pdf', '.ipynb'))):
             if not advice('dup_advice'):
                 sys.exit(0)
-            try:  # advice only, never a block: same file+range already read this session and unchanged
-                from tzopt import read_advice, ledger
-                adv = read_advice(data.get('session_id', 'x'), f, ti.get('limit'), ti.get('offset')) if os.path.isfile(f) else ''
-                if adv:
-                    ledger('overhead-hook', len(adv), 'measured', data.get('session_id', 'x'))
-                    print(json.dumps({'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'additionalContext': adv}}))
+            try:  # same file+range already read and unchanged: advice (default) or, with read_guard=deny, deny once (retry allowed)
+                from tzopt import read_decision, ledger
+                r = read_decision(data)
+                if r:
+                    ledger('overhead-hook', len(r.get('additionalContext') or r.get('permissionDecisionReason') or ''), 'measured', data.get('session_id', 'x'))
+                    emit({'hookSpecificOutput': r})
             except Exception:
                 pass
             sys.exit(0)
@@ -91,11 +136,27 @@ try:
             sys.exit(0)  # second attempt = Claude decided the whole file is needed: allow
         os.makedirs(os.path.dirname(state), exist_ok=True)
         open(state, 'a').write(f + '\n')
-        print(json.dumps({'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny',
+        emit(({'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny',
             'permissionDecisionReason': f'TOKEN ZOMBIE (advice, not a ban): {f} is {os.path.getsize(f) // 1024} KB. '
             'If only part is needed: grep -n, then Read with offset+limit. If the task needs the whole file, '
             'repeat the same Read: it will be allowed.'}}))
         sys.exit(0)
+    if ev == 'PostToolUse':  # big Read/Grep/WebFetch/MCP output: trim before the model sees it, full text kept (tz recall)
+        tool = data.get('tool_name') or ''
+        if tool in ('Read', 'Grep', 'WebFetch') or tool.startswith('mcp__'):
+            try:
+                from tzout import trim
+                out, _ = trim(data)
+                if out:
+                    try:  # tzlive must not call this result "still above" any more
+                        tzlive.edit(data.get('session_id', 'x'), lambda s: s['calls'].get(tzlive.key(data), {}).update(trimmed=1))
+                    except Exception:
+                        pass
+                    emit({'hookSpecificOutput': out})
+                    sys.exit(0)
+            except Exception:
+                _diag('out', ev)
+    used = used_tokens(data)
     k = used // 1000
     if ev == 'PostToolUse':
         if used < HARD:
@@ -119,14 +180,25 @@ try:
         if used < LIMIT:
             hint = pack_hint(data) if advice('pack_hints') else ''
             if hint:
-                print(json.dumps({'hookSpecificOutput': {'hookEventName': ev, 'additionalContext': hint}}))
+                emit(({'hookSpecificOutput': {'hookEventName': ev, 'additionalContext': hint}}))
             sys.exit(0)
         if not advice('next_task'):
             sys.exit(0)
         msg = (f'TOKEN ZOMBIE: chat is {k}k tokens past start. If this prompt continues the unfinished task, keep going until it is done, '
                'no big reads or images. If it is a NEW task: write the handoff first, then start it in a fresh session '
                '(mcp__ccd_session__start_session, context "fresh", short brief + handoff path; else tell the owner to open a new chat).')
-    print(json.dumps({'hookSpecificOutput': {'hookEventName': ev, 'additionalContext': msg}}))
+    emit(({'hookSpecificOutput': {'hookEventName': ev, 'additionalContext': msg}}))
+except SystemExit:
+    pass
 except Exception:
     _diag('guard', ev)
-    sys.exit(0)
+finally:
+    try:
+        if LIVE[0] and not OUT[0]:
+            emit({'hookSpecificOutput': {'hookEventName': ev}})
+        import tzlive
+        tzlive.timing(data.get('session_id', 'x'), ev + (':' + data['tool_name'] if data.get('tool_name') else ''),
+                      (time.perf_counter() - T0) * 1000, OUT[0])
+    except Exception:
+        pass
+sys.exit(0)

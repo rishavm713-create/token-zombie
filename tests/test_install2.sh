@@ -7,7 +7,7 @@ i() { HOME="$H" bash "$Z/install.sh" "$@" 2>&1; }
 jq_() { python3 -c "import json,sys;s=json.load(open('$S'));print(eval(sys.argv[1]))" "$1"; }
 FOREIGN='{"hooks":{"Stop":[{"hooks":[{"type":"command","command":"echo mine"}]}],"UserPromptSubmit":[{"hooks":[{"type":"command","command":"echo keep"},{"type":"command","command":"python3 /x/token-zombie/bin/tz-guard.py"}]}]},"statusLine":{"type":"command","command":"echo MYSTATUS"},"model":"opus","permissions":{"allow":["Bash(ls)"]}}'
 # 1 fresh, no settings file at all
-new 1; o=$(i); ok "fresh install, missing settings.json + missing config" '[ -f "$S" ] && [[ $o == *installed* ]] && [ "$(jq_ "len(s[\"hooks\"])")" = 7 ]'
+new 1; o=$(i); ok "fresh install, missing settings.json + missing config" '[ -f "$S" ] && [[ $o == *installed* ]] && [ "$(jq_ "len(s[\"hooks\"])")" = 8 ]'
 o=$(i --check); ok "--check lists 7 events + tz statusline" '[[ $o == *Stop* && $o == *SessionEnd* && $o == *"statusline: tz"* ]]'
 # 2 foreign preserved
 new 2; echo "$FOREIGN" >"$S"; i >/dev/null
@@ -29,7 +29,7 @@ mk=lambda c,m=None:dict(({'matcher':m} if m is not None else {}),hooks=[{'type':
 json.dump({'hooks':{'UserPromptSubmit':[mk(g)],'PostToolUse':[mk(g,'')],'PreToolUse':[mk(g,'Read')],'SessionStart':[mk(f'python3 "{d}/bin/tz-start.py"')],'PreCompact':[mk(f'python3 "{d}/bin/tz-compact.py"')]},'statusLine':{'type':'command','command':f'python3 "{d}/bin/tz-status.py"'}},open(sys.argv[1],'w'))
 PY
 mkdir -p "$H/.claude/token-zombie"; echo '{"prev_statusline":"echo OLD","limit":90000}' >"$C"; i >/dev/null
-ok "upgrade: now 7 events, no duplicates, tz-guard x6" '[ "$(jq_ "len(s[\"hooks\"])")" = 7 ] && [ "$(grep -c "tz-guard.py" "$S")" = 6 ]'
+ok "upgrade: now 8 events, no duplicates, tz-guard x7" '[ "$(jq_ "len(s[\"hooks\"])")" = 8 ] && [ "$(grep -c "tz-guard.py" "$S")" = 7 ]'
 ok "upgrade keeps prev_statusline and user config" 'grep -q "echo OLD" "$C" && grep -q 90000 "$C"'
 # 6 malformed settings / config / shapes: refuse, nothing changed
 new 6; echo '{bad' >"$S"; cp "$S" "$T/b"; o=$(i); ok "malformed settings refused, untouched, no backup" '[[ $o == *"not valid JSON"* ]] && cmp -s "$S" "$T/b" && ! ls "$S".bak-tz-* 2>/dev/null'

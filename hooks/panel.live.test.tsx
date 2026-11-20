@@ -26,10 +26,10 @@ const world = (on: any, w: W) => {
   on('ui.status', () => ({ value: undefined }))
   on('session.start', (_: any, e: any) => ({ cwd: e.cwd }))
   on('agent.list', () => ({ value: Array.from({ length: w.agents }, (_, i) => ({ id: `a${i}`, status: 'running' })) }))
-  on('fs.list', () => ({ value: w.skills.map(name => ({ name, kind: 'dir' })) }))
-  on('fs.exists', () => ({ value: true }))
+  on('session.id', () => ({ value: 's1' }))
   on('fs.read', (_: any, e: any) => {
-    const f = w.files[e.path.split('/').pop()!]
+    const name = e.path.split('/').pop()!
+    const f = name === 'live-s1.json' && w.skills.length ? JSON.stringify({ skills: { invoked: Object.fromEntries(w.skills.map(n => [n, 1])) } }) : w.files[name]
     return f === undefined ? { deny: 'ENOENT' } : { value: f }
   })
   on('fs.write', (_: any, e: any) => {
@@ -40,7 +40,7 @@ const world = (on: any, w: W) => {
 
 const led = (n: number) => JSON.stringify(Array.from({ length: n }, (_, i) => ({ t: NOW / 1000 - 10, kind: 'filter', tok: 100, basis: 'measured' })))
 
-test('bar numbers follow agent.list, skills on disk and ledger.json on the poll', async ($, on) => {
+test('bar numbers follow agent.list, skills invoked this session and ledger.json on the poll', async ($, on) => {
   const clock = mock.clock(on, { now: NOW })
   const w: W = { files: { 'ledger.json': led(1) }, agents: 1, skills: ['a'], writes: {} }
   world(on, w)
@@ -51,18 +51,18 @@ test('bar numbers follow agent.list, skills on disk and ledger.json on the poll'
     return all[all.findIndex(x => label.test(x.text)) - 1]?.text
   }
   expect(await val(/^AGENTS$/)).toBe('1')
-  expect(await val(/^SKILLS ON$/)).toBe('1')
+  expect(await val(/^SKILLS USED$/)).toBe('1')
   expect(await val(/^TOKENS SAVED · EST$/)).toBe('100')
   expect(await val(/^OPTIMIZATIONS$/)).toBe('1')
   expect(JSON.parse(w.writes['/h/.claude/token-zombie/agents.json']!).running).toBe(1)
 
-  // sources change; skills are re-listed at most once a minute, so move past that
+  // sources change; the next poll picks them up
   w.agents = 4
   w.skills = ['a', 'b', 'c']
   w.files['ledger.json'] = led(3)
   await clock.advance(61_000)
   expect(await val(/^AGENTS$/)).toBe('4')
-  expect(await val(/^SKILLS ON$/)).toBe('3')
+  expect(await val(/^SKILLS USED$/)).toBe('3')
   expect(await val(/^TOKENS SAVED · EST$/)).toBe('300')
   expect(await val(/^OPTIMIZATIONS$/)).toBe('3')
   expect(JSON.parse(w.writes['/h/.claude/token-zombie/agents.json']!).running).toBe(4)

@@ -66,21 +66,16 @@ async function writeAgents($: any, d: string, now: number): Promise<number | nul
   }
 }
 
-// SKILLS ON = ~/.claude/skills/*/SKILL.md on disk (installed + on, not invocations); listed at most once a minute.
-let skillsN: number | null = null
-let skillsAt = -1e9
-async function countSkills($: any, home: string, now: number) {
-  if (now - skillsAt < 60) return skillsN
-  skillsAt = now
+// SKILLS USED = skills the model invoked (Skill tool) in THIS session, from the hook ledger live-<session>.json (tzlive.py).
+// Not skills on disk or enabled (`tz live skills` lists installed/enabled/discovered/loaded/invoked apart). No ledger yet => UNKNOWN.
+async function countSkills($: any, d: string) {
   try {
-    const dir = `${home}/.claude/skills`
-    const ents: any[] = await $.fs.list(dir)
-    const has = await Promise.all(ents.filter(x => x.kind !== 'file').map(x => $.fs.exists(`${dir}/${x.name}/SKILL.md`).catch(() => false)))
-    skillsN = has.filter(Boolean).length
+    const v = JSON.parse(await $.fs.read(`${d}/live-${await $.session.id()}.json`))
+    const inv = v?.skills?.invoked
+    return inv && typeof inv === 'object' ? Object.keys(inv).length : null
   } catch {
-    skillsN = null
+    return null
   }
-  return skillsN
 }
 
 // Same rule as bin/tzdash.py metrics(): measured non-overhead cuts minus overhead (EST); opts = measured entries.
@@ -122,7 +117,7 @@ async function poll($: any) {
     const m = obj(c)?.mode
     const mode = typeof m === 'string' && m ? m : 'full'
     const agents = await writeAgents($, d, now)
-    const skills = await countSkills($, home, now)
+    const skills = await countSkills($, d)
     const b = { agents, skills, ...ledger(lg) }
     const bsig = JSON.stringify(b)
     if (bsig !== (await read($, bar)).sig) await update($, bar, () => ({ sig: bsig, ...b }))
@@ -268,7 +263,7 @@ export const register: Register = on => {
     const state = vs === 'alert' ? 'Alert' : isOff ? 'Off' : f.isStale ? 'Stale' : 'Active'
     const nums: [string, string, string, boolean][] = [
       ['agents', b.agents === null ? '—' : String(b.agents), 'AGENTS', false],
-      ['skills', b.skills === null ? '—' : String(b.skills), 'SKILLS ON', false],
+      ['skills', b.skills === null ? '—' : String(b.skills), 'SKILLS USED', false],
       ['saved', b.hasLedger ? big(b.saved) : '0', 'TOKENS SAVED · EST', true],
       ['opts', String(b.opts), 'OPTIMIZATIONS', false],
     ]

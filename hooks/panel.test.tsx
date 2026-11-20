@@ -30,10 +30,8 @@ const world = (on: any, files: Files, o: Opt = {}) => {
     return { value: { isPlaced: placed } }
   })
   if (o.agents !== undefined) on('agent.list', () => ({ value: Array.from({ length: o.agents! }, (_, i) => ({ id: `a${i}`, status: 'running' })) }))
-  if (o.skills) {
-    on('fs.list', () => ({ value: [...o.skills!.map(name => ({ name, kind: 'dir' })), { name: 'README.md', kind: 'file' }] }))
-    on('fs.exists', (_: any, e: any) => ({ value: !e.path.includes('/nope/') }))
-  }
+  on('session.id', () => ({ value: 's1' }))
+  if (o.skills) files['live-s1.json'] = JSON.stringify({ skills: { invoked: Object.fromEntries(o.skills.map(n => [n, 1])), loaded: { extra: 1 }, discovered: { d: 1 } } })
   on('ui.status', (_: any, e: any) => {
     o.status?.push(String(e.text))
     return { value: undefined }
@@ -218,7 +216,7 @@ test('slim bar on desktop: real numbers, green saved, svg mascot, chevron opens 
     return all[i - 1]
   }
   expect((await val(/^AGENTS$/))?.text).toBe('3')
-  expect((await val(/^SKILLS ON$/))?.text).toBe('2')
+  expect((await val(/^SKILLS USED$/))?.text).toBe('3') // invoked only: loaded/discovered/on-disk never counted
   const saved = await val(/^TOKENS SAVED · EST$/)
   expect(saved?.text).toBe('480')
   expect(saved?.props.color).toBe('green')

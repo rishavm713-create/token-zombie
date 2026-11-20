@@ -23,3 +23,13 @@ Changed: the skills metric is labelled SKILLS ON (dashboard: SKILLS ENABLED), be
 Fixed: dashboard bar labels were cut off with an ellipsis between about 640 and 820 px. The bar now wraps its metrics to a second row at 820 px and below. Checked at 375, 600, 674, 780, 860, 1100 and 1440 px, both collapsed and expanded.
 Privacy: tests use generic fixture names and a throwaway HOME only. No test reads the real home folder.
 Tests: 377 -> 517 shell checks (`bash tests/run_all.sh`), plus 14 Mod tests (`claude plugin test .`).
+
+## v0.4.0-rc1 (2026-11-21, release candidate: uncommitted, not installed, no paid benchmark)
+Added: output trim + local recall for big Read/Grep/WebFetch/MCP results (bin/tzout.py, `tz recall`; Bash left to rtk);
+tzopt.read_decision (read_guard advice|deny|off); `tz stats` shows rtk gain; `tz skills` shows plugin skill cost, 30-day
+invocations and never-invoked skills; tzlive live ledger (skill states, agent lifecycle, Grep/Glob/Web dedupe advice);
+tzhooks hook-time bench; tzpreflight A/B readiness; SubagentStop hook; docs/REUSE.md, docs/REQUIREMENTS.md.
+Changed: PreToolUse matcher Read|Grep|Glob|WebSearch|WebFetch|Agent|Task; tool events skip the supervisor tick;
+tz-vet HIGH -> LOW for test/fixture/CI/comment-only hits (.md never downgraded); recall store private (0700/0600).
+Tests: bash tests/run_all.sh 584/0; claude plugin test . 14/0. Limits: docs/LIMITATIONS.md.
+

@@ -28,7 +28,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "Read",
+        "matcher": "Read|Grep|Glob|WebSearch|WebFetch|Agent|Task",
         "hooks": [
           {
             "type": "command",
@@ -81,6 +81,17 @@
       }
     ],
     "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
       {
         "hooks": [
           {

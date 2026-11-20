@@ -21,15 +21,15 @@ State files live in `~/.claude/token-zombie/`.
   - It covers one session. Several open sessions write the same file, and the last write wins.
   - It counts subagents, not teammates or other Claude processes.
 
-## SKILLS ON (dashboard: SKILLS ENABLED)
-- **What it is:** the number of folders in `~/.claude/skills/` that hold a `SKILL.md`. These are user-level skills that are installed and switched on, so their descriptions load into every new chat.
-- **Source:** a directory listing, refreshed at most once a minute.
-- **Label:** MEASURED, for the count on disk only.
-- **What it is not:**
-  - It does **not** count skills that were *used*. A skill that is enabled but never invoked is still counted.
-  - It leaves out plugin skills, project skills (`<project>/.claude/skills`) and skills parked in `skills-off`. The dashboard lists the parked ones separately ("N kept off", with an EST token cost).
-- **Actual use:** `tz startup` reads the newest chat logs and reports "skill X: not invoked in the N newest chats". That is advice from the logs, not a toolbar metric.
-
+## SKILLS USED (Mod bar) and SKILLS ENABLED (HTML dashboard)
+Five skill states, never mixed (`tz live skills` prints all five, MEASURED):
+- **installed**: `SKILL.md` on disk: `~/.claude/skills`, parked `~/.claude/skills-off`, plugin cache.
+- **enabled**: its description loads into every chat: `~/.claude/skills` plus skills of enabled plugins.
+- **discovered**: TOKEN ZOMBIE suggested it in this session (pack hint).
+- **loaded**: its body entered this chat (invoked, or the user typed `/name`).
+- **invoked**: the model called the Skill tool for it in this session.
+- **Mod bar SKILLS USED** = invoked skills in this session, from the hook ledger `~/.claude/token-zombie/live-<session>.json`. It shows a dash (UNKNOWN) until a hook writes that file.
+- **HTML dashboard SKILLS ENABLED** = folders in `~/.claude/skills/` that hold a `SKILL.md`. That is not usage.
 ## TOKENS SAVED · EST
 - **What it is:** tokens that TOKEN ZOMBIE actually cut from tool output, net of its own overhead.
 - **Calculation**, over the entries in `ledger.json` (the last 2000 are kept):

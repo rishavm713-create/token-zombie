@@ -18,7 +18,7 @@ for c in tz optimize audit review compact board supervisor benchmark; do
 done
 ok "compact command admits it cannot run /compact" 'grep -q "cannot run /compact" "$Z/commands/compact.md"'
 # hooks vs install.sh
-ok "hooks.json modules + 7 events + scripts exist, same events as install.sh" 'py "
+ok "hooks.json modules + 8 events + scripts exist, same events as install.sh" 'py "
 import json,sys,re,os
 z=sys.argv[1]; h=json.load(open(z+\"/hooks/hooks.json\"))
 assert h[\"modules\"]==[\"./panel.tsx\"] and os.path.exists(z+\"/hooks/panel.tsx\")
@@ -34,7 +34,7 @@ ok "hook plan matches install.sh (matchers, scripts)" 'py "
 import json,sys,re
 z=sys.argv[1]; h=json.load(open(z+\"/hooks/hooks.json\"))[\"hooks\"]
 plan=re.search(r\"plan = \((.*?)\)\n    for ev\",open(z+\"/install.sh\").read(),re.S).group(1)
-want=re.findall(r\"\(\x27(\w+)\x27, (None|\x27\x27|\x27\w+\x27), (\w+)\)\",plan); assert len(want)==8
+want=re.findall(r\"\(\x27(\w+)\x27, (None|\x27\x27|\x27[\w|]+\x27), (\w+)\)\",plan); assert len(want)==9
 nm={\"guard\":\"tz-guard.py\",\"start\":\"tz-start.py\",\"compact\":\"tz-compact.py\"}
 got=[]
 for e,gs in h.items():

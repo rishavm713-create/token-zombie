@@ -35,7 +35,7 @@ def agg_used(ev):
     return n
 
 
-def run_session(name, cwd, cfg, prompt, evidence, model='sonnet', cap=SESSION_CAP, agg_cap=AGG_CAP, extra=(), claude=None):
+def run_session(name, cwd, cfg, prompt, evidence, model='sonnet', cap=SESSION_CAP, agg_cap=AGG_CAP, extra=(), claude=None, allowed=None):
     """Returns dict(status, total, parts, path). status: ok | cap-session | cap-aggregate | refused-aggregate | error."""
     os.makedirs(evidence, exist_ok=True)
     used = agg_used(evidence)
@@ -57,6 +57,8 @@ def run_session(name, cwd, cfg, prompt, evidence, model='sonnet', cap=SESSION_CA
         os.remove(own_partial_old)
     # headless runs cannot answer permission prompts: allow edits in the fixture copy and only the commands the tasks need
     perms = ['--permission-mode', 'acceptEdits', '--allowedTools', 'Bash(python3:*)', 'Bash(python:*)', 'Bash(pytest:*)', 'Bash(git diff:*)', 'Bash(git status:*)', 'Bash(ls:*)']
+    if allowed is not None:  # smoke S2-S4: only the scenario's own tool is pre-approved (no Bash)
+        perms = ['--permission-mode', 'acceptEdits', '--allowedTools', *allowed]
     cmd = [claude, '-p', prompt, '--model', model, '--output-format', 'stream-json', '--verbose', *perms, *extra]
     pr = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     import threading

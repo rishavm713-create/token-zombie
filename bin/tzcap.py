@@ -25,7 +25,9 @@ def _skill(path):
     m = re.search(r'^description:\s*(.*)$', fm, re.M)
     n = re.search(r'^name:\s*(.*)$', fm, re.M)
     d = (m.group(1) if m else '').strip()
-    return {'name': (n.group(1).strip() if n else os.path.basename(os.path.dirname(path))), 'desc': d, 'tok': (len(d) + 20) // 4, 'path': path}
+    hidden = bool(re.search(r'^disable-model-invocation:\s*true', fm, re.M))  # not in the model's skill list: 0 tok
+    return {'name': (n.group(1).strip() if n else os.path.basename(os.path.dirname(path))), 'desc': d,
+            'tok': 0 if hidden else (len(d) + 20) // 4, 'path': path, 'hidden': hidden}
 
 
 def inventory(home=None):
@@ -45,6 +47,45 @@ def inventory(home=None):
     inv['mcp'] = sorted(set((st.get('mcpServers') or {}).keys()) | set((_json(os.path.join(home, '.claude.json')).get('mcpServers') or {}).keys()))
     inv['hooks'] = sum(len(g.get('hooks', [])) for gs in (st.get('hooks') or {}).values() for g in gs)
     return inv
+
+
+def plugin_skills(home=None):
+    """Skills of ENABLED plugins (newest cached version), listed every chat as 'plugin:name'. Tokens est = chars/4."""
+    cl = os.path.join(home or os.path.expanduser('~'), '.claude')
+    out = []
+    for k, v in (_json(os.path.join(cl, 'settings.json')).get('enabledPlugins') or {}).items():
+        if not v or '@' not in k:
+            continue
+        plug, mkt = k.split('@', 1)
+        base = os.path.join(cl, 'plugins', 'cache', mkt, plug)
+        vers = [os.path.join(base, x) for x in os.listdir(base)] if os.path.isdir(base) else []
+        if not vers:
+            continue
+        sk = os.path.join(max(vers, key=os.path.getmtime), 'skills')
+        for n in sorted(os.listdir(sk)) if os.path.isdir(sk) else []:
+            s = _skill(os.path.join(sk, n, 'SKILL.md')) if os.path.isfile(os.path.join(sk, n, 'SKILL.md')) else None
+            if s:
+                s['name'] = f"{plug}:{s['name']}"
+                out.append(s)
+    return out
+
+
+def skill_usage(home=None, days=30):
+    """Skill tool invocations per skill name in chat logs of the last `days` days (MEASURED from transcripts)."""
+    import time
+    root = os.path.join(home or os.path.expanduser('~'), '.claude', 'projects')
+    cut, n = time.time() - days * 86400, {}
+    for d, _, fs in os.walk(root):
+        for f in fs:
+            p = os.path.join(d, f)
+            if not f.endswith('.jsonl') or os.path.getmtime(p) < cut:
+                continue
+            for ln in open(p, errors='replace'):
+                if '"name":"Skill"' not in ln.replace(' ', ''):
+                    continue
+                for m in re.finditer(r'"skill"\s*:\s*"([^"]+)"', ln):
+                    n[m.group(1)] = n.get(m.group(1), 0) + 1
+    return n
 
 
 def words(s):
@@ -214,6 +255,14 @@ def main(argv):
         else:
             tok = sum(s['tok'] for s in inv['skills'])
             print(f"skills loaded at startup: {len(inv['skills'])} (~{tok} tok est, descriptions only) | parked: {len(inv['parked'])} (~{sum(s['tok'] for s in inv['parked'])} tok est NOT loaded)")
+            ps = plugin_skills(a.home)
+            print(f"plugin skills listed every chat: {len(ps)} (~{sum(s['tok'] for s in ps)} tok est)")
+            use = skill_usage(a.home)
+            idle = [s for s in inv['skills'] + ps if not s.get('hidden') and not use.get(s['name']) and not use.get(s['name'].split(':')[-1])]
+            print(f"invoked in last 30 days [measured, chat logs]: {sum(use.values())} calls, {len(use)} skills"
+                  + ''.join(f"\n  {k} {v}x" for k, v in sorted(use.items(), key=lambda x: -x[1])[:8]))
+            print(f"listed but not invoked in 30 days: {len(idle)} (~{sum(s['tok'] for s in idle)} tok est per chat, re-read on every call)"
+                  + ''.join(f"\n  {s['name']} {s['tok']}t" for s in sorted(idle, key=lambda s: -s['tok'])[:10]))
     elif a.cmd == 'capabilities':
         tok = sum(s['tok'] for s in inv['skills'])
         print(f"skills {len(inv['skills'])} (~{tok} tok est) | parked {len(inv['parked'])} | plugins enabled {len(inv['plugins'])} | MCP servers {len(inv['mcp'])} | hooks {inv['hooks']}")

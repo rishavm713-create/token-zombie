@@ -55,12 +55,12 @@ WARNING: if you used the old `install.sh` hook install, run `install.sh --uninst
 ## Toolbar
 After install, a one-line bar sits above the prompt (Claude Code desktop and terminal):
 
-`[mascot] TOKEN ZOMBIE [FULL]  2 AGENTS  3 SKILLS ON  12K TOKENS SAVED·EST  2 OPTIMIZATIONS  ● Active  ⌄`
+`[mascot] TOKEN ZOMBIE [FULL]  2 AGENTS  3 SKILLS USED  12K TOKENS SAVED·EST  2 OPTIMIZATIONS  ● Active  ⌄`
 
 | Metric | Counts | Label |
 |---|---|---|
 | AGENTS | subagents running now (`$.agent.list`) | MEASURED; `—` when unknown |
-| SKILLS ON | skills enabled in `~/.claude/skills` (not invocations) | MEASURED count |
+| SKILLS USED | skills the model invoked this session (Skill tool), from the hook ledger; `tz live skills` lists installed/enabled/discovered/loaded/invoked apart | MEASURED count, dash = UNKNOWN |
 | TOKENS SAVED · EST | output tz actually cut, net of its own overhead (chars / 4) | EST; no A/B baseline |
 | OPTIMIZATIONS | filter actions that actually ran | MEASURED |
 

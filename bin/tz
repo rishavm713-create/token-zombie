@@ -36,6 +36,10 @@ HELP = """tz <command> [args]
   mascot                                        zombie state line
   overlay build|run                             native always-on-top status window (macOS, swiftc from Command Line Tools)
   bench results [dir]                           A/B evidence into view
+  hooks bench|live                              hook wall-time baseline (temp HOME) / live per-event hook time + injected chars
+  live [show|skills|agents]                     this session: skill states, agent lifecycle, dedupe advices (MEASURED from hooks)
+  preflight [--evidence D] [--validate D] [--smoke --yes]  A/B readiness: offline checks; validate a finished run; paid smoke run
+  recall <id> [--grep P] [--lines A-B]          full text of a tool output TZ trimmed (ids are in the trim note)
   help"""
 
 
@@ -69,7 +73,7 @@ def main(argv):
         if c in ('skills', 'capabilities', 'security', 'audit', 'instructions', 'profile'):
             import tzcap
             return tzcap.main([c, *rest])
-        mods = {'sup': 'tzsup', 'route': 'tzroute', 'adapters': 'tzadapters', 'reg': 'tzreg', 'dash': 'tzdash', 'companion': 'tzcompanion', 'mascot': 'tzmascot'}
+        mods = {'sup': 'tzsup', 'route': 'tzroute', 'adapters': 'tzadapters', 'reg': 'tzreg', 'dash': 'tzdash', 'companion': 'tzcompanion', 'mascot': 'tzmascot', 'hooks': 'tzhooks', 'live': 'tzlive', 'preflight': 'tzpreflight', 'recall': 'tzout'}
         if c in mods:
             return __import__(mods[c]).main(rest)
         if c == 'overlay':  # build/run the native always-on-top window (Command Line Tools swiftc; installs nothing)
