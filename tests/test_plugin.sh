@@ -59,6 +59,7 @@ ok "statusline-only idempotent (same file, prev kept)" 'cmp -s "$S2" "$T/a" && g
 i --uninstall >/dev/null
 ok "uninstall removes it and restores previous statusline" '! grep -q tz-status "$S2" && grep -q "echo prev" "$S2"'
 # validator
+ok "Mod mode sounds match bin/tzsfx.py (regen: python3 bin/tzsfx.py)" 'python3 "$Z/bin/tzsfx.py" "$T/sfx" && diff -r "$T/sfx" "$Z/sounds" >/dev/null && grep -q "sounds/mode-" "$Z/hooks/panel.tsx"'
 if command -v claude >/dev/null; then
   HOME="$H" claude plugin validate "$Z" >"$T/v.out" 2>&1; rc=$?; ok "claude plugin validate exits 0" '[ $rc = 0 ]'
 else echo "SKIP: claude not installed"; fi

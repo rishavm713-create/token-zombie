@@ -7,6 +7,11 @@ const PANE = 'token-zombie'
 const STALE_S = 600
 const KEEP = 'current task, files changed, test results, next step'
 const MODES = ['off', 'lite', 'full', 'ultra'] as const
+// one colour per mode so each reads apart at a glance; off stays dim
+const MODE_COLOR: Record<string, string | undefined> = { off: undefined, lite: '#5ad1ff', full: 'green', ultra: '#ff8a1f' }
+const TAGLINE = 'MAKE EVERY SINGLE TOKEN COUNT.'
+// sounds/mode-*.wav come from bin/tzsfx.py; never block or fail a mode switch on audio
+const sfx = ($: any, m: string) => void $.audio.play({ asset: `sounds/mode-${m}.wav` }, { gain: 0.6 }).catch(() => {})
 
 const ST = { plugin: 'token-zombie', key: 'stats' } as const
 const FI = { plugin: 'token-zombie', key: 'files' } as const
@@ -258,6 +263,7 @@ export const register: Register = on => {
     const G = 'green'
     const mode = f.mode.toUpperCase()
     const isOff = f.mode === 'off'
+    const MC = MODE_COLOR[f.mode] ?? G
     const dot = vs === 'alert' ? 'yellow' : isOff || f.isStale ? 'gray' : G
     const state = vs === 'alert' ? 'Alert' : isOff ? 'Off' : f.isStale ? 'Stale' : 'Active'
     const nums: [string, string, string, boolean][] = [
@@ -277,8 +283,10 @@ export const register: Register = on => {
       return (
         <Box flexDirection="row" gap={1}>
           <Text>🧟</Text>
-          <Text bold>TOKEN ZOMBIE</Text>
-          <Text color={isOff ? undefined : G} dimColor={isOff}>{mode}</Text>
+          <Text bold>
+            TOKEN <Text color={G}>ZOMBIE</Text>
+          </Text>
+          <Text bold color={isOff ? undefined : MC} dimColor={isOff}>{mode}</Text>
           {nums.map(([k, v, l, isG]) => (
             <Text key={`t-${k}`}>
               <Text bold color={isG ? G : undefined}>{v}</Text>
@@ -298,7 +306,7 @@ export const register: Register = on => {
       <Box flexDirection="column" paddingTop={2}>
         <Box
           borderStyle="round"
-          borderColor="gray"
+          borderColor={isOff ? 'gray' : MC}
           flexDirection="row"
           alignItems="center"
           justifyContent="space-between"
@@ -307,8 +315,15 @@ export const register: Register = on => {
         >
           <Box flexDirection="row" alignItems="center" gap="sm" flexShrink={0}>
             <Box width={6} />
-            <Text weight="semibold">TOKEN ZOMBIE</Text>
-            <Text size="caption" weight="semibold" color={isOff ? undefined : G} dimColor={isOff}>
+            <Box flexDirection="column">
+              <Text weight="bold">
+                TOKEN <Text weight="bold" color={G}>ZOMBIE</Text>
+              </Text>
+              <Text size="caption" weight="bold" wrap="truncate-end">
+                {TAGLINE}
+              </Text>
+            </Box>
+            <Text size="caption" weight="bold" color={isOff ? undefined : MC} dimColor={isOff}>
               {mode}
             </Text>
           </Box>
@@ -380,12 +395,13 @@ export const register: Register = on => {
             TOKEN <Text color={A}>ZOMBIE</Text>
           </Text>
           <Text dimColor>  mode </Text>
-          <Text color={A}>{f.mode}</Text>
+          <Text bold color={MODE_COLOR[f.mode]} dimColor={f.mode === 'off'}>{f.mode}</Text>
         </Box>
-        <Text bold>MAKE EVERY SINGLE TOKEN COUNT.</Text>
+        <Text bold>{TAGLINE}</Text>
         <Box>
           {MODES.map(m =>
             btn(`mode-${m}`, f.mode === m ? `[${m}]` : m, async () => {
+              sfx($, m)
               await run(`mode ${m}`, tz('mode', m), 6)
               await poll($)
             }),

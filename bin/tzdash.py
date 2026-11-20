@@ -92,7 +92,7 @@ def render():
 .tzbar:focus-visible{{outline:2px solid var(--acc);outline-offset:2px}}
 .bz{{position:absolute;left:12px;top:-45px;width:68px;height:84px;pointer-events:none;filter:drop-shadow(0 6px 6px #0008)}}
 .bt{{display:flex;align-items:center;gap:8px;flex:none;white-space:nowrap}}.bt h1{{font-size:14px;letter-spacing:.08em;font-weight:700;margin:0}}
-.pill{{font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--acc);background:#9dff3a1a;border:1px solid #9dff3a33;border-radius:999px;padding:1px 8px}}.pill.off{{color:var(--dim);background:#ffffff0d;border-color:#ffffff1a}}
+.pill{{font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--acc);background:#9dff3a1a;border:1px solid #9dff3a33;border-radius:999px;padding:1px 8px}}.bh{{display:flex;flex-direction:column;gap:2px}}.bt h1{{color:#fff;font-weight:800;letter-spacing:.12em}}.btag{{color:#fff;font-size:9.5px;font-weight:700;letter-spacing:.18em}}.pill[data-m=lite]{{color:#5ad1ff;background:#5ad1ff1a;border-color:#5ad1ff40}}.pill[data-m=ultra]{{color:#ff8a1f;background:#ff8a1f1a;border-color:#ff8a1f40}}.pill.off{{color:var(--dim);background:#ffffff0d;border-color:#ffffff1a}}
 .bms{{display:flex;flex:1;min-width:0;justify-content:space-around;gap:12px}}
 .bm{{display:flex;flex-direction:column;min-width:0}}.bn{{font-size:19px;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums;color:#f2fff0}}.bm.g .bn{{color:var(--acc)}}
 .bl{{font-size:9.5px;letter-spacing:.11em;color:var(--dim);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}.bl i{{font-style:normal;color:var(--amber);margin-left:4px}}
@@ -118,7 +118,7 @@ table{{border-collapse:collapse;width:100%;margin:8px 0}}td{{padding:3px 10px 3p
 </style>
 <div class=wrap>
 <details class=tzx><summary class=tzbar aria-label="TOKEN ZOMBIE bar: open details"><span class=bz>{svg_zombie(vs)}</span>
-<span class=bt><h1>TOKEN ZOMBIE</h1><span class="pill{' off' if mode == 'off' else ''}">{e(str(mode)).upper()}</span></span>
+<span class=bt><span class=bh><h1>TOKEN <b>ZOMBIE</b></h1><span class=btag>MAKE EVERY SINGLE TOKEN COUNT.</span></span><span data-m={e(str(mode))} class="pill{' off' if mode == 'off' else ''}">{e(str(mode)).upper()}</span></span>
 <span class=bms>{bnum('agents', 'AGENTS')}{bnum('skills', 'SKILLS ON')}{bnum('saved', 'TOKENS SAVED', ' g')}{bnum('opts', 'OPTIMIZATIONS')}</span>
 <span class=bs><span class="dot {e(state.lower())}"></span>{state}<span class=chev></span></span></summary>
 <div class=full><div class=card>

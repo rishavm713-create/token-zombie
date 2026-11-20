@@ -126,10 +126,16 @@ test('buttons run the expected argv, copy and compact', async ($, on) => {
   const copies: string[] = []
   const cmds: any[] = []
   world(on, { 'status.json': STATUS }, { ran, copies, cmds })
+  const clips: any[] = []
+  on('audio.play', (_: any, e: any) => {
+    clips.push(e.clip)
+    return { value: undefined }
+  })
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
 
   await ui.press({ plugin: 'token-zombie', key: 'mode-ultra' })
+  expect(clips).toEqual([{ asset: 'sounds/mode-ultra.wav' }])
   const last = () => ran[ran.length - 1]!
   expect(last().slice(0, 1)).toEqual(['python3'])
   expect(last().slice(-2)).toEqual(['mode', 'ultra'])
