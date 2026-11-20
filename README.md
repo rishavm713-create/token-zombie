@@ -1,5 +1,9 @@
 # TOKEN ZOMBIE
 
+<p align="center"><img src="docs/img/brand-hero.svg" alt="TOKEN ZOMBIE. Make every single token count." width="720"></p>
+
+**MAKE EVERY SINGLE TOKEN COUNT.**
+
 Local-first token saver for Claude Code. It watches chat size and plan usage, nudges you to hand off before a chat gets expensive, and audits what loads into every chat. No network, no telemetry; nothing leaves your machine.
 
 What is in it:

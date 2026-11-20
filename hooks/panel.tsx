@@ -376,10 +376,13 @@ export const register: Register = on => {
     return (
       <Box flexDirection="column">
         <Box>
-          <Text color={A} bold>TOKEN ZOMBIE </Text>
-          <Text dimColor>mode </Text>
+          <Text bold>
+            TOKEN <Text color={A}>ZOMBIE</Text>
+          </Text>
+          <Text dimColor>  mode </Text>
           <Text color={A}>{f.mode}</Text>
         </Box>
+        <Text bold>MAKE EVERY SINGLE TOKEN COUNT.</Text>
         <Box>
           {MODES.map(m =>
             btn(`mode-${m}`, f.mode === m ? `[${m}]` : m, async () => {

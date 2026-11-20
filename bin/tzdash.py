@@ -102,7 +102,7 @@ def render():
 .card{{position:relative;background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:16px;box-shadow:0 30px 60px -30px #000,inset 0 1px 0 #ffffff0d}}
 .card:before{{content:"";position:absolute;inset:0 0 auto 0;height:2px;border-radius:16px 16px 0 0;background:linear-gradient(90deg,transparent,#9dff3a55,transparent)}}
 .head{{padding:16px 20px 0}}
-h1{{margin:0;font-size:20px;letter-spacing:.14em;font-weight:800}}h1 b{{color:var(--acc)}}
+h1{{margin:0;font-size:20px;letter-spacing:.14em;font-weight:800}}h1 b{{color:var(--acc)}}.brand{{margin:0 0 12px}}.brand h1{{color:#fff;font-size:22px}}.tagline{{margin:2px 0 0;color:#fff;font-size:11px;font-weight:700;letter-spacing:.16em}}
 .chips{{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}}.chip{{border:1px solid var(--line);background:#0b1014;border-radius:999px;padding:2px 10px;font-size:12px;color:var(--dim)}}.chip b{{color:var(--txt);font-weight:600}}
 .st-alert b{{color:var(--amber)}}
 .grid{{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px 16px 18px}}
@@ -123,6 +123,7 @@ table{{border-collapse:collapse;width:100%;margin:8px 0}}td{{padding:3px 10px 3p
 <span class=bs><span class="dot {e(state.lower())}"></span>{state}<span class=chev></span></span></summary>
 <div class=full><div class=card>
 <div class=head>
+<div class=brand><h1>TOKEN <b>ZOMBIE</b></h1><p class=tagline>MAKE EVERY SINGLE TOKEN COUNT.</p></div>
 <div class=chips style="margin-top:0"><span class="chip st-{e(vs)}">mascot <b>{e(vs.upper())}</b></span><span class=chip>mode <b>{e(str(mode)).upper()}</b></span><span class=chip>context <b>{e(ctxs)}</b></span><span class=chip>level <b>{e(str(s.get('level', '—')))}</b></span><span class=chip>supervisor <b>{e(str(s.get('state', '—')))}</b></span></div></div>
 <div class=grid>{tile('agents', 'AGENTS RUNNING')}{tile('skills', 'SKILLS ENABLED')}{tile('saved', 'TOKENS SAVED')}{tile('opts', 'OPTIMIZATIONS EXECUTED')}</div>
 </div>
