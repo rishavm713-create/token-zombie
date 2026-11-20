@@ -12,7 +12,7 @@ DEFS = """<defs>
 <radialGradient id="tzSkin" cx="38%" cy="28%" r="78%"><stop offset="0" stop-color="#c8ec8a"/><stop offset=".42" stop-color="#86b851"/><stop offset=".78" stop-color="#4f7d2f"/><stop offset="1" stop-color="#2c4a1b"/></radialGradient>
 <radialGradient id="tzSkinB" cx="35%" cy="25%" r="85%"><stop offset="0" stop-color="#a9d870"/><stop offset=".6" stop-color="#6b9c40"/><stop offset="1" stop-color="#34561f"/></radialGradient>
 <linearGradient id="tzShirt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5d4b8c"/><stop offset=".55" stop-color="#3b2f60"/><stop offset="1" stop-color="#211a38"/></linearGradient>
-<linearGradient id="tzPants" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3c4a63"/><stop offset=".5" stop-color="#2a3448"/><stop offset="1" stop-color="#171d2b"/></linearGradient>
+<linearGradient id="tzPants" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5a6f96"/><stop offset=".5" stop-color="#3d4c6b"/><stop offset="1" stop-color="#262f45"/></linearGradient>
 <linearGradient id="tzShoe" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a372c"/><stop offset="1" stop-color="#1c130e"/></linearGradient>
 <radialGradient id="tzEye" cx="45%" cy="45%" r="60%"><stop offset="0" stop-color="#fbffd0"/><stop offset=".3" stop-color="#d6ff5c"/><stop offset=".7" stop-color="#6fe81f"/><stop offset="1" stop-color="#2f9a0c"/></radialGradient>
 <radialGradient id="tzHalo" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#9dff3a" stop-opacity=".55"/><stop offset="1" stop-color="#9dff3a" stop-opacity="0"/></radialGradient>
@@ -33,7 +33,7 @@ def _leg(m):
             '<path d="M104 232 Q108 235 112 232" fill="none" stroke="#2c4a1b" stroke-width="1.1"/>') if m else ''
     return (f'<g class="tz-leg tz-leg{"R" if m else "L"}"><g{t}>'
             '<ellipse cx="106" cy="184" rx="25" ry="15" fill="url(#tzPants)"/><ellipse cx="101" cy="179" rx="12" ry="5" fill="#6d84aa" opacity=".35"/>'
-            '<path d="M91 192 Q88 232 93 268 L119 268 Q124 232 124 192 Z" fill="url(#tzPants)"/>'
+            '<path d="M91 192 Q88 232 93 268 L119 268 Q124 232 124 192 Z" fill="url(#tzPants)" stroke="#8fa6d6" stroke-opacity=".55" stroke-width="2"/>'
             '<path d="M95 192 Q93 230 97 262" fill="none" stroke="#5b6e8f" stroke-width="2" opacity=".35"/>'
             + tear +
             '<path d="M91 266 L96 276 L100 267 L105 278 L110 267 L114 277 L119 266 Z" fill="#1a2132"/>'
@@ -239,9 +239,21 @@ def visual_state(bus, mascot_state, agents_running=0, saved_recent=False, now=No
     return 'idle'
 
 
+# Mod band crop: transparent room above the head so the grip line (EDGE_Y) lands BAND_EDGE px below the
+# image top at BAND_W px wide. The band places the image 2 cells above the bar's border (~19 px/cell).
+BAND_W, BAND_EDGE = 42, 38
+_k = BAND_W / VB_W
+BAND_TOP = round(EDGE_Y - BAND_EDGE / _k)
+BAND_VB = f'0 0 {VB_W} {VB_H - BAND_TOP}'  # content shifted down, not a negative viewBox: keeps CSS transform-origins right
+BAND_H = round((VB_H - BAND_TOP) * _k)
+
+
 def svg_file(vs='idle'):
     """Standalone SVG (xmlns + its own <style>) for surfaces that draw it as an image, e.g. the Mod's band."""
     s = svg_zombie(vs).replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ', 1)
+    s = s.replace(f'viewBox="0 0 {VB_W} {VB_H}"', f'viewBox="{BAND_VB}" width="{BAND_W}" height="{BAND_H}"', 1)
+    i = s.index('</defs>') + len('</defs>')
+    s = s[:i] + f'<g transform="translate(0 {-BAND_TOP})">' + s[i:].replace('</svg>', '</g></svg>')
     return s.replace(DEFS, DEFS + '<style>' + CSS.replace('\n', '') + '</style>', 1)
 
 

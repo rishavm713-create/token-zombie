@@ -294,7 +294,8 @@ export const register: Register = on => {
     const { Svg } = $.ui.resolve(e)
     const src = await mascot($, vs)
     return (
-      <Box flexDirection="column" paddingTop={1}>
+      // 2 cells above the bar hold the head; assets/zombie-*.svg puts the grip line 38px down (~2 cells), on the border
+      <Box flexDirection="column" paddingTop={2}>
         <Box
           borderStyle="round"
           borderColor="gray"
@@ -305,7 +306,7 @@ export const register: Register = on => {
           paddingX="sm"
         >
           <Box flexDirection="row" alignItems="center" gap="sm" flexShrink={0}>
-            <Box width={5} />
+            <Box width={6} />
             <Text weight="semibold">TOKEN ZOMBIE</Text>
             <Text size="caption" weight="semibold" color={isOff ? undefined : G} dimColor={isOff}>
               {mode}
@@ -329,10 +330,10 @@ export const register: Register = on => {
         </Box>
         {src ? (
           <Box key="tz-mascot" position="absolute" top={0} left={1}>
-            <Svg source={src} alt={`TOKEN ZOMBIE mascot: ${vs}`} width={34} height={42} />
+            <Svg source={src} alt={`TOKEN ZOMBIE mascot: ${vs}`} width={42} height={62} />
           </Box>
         ) : (
-          <Box key="tz-mascot" position="absolute" top={1} left={1}>
+          <Box key="tz-mascot" position="absolute" top={2} left={1}>
             <Text>🧟</Text>
           </Box>
         )}

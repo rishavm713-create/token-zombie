@@ -86,11 +86,11 @@ def render():
 <style>
 :root{{--bg:#07090c;--card:#0f1418;--card2:#131a20;--line:#1f2a31;--txt:#dce6dd;--dim:#7c8b84;--acc:#9dff3a;--amber:#ffb020;--zh:clamp(210px,34vw,300px)}}
 *{{box-sizing:border-box}}body{{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#16301a 0,#07090c 55%) fixed;color:var(--txt);font:14px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}}
-.wrap{{max-width:980px;margin:0 auto;padding:52px 16px 40px}}
+.wrap{{max-width:980px;margin:0 auto;padding:60px 16px 40px}}
 .tzx{{margin:0;padding:0;background:none;border:0}}.tzx>summary{{list-style:none}}.tzx>summary::-webkit-details-marker{{display:none}}
-.tzbar{{position:relative;display:flex;align-items:center;gap:18px;min-height:58px;padding:9px 14px 9px 78px;background:linear-gradient(180deg,#15191d,#101316);border:1px solid #262d32;border-radius:14px;box-shadow:0 14px 30px -18px #000,inset 0 1px 0 #ffffff0a;cursor:pointer;color:var(--txt)}}
+.tzbar{{position:relative;display:flex;align-items:center;gap:18px;min-height:58px;padding:9px 14px 9px 92px;background:linear-gradient(180deg,#15191d,#101316);border:1px solid #262d32;border-radius:14px;box-shadow:0 14px 30px -18px #000,inset 0 1px 0 #ffffff0a;cursor:pointer;color:var(--txt)}}
 .tzbar:focus-visible{{outline:2px solid var(--acc);outline-offset:2px}}
-.bz{{position:absolute;left:12px;top:-37px;width:56px;height:69px;pointer-events:none;filter:drop-shadow(0 6px 6px #0008)}}
+.bz{{position:absolute;left:12px;top:-45px;width:68px;height:84px;pointer-events:none;filter:drop-shadow(0 6px 6px #0008)}}
 .bt{{display:flex;align-items:center;gap:8px;flex:none;white-space:nowrap}}.bt h1{{font-size:14px;letter-spacing:.08em;font-weight:700;margin:0}}
 .pill{{font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--acc);background:#9dff3a1a;border:1px solid #9dff3a33;border-radius:999px;padding:1px 8px}}.pill.off{{color:var(--dim);background:#ffffff0d;border-color:#ffffff1a}}
 .bms{{display:flex;flex:1;min-width:0;justify-content:space-around;gap:12px}}
@@ -113,7 +113,7 @@ h1{{margin:0;font-size:20px;letter-spacing:.14em;font-weight:800}}h1 b{{color:va
 details{{margin:12px 0 0;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 14px}}summary{{cursor:pointer;color:var(--dim);font-weight:600}}
 table{{border-collapse:collapse;width:100%;margin:8px 0}}td{{padding:3px 10px 3px 0;border-bottom:1px solid var(--line);font-size:12.5px;overflow-wrap:anywhere}}pre{{white-space:pre-wrap;font-size:12px;color:var(--dim)}}
 @media (max-width:760px){{.grid{{grid-template-columns:repeat(2,1fr)}}}}
-@media (max-width:640px){{.tzbar{{flex-wrap:wrap;row-gap:8px;padding:9px 12px 9px 74px}}.bt{{flex:1}}.bms{{order:3;flex:1 0 100%;margin-left:-62px;justify-content:space-between}}.bn{{font-size:16px}}.bl{{font-size:8.5px;letter-spacing:.06em}}.val{{font-size:24px}}}}
+@media (max-width:640px){{.tzbar{{flex-wrap:wrap;row-gap:8px;padding:9px 12px 9px 86px}}.bt{{flex:1}}.bms{{order:3;flex:1 0 100%;margin-left:-74px;justify-content:space-between}}.bn{{font-size:16px}}.bl{{font-size:8.5px;letter-spacing:.06em}}.val{{font-size:24px}}}}
 {ZCSS}
 </style>
 <div class=wrap>
