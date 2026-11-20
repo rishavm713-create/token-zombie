@@ -1,8 +1,8 @@
 #!/bin/bash
 # DO NOT RUN WITHOUT APPROVAL: spends real tokens. 4 headless sessions (+1 fresh B2 session). Caps: 1.5M per session, 5M total (bin/tzab.py kills at the cap).
-# Usage: bash run_experiment.sh <evidence_dir>   (CLAUDE_CONFIG_DIR is the isolated, user-authenticated /Users/mac/tz-ab-config; live ~/.claude is never used)
+# Usage: bash run_experiment.sh <evidence_dir>   (CLAUDE_CONFIG_DIR is the isolated, user-authenticated set via TZ_AB_CONFIG; live ~/.claude is never used)
 set -u
-Z="$(cd "$(dirname "$0")/../.." && pwd)"; AB="$Z/tests/ab"; EV="${1:?evidence dir}"; CFG=/Users/mac/tz-ab-config; ST=/Users/mac/tz-ab-state
+Z="$(cd "$(dirname "$0")/../.." && pwd)"; AB="$Z/tests/ab"; EV="${1:?evidence dir}"; CFG="${TZ_AB_CONFIG:?set TZ_AB_CONFIG to an isolated, logged-in CLAUDE_CONFIG_DIR}"; ST="${TZ_AB_STATE:?set TZ_AB_STATE to a scratch HOME dir for the B-run state}"
 run() { python3 "$Z/bin/tzab.py" --name "$1" --cwd "$2" --config "$CFG" --prompt-file "$3" --evidence "$EV" "${@:4}"; }
 fresh() { rm -rf "$1"; mkdir -p "$(dirname "$1")"; cp -R "$AB/fixture" "$1"; git -C "$1" init -q; git -C "$1" add -A; git -C "$1" -c user.email=a@a -c user.name=ab commit -qm snapshot; }
 # B settings: hooks only for B, state redirected to $ST so the real ~/.claude/token-zombie is untouched

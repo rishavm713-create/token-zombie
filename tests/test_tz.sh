@@ -1,7 +1,7 @@
 #!/bin/bash
-# Token-zombie self-test. Isolated: fake HOME in a temp dir; real ~/.claude/settings.json is only copied, never written.
-# Run: bash ~/.claude/skills/token-zombie/tests/test_tz.sh
-Z="$(cd "$(dirname "$0")/.." && pwd)"; REAL="$HOME"; T="$(mktemp -d)"; H="$T/home"; pass=0; fail=0
+# Token-zombie self-test. Isolated: fake HOME in a temp dir; the real home folder is never read or written.
+# Run: bash tests/test_tz.sh
+Z="$(cd "$(dirname "$0")/.." && pwd)"; T="$(mktemp -d)"; H="$T/home"; pass=0; fail=0
 mkdir -p "$H/.claude/skills-off/video/cut" "$H/.claude/skills" && touch "$H/.claude/skillpack"
 ok() { if eval "$2"; then pass=$((pass+1)); else fail=$((fail+1)); echo "FAIL: $1"; fi; }
 g() { HOME="$H" python3 "$Z/bin/tz-guard.py"; }
@@ -50,13 +50,15 @@ o=$(s '{}'); ok "no invented % without data" '[[ $o == *TZ* && $o != *%* ]]'
 # 5. lean start: top block to ---, 15-line cap without ---, char cap
 mkdir -p "$T/p1/handoffs" "$T/p2"
 printf 'top1\ntop2\n---\nOLD DETAIL\n' > "$T/p1/HANDOFF.md"; echo "daily" > "$T/p1/handoffs/2026-11-20.md"
-o=$(echo "{\"cwd\":\"$T/p1\"}" | python3 "$Z/bin/tz-start.py")
+o=$(echo "{\"cwd\":\"$T/p1\"}" | HOME="$H" python3 "$Z/bin/tz-start.py")
 ok "top block only + daily" '[[ $o == *top2* && $o != *"OLD DETAIL"* && $o == *daily* ]]'
 seq 1 40 | sed 's/^/line /' > "$T/p2/HANDOFF.md"
-o=$(echo "{\"cwd\":\"$T/p2\"}" | python3 "$Z/bin/tz-start.py")
+o=$(echo "{\"cwd\":\"$T/p2\"}" | HOME="$H" python3 "$Z/bin/tz-start.py")
 ok "no --- : 15 lines max" '[[ $o == *"line 15"* && $o != *"line 16"* ]]'
-o=$(echo "{\"cwd\":\"$REAL/EditSutra\"}" | python3 "$Z/bin/tz-start.py" | wc -c | tr -d ' ')
-ok "real EditSutra start <= 4300 chars ($o)" '[ "$o" -le 4300 ]'
+mkdir -p "$T/p3/handoffs"; for i in $(seq 1 40); do printf 'top %s %0500d\n' "$i" 0; done > "$T/p3/HANDOFF.md"
+for i in $(seq 1 40); do printf 'day %s %0500d\n' "$i" 0; done > "$T/p3/handoffs/2026-11-20.md"
+o=$(echo "{\"cwd\":\"$T/p3\"}" | HOME="$H" python3 "$Z/bin/tz-start.py" | wc -c | tr -d ' ')
+ok "oversized project start <= 4300 chars ($o)" '[ "$o" -le 4300 ] && [ "$o" -ge 3000 ]'
 
 # 6. vet: catches real danger, ignores ordinary code and itself
 mkdir -p "$T/bad" "$T/okrepo"
@@ -69,7 +71,7 @@ bash "$Z/bin/tz-vet.sh" "$T/okrepo" > "$T/v2"; r=$?
 ok "vet: plain fetch is INFO, not HIGH" '[ $r = 0 ] && grep -q INFO "$T/v2"'
 bash "$Z/bin/tz-vet.sh" "$Z" > /dev/null; r=$?; ok "vet: no self-detection" '[ $r = 0 ]'
 
-# 7. installer on a COPY of the real settings: idempotent, uninstall restores
+# 7. installer on a fixture settings file: idempotent, uninstall restores
 # fixture (not the real settings: the real file may already have tz installed)
 echo '{"model":"x","statusLine":{"type":"command","command":"echo prevstatus"},"hooks":{"UserPromptSubmit":[{"hooks":[{"type":"command","command":"python3 ~/.claude/hooks/chat-size-guard.py"}]}]}}' > "$H/.claude/settings.json"
 cp "$H/.claude/settings.json" "$T/fixture.json"
@@ -149,26 +151,26 @@ echo "{\"session_id\":\"c1\",\"agent_id\":\"a1\",\"cwd\":\"$T\"}" | HOME="$H" py
 ok "subagent compaction does not overwrite parent note" 'grep -q "wire hook" "$H/.claude/token-zombie/compact-c1.md"'
 
 # 11. --startup audit: fake logs/skills, advice only
-S="$T/sh"; mkdir -p "$S/.claude/projects/-p" "$S/.claude/skills/editsutra"
+S="$T/sh"; mkdir -p "$S/.claude/projects/-p" "$S/.claude/skills/demo-skill"
 python3 - "$S" <<'PY'
 import json, sys
 S = sys.argv[1]; L = lambda o: json.dumps(o) + '\n'
 long = 'x' * 400; dup = 'Keep every reply short and never read whole big files again.'
 with open(f'{S}/.claude/projects/-p/aaaa1111.jsonl', 'w') as f:
     f.write(L({'type': 'api-request-shape', 'shape': {'system': [{'text': 'a' * 8000}], 'tools': [{'name': 'Bash', 'description': 'b' * 4000}, {'name': 'mcp__srv__t', 'description': 'c' * 2000}]}}))
-    f.write(L({'type': 'attachment', 'attachment': {'type': 'skill_listing', 'content': f'- editsutra: {long}\n- plain: short desc'}}))
+    f.write(L({'type': 'attachment', 'attachment': {'type': 'skill_listing', 'content': f'- demo-skill: {long}\n- plain: short desc'}}))
     f.write(L({'type': 'attachment', 'attachment': {'type': 'instructions', 'files': [{'path': '/x/CLAUDE.md', 'content': dup}, {'path': '/x/RTK.md', 'content': dup}]}}))
     f.write(L({'type': 'attachment', 'attachment': {'type': 'hook_success', 'hookEvent': 'SessionStart', 'command': 'Loading demo mode...', 'stdout': 'h' * 3000}}))
-    f.write(L({'type': 'attachment', 'attachment': {'type': 'deferred_tools_delta', 'addedNames': ['mcp__premiere-pro__razor', 'mcp__srv__t']}}))
+    f.write(L({'type': 'attachment', 'attachment': {'type': 'deferred_tools_delta', 'addedNames': ['mcp__demo-mcp__razor', 'mcp__srv__t']}}))
     f.write(L({'type': 'assistant', 'message': {'role': 'assistant', 'model': 'm', 'usage': {'input_tokens': 2, 'cache_read_input_tokens': 50000, 'cache_creation_input_tokens': 40000}}}))
-open(f'{S}/.claude/skills/editsutra/SKILL.md', 'w').write('---\nname: editsutra\ndescription: ' + long + '\n---\n')
+open(f'{S}/.claude/skills/demo-skill/SKILL.md', 'w').write('---\nname: demo-skill\ndescription: ' + long + '\n---\n')
 PY
 sum0=$(find "$S" -type f | sort | xargs cksum | cksum)
 st() { HOME="$S" "$@" python3 "$Z/bin/tz-status.py" --startup; }
 o=$(st env); ok "startup: measured median 90k + WARN over 60k default" '[[ $o == *"median 90k"* && $o == *"WARN"* ]]'
 ok "startup: components + UNKNOWN row + split totals" '[[ $o == *"tools: built-in"* && $o == *"UNKNOWN (not itemised"* && $o == *"platform-managed"*"yours"* && $o == *"MEASURED"* ]]'
-ok "startup: long skill description flagged" '[[ $o == *"shorten description of skill editsutra"* ]]'
-ok "startup: unused MCP + unused skill detected from logs (dynamic)" '[[ $o == *"MCP \"premiere-pro\" loaded but never used"* && $o == *"skill editsutra: not invoked"* ]]'
+ok "startup: long skill description flagged" '[[ $o == *"shorten description of skill demo-skill"* ]]'
+ok "startup: unused MCP + unused skill detected from logs (dynamic)" '[[ $o == *"MCP \"demo-mcp\" loaded but never used"* && $o == *"skill demo-skill: not invoked"* ]]'
 ok "startup: SessionStart hook size flagged" '[[ $o == *"Loading demo mode"*"3000 chars"* ]]'
 ok "startup: duplicate line across instruction files" '[[ $o == *"duplicate line in CLAUDE.md, RTK.md"* ]]'
 o=$(st env TZ_STARTUP_WARN=120000); ok "startup_warn configurable (env)" '[[ $o != *WARN:* ]]'
@@ -180,12 +182,12 @@ python3 - "$S" <<'PY'
 import json, sys
 S = sys.argv[1]; L = lambda o: json.dumps(o) + '\n'
 with open(f'{S}/.claude/projects/-q/bbbb2222.jsonl', 'w') as f:
-    f.write(L({'type': 'assistant', 'timestamp': '2026-11-20T10:00:00Z', 'message': {'role': 'assistant', 'model': 'm', 'usage': {'input_tokens': 2, 'cache_read_input_tokens': 30000, 'cache_creation_input_tokens': 20000}, 'content': [{'type': 'tool_use', 'name': 'mcp__premiere-pro__razor', 'input': {'skill': 'editsutra'}}]}}))
-    f.write('{"x":"\\"name\\":\\"mcp__premiere-pro__razor\\"","name":"mcp__premiere-pro__razor","skill":"editsutra"}\n')
+    f.write(L({'type': 'assistant', 'timestamp': '2026-11-20T10:00:00Z', 'message': {'role': 'assistant', 'model': 'm', 'usage': {'input_tokens': 2, 'cache_read_input_tokens': 30000, 'cache_creation_input_tokens': 20000}, 'content': [{'type': 'tool_use', 'name': 'mcp__demo-mcp__razor', 'input': {'skill': 'demo-skill'}}]}}))
+    f.write('{"x":"\\"name\\":\\"mcp__demo-mcp__razor\\"","name":"mcp__demo-mcp__razor","skill":"demo-skill"}\n')
 PY
 o=$(st2 20); ok "startup: per-project median shown" '[[ $o == *"per project median (MEASURED)"* ]]'
 ok "startup: MCP used in one project -> enable only there" '[[ $o == *"used only in"* && $o != *"loaded but never used"* ]]'
-ok "startup: used skill not flagged unused" '[[ $o != *"skill editsutra: not invoked"* ]]'
+ok "startup: used skill not flagged unused" '[[ $o != *"skill demo-skill: not invoked"* ]]'
 o=$(st2 20 --save | tail -1); ok "startup --save writes snapshot in token-zombie dir" '[[ $o == "saved snapshot"* ]] && ls "$S"/.claude/token-zombie/startup-*.json >/dev/null 2>&1' 
 sleep 1; HOME="$S" python3 - <<'PY'
 import glob, json, os

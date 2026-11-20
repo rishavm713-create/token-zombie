@@ -1,92 +1,103 @@
 # TOKEN ZOMBIE v0.3.0 release report (2026-11-21)
 
-Status: **ready for GitHub publication, waiting on the owner's explicit yes.** Nothing is pushed.
-Every check below ran in a throwaway HOME. The real `~/.claude/settings.json`, `~/.claude/skills/token-zombie` and live hooks were not touched.
+Status: **release-ready locally. Not pushed, not published.** The owner's explicit yes is needed before anything leaves this machine.
+- Every check ran in a throwaway HOME.
+- These were not touched: `~/.claude/settings.json`, the installed skill and the live hooks.
 
-## 1. The four bar metrics follow their real sources
+## Hardening done in this round
+1. **Privacy**
+   - `tests/test_tz.sh` no longer reads the owner's real project folder. The real-project size check is now a generated oversized project, and it is stricter: it must hit the 4000-char cap.
+   - Private fixture names were replaced with `demo-skill` / `demo-mcp`.
+   - `tz-start.py` test calls now run under the fake HOME.
+   - `tests/test_bench.sh` runs under its own temp HOME. It still checks that its state dir is left untouched.
+   - `bin/tzstartup.py` no longer hard-codes two machine-specific plugin names.
+2. **Dashboard responsiveness**
+   - The bar now wraps its metrics to a second row at <= 820 px (it was 640 px).
+   - A 4 px gap stops the mascot's feet touching the metric row.
+   - The compact one-row bar is unchanged above 820 px.
+3. **Mascot consistency**
+   - The dashboard chip shows only the animated state (it used to show "SLEEP · excited").
+   - Priority is fixed and identical in Python and in the Mod: alert, excited, working, sleep, idle.
+4. **Metric honesty**
+   - The skills metric counts enabled skills on disk, not invocations. It is now labelled **SKILLS ON** on the bar and **SKILLS ENABLED** on the card.
+   - [docs/METRICS.md](METRICS.md) documents each formula, source, label and limit, and separates measured, estimated and verified-baseline savings.
+5. **Docs**
+   - CHANGELOG v0.3.0 is complete, with the test count corrected.
+   - README has a Toolbar section.
+   - PANEL.md has a toolbar section.
+   - SECURITY.md keeps all of the old `docs/SECURITY.md` content and adds a line on the Mod.
+   - `docs/RELEASE-NOTES-0.3.0.md` is new.
+   - The marketplace now has a `description`.
+   - The dashboard captures were regenerated from demo data.
 
-| Metric | Source | Mod evidence (`claude plugin test`) | Dashboard evidence |
-|---|---|---|---|
-| AGENTS | `$.agent.list()` running count; the Mod writes `~/.claude/token-zombie/agents.json` for the dashboard | `panel.live.test.tsx`: 1 then 4 after the source changes; `agents.json` rewritten with `running` 1 then 4 | `tz dash --out`: 2 then 5 after `agents.json` changed; stale file shows UNKNOWN (`test_dash2`) |
-| SKILLS | `~/.claude/skills/*/SKILL.md` (re-listed at most once a minute) | 1 then 3 after 61 s on the mock clock | 1 then 3 after two skill folders were added |
-| TOKENS SAVED (EST) | `ledger.json`: measured, non-overhead entries minus overhead | 100 then 300 | 700 then 1.9K (700 + 1300 - 50) |
-| OPTIMIZATIONS | `ledger.json`: count of measured, non-overhead entries | 1 then 3 | 1 then 2 |
+## A. Automated tests (no live host)
+| Check | Result |
+|---|---|
+| `bash tests/run_all.sh`, 20 scripts | `TOTAL pass 517 fail 0` (was 515; +2 new dash2 checks) |
+| `claude plugin test .` | 14 pass, 0 fail (11 existing + 3 in `panel.live.test.tsx`) |
+| `claude plugin validate .` | passed; 1 warning: no plugin icon |
+| `scan_secrets` | 140 files, no key or token format found |
+| Hygiene grep over the 132 files git would publish | no emails, home paths, private project names, hostnames, private IPs or real keys; the only `sk-ant-` string is a fake redaction fixture |
+| Suite run with an empty outer HOME | 517/517 with HOME set to an empty dir. 0 files were written to it. In the real `~/.claude/token-zombie`, only `activity.json`, `status.json` and `guard-<id>` changed, all written by the live hooks of the session that ran the checks. |
 
-The new test advances the Mod's 5 s `$.clock.every` poll with `mock.clock`, so the bar must redraw from the new values. No number is invented: a source that is missing shows `—` or UNKNOWN.
+New tests this round:
+- `test_dash2`: the mascot chip equals the animated state, both with data (EXCITED) and with no data (SLEEP).
+- Labels updated in `test_dash2` and the Mod tests: SKILLS ON / SKILLS ENABLED.
+- `test_tz`: the oversized-project start cap.
 
-## 2. Interactions
+## B. Simulated integration (real code, fake host or fake HOME)
+- **Mod metrics:** `mock.clock` advances the 5 s poll.
+  - AGENTS 1→4, with `agents.json` rewritten.
+  - SKILLS ON 1→3.
+  - TOKENS SAVED 100→300.
+  - OPTIMIZATIONS 1→3.
+- **Mod interactions:** the chevron opens the pane; `/tz` opens the pane, or falls back to the status line; the mode, Review, Audit, Board, Copy and Compact buttons run the expected argv; a refused compact shows the line to type.
+- **Reload:** `$.state` totals survive a second `session.start`. A value stored under an old shape is declined.
+- **Real `tz` CLI** in a fake HOME:
+  - `mode ultra` / `mode full` exit 0, and `config.json` persists the mode.
+  - `optimize`, `audit` and `dash --out` exit 0.
+  - `checkpoint` exits 1 with no task state. Compact still asks for `/compact`.
+- **Dashboard** from real files:
+  - agents 2→5, skills 1→3, saved 700→1.9K.
+  - The `tz dash --serve` server returns 401 without the token, and sends a CSP.
+- **Responsive**, in the built-in browser with the worst-case data (ULTRA, 1.2M saved):
+  - Widths 375, 600, 674, 780, 860, 1100 and 1440 px, collapsed and expanded.
+  - Every width: 0 clipped labels, 0 overlapping bar items, 0 overlapping cards, no horizontal scroll.
+  - The `<details>` body is visible when open and hidden when closed (real clicks, earlier round).
+- **Clean install** in a fake HOME:
+  - `claude plugin install token-zombie --marketplace ./` gives v0.3.0, enabled, read from the repo folder.
 
-- Chevron (`tz-expand`) opens the pane: `ui.open('token-zombie')` is called (`panel.test.tsx`, "chevron opens the pane").
-- `/tz` opens the pane. When no surface places a pane, it falls back to a status line (`/tz opens the pane ...`).
-- Pane buttons (`buttons run the expected argv ...`):
-  - mode: `tz mode ultra`
-  - review: `tz optimize`
-  - audit: `tz audit`
-  - board: `tz dash --out ~/.claude/token-zombie/board.html`
-  - copy: clipboard summary
-  - compact: `tz checkpoint`, then `/compact` with the keep-list
-- When the host refuses compact, the pane shows the line to type.
-- The same CLI commands also ran for real in a fake HOME:
-  - `mode ultra` and `mode full` both exit 0, and `config.json` persisted the mode.
-  - `optimize`, `audit` and `dash --out` all exit 0. The board was 24 KB.
-  - `checkpoint` exits 1 ("no task state") in an empty HOME. The Compact button still goes on to request `/compact`.
-- Dashboard `<details>`: tested in the browser with real clicks on `tz dash --serve`. It starts closed, and the summary click opens it and closes it (`open` true/false, content visibility true/false).
-- Dashboard server security: no token gives HTTP 401. The page is served with CSP `default-src 'none'; style-src 'unsafe-inline'`.
+## C. Actual live host verification
+- The owner saw the toolbar live in Claude Code on 2026-11-20 and 2026-11-21: the bar, and the mascot's hands on its border.
+- The Mod was loaded from the dev-mods copy and wrote a real `agents.json`.
+- `hooks/panel.tsx` is synced to the dev-mods copy with this round's label change.
+- **Not verified live** in this round:
+  - the new SKILLS ON label in the app
+  - pane buttons pressed by hand
+  - `/tz` typed by hand
+  - a hot reload in a real session
+  - an install from GitHub (the repo does not exist yet)
 
-## 3. Persistence and reload
-
-- `$.state` atoms (`stats`, `files`, `acts`, `note`, `bar`) are kept by the host for the session. A hot reload re-runs `register` and `session.start` and keeps them.
-  - Test: token totals survive a second `session.start`.
-  - Test: a value stored under an older shape tag is declined, and the pane does not crash.
-- Module variables (pane-placed flag, SVG cache, skills and agents throttles) reset on reload. Each is only a cache and is rebuilt on the next poll.
-- Across sessions, the Mod does not use `$.store`. Everything that must last is already on disk:
-  - the mode (`config.json`)
-  - the ledger, `agents.json`, `status.json` and `host.json`
-- The pane's token totals are per-session by design (docs/PANEL.md).
-
-## 4. Docs and security
-
-- README install was tested in a fake HOME. `claude plugin install token-zombie --marketplace ./` added the marketplace, and the install showed v0.3.0, enabled.
-- The `owner/repo` form in the README cannot be tested until the repo exists.
-- `claude plugin validate`: passed with 2 warnings, no marketplace `description` and no plugin icon. Both are cosmetic.
-- `scan_secrets` (plugin-authoring): 136 files scanned, no known key or token format found.
-- Hygiene grep over the 129 files git would publish:
-  - No email addresses, home-folder paths, real keys, internal hosts or private IPs.
-  - The only `sk-ant-` string is a fake fixture in `tests/test_status_read.sh`, used to test redaction.
-  - The GitHub handle `rishavm713-create` appears in README, docs/INSTALL.md and `.github/ISSUE_TEMPLATE/config.yml`. This is intended.
-  - **Finding:** `tests/test_tz.sh` line 58 runs `tz-start.py` against `$REAL/EditSutra` with the real HOME (read-only). Lines 152-188 use `editsutra` and `premiere-pro` as fixture names. These are the owner's private project names. The owner should decide whether to rename them before publishing (see manual steps).
-- CHANGELOG: the v0.3.0 entry says "Tests: 377 -> 477". It has no line for the slim bar or the mascot changes (commits a8dcdd2, bc48121).
-- COMPAT: accurate (Claude Code >= 2.1.318 tested; macOS tested; other agents rules-only and EXPERIMENTAL).
-- Those doc files are owned by the docs session, so this report does not edit them.
-
-## 5. Test suite
-
-- `bash tests/run_all.sh`: see the result line below.
-- `claude plugin test .`: 14/14. That is the 11 existing tests plus 3 new ones in `hooks/panel.live.test.tsx`.
-- CI does not run the Mod tests (the runner has no `claude` CLI). `test_plugin.sh` skips `validate` there.
-
-Result on 2026-11-21: `TOTAL pass 515 fail 0`. That is 20 scripts, each with fail 0, and it matches the baseline.
+## D. Remaining limitations
+- TOKENS SAVED is an estimate (chars / 4) of `tz filter` cuts only. There is **no A/B baseline**, so it is not a proven saving.
+- AGENTS needs the Mod loaded (otherwise UNKNOWN). Several sessions share one `agents.json`.
+- SKILLS ON counts enabled user skills. It does not count plugin or project skills, and it does not count usage.
+- The Mod's token totals are per session. They survive a hot reload but not a new session.
+- The Mod tests need the `claude` CLI, so CI runs only the shell suite.
+- The terminal bar draws an emoji, not the SVG mascot.
+- Windows is untested. Non-Claude adapters are rules-only.
+- There is no plugin icon.
 
 ## Install (after publication)
-
-In Claude Code:
 ```
 /plugin install token-zombie --marketplace rishavm713-create/token-zombie
 ```
-Shell: `claude plugin install token-zombie --marketplace rishavm713-create/token-zombie`.
-Optional cost row: `bash <plugin dir>/install.sh --statusline-only`.
-If the old hook install is present, run `bash install.sh --uninstall` first. Otherwise every hook fires twice.
-Then type `/tz` in a session, or click the chevron on the bar above the prompt.
+- **Shell:** `claude plugin install token-zombie --marketplace rishavm713-create/token-zombie`.
+- **Optional cost row:** `bash <plugin dir>/install.sh --statusline-only`.
+- **Legacy install:** if the old hook install is present, run `bash install.sh --uninstall` first.
 
-## Remaining manual steps (owner)
-
-1. Decide on the `EditSutra` / `premiere-pro` names in `tests/test_tz.sh` (rename them to neutral names, or keep them). If you rename, keep the checks.
-2. Let the docs session commit its README/LICENSE/CONTRIBUTING/SECURITY/.github/docs files, including the staged deletion of `docs/SECURITY.md`. Then update the CHANGELOG test count and add the slim-bar line.
-3. Optional: add a marketplace `description` and an icon to clear the two validate warnings.
-4. Set the git identity you want to publish under (`git config user.name/user.email`). Recent commits use the machine's default local address.
-5. Give an explicit yes to create the public repo `rishavm713-create/token-zombie` and push. Then run `scan_secrets` again on the final tree.
-6. After the push, install with the README one-liner in a clean Claude Code. Check that the bar shows, that `/tz` and the chevron open the pane, and take the panel capture for the README.
-7. Known cosmetic issue: between about 600 and 780 px wide, the dashboard bar clips the AGENTS/SKILLS/OPTIMIZATIONS labels with an ellipsis. They are fine at 375, 800, 1100 and 1440 px.
-8. The dashboard chip reads "mascot SLEEP · excited". It shows the status-bus mascot next to the bar's visual state, which can look contradictory.
-
-No token-savings claim is made: there is still no A/B baseline.
+## Manual steps for the owner, in order
+1. Set the git identity to publish under: `git config user.name` / `git config user.email`.
+2. Give an explicit yes to create the public repo `rishavm713-create/token-zombie` and push `main`.
+3. After the push, install from GitHub in a clean Claude Code session. Check the bar, the chevron, `/tz` and each pane button by hand. Then take the toolbar capture for the README.
+4. Optional: add a plugin icon.

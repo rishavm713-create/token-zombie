@@ -61,7 +61,7 @@ async function writeAgents($: any, d: string, now: number): Promise<number | nul
   }
 }
 
-// SKILLS = ~/.claude/skills/*/SKILL.md on disk; listed at most once a minute.
+// SKILLS ON = ~/.claude/skills/*/SKILL.md on disk (installed + on, not invocations); listed at most once a minute.
 let skillsN: number | null = null
 let skillsAt = -1e9
 async function countSkills($: any, home: string, now: number) {
@@ -262,7 +262,7 @@ export const register: Register = on => {
     const state = vs === 'alert' ? 'Alert' : isOff ? 'Off' : f.isStale ? 'Stale' : 'Active'
     const nums: [string, string, string, boolean][] = [
       ['agents', b.agents === null ? '—' : String(b.agents), 'AGENTS', false],
-      ['skills', b.skills === null ? '—' : String(b.skills), 'SKILLS', false],
+      ['skills', b.skills === null ? '—' : String(b.skills), 'SKILLS ON', false],
       ['saved', b.hasLedger ? big(b.saved) : '0', 'TOKENS SAVED · EST', true],
       ['opts', String(b.opts), 'OPTIMIZATIONS', false],
     ]

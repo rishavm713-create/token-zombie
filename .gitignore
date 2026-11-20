@@ -5,3 +5,4 @@ __pycache__/
 .claude-plugin/types/
 overlay/build/
 node_modules/
+handoffs/

@@ -1,4 +1,17 @@
-# Install / rollback (tested only in fake HOME; nothing has been run on the real machine)
+# Install
+## Primary: plugin marketplace
+```
+/plugin install token-zombie --marketplace rishavm713-create/token-zombie
+```
+Shell form: `claude plugin install token-zombie --marketplace rishavm713-create/token-zombie`.
+Desktop app: + next to the prompt box > Plugins > Add marketplace `rishavm713-create/token-zombie` > Add plugin.
+Optional statusline (also feeds the panel cost row): `bash <plugin dir>/install.sh --statusline-only`.
+Uninstall: `/plugin uninstall token-zombie`.
+WARNING: if you used the legacy `install.sh` hook install, run `install.sh --uninstall` first, or the hooks fire twice.
+
+## Legacy: install.sh (hooks written into settings.json)
+The skill now lives at `skills/token-zombie/` (the old root `SKILL.md` moved there). The commands below assume the repo (or the old skill folder) sits at `~/.claude/skills/token-zombie`; adjust the path to where you cloned it.
+
 Preview (writes nothing):
 ```bash
 bash ~/.claude/skills/token-zombie/install.sh --dry-run

@@ -51,7 +51,7 @@ test('bar numbers follow agent.list, skills on disk and ledger.json on the poll'
     return all[all.findIndex(x => label.test(x.text)) - 1]?.text
   }
   expect(await val(/^AGENTS$/)).toBe('1')
-  expect(await val(/^SKILLS$/)).toBe('1')
+  expect(await val(/^SKILLS ON$/)).toBe('1')
   expect(await val(/^TOKENS SAVED · EST$/)).toBe('100')
   expect(await val(/^OPTIMIZATIONS$/)).toBe('1')
   expect(JSON.parse(w.writes['/h/.claude/token-zombie/agents.json']!).running).toBe(1)
@@ -62,7 +62,7 @@ test('bar numbers follow agent.list, skills on disk and ledger.json on the poll'
   w.files['ledger.json'] = led(3)
   await clock.advance(61_000)
   expect(await val(/^AGENTS$/)).toBe('4')
-  expect(await val(/^SKILLS$/)).toBe('3')
+  expect(await val(/^SKILLS ON$/)).toBe('3')
   expect(await val(/^TOKENS SAVED · EST$/)).toBe('300')
   expect(await val(/^OPTIMIZATIONS$/)).toBe('3')
   expect(JSON.parse(w.writes['/h/.claude/token-zombie/agents.json']!).running).toBe(4)

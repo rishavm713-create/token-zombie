@@ -4,7 +4,14 @@ In-chat pane built only on the supported Mods API (function hooks). No DOM, no s
 no model calls, no network, no telemetry. Open it with `/tz` (bare command, registered by the mod).
 Source: `hooks/panel.tsx`; tests: `hooks/panel.test.tsx`; state contract: `types/index.d.ts`.
 
-## What it shows and where each number comes from
+## Default view: the toolbar
+- **Where:** one slim bar above the prompt (`AbovePrompt`).
+- **What it shows:** the mascot, TOKEN ZOMBIE, a mode pill, AGENTS, SKILLS ON, TOKENS SAVED · EST, OPTIMIZATIONS, a status dot (Active / Stale / Off / Alert), and a chevron that opens the pane below. How each number is calculated: [METRICS.md](METRICS.md).
+- **Desktop:** draws `assets/zombie-<state>.svg`, with the hands on the bar's top border.
+- **Terminal:** draws an emoji, because it has no Svg element.
+- **Surveys:** the bar steps aside while a question dialog is open.
+
+## Pane: what it shows and where each number comes from
 | Row | Source | Label |
 |---|---|---|
 | tokens in / out / cache | sum of `turn.complete` `usage` on the main loop, since the panel loaded | MEASURED (host event) |

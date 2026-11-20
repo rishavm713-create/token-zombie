@@ -1,3 +1,5 @@
+> Historical tracker from v0.2.1. For the v0.3.0 state see [RELEASE-REPORT.md](RELEASE-REPORT.md).
+
 # Feature tracker v0.2.1 (BUILT / TESTED / VERIFIED / PARTIAL / BLOCKED)
 VERIFIED = checked against a live Claude Code session. Nothing is VERIFIED yet: tz is not installed.
 | Feature | Status | Note |
@@ -20,5 +22,5 @@ VERIFIED = checked against a live Claude Code session. Nothing is VERIFIED yet: 
 | Registry | TESTED | local dirs only, no network |
 | Benchmark synthetic + compare | TESTED | |
 | A/B runner caps + interrupted recovery | TESTED | stub claude |
-| Real A/B experiment | BLOCKED | login 401 in /Users/mac/tz-ab-config; needs your approval |
+| Real A/B experiment | BLOCKED | login 401 in the isolated A/B config dir; needs approval |
 | Live end-to-end in real Claude Code | BLOCKED | needs install approval |

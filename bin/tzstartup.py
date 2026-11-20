@@ -155,7 +155,7 @@ def startup(n=12, save=False, compare=False):
         sk_disk = {os.path.basename(os.path.dirname(p)) for p in glob.glob(os.path.join(root, 'skills', '*', 'SKILL.md'))}
         used = {k for u in use.values() for k in u['skill']}
         for ln_len, nm in sorted((x for v in by.values() for x in v), reverse=True):
-            own = nm.split(':')[0] in ('caveman', 'ponytail') or nm in sk_disk
+            own = nm in sk_disk  # only skills on disk are the user's to shorten
             if own and ln_len > LONG + len(nm) + 4:
                 adv.append(((ln_len - LONG) // 4, 'safe', f'shorten description of skill {nm} ({ln_len} chars > {LONG})'))
             if nm in sk_disk and nm not in used and nm not in ('token-zombie',):

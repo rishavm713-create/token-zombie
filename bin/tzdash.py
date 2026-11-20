@@ -113,18 +113,18 @@ h1{{margin:0;font-size:20px;letter-spacing:.14em;font-weight:800}}h1 b{{color:va
 details{{margin:12px 0 0;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 14px}}summary{{cursor:pointer;color:var(--dim);font-weight:600}}
 table{{border-collapse:collapse;width:100%;margin:8px 0}}td{{padding:3px 10px 3px 0;border-bottom:1px solid var(--line);font-size:12.5px;overflow-wrap:anywhere}}pre{{white-space:pre-wrap;font-size:12px;color:var(--dim)}}
 @media (max-width:760px){{.grid{{grid-template-columns:repeat(2,1fr)}}}}
-@media (max-width:640px){{.tzbar{{flex-wrap:wrap;row-gap:8px;padding:9px 12px 9px 86px}}.bt{{flex:1}}.bms{{order:3;flex:1 0 100%;margin-left:-74px;justify-content:space-between}}.bn{{font-size:16px}}.bl{{font-size:8.5px;letter-spacing:.06em}}.val{{font-size:24px}}}}
+@media (max-width:820px){{.tzbar{{flex-wrap:wrap;row-gap:8px;padding:9px 12px 9px 86px}}.bt{{flex:1}}.bms{{order:3;flex:1 0 100%;margin-left:-74px;margin-top:4px;justify-content:space-between}}.bn{{font-size:16px}}.bl{{font-size:8.5px;letter-spacing:.06em}}.val{{font-size:24px}}}}
 {ZCSS}
 </style>
 <div class=wrap>
 <details class=tzx><summary class=tzbar aria-label="TOKEN ZOMBIE bar: open details"><span class=bz>{svg_zombie(vs)}</span>
 <span class=bt><h1>TOKEN ZOMBIE</h1><span class="pill{' off' if mode == 'off' else ''}">{e(str(mode)).upper()}</span></span>
-<span class=bms>{bnum('agents', 'AGENTS')}{bnum('skills', 'SKILLS')}{bnum('saved', 'TOKENS SAVED', ' g')}{bnum('opts', 'OPTIMIZATIONS')}</span>
+<span class=bms>{bnum('agents', 'AGENTS')}{bnum('skills', 'SKILLS ON')}{bnum('saved', 'TOKENS SAVED', ' g')}{bnum('opts', 'OPTIMIZATIONS')}</span>
 <span class=bs><span class="dot {e(state.lower())}"></span>{state}<span class=chev></span></span></summary>
 <div class=full><div class=card>
 <div class=head>
-<div class=chips style="margin-top:0"><span class="chip st-{e(vs)}">mascot <b>{e(st)}</b> · {e(vs)}</span><span class=chip>mode <b>{e(str(mode)).upper()}</b></span><span class=chip>context <b>{e(ctxs)}</b></span><span class=chip>level <b>{e(str(s.get('level', '—')))}</b></span><span class=chip>supervisor <b>{e(str(s.get('state', '—')))}</b></span></div></div>
-<div class=grid>{tile('agents', 'AGENTS RUNNING')}{tile('skills', 'SKILLS IN USE')}{tile('saved', 'TOKENS SAVED')}{tile('opts', 'OPTIMIZATIONS EXECUTED')}</div>
+<div class=chips style="margin-top:0"><span class="chip st-{e(vs)}">mascot <b>{e(vs.upper())}</b></span><span class=chip>mode <b>{e(str(mode)).upper()}</b></span><span class=chip>context <b>{e(ctxs)}</b></span><span class=chip>level <b>{e(str(s.get('level', '—')))}</b></span><span class=chip>supervisor <b>{e(str(s.get('state', '—')))}</b></span></div></div>
+<div class=grid>{tile('agents', 'AGENTS RUNNING')}{tile('skills', 'SKILLS ENABLED')}{tile('saved', 'TOKENS SAVED')}{tile('opts', 'OPTIMIZATIONS EXECUTED')}</div>
 </div>
 <details><summary>Status bus (ctx% actual/est, minutes est)</summary><table>{rows or '<tr><td>no status: run tz sup tick</td></tr>'}</table></details>
 <details><summary>Ledger (last 20)</summary><pre>{e(json.dumps(led, indent=1)[:2000])}</pre></details>

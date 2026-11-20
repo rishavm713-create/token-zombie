@@ -7,10 +7,10 @@ touch "$H/.claude/skills/a/SKILL.md" "$H/.claude/skills/b/SKILL.md"
 NOW=$(date +%s)
 
 tz dash --out "$T/d.html" >/dev/null
-for m in "AGENTS RUNNING" "SKILLS IN USE" "TOKENS SAVED" "OPTIMIZATIONS EXECUTED"; do ok "metric tile: $m" "grep -q '$m' '$T/d.html'"; done
+for m in "AGENTS RUNNING" "SKILLS ENABLED" "TOKENS SAVED" "OPTIMIZATIONS EXECUTED"; do ok "metric tile: $m" "grep -q '$m' '$T/d.html'"; done
 ok "no data: agents UNKNOWN, not a number" 'grep -A2 "AGENTS RUNNING" "$T/d.html" | grep -q "—"'
 ok "no data: mascot sleeps" 'grep -q "tz-zombie tz-sleep" "$T/d.html"'
-ok "skills counted from disk (2)" 'grep -A1 "SKILLS IN USE" "$T/d.html" | grep -q "class=\"val\">2<"'
+ok "skills counted from disk (2)" 'grep -A1 "SKILLS ENABLED" "$T/d.html" | grep -q "class=\"val\">2<"'
 ok "tokens saved labelled EST + no-baseline note" 'grep -q "t-est\">EST" "$T/d.html" && grep -q "no A/B baseline" "$T/d.html"'
 ok "self-contained: no script, no external src/href" '! grep -qiE "<script|src=.?http|href=.?http|url\(.?http" "$T/d.html"'
 ok "reduced-motion respected" 'grep -q "prefers-reduced-motion" "$T/d.html"'
@@ -24,6 +24,9 @@ ok "agents running from fresh agents.json (3, MEASURED)" 'grep -A2 "AGENTS RUNNI
 ok "optimizations = measured non-overhead entries (1)" 'grep -A1 "OPTIMIZATIONS EXECUTED" "$T/m.html" | grep -q "class=\"val\">1<"'
 ok "tokens saved = measured minus overhead (480), est flags excluded" 'grep -A1 "TOKENS SAVED" "$T/m.html" | grep -q "class=\"val\">480<"'
 ok "recent measured saving => excited mascot" 'grep -q "tz-zombie tz-excited" "$T/m.html"'
+chip() { grep -o 'mascot <b>[A-Z]*</b></span>' "$1" | sed 's/.*<b>//;s/<.*//'; }
+ok "mascot chip = animated state, one state only (EXCITED)" '[ "$(chip "$T/m.html")" = EXCITED ] && ! grep -q "mascot <b>[A-Z]*</b> ·" "$T/m.html"'
+ok "mascot chip = animated state with no data (SLEEP)" '[ "$(chip "$T/d.html")" = SLEEP ] && grep -q "tz-zombie tz-sleep" "$T/d.html"'
 printf '{"running":3,"ts":1}' >"$S/agents.json"; tz dash --out "$T/s.html" >/dev/null
 ok "stale agents.json => UNKNOWN" 'grep -A2 "AGENTS RUNNING" "$T/s.html" | grep -q "—"'
 echo 'not json' >"$S/agents.json"; echo '{"x":1}' >"$S/ledger.json"
@@ -44,7 +47,7 @@ ok "unknown state falls back to idle" "HOME='$H' python3 -c \"import sys;sys.pat
 # slim bar default view (v0.3.1): one bar is the <summary>, full detail behind <details>, one mascot inside the bar
 ok "bar: details collapsed by default, bar is its summary" 'grep -q "<details class=tzx><summary class=tzbar" "$T/m.html" && ! grep -q "class=tzx open" "$T/m.html"'
 ok "bar: mascot sits inside the bar, drawn once" 'grep -q "<span class=bz><svg class=\"tz-zombie" "$T/m.html" && [ "$(grep -o "<svg class=\"tz-zombie" "$T/m.html" | wc -l | tr -d " ")" = 1 ]'
-for l in AGENTS SKILLS "TOKENS SAVED" OPTIMIZATIONS; do ok "bar label: $l" "grep -q 'class=bl>$l' '$T/m.html'"; done
+for l in AGENTS "SKILLS ON" "TOKENS SAVED" OPTIMIZATIONS; do ok "bar label: $l" "grep -q 'class=bl>$l' '$T/m.html'"; done
 ok "bar: saved is green and EST-tagged (480)" 'grep -q "<span class=\"bm g\"><b class=bn>480</b><span class=bl>TOKENS SAVED <i>EST</i>" "$T/m.html"'
 ok "bar: agents 3, opts 1" 'grep -q "<b class=bn>3</b><span class=bl>AGENTS" "$T/m.html" && grep -q "<b class=bn>1</b><span class=bl>OPTIMIZATIONS" "$T/m.html"'
 ok "bar: mode pill + status dot + chevron" 'grep -q "class=\"pill\">FULL<" "$T/m.html" && grep -q "class=\"dot " "$T/m.html" && grep -q "class=chev" "$T/m.html"'

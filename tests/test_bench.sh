@@ -1,6 +1,7 @@
 #!/bin/bash
 # bench tests: structure, labels, arithmetic, isolation (never writes real HOME state).
 Z="$(cd "$(dirname "$0")/.." && pwd)"; pass=0; fail=0; ok() { if eval "$2"; then pass=$((pass+1)); else fail=$((fail+1)); echo "FAIL: $1"; fi; }
+export HOME="$(mktemp -d)"; mkdir -p "$HOME/.claude/token-zombie"; echo keep > "$HOME/.claude/token-zombie/x"  # fake HOME with a state dir to watch
 B0=$(ls ~/.claude/token-zombie 2>/dev/null | md5); j=$("$Z/bin/tz" bench --json); o=$("$Z/bin/tz" bench --chat-tokens 50000)
 ok "labels MEASURED/EST/UNKNOWN all present" '[[ $o == *MEASURED* && $o == *EST* && $o == *UNKNOWN* && $o == *NET* ]]'
 ok "dup-read: 4 of 5 flagged" 'python3 -c "import json,sys;d=json.loads(sys.argv[1]);assert d[\"dup_read\"][\"flagged\"]==4" "$j"'
@@ -10,7 +11,7 @@ ok "saved arithmetic: chat - resume" 'python3 -c "import json,sys;r=json.loads(s
 ok "chat-tokens param changes result" '[[ $o == *"carrying 50000"* ]]'
 ok "hooks fast (<1500 ms each)" 'python3 -c "import json,sys;assert json.loads(sys.argv[1])[\"overhead\"][\"hook_ms_max\"]<1500" "$j"'
 ok "net measured-only <= net with estimates" 'python3 -c "import json,sys;n=json.loads(sys.argv[1])[\"net\"];assert n[\"measured_only_tok\"]<=n[\"with_estimates_tok\"]" "$j"'
-ok "real state dir untouched" '[ "$B0" = "$(ls ~/.claude/token-zombie 2>/dev/null | md5)" ]'
+ok "state dir untouched" '[ "$B0" = "$(ls ~/.claude/token-zombie 2>/dev/null | md5)" ]'
 # real A/B compare from two chat logs
 mk() { python3 - "$1" "$2" "$3" <<'PY'
 import json,sys
