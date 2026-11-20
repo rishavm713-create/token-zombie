@@ -47,7 +47,7 @@ ok "every \${CLAUDE_PLUGIN_ROOT} is double-quoted" '! grep -rhoE "[^\"]\\\$\{CLA
 S="$Z/skills/token-zombie/SKILL.md"
 ok "SKILL.md frontmatter name+description" '[ "$(sed -n 1p "$S")" = --- ] && sed -n 2p "$S" | grep -q "^name: token-zombie$" && sed -n 3p "$S" | grep -q "^description: ." && [ "$(sed -n 4p "$S")" = --- ]'
 ok "SKILL.md lean (<= 90 lines)" '[ "$(wc -l < "$S")" -le 90 ]'
-ok "SKILL.md references/ links resolve (12)" 'L=$(grep -oE "\]\(references/[a-z-]+\.md\)" "$S" | tr -d "]()" | sort -u); [ $(echo "$L" | wc -l) -eq 12 ] && for r in $L; do [ -s "$Z/skills/token-zombie/$r" ] || false; done'
+ok "SKILL.md references/ links resolve (13)" 'L=$(grep -oE "\]\(references/[a-z-]+\.md\)" "$S" | tr -d "]()" | sort -u); [ $(echo "$L" | wc -l) -eq 13 ] && for r in $L; do [ -s "$Z/skills/token-zombie/$r" ] || false; done'
 ok "no root SKILL.md left" '[ ! -e "$Z/SKILL.md" ]'
 # statusline-only
 S2="$H/.claude/settings.json"; echo '{"model":"sonnet","statusLine":{"type":"command","command":"echo prev"}}' > "$S2"

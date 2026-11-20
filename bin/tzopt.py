@@ -62,7 +62,7 @@ def analyze(path):
     r = dict(reads=0, dup_reads=[], dup_cmds=[], wasted_chars=0, big_full_reads=[], dup_research=[], dup_explore=[], big_outputs=[])
     if not path or not os.path.isfile(path):
         return r
-    uses, results = [], {}
+    uses, results, ids = [], {}, set()
     with open(path, 'rb') as f:
         for raw in f:
             line = raw.decode('utf-8', 'ignore')
@@ -74,6 +74,9 @@ def analyze(path):
                 continue
             for b in c if isinstance(c, list) else []:
                 if isinstance(b, dict) and b.get('type') == 'tool_use':
+                    if b.get('id') and b['id'] in ids:
+                        continue  # the host can log one call on several lines; count it once
+                    ids.add(b.get('id'))
                     uses.append(b)
                 elif isinstance(b, dict) and b.get('type') == 'tool_result':
                     results[b.get('tool_use_id')] = len(_text(b.get('content')))
@@ -194,6 +197,17 @@ def main(argv):
         for f, n in r['big_full_reads'][:5]:
             print(f'  big full read: {f} ({n // 1000}k chars): try grep -n + Read offset/limit')
         print(f"avoidable [est] ~{ET(r['wasted_chars'])} tokens (what the repeats cost; avoiding them is advice, not guaranteed)")
+        from tzusage import totals
+        u = totals(path)
+        if u['turns']:
+            # every model call re-sends the whole chat; usually the biggest cost in a long chat
+            per = (u['inp'] + u['cr'] + u['cw']) // u['turns']
+            print(f"model calls [actual] {u['turns']}; context re-sent per call avg ~{per // 1000}k [actual], total {(u['inp'] + u['cr'] + u['cw']) // 1000}k")
+            # list-price multipliers relative to fresh input (cache read 0.1x, cache write 1.25x, output 5x): shares, not dollars
+            w = dict(input=u['inp'], cache_read=u['cr'] * .1, cache_write=u['cw'] * 1.25, output=u['out'] * 5)
+            tw = sum(w.values()) or 1
+            print('  cost share [est, input-equivalent weights]: ' + ', '.join(f'{k} {v * 100 / tw:.0f}%' for k, v in w.items()))
+            print(f"  each tool round trip you avoid (batch independent calls in one message) saves ~{per // 1000}k re-sent [est]")
         if not path:
             print('no chat log found (pass --transcript)')
     elif a.cmd == 'stats':

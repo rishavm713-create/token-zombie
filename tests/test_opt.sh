@@ -31,6 +31,9 @@ ok "dup read found, edit-between not counted" '[[ $o == *"duplicate full reads 1
 ok "repeated command found" '[[ $o == *"repeated commands w/ same output 1"* ]]'
 ok "big full read advice (not a block)" '[[ $o == *"big full read: /c"* && $o == *"offset/limit"* ]]'
 ok "avoidable labelled est (4000+1000 chars = 1250)" '[[ $o == *"avoidable [est] ~1250"* ]]'
+python3 -c "import json;u=json.dumps({'message':{'content':[{'type':'tool_use','id':'x1','name':'Bash','input':{'command':'make all'}}]}});r=json.dumps({'message':{'content':[{'type':'tool_result','tool_use_id':'x1','content':'o'*900}]}});m=json.dumps({'message':{'id':'m1','usage':{'input_tokens':1000,'cache_read_input_tokens':9000}}});open('$T/c2.jsonl','w').write(u+chr(10)+u+chr(10)+r+chr(10)+m+chr(10)+m+chr(10))"
+o=$(o_ optimize --transcript "$T/c2.jsonl"); ok "one call logged twice (same tool_use id) is not a repeat" '[[ $o == *"repeated commands w/ same output 0"* ]]'
+ok "per-call re-sent context measured once per reply" '[[ $o == *"model calls [actual] 1;"* && $o == *"avg ~10k"* && $o == *"cache_read 47%"* ]]'
 o=$(o_ optimize --transcript "$T/none"); ok "missing log handled" '[[ $o == *"no chat log"* || $o == *"reads [actual] 0"* ]]'
 # filter
 python3 -c "print('ok line\n'*200 + 'ERROR boom\n' + '\n'.join(f'l{i}' for i in range(300)))" > "$T/big.out"
