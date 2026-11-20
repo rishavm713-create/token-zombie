@@ -7,7 +7,7 @@ cat > "$T/claude" <<'PY'
 import json,os,sys
 n=int(os.environ.get('STUB_REPLIES','3')); per=int(os.environ.get('STUB_TOK','1000'))
 open(os.environ['STUB_CFGLOG'],'w').write(os.environ.get('CLAUDE_CONFIG_DIR',''))
-open(os.environ['STUB_CFGLOG']+'.env','w').write(' '.join(k for k in ('ANTHROPIC_AUTH_TOKEN','ANTHROPIC_BASE_URL','ANTHROPIC_API_KEY') if k in os.environ))
+open(os.environ['STUB_CFGLOG']+'.env','w').write(' '.join(k for k in os.environ if k.startswith(('ANTHROPIC_','CLAUDE')) and k!='CLAUDE_CONFIG_DIR'))
 for i in range(n):
     u={"input_tokens":per//4,"output_tokens":per//4,"cache_read_input_tokens":per//4,"cache_creation_input_tokens":per//4}
     print(json.dumps({"type":"assistant","message":{"id":f"m{i}","usage":u}}),flush=True)
@@ -22,5 +22,5 @@ o=$(STUB_REPLIES=50 r A2 --cap 5000); rc=$?; ok "per-session cap stops it, exit 
 o=$(STUB_REPLIES=50 r A3 --cap 1500000 --agg-cap 9000); ok "aggregate cap stops it (3000+5000 used; limit 9000)" '[[ $o == *cap-aggregate* ]]'
 o=$(r A4 --agg-cap 8000 2>&1); rc=$?; ok "aggregate exhausted => refused, no session started" '[[ $o == *refused-aggregate* ]] && [ $rc = 3 ]'
 ok "cap messages never continue: aggregate file monotone" '[ "$(python3 -c "import json;print(json.load(open(\"$T/ev/aggregate.json\"))[\"total\"])")" -ge 8000 ]'
-o=$(ANTHROPIC_AUTH_TOKEN=leak ANTHROPIC_BASE_URL=http://localhost:3001 r A5); ok "provider env from parent never reaches the isolated run (401 fix)" '[ -f "$T/cfglog.env" ] && [ ! -s "$T/cfglog.env" ] && [ "$(cat "$T/cfglog")" = "$T/cfg" ]'
+o=$(ANTHROPIC_AUTH_TOKEN=leak ANTHROPIC_BASE_URL=http://localhost:3001 CLAUDE_CODE_MESSAGING_TOKEN=leak CLAUDECODE=1 r A5); ok "provider env from parent never reaches the isolated run (401 fix)" '[ -f "$T/cfglog.env" ] && [ ! -s "$T/cfglog.env" ] && [ "$(cat "$T/cfglog")" = "$T/cfg" ]'
 echo "ab: pass $pass fail $fail"; [ $fail = 0 ]
