@@ -21,6 +21,7 @@ HELP = """tz <command> [args]
   resume [--run-test]                            verify handoff vs git/tests, print next action
   replay [transcript]                            costliest steps (input-eq) + repeated tool calls
   skills [prompt words]                          skills loaded/parked; relevance advice
+  skills find Q | preview DIR | stage DIR --yes | unstage N   curated catalog search, safety preview of a local clone, staged reversible install
   capabilities                                   skills/plugins/MCP inventory, overlaps
   ondemand [on|off NAME|end|log|rollback]        optional MCP/plugin/skill on for a task, off at chat end
   security <dir>                                 GREEN/YELLOW/RED scan of a skill/plugin/repo
@@ -92,6 +93,9 @@ def main(argv):
         if c in ('handoff', 'resume', 'task-wrap', 'checkpoint', 'import'):
             import tzhandoff
             return tzhandoff.main([c, *rest])
+        if c == 'skills' and rest[:1] in (['find'], ['preview'], ['stage'], ['unstage']):
+            import tzfinder
+            return tzfinder.main(rest)
         if c in ('skills', 'capabilities', 'security', 'audit', 'instructions', 'profile'):
             import tzcap
             return tzcap.main([c, *rest])

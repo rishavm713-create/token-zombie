@@ -1,0 +1,282 @@
+[
+ {
+  "name": "superpowers",
+  "repo": "obra/superpowers",
+  "kind": "skills",
+  "tags": "plan brainstorm tdd review workflow subagent",
+  "desc": "Brainstorm, plan, implement/test, review skill workflow",
+  "license": "MIT",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "ponytail",
+  "repo": "DietrichGebert/ponytail",
+  "kind": "skills",
+  "tags": "minimal code review audit cost",
+  "desc": "Minimal implementation and review guidance, cost band",
+  "license": "MIT",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "matt-pocock-skills",
+  "repo": "mattpocock/skills",
+  "kind": "skills",
+  "tags": "engineering docs research workflow",
+  "desc": "Composable engineering skills",
+  "license": "MIT",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "karpathy-skills",
+  "repo": "multica-ai/andrej-karpathy-skills",
+  "kind": "rules",
+  "tags": "simplicity focused edits think first coding guidelines",
+  "desc": "",
+  "license": "unknown",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "anthropic-skills",
+  "repo": "anthropics/skills",
+  "kind": "skills",
+  "tags": "documents pdf docx pptx xlsx office",
+  "desc": "Anthropic published skills (read-only: no licence returned)",
+  "license": "unknown",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "everything-claude-code",
+  "repo": "affaan-m/everything-claude-code",
+  "kind": "pack",
+  "tags": "agents hooks commands rules memory optimization workflow",
+  "desc": "",
+  "license": "unknown",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "osmani-agent-skills",
+  "repo": "addyosmani/agent-skills",
+  "kind": "skills",
+  "tags": "software engineering review testing performance",
+  "desc": "",
+  "license": "unknown",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "ui-ux-pro-max",
+  "repo": "ui-ux-pro-max",
+  "kind": "skills",
+  "tags": "ui ux design interface frontend",
+  "desc": "",
+  "license": "unknown",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "impeccable",
+  "repo": "impeccable",
+  "kind": "skills",
+  "tags": "frontend design polish critique interface",
+  "desc": "",
+  "license": "unknown",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "claude-seo",
+  "repo": "claude-seo",
+  "kind": "skills",
+  "tags": "seo content website search",
+  "desc": "",
+  "license": "unknown",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "humanizer",
+  "repo": "humanizer",
+  "kind": "skills",
+  "tags": "writing prose edit natural tone",
+  "desc": "",
+  "license": "unknown",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "planning-with-files",
+  "repo": "planning-with-files",
+  "kind": "skills",
+  "tags": "planning progress tracking long tasks files",
+  "desc": "",
+  "license": "unknown",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "context7",
+  "repo": "upstash/context7",
+  "kind": "mcp",
+  "tags": "library docs documentation api reference",
+  "desc": "Current library docs for coding agents",
+  "license": "MIT",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "wshobson-agents",
+  "repo": "wshobson/agents",
+  "kind": "agents",
+  "tags": "agents skills workflows specialist",
+  "desc": "Collections of agents and skills",
+  "license": "MIT",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "gstack",
+  "repo": "gstack",
+  "kind": "skills",
+  "tags": "roles workflow plan review ship",
+  "desc": "",
+  "license": "unknown",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "hermes-agent",
+  "repo": "NousResearch/hermes-agent",
+  "kind": "agent",
+  "tags": "context compression lifecycle",
+  "desc": "Agent with context compressor",
+  "license": "MIT",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "claude-mem",
+  "repo": "thedotmack/claude-mem",
+  "kind": "memory",
+  "tags": "memory observations retrieval sessions",
+  "desc": "Persistent observations (worker + model summaries = extra cost)",
+  "license": "Apache-2.0",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "caveman",
+  "repo": "JuliusBrussee/caveman",
+  "kind": "proxy",
+  "tags": "context trim shadow canary",
+  "desc": "Proxy context trimming",
+  "license": "Apache-2.0",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "headroom",
+  "repo": "headroomlabs-ai/headroom",
+  "kind": "proxy",
+  "tags": "compression json code prose",
+  "desc": "Proxy/library compression",
+  "license": "Apache-2.0",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "rtk",
+  "repo": "rtk-ai/rtk",
+  "kind": "cli",
+  "tags": "shell output filter savings",
+  "desc": "Shell output rewriting",
+  "license": "Apache-2.0",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "context-mode",
+  "repo": "mksglu/context-mode",
+  "kind": "plugin",
+  "tags": "sandbox output search compaction",
+  "desc": "Sandboxed execution + FTS (ELv2: copy no code)",
+  "license": "ELv2 (reported)",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "oh-my-claudecode",
+  "repo": "oh-my-claudecode",
+  "kind": "plugin",
+  "tags": "agents multi-agent workflows specialist",
+  "desc": "",
+  "license": "unknown",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "ruflo",
+  "repo": "ruflo/claude-flow",
+  "kind": "plugin",
+  "tags": "swarm orchestration agents workflows memory",
+  "desc": "",
+  "license": "unknown",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "vercel-agent-skills",
+  "repo": "vercel-labs/skills",
+  "kind": "cli",
+  "tags": "skills install discovery update",
+  "desc": "",
+  "license": "unknown",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "google-skills",
+  "repo": "google skills collection",
+  "kind": "skills",
+  "tags": "google cloud gemini",
+  "desc": "",
+  "license": "unknown",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "openai-skills",
+  "repo": "openai skills collection",
+  "kind": "skills",
+  "tags": "openai codex",
+  "desc": "",
+  "license": "unknown",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "hf-skills",
+  "repo": "huggingface skills collection",
+  "kind": "skills",
+  "tags": "models datasets training",
+  "desc": "",
+  "license": "unknown",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ },
+ {
+  "name": "copilot-awesome",
+  "repo": "github/awesome-copilot",
+  "kind": "skills",
+  "tags": "copilot instructions prompts",
+  "desc": "",
+  "license": "unknown",
+  "source": "public listing in docs/internal research (not re-fetched)",
+  "reviewed": "2026-11-23"
+ }
+]

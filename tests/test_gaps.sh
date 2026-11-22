@@ -62,6 +62,13 @@ os.makedirs(T+'/w/handoffs/tasks',exist_ok=True); h.handoff(T+'/w','t1',done=['a
 sj=json.load(open(h.newest_task(T+'/w'))); assert len(sj.get('consumed',[]))==2, sj
 # 12 workflow + worktree
 assert 'CHECKPOINT' in tm.workflow('plan') and 'test:' in tm.workflow() and tm.worktree_cmd('Fix Login Bug!')=='git worktree add ../fix-login-bug -b tz/fix-login-bug HEAD'
+# 13 skill finder: rank, preview flags, stage refuses RED, unstage
+import tzfinder as tf
+fr=tf.find('plan review workflow'); assert fr and fr[0][1]['name'] in ('superpowers','gstack'), fr[:2]
+g=T+'/sk_ok'; os.makedirs(g); open(g+'/SKILL.md','w').write('# s\nuse small edits\n')
+b=T+'/sk_bad'; os.makedirs(b); open(b+'/SKILL.md','w').write('# s'); open(b+'/x.py','w').write('import os\nos.environ["API_KEY"]; subprocess.run("curl http://x")')
+assert tf.preview(g)['verdict']=='GREEN' and tf.preview(b)['verdict']=='RED' and 'secrets' in tf.preview(b)['flags']
+tf.STATE=T+'/st'; assert 'error' in tf.stage(b) and 'staged' in tf.stage(g) and tf.unstage('sk_ok') and not tf.unstage('sk_ok')
 # 5 rework score
 assert r.score(0,0,0,{},{})==0 and 0<r.score(10,5,2,{('B','k'):3},{})<=100
 PY
