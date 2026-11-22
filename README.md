@@ -1,45 +1,137 @@
 # TOKEN ZOMBIE
 
-<p align="center"><img src="docs/img/brand-hero.svg" alt="TOKEN ZOMBIE. Make every single token count." width="720"></p>
+<p align="center"><img src="docs/img/brand-hero.svg" alt="TOKEN ZOMBIE — Make every single token count" width="760"></p>
 
-**MAKE EVERY SINGLE TOKEN COUNT.**
+<p align="center">
+  <strong>MAKE EVERY SINGLE TOKEN COUNT.</strong><br>
+  <em>STOP THE WASTE. CONTROL THE SWARM. PROTECT THE WORKFLOW.</em>
+</p>
 
-Local-first token saver for Claude Code. It watches chat size and plan usage, nudges you to hand off before a chat gets expensive, and audits what loads into every chat. No network, no telemetry; nothing leaves your machine.
+<p align="center">
+  <strong>AI Agent Resource Intelligence for Claude Code</strong><br>
+  See what your agents consume. Catch workflow waste. Protect context and continuity.
+</p>
+
+<p align="center">
+  <a href="#install">Install</a> ·
+  <a href="#what-it-is">What it is</a> ·
+  <a href="docs/ROADMAP.md">Roadmap</a> ·
+  <a href="docs/IMPLEMENTATION-MATRIX.md">Implementation status</a> ·
+  <a href="docs/LIMITATIONS.md">Limitations</a>
+</p>
+
+<p align="center">
+  <img alt="Platform" src="https://img.shields.io/badge/platform-Claude%20Code-7CFF9B?style=flat&labelColor=111812">
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-7CFF9B?style=flat&labelColor=111812">
+  <img alt="Privacy" src="https://img.shields.io/badge/privacy-local--first-7CFF9B?style=flat&labelColor=111812">
+</p>
+
+> **Your AI agents are doing work. Can you see what that work is costing you?**
+
+TOKEN ZOMBIE is a local-first resource-intelligence layer for Claude Code. It observes token and cache activity, tracks agent work, flags inefficient patterns, protects useful context, and helps carry unfinished work into the next session.
+
+It is not just a token counter. It brings **visibility, guardrails, optimisation advice and workflow continuity** into one local control layer.
+
+<p align="center">
+  <img src="docs/img/dashboard.png" alt="TOKEN ZOMBIE dashboard — illustrative demo data" width="760">
+  <br><sub>Dashboard preview · generated with demo data, not a live user session.</sub>
+</p>
+
+## Install
+
+```text
+/plugin install token-zombie --marketplace rishavm713-create/token-zombie
+```
+
+Restart Claude Code, then run `/token-zombie:tz`. Shell and desktop installation instructions are below.
+
+## What it is
+
+| Capability | What you get |
+|---|---|
+| **OBSERVE** | A local ledger for hook activity, token/cache estimates, agent activity and resource signals. Values are labelled MEASURED, EST or UNKNOWN. |
+| **DETECT** | Evidence-backed advice about repeated reads, large context loads, duplicate or low-value agent work, and rework patterns. |
+| **OPTIMISE** | Output trimming in supported paths, reversible recall, Python AST skeleton compression, and optimisation modes. |
+| **PROTECT** | Compaction checks, safe-point handoffs, checkpoints and recoverable originals. |
+| **CONTINUE** | A compact project state and handoff that helps a fresh chat resume unfinished work. |
+
+The guiding rule: **optimise resource use without pretending that fewer tokens automatically means better work.** Quality and real-world savings still need measured A/B evidence.
+
+## Current status
+
+- **Built in the repository:** 18-event hook ledger, SQLite ledger, agent lifecycle signals, context vault index, handoffs/checkpoints, output trim and recall, Python AST skeleton compression, shadow-mode advice, dashboard and toolbar components.
+- **Validation pending:** live-host verification for some hook payloads and UI behaviours; real-world A/B trials have not been recorded.
+- **Partial / experimental:** pricing and some cost attribution; some agent intelligence; non-Claude adapters are rules-only and experimental.
+- **Not built yet:** semantic/vector memory, non-Python AST compression, task-level vault index and automatic CANARY-to-ACTIVE promotion.
+
+See the [roadmap](docs/ROADMAP.md), [implementation matrix](docs/IMPLEMENTATION-MATRIX.md), [latest code audit](docs/AUDIT.md), [host verification checklist](docs/HOST-VERIFY.md) and [limitations](docs/LIMITATIONS.md). These documents are the source of truth; this README does not turn planned work into shipped features.
 
 ## Why it exists
-The same task, equal quality, fewer resources. TOKEN ZOMBIE was built after one small UI change burned about 68% of a 5-hour limit: a chat past 100k tokens re-sent its whole history on every step, screenshots stayed in context, agents duplicated work, and nothing showed where the tokens went.
 
-It is not only a token saver. The aim is one local layer that watches, protects and continues the work, so you need fewer separate plugins, skills and agent stacks to get the same result:
-- **See** where tokens, cache writes (5m / 1h), agents and cost go, with every number labelled MEASURED, EST or UNAVAILABLE. No invented metrics.
-- **Protect** quality: compaction survival check, output trims run in shadow mode first, originals always recoverable (`tz recall`).
-- **Control** agents: exact lifecycle by agent id, duplicate / small / empty / stalled agent flags, cost per agent.
-- **Continue** unfinished work across chats (`handoffs/STATE.md`, `tz resume`) instead of rebuilding context.
-- **Local only**: no network, no telemetry, no model calls inside hooks. Advice never blocks you.
+A single small UI change once consumed about 68% of a five-hour usage window. Long chats repeatedly carried history, screenshots stayed in context, agents duplicated work, and there was no single place to understand where resources were going.
 
-Honest status: see [docs/IMPLEMENTATION-MATRIX.md](docs/IMPLEMENTATION-MATRIX.md) and [docs/LEFT.md](docs/LEFT.md) for what is built, partial or not built. Replacing other plugins and skills is the direction, not a measured claim.
+TOKEN ZOMBIE grew from that problem: give developers a local view of agent resource use and practical ways to protect the work already done.
 
-## Built vs roadmap
+It does **not** claim that every warning saves tokens, that every estimate is provider billing data, or that all optimisations preserve quality automatically. The project labels what it knows and documents what it cannot yet prove.
 
-Item-by-item status of every research item (BUILT / PARTIAL / NOT BUILT / UNVERIFIED / HOST): [docs/AUDIT.md](docs/AUDIT.md). New: `tz rework` (retry/repeat counts) and `tz hooks bench` for all 18 hook events.
-**Built and tested in this repo (not yet verified on a live host: see [docs/HOST-VERIFY.md](docs/HOST-VERIFY.md); no real A/B savings trials yet: see [docs/BENCHMARK-METHOD.md](docs/BENCHMARK-METHOD.md)):** hook ledger on 18 events, agent lifecycle + ROI flags, compaction survival check, 5m/1h cache split, thinking-token EST, incremental transcript scan, Ledger/Priced/Mixed/Unpriced labels, one SQLite ledger (`tz ledger`), alerts with evidence, intervention and outcome, Context Vault index (`tz ledger --vault`), AST skeleton for Python files (`tz compress`, validated, fail open), shadow-mode output trim, recall search.
+## See it
 
-**Roadmap, NOT built yet:** vector/semantic memory, AST compression for languages other than Python, a task-level vault index (today: by session, tool and file), automatic promotion CANARY to ACTIVE (today: advice only), host-verified PostCompact data (needs a real host run after `install.sh`).
+The repository includes dashboard and mascot captures generated with demo data. They demonstrate the interface, not measured production savings.
 
-What is in it:
-- **Guard hooks** on 18 events (UserPromptSubmit, PostToolUse, PreToolUse, SessionStart, PreCompact, PostCompact, Stop, SessionEnd, SubagentStart/Stop, InstructionsLoaded, PostToolUseFailure, PostToolBatch, Pre/PostModelSwitch, WorktreeCreate/Remove, FileChanged): size warnings, big-Read and duplicate-read advice. Advice never blocks.
-- **Supervisor** (`tz sup`): usage level, auto checkpoint, status bus (`status.json`), next-session brief.
-- **Handoffs and checkpoints**: `tz handoff` / `tz resume` / `tz checkpoint` keep task state across chats and verify it against git and tests.
-- **Context continuity**: `tz state` keeps one compact `handoffs/STATE.md` (master facts, current work, session handoff; a section is rewritten only when its facts change). `tz expensive` reads real usage and repeated reads, saves a verified checkpoint and prints the manual fresh-chat step (the desktop app cannot switch chats for you). `tz waste-audit` finds duplicated handoff docs, repeated reads and long pasted briefs.
-- **Optimizer**: repeated reads and commands, output filter, task classification and model advice, savings ledger net of tz's own overhead.
-- **Skill / plugin / MCP audit**: inventory, overlaps, GREEN/YELLOW/RED static scan.
-- **Modes**: off, lite, full, ultra.
-- **Toolbar Mod**: a slim bar above the prompt with the mascot, the mode, and four metrics. A chevron (or `/tz`) opens the detail pane: live tokens, agent time, cost, context, supervisor, and mode buttons.
-- **HTML dashboard** (`tz dash`): the same bar plus metric cards, and an SVG zombie mascot.
+<p align="center">
+  <img src="docs/img/dashboard-mobile.png" alt="TOKEN ZOMBIE dashboard at phone width — demo data" width="360">
+  <br><sub>Responsive dashboard preview · demo data.</sub>
+</p>
+
+<p align="center">
+  <img src="docs/img/mascot-states.png" alt="TOKEN ZOMBIE mascot states" width="560">
+</p>
+
+The in-chat toolbar is part of the product, but a verified public capture of it is not yet included. See [toolbar details](docs/PANEL.md).
+
+## Roadmap
+
+TOKEN ZOMBIE is being developed in stages. The near-term focus is to close verification gaps and publish honest measurements before expanding the feature surface.
+
+- **Now:** verify real-host behaviour, gather real A/B trials, improve measurement coverage and tighten install/onboarding.
+- **Next:** improve resource/cost attribution and agent-state intelligence; expand context indexing only where evidence justifies it.
+- **Later / planned:** semantic retrieval, broader language-aware compression and deeper task-level orchestration.
+
+The exact status of each item is tracked in the [public roadmap](docs/ROADMAP.md). No planned capability is represented as already shipped.
+
+## Privacy and safety
+
+- Local-first state under `~/.claude/token-zombie/`.
+- No network calls or telemetry from the core hooks.
+- No model calls inside hooks.
+- Advice is non-blocking; TOKEN ZOMBIE does not silently take over the developer's workflow.
+- Original output can be recovered with `tz recall` where trimming is supported.
+- Local recall files may contain content returned by tools; review local storage before sharing diagnostic files.
+
+Read [SECURITY.md](SECURITY.md) and [LIMITATIONS.md](docs/LIMITATIONS.md).
+
+## Documentation
+
+| Guide | Purpose |
+|---|---|
+| [Installation](docs/INSTALL.md) | Install, configure, verify and uninstall |
+| [Roadmap](docs/ROADMAP.md) | Built, in-progress, planned and deferred capabilities |
+| [Implementation matrix](docs/IMPLEMENTATION-MATRIX.md) | Feature-by-feature status |
+| [Audit](docs/AUDIT.md) | Evidence-based gap audit |
+| [Metrics](docs/METRICS.md) | Metric definitions and labels |
+| [Limitations](docs/LIMITATIONS.md) | Known gaps and unverified behaviour |
+| [Toolbar / panel](docs/PANEL.md) | In-chat interface |
+| [CLI reference](docs/CLI.md) | Commands |
+| [Compatibility](docs/COMPAT.md) | Platform and adapter status |
+| [Security](SECURITY.md) | Privacy and safety model |
+| [Contributing](CONTRIBUTING.md) | Development and contribution guidance |
+
+---
 
 ## Architecture
 ```mermaid
 flowchart LR
-  H[Claude Code hooks<br/>7 events] --> B[bin scripts<br/>tz-guard, tz-status, tzsup, tz]
+  H[Claude Code hooks<br/>18 registered events] --> B[bin scripts<br/>tz-guard, tz-status, tzsup, tz]
   B --> S[(~/.claude/token-zombie<br/>status.json, activity.json, ledger.json,<br/>host.json, agents.json, config.json)]
   P[panel Mod<br/>hooks/panel.tsx] --> S
   P -->|runs tz| B
