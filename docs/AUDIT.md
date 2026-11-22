@@ -28,7 +28,7 @@ Basis: read of `bin/`, `install.sh`, `tests/`. Not a claim of savings; savings n
 | Item | Label |
 |---|---|
 | Agent start/stop/ID, ROI, stalled flag | BUILT; stalled is inferred (EST) |
-| Interrupted / cancelled agent states | NOT BUILT (host sends no signal) |
+| Interrupted agent state | PARTIAL: agent still running at SessionEnd is marked interrupted (test_hooklive); user-cancel mid-session has no host signal |
 | Idle-agent, overlapping-agent detection | PARTIAL |
 | Skill effectiveness vs outcomes | PARTIAL (no outcome correlation) |
 | Instruction conflict detection | PARTIAL (`tzcap.py`) |
@@ -58,10 +58,10 @@ Real-host status is NOT VERIFIED for every row until the owner runs docs/HOST-VE
 | FEATURE | IMPLEMENTATION | TEST | REAL-HOST | EVIDENCE | REMAINING LIMITATION |
 |---|---|---|---|---|---|
 | 18-event hook ledger | BUILT | test_install*, test_live | NOT VERIFIED | suite 795/0 | host payload fields unconfirmed |
-| Hook overhead | BUILT | tz hooks bench | live NOT VERIFIED | 28-89 ms/event on dev machine | live p95/failures need install |
+| Hook overhead | BUILT | tz hooks bench | live NOT VERIFIED | 28-89 ms/event on dev machine | live p50/p95/fail counts BUILT (tz hooks live, test_hooklive), need install to fill |
 | Incremental scan + accounting | BUILT | test_usage | n/a | suite | pricing/MCP/subagent attribution PARTIAL |
 | SQLite ledger, alerts, vault | BUILT | test_out | NOT VERIFIED | suite | task-level index NOT BUILT |
-| Agent lifecycle/ROI/stalled | BUILT | test_live | NOT VERIFIED | suite | stalled is EST; interrupted/cancelled NOT BUILT |
+| Agent lifecycle/ROI/stalled | BUILT | test_live | NOT VERIFIED | suite | stalled is EST; interrupted at SessionEnd BUILT; mid-session cancel NOT BUILT |
 | Compaction verification | BUILT | test_out | HOST DEPENDENT | suite | needs `compact_summary` |
 | Python AST compression | BUILT | test_out | n/a | suite | Python only |
 | Rework counts | BUILT | test_rework | NOT VERIFIED | suite | counts, not proven waste |

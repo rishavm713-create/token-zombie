@@ -158,6 +158,11 @@ def on_event(data, now=None):
             v = verify_compact(data.get('session_id', 'x'), data.get('compact_summary'))
             s.setdefault('compact', []).append(dict(t=int(now), trigger=str(data.get('trigger') or '')[:20], **v))
             s['compact'] = s['compact'][-20:]
+        elif ev == 'SessionEnd':  # agents still running when the chat ends were cut off (MEASURED from the two events)
+            for a in s['agents'].values():
+                if a.get('status') in ('running', 'starting'):
+                    a['status'] = 'interrupted'; a['t1'] = int(now)
+            _bump(s['notes'], 'session_end')
         elif ev == 'SubagentStop':
             aid = data.get('agent_id') or ''
             if aid and aid in s['agents']:
@@ -258,9 +263,11 @@ def discovered(session, names):
     edit(session, fn)
 
 
-def timing(session, ev, ms, chars):
+def timing(session, ev, ms, chars, failed=False):
     def fn(s):
         h = s['hooks'].setdefault(ev, {'n': 0, 'ms': 0.0, 'max': 0.0, 'chars': 0})
+        h['fail'] = h.get('fail', 0) + (1 if failed else 0)
+        h['samples'] = (h.get('samples', []) + [round(ms, 1)])[-200:]
         h['n'] += 1; h['ms'] = round(h['ms'] + ms, 2); h['max'] = round(max(h['max'], ms), 2); h['chars'] += chars
     edit(session, fn)
 

@@ -55,12 +55,26 @@ def bench(mb=20, n=7):
     return dict(transcript_mb=mb, runs=n, python_start_ms=py, events=rows, basis='MEASURED wall ms, this machine')
 
 
-def live():
-    p = os.path.expanduser('~/.claude/token-zombie/hook-times.json')
-    try:
-        return json.load(open(p))
-    except Exception:
-        return {}
+def live(home=None):
+    """Aggregate per-event hook stats (MEASURED) over every live-<session>.json the guard wrote."""
+    import glob
+    d = os.path.join(home or os.path.expanduser('~'), '.claude', 'token-zombie')
+    agg = {}
+    for f in glob.glob(os.path.join(d, 'live-*.json')):
+        try:
+            hs = json.load(open(f)).get('hooks') or {}
+        except Exception:
+            continue
+        for ev, h in hs.items():
+            a = agg.setdefault(ev, dict(n=0, ms=0.0, max=0.0, chars=0, fail=0, samples=[]))
+            a['n'] += h.get('n', 0); a['ms'] += h.get('ms', 0); a['max'] = max(a['max'], h.get('max', 0))
+            a['chars'] += h.get('chars', 0); a['fail'] += h.get('fail', 0); a['samples'] += h.get('samples', [])
+    for a in agg.values():
+        sm = sorted(a.pop('samples'))
+        a['p50'] = round(statistics.median(sm), 1) if sm else None
+        a['p95'] = round(sm[min(len(sm) - 1, int(len(sm) * .95))], 1) if sm else None
+        a['sampled'] = len(sm)
+    return agg
 
 
 def main(argv):
@@ -83,7 +97,7 @@ def main(argv):
         print('no live hook timings yet (UNKNOWN): the guard records them once this version is installed'); return 0
     for k, v in sorted(r.items()):
         if isinstance(v, dict):
-            print(f"  {k:18} n {v.get('n', 0):6}  total {v.get('ms', 0):9.0f} ms  max {v.get('max', 0):6.0f} ms  injected ~{v.get('chars', 0) // 4} tok [EST]")
+            print(f"  {k:18} n {v.get('n', 0):6}  p50 {v.get('p50')} p95 {v.get('p95')} max {v.get('max', 0):6.0f} ms  fail {v.get('fail', 0)}  injected ~{v.get('chars', 0) // 4} tok [EST]")
     return 0
 
 

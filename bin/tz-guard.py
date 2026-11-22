@@ -4,6 +4,7 @@
 # PostToolUse: from HARD growth, once per 25k step, "write handoff and move the rest of this task to a fresh session now".
 import json, os, sys, time
 T0 = time.perf_counter()
+FAILED = [False]
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from tzlib import chat_tokens, cfg, LIMIT, HARD, advice
 
@@ -328,6 +329,7 @@ try:
 except SystemExit:
     pass
 except Exception:
+    FAILED[0] = True
     _diag('guard', ev)
 finally:
     try:
@@ -338,7 +340,7 @@ finally:
             from tzopt import ledger
             ledger('overhead-hook', CTX[0], 'measured', data.get('session_id', 'x'), 'advice text ' + ev)
         tzlive.timing(data.get('session_id', 'x'), ev + (':' + data['tool_name'] if data.get('tool_name') else ''),
-                      (time.perf_counter() - T0) * 1000, OUT[0])
+                      (time.perf_counter() - T0) * 1000, OUT[0], FAILED[0])
     except Exception:
         pass
 sys.exit(0)
