@@ -78,3 +78,6 @@ See [Compatibility](../COMPAT.md).
 A capability moves from planned to in-development only when implementation work starts. It moves to available only when the code and relevant tests support the claim. Host-dependent features remain marked unverified until tested on the actual host. Savings claims require real A/B evidence and quality checks.
 
 For known gaps, consult [Limitations](LIMITATIONS.md) and [Host Verification](HOST-VERIFY.md).
+
+## Competitive-audit priorities (added 2026-11-23)
+Order from `COMPETITIVE-GAP-ANALYSIS.md`: P0 real A/B trial and live-host verification (owner-run); P1 MCP/tool-schema cost signal, real-toolbar demo GIF, handoff chain id; P2 official usage view, JS/TS skeletons, rework scoring, CI-failing startup audit; P3 non-Claude adapters. Rejected: nine-tab UI, RTK clone, Claude-Mem replacement, auto agent spawning, early vector memory, lossy compression, blocking tools.

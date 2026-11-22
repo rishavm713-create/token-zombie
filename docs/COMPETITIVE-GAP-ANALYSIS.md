@@ -1,26 +1,19 @@
-# Competitive gap analysis (repo-based, 2026-11-23)
+# Competitive gap analysis (web-researched, 2026-11-23)
 
-Scope: what TOKEN ZOMBIE has not built yet, taken from `IMPLEMENTATION-MATRIX.md`, `LIMITATIONS.md` and `COMPETITIVE-POSITIONING.md`. Competitor facts come from that positioning file and were **not re-verified against live repos** in this pass. No new web research, no code changes.
+Replaces the earlier repo-only version. Sources: `COMPETITIVE-INTELLIGENCE.md` (21 competitors, VERIFIED vs CLAIM) and `FEATURE-PARITY-MATRIX.md`.
 
-## Already built (do not rebuild)
-Hook ledger (SQLite), 5m/1h cache accounting, agent lifecycle + ROI flags, reversible output trim + recall, Python AST skeleton, handoffs/checkpoints/resume, retry tracking, A/B runner, toolbar, dashboard, CLI, local-first with no telemetry.
-
-## Missing or incomplete, ranked
-| Pri | Gap | Why it matters | Who does it better |
+| Pri | Gap | Why it matters | Effort |
 |---|---|---|---|
-| P0 | Real multi-trial A/B savings result (runner exists, no trial recorded) | Every strong competitor leads with one measured number; we cannot claim savings | Claude Token Optimizer, Context Mode |
-| P0 | Live-host verification of hook payloads, overlay look | "Built" is unproven until seen on a real host | n/a |
-| P1 | Short memorable command (we have `/token-zombie:tz`) | Recall and sharing | RTK (`rtk gain`) |
-| P1 | Real demo GIF of the toolbar warning and a handoff | Fastest way to sell it | most top repos |
-| P1 | MCP/plugin tool-schema cost (UNKNOWN today) and model pricing coverage | Big hidden token cost we cannot show | none verified |
-| P2 | Rework/retry quality scoring, skill outcome correlation, intervention outcomes | Turns warnings into proven advice | none verified |
-| P2 | Non-Python code compression (JS/TS) | Wider coverage of output trim | Context Mode (per positioning file) |
-| P2 | Real adapters beyond Claude Code (7 are rules-file stubs) | Reach, but dilutes focus | Context Mode, Superpowers |
-| P3 | Semantic/vector memory, task-level vault index | Cross-session recall | Claude-Mem |
-| REJECT | Full Claude-Mem replacement, RTK clone, nine-tab UI, auto agent spawning, lossy compression, blocking tools | Owner decisions already made | n/a |
+| P0 | No real A/B run (only measured 153,372 tokens; no controlled baseline) | Every leader leads with a number; TZ must not publish one it cannot prove | Needs real sessions: `tz bench` runner exists; owner runs it |
+| P0 | Live-host verification: re-run `./install.sh`, check toolbar look, 9 hook events | Several features read UNAVAILABLE until then | Owner, ~15 min |
+| P1 | MCP / tool-schema cost signal | Token Optimizer audits MCP; a big hidden cost | Small–medium |
+| P1 | 30-second demo GIF of the real toolbar | RTK/Ponytail convert on a visual | Small, needs real capture |
+| P1 | Handoff chain id + import of crashed-session JSONL | REMvisual and vasilispapg do this | Small |
+| P2 | Official 5h/7d usage view | Usage-Monitor, ccstatusline show it | Medium (host data) |
+| P2 | JS/TS skeleton compression | LeanCTX 27 langs | Medium |
+| P2 | Rework/retry scoring | Matrix row 9 | Medium |
+| P2 | CI-failing startup audit | Claude Token Optimizer | Small |
+| P3 | Real adapters beyond Claude | ccusage ~20 agents | Large; low value for Claude-first tool |
+| REJECT | Nine-tab UI, RTK clone, full Claude-Mem replacement, auto agent spawning, early vector memory, lossy compression, blocking tools | Owner decisions | — |
 
-## Where TZ is differentiated (unproven on savings)
-Every number is labelled MEASURED or EST; non-blocking advice; recoverable trims; zombie-agent detection; handoff survival checks. No verified competitor combines all of these, but that comes from the positioning notes, not a fresh audit.
-
-## Next step
-Run one real controlled A/B (same task, with and without TZ, logs published). Until then keep the "no savings figure promised" wording.
+TZ advantages confirmed: subagent ROI flags (no competitor page states them), MEASURED/EST labelling on every number, MIT licence with no telemetry, fail-open lossless trimming with `tz recall`, compaction-survival check.

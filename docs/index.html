@@ -97,8 +97,14 @@ section{padding:104px 0;position:relative}
 .show{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:stretch}
 .show .card{padding:0;display:flex;flex-direction:column}
 .show .card .cap{padding:26px 30px}.show .card img{background:#07090c;padding:18px}
-.show .card>img.d{aspect-ratio:4/3;object-fit:cover;object-position:top;width:100%}
+.show .card>img.d{aspect-ratio:16/11;object-fit:cover;object-position:top;width:100%}
 .show .card .mb{flex:1;display:grid;place-items:center;background:#07090c;padding:24px}.show .card .mb img{padding:0;background:none}
+.show .card .mb{flex-direction:column;gap:18px;padding:30px 24px}.zs{width:min(100%,380px);aspect-ratio:212/260;background:url(img/mascot-states.png) 0 0/500% 100% no-repeat;animation:zf 5s steps(1) infinite,zb 1.6s ease-in-out infinite}
+@keyframes zf{0%{background-position:0 0}20%{background-position:25% 0}40%{background-position:50% 0}60%{background-position:75% 0}80%{background-position:100% 0}}
+@keyframes zb{50%{transform:translateY(-10px)}}
+.zl{display:flex;gap:14px;font-size:13px;color:var(--green)}.zl b{font-weight:600;opacity:.5;animation:zt 5s steps(1) infinite}.zl b:nth-child(2){animation-delay:1s}.zl b:nth-child(3){animation-delay:2s}.zl b:nth-child(4){animation-delay:3s}.zl b:nth-child(5){animation-delay:4s}
+@keyframes zt{0%{opacity:1}20%,100%{opacity:.35}}
+@media(prefers-reduced-motion:reduce){.zs,.zl b{animation:none}}
 .show .card h3{font-size:20px}.show .card p{margin-top:8px;font-size:16px}
 
 /* offer */
@@ -215,7 +221,7 @@ section{padding:64px 0}.hero{padding:44px 0 56px}.head{margin-bottom:34px}
 <div class="head rv"><p class="eyebrow">See it</p><h2>The numbers, right where you work.</h2><p class="lead">A small bar inside Claude Code for quick signals, and a dashboard for the details.</p></div>
 <div class="show">
 <div class="card rv"><img class="d" src="img/dashboard.png" alt="TOKEN ZOMBIE dashboard" loading="lazy"><div class="cap"><h3>Dashboard</h3><p>Usage, savings and warnings on one page. Opens on your computer only.</p></div></div>
-<div class="card rv" style="--i:1"><div class="mb"><img src="img/mascot-states.png" alt="Zombie mascot states: idle, working, excited, alert, sleep" loading="lazy"></div><div class="cap"><h3>The zombie tells you the state</h3><p>Idle, working, excited, alert or asleep, so you know at a glance when to act.</p></div></div>
+<div class="card rv" style="--i:1"><div class="mb"><div class="zs" role="img" aria-label="Animated zombie mascot cycling through idle, working, excited, alert and asleep"></div><div class="zl"><b>idle</b><b>working</b><b>excited</b><b>alert</b><b>asleep</b></div></div><div class="cap"><h3>The zombie tells you the state</h3><p>Idle, working, excited, alert or asleep, so you know at a glance when to act.</p></div></div>
 </div></div></section>
 
 <section id="offer" style="background:#0a110c;border-block:1px solid var(--line)"><div class="wrap">
