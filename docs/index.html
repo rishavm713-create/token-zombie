@@ -1,43 +1,60 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TOKEN ZOMBIE</title>
-<meta name="description" content="Local-first resource intelligence for Claude Code. Make every single token count.">
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TOKEN ZOMBIE — Make Every Single Token Count</title>
+<meta name="description" content="Local-first AI agent resource intelligence for Claude Code. Observe agent activity, detect workflow waste, protect context and continue work.">
+<meta name="theme-color" content="#0b100d">
+<meta property="og:title" content="TOKEN ZOMBIE — Make Every Single Token Count">
+<meta property="og:description" content="AI Agent Resource Intelligence for Claude Code. Stop the waste. Control the swarm. Protect the workflow.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://rishavm713-create.github.io/token-zombie/">
 <style>
-:root{--bg:#0e1511;--fg:#e8f0ea;--mut:#9bb0a2;--acc:#7CFF9B;--card:#16201a;--line:#24342a}
-@media (prefers-color-scheme:light){:root{--bg:#f6faf7;--fg:#13201a;--mut:#4d6556;--acc:#0b7a3a;--card:#fff;--line:#d5e3da}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,sans-serif}
-main{max-width:860px;margin:0 auto;padding:48px 16px}
-h1{font-size:clamp(2rem,6vw,3.2rem);margin:.2em 0}h2{margin-top:2em}
-.tag{color:var(--acc);font-weight:700;letter-spacing:.04em}.mut{color:var(--mut)}
-.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
-.card b{color:var(--acc)}pre{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px;overflow:auto}
-a{color:var(--acc)}img{max-width:100%;height:auto}
-</style></head><body><main>
-<img src="img/brand-hero.svg" alt="TOKEN ZOMBIE" width="640">
-<p class="tag">MAKE EVERY SINGLE TOKEN COUNT.</p>
-<h1>Resource intelligence for Claude Code</h1>
-<p>Same task, equal quality, fewer resources. TOKEN ZOMBIE watches, protects and continues your work. Local only: no network, no telemetry, no model calls inside hooks.</p>
-<p><a href="https://github.com/rishavm713-create/token-zombie">GitHub</a> · <a href="https://github.com/rishavm713-create/token-zombie/blob/main/docs/IMPLEMENTATION-MATRIX.md">What is built</a></p>
-
-<h2>Why it exists</h2>
-<p>One small UI change burned about 68% of a 5-hour limit: a chat past 100k tokens re-sent its whole history on every step, screenshots stayed in context, agents duplicated work, and nothing showed where the tokens went. It is not only a token saver. The aim is one local layer so you need fewer separate plugins, skills and agent stacks. That is the direction, not a measured claim.</p>
-
-<h2>What it does</h2>
-<div class="grid">
-<div class="card"><b>See</b><br>Tokens, 5m/1h cache writes, agents and cost, labelled MEASURED, EST or UNAVAILABLE. No invented numbers.</div>
-<div class="card"><b>Protect</b><br>Compaction survival check, output trims tried in shadow mode first, originals always recoverable with <code>tz recall</code>.</div>
-<div class="card"><b>Control</b><br>Exact agent lifecycle, duplicate, small, empty and stalled agent flags, cost per agent.</div>
-<div class="card"><b>Continue</b><br>STATE.md and handoffs carry unfinished work across chats. <code>tz resume</code>.</div>
-</div>
-
-<h2>Built vs roadmap</h2>
-<div class="grid">
-<div class="card"><b>Live (built and tested)</b><br>Hook ledger on 18 events, agent lifecycle and ROI flags, compaction check, 5m/1h cache split, incremental transcript scan, Ledger/Priced/Mixed/Unpriced labels, SQLite ledger, alerts with evidence and outcome, Context Vault index, Python AST skeleton, shadow-mode trim.</div>
-<div class="card"><b>Roadmap (not built yet)</b><br>Semantic memory, AST compression beyond Python, task-level vault index, automatic canary-to-active promotion, host-verified PostCompact data.</div>
-</div>
-
-<h2>Install</h2>
-<pre>claude plugin install token-zombie --marketplace rishavm713-create/token-zombie</pre>
-<p class="mut">Hooks beyond the plugin defaults are activated by running <code>install.sh</code> yourself. Advice never blocks you. Status of every feature: built, partial or not built, in the matrix above.</p>
+:root{color-scheme:dark;--bg:#090e0b;--panel:#111a14;--panel2:#152119;--fg:#edf7ef;--muted:#9eb2a3;--green:#7cff9b;--line:#26392c;--max:1080px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#1a3321 0,transparent 55%),var(--bg);color:var(--fg);font:16px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,sans-serif}
+a{color:var(--green);text-decoration:none}a:hover{text-decoration:underline}main{max-width:var(--max);margin:auto;padding:28px 22px 90px}
+nav{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 0 28px;color:var(--muted);font-size:14px}
+.brand{color:var(--fg);font-weight:850;letter-spacing:.13em}.navlinks{display:flex;gap:18px;flex-wrap:wrap}
+.hero{text-align:center;padding:38px 0 54px}.hero img{width:min(100%,680px);height:auto}.eyebrow{color:var(--green);font-size:12px;letter-spacing:.2em;font-weight:800;margin:22px 0 8px}
+h1{font-size:clamp(34px,6vw,66px);line-height:1.03;letter-spacing:-.045em;margin:10px 0 18px}h2{font-size:clamp(25px,4vw,36px);line-height:1.15;letter-spacing:-.03em;margin:0 0 16px}h3{margin:0 0 8px;font-size:17px}
+.lead{max-width:760px;margin:0 auto;color:#c2d1c6;font-size:clamp(17px,2.2vw,21px)}
+.actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:28px 0}.btn{display:inline-block;padding:12px 19px;border-radius:8px;border:1px solid var(--green);font-weight:750}.primary{background:var(--green);color:#07100a}.secondary{color:var(--fg);border-color:#405746}
+.pills{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;color:var(--muted);font-size:12px}.pills span{border:1px solid var(--line);border-radius:99px;padding:5px 10px}
+.preview{margin:30px auto 0;max-width:900px;border:1px solid var(--line);border-radius:14px;background:#0e1711;padding:12px;box-shadow:0 24px 80px #0008}.preview img{display:block;width:100%;border-radius:8px}
+section{padding:56px 0;border-top:1px solid var(--line)}.section-intro{color:var(--muted);max-width:720px;margin:0 0 24px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card{background:linear-gradient(145deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:12px;padding:20px}.card p{margin:0;color:var(--muted)}.tag{font-size:11px;letter-spacing:.14em;color:var(--green);font-weight:800}
+.split{display:grid;grid-template-columns:1.05fr .95fr;gap:30px;align-items:center}.split img{width:100%;border:1px solid var(--line);border-radius:12px}
+pre{overflow:auto;background:#050906;border:1px solid var(--line);border-radius:10px;padding:18px;color:var(--green);font-size:14px}.muted{color:var(--muted)}ul{padding-left:20px;color:var(--muted)}li{margin:7px 0}
+footer{padding:35px 0;color:var(--muted);border-top:1px solid var(--line);font-size:13px}
+@media(max-width:700px){main{padding:16px 16px 60px}.navlinks{gap:10px}.grid,.split{grid-template-columns:1fr}.hero{padding-top:24px}.card{padding:17px}section{padding:42px 0}}
+</style>
+</head>
+<body><main>
+<nav><a class="brand" href="#">TOKEN ZOMBIE</a><div class="navlinks"><a href="#capabilities">Capabilities</a><a href="ROADMAP.md">Roadmap</a><a href="INSTALL.md">Docs</a><a href="https://github.com/rishavm713-create/token-zombie">GitHub ↗</a></div></nav>
+<header class="hero">
+<img src="img/brand-hero.svg" alt="TOKEN ZOMBIE mascot and brand">
+<p class="eyebrow">MAKE EVERY SINGLE TOKEN COUNT.</p>
+<h1>Your AI agents need<br>resource intelligence.</h1>
+<p class="lead">See what your Claude Code agents consume. Detect inefficient patterns. Protect context and continuity. Keep control of your workflow.</p>
+<div class="actions"><a class="btn primary" href="#install">Get started</a><a class="btn secondary" href="https://github.com/rishavm713-create/token-zombie">Explore on GitHub ↗</a></div>
+<div class="pills"><span>LOCAL-FIRST</span><span>NO TELEMETRY</span><span>NON-BLOCKING ADVICE</span><span>MIT LICENSE</span></div>
+<div class="preview"><img src="img/dashboard.png" alt="TOKEN ZOMBIE dashboard preview using demo data"><p class="muted">Interface preview · demo data, not measured production savings.</p></div>
+</header>
+<section><div class="split"><div><p class="tag">THE PROBLEM</p><h2>Agent work is growing.<br>Visibility is not.</h2><p class="section-intro">Long conversations, repeated context, agent activity and tool output can make resource use hard to understand. TOKEN ZOMBIE adds a local layer for observing activity and protecting unfinished work.</p><p class="muted">The goal is not to cut tokens at any cost. It is to use resources deliberately while preserving useful work and quality.</p></div><div class="card"><h3>One local control layer</h3><ul><li>See resource signals and agent activity.</li><li>Get evidence-backed workflow advice.</li><li>Keep originals recoverable where trimming is supported.</li><li>Carry project state into the next session.</li></ul></div></div></section>
+<section id="capabilities"><p class="tag">OBSERVE · DETECT · OPTIMISE · PROTECT</p><h2>What it does</h2><p class="section-intro">A practical set of local capabilities, with measurements labelled honestly and host-dependent behaviour called out.</p><div class="grid">
+<div class="card"><p class="tag">01 / OBSERVE</p><h3>Resource visibility</h3><p>Local hook ledger, token and cache signals, agent activity and clear MEASURED / EST / UNKNOWN labels.</p></div>
+<div class="card"><p class="tag">02 / DETECT</p><h3>Workflow signals</h3><p>Flags for repeated reads, large context loads, duplicate or low-value agent activity and rework patterns.</p></div>
+<div class="card"><p class="tag">03 / OPTIMISE</p><h3>Reversible optimisation</h3><p>Supported output trimming, recall of originals, Python AST skeleton compression and shadow-mode advice.</p></div>
+<div class="card"><p class="tag">04 / PROTECT</p><h3>Continuity and recovery</h3><p>Compaction checks, handoffs, checkpoints and a project state that helps a new chat continue the work.</p></div>
+</div></section>
+<section><div class="split"><div><p class="tag">SEE THE INTERFACE</p><h2>A dashboard for the work behind the prompt.</h2><p class="section-intro">The dashboard and mascot captures in this repository use demo data. The in-chat toolbar is implemented, but a verified public capture is not yet published.</p><a href="PANEL.md">Explore toolbar details →</a></div><img src="img/dashboard-mobile.png" alt="Mobile-width dashboard preview using demo data"></div></section>
+<section><p class="tag">TRANSPARENT DEVELOPMENT</p><h2>What works. What comes next.</h2><div class="grid">
+<div class="card"><h3>Available in the codebase</h3><p>18-event hook ledger, SQLite ledger, handoffs/checkpoints, output trim and recall, Python AST skeleton compression, dashboard and toolbar components. Some host behaviours still need live verification.</p></div>
+<div class="card"><h3>Validation and next priorities</h3><p>Real-host verification, real A/B trials, stronger resource attribution and improved agent-state intelligence.</p></div>
+<div class="card"><h3>Planned</h3><p>Semantic retrieval, broader language-aware compression and a task-level vault index. These are not shipped features.</p></div>
+<div class="card"><h3>Experimental</h3><p>Non-Claude adapters currently produce rules files only; they do not offer equivalent hooks or statusline integration.</p></div>
+</div><p style="margin-top:20px"><a href="ROADMAP.md">Full roadmap →</a> · <a href="IMPLEMENTATION-MATRIX.md">Implementation matrix →</a> · <a href="LIMITATIONS.md">Limitations →</a></p></section>
+<section id="install"><p class="tag">START IN CLAUDE CODE</p><h2>Try TOKEN ZOMBIE.</h2><p class="section-intro">Install the plugin, restart Claude Code, then inspect the current session's status.</p><pre>/plugin install token-zombie --marketplace rishavm713-create/token-zombie</pre><p>Then run <code>/token-zombie:tz</code>.</p><div class="actions" style="justify-content:flex-start"><a class="btn primary" href="INSTALL.md">Installation guide</a><a class="btn secondary" href="https://github.com/rishavm713-create/token-zombie">Star / inspect on GitHub ↗</a></div></section>
+<section><p class="tag">LOCAL BY DESIGN</p><h2>Your workflow stays yours.</h2><p class="section-intro">Core hooks make no network calls, send no telemetry and make no model calls. Advice is non-blocking. Read the security and limitations documents before enabling optional integrations.</p><a href="../SECURITY.md">Security model →</a> · <a href="LIMITATIONS.md">Known limitations →</a></section>
+<footer>© TOKEN ZOMBIE · MAKE EVERY SINGLE TOKEN COUNT. · <a href="https://github.com/rishavm713-create/token-zombie">GitHub repository</a></footer>
 </main></body></html>
