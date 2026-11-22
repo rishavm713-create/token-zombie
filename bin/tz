@@ -38,6 +38,7 @@ HELP = """tz <command> [args]
   companion [--port N]                          local status server with token auth (native overlay not built)
   mascot                                        zombie state line
   overlay build|run                             native always-on-top status window (macOS, swiftc from Command Line Tools)
+  bench quality TRIALS.json                         tokens per PASSED task, control vs treatment (needs 5+5 trials to count as proof)
   bench results [dir]                           A/B evidence into view
   rework [LOG] [--json]                              repeat/retry/loop counts from a chat log (MEASURED counts)
   hooks bench|live                              hook wall-time baseline (temp HOME) / live per-event hook time + injected chars

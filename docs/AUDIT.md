@@ -11,7 +11,7 @@ Basis: read of `bin/`, `install.sh`, `tests/`. Not a claim of savings; savings n
 | A/B runner with token caps | BUILT | `bin/tzab.py`, `tz bench compare`; zero real trials recorded yet = no proof |
 | Net savings (savings minus TZ overhead) | BUILT (synthetic) | `tz bench`; real-session net needs A/B runs |
 | Rework / retry-loop / repeated-edit counts | BUILT (this round) | `tz rework` (`bin/tzrework.py`, `tests/test_rework.sh`); counts only, not proven waste |
-| Quality-adjusted savings | NOT BUILT | needs A/B runs with identical acceptance tests |
+| Quality-adjusted savings | BUILT as `tz bench quality` (calculator); no real data | needs real A/B trials |
 | Real-host hook verification | HOST / owner | run `./install.sh`, then `tz hooks live` |
 
 ## Accounting
@@ -67,6 +67,6 @@ Real-host status is NOT VERIFIED for every row until the owner runs docs/HOST-VE
 | Rework counts | BUILT | test_rework | NOT VERIFIED | suite | counts, not proven waste |
 | Install/uninstall/restore | BUILT | test_install, test_install2 | NOT VERIFIED | suite | Linux unverified |
 | A/B runner + compare | BUILT | test_ab, test_bench | NOT RUN | none | zero real trials: no savings claim |
-| Quality-adjusted savings | NOT BUILT | none | n/a | none | needs A/B data |
+| Quality-adjusted savings | BUILT (calculator) | test_bench | NOT RUN | synthetic only | no real trials to feed it |
 | Website | PARTIAL | none | n/a | docs/index.html | redesign pending, lowest priority |
 Launch readiness verdict: NOT launch-ready. Engineering substantial; proof (A/B, host verification), demo and website outstanding.

@@ -8,6 +8,6 @@ Principle: same task, same start repo, same model and settings, same acceptance 
 4. Compare: `tz bench compare --baseline LOG... --optimized LOG... --both-passed` (counts input + output + cache write + cache read; cache is not free).
 5. TZ's own cost: hook text and handoff are already inside the treatment log totals; time overhead from `tz hooks bench`.
 6. Report per task: all raw totals, median, spread, pass rate, rework (`tz rework LOG`). Never only the best run.
-7. Quality-adjusted savings = tokens per PASSED task, control vs treatment. Not built as a command yet: compute from the raw table.
+7. Quality-adjusted savings = tokens per PASSED task, control vs treatment. `tz bench quality TRIALS.json` (list of {arm, task, tokens, passed}); verdict PROVEN only with 5+ trials per arm and no pass-rate drop.
 Cost warning: 3 tasks x 10 trials is 30 real sessions on your plan. Start with 1 task x 5+5 to see the spread.
 Limits: few trials = anecdote; one model; synthetic tasks; results do not transfer to your project automatically.

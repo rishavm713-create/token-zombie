@@ -76,7 +76,43 @@ def compare(base, opt, base_ok, opt_ok, overhead_tok=None):
     return r
 
 
+def quality(trials):
+    """Quality-adjusted comparison from recorded trials [{arm, task, tokens, passed}]. Tokens per PASSED task, not per attempt."""
+    r = {}
+    for arm in ('control', 'treatment'):
+        t = [x for x in trials if x.get('arm') == arm]
+        ok = [x for x in t if x.get('passed')]
+        tok = sorted(x['tokens'] for x in t)
+        r[arm] = dict(n=len(t), passed=len(ok), pass_rate=round(len(ok) / len(t), 2) if t else None,
+                      median_tokens=tok[len(tok) // 2] if tok else None,
+                      tokens_per_pass=round(sum(x['tokens'] for x in t) / len(ok)) if ok else None)
+    c, t = r['control'], r['treatment']
+    why = []
+    if min(c['n'], t['n']) < 5:
+        why.append('fewer than 5 trials per arm: anecdote, not proof')
+    if c['passed'] == 0 or t['passed'] == 0:
+        why.append('an arm has no passing trial: no quality-adjusted number')
+    elif t['pass_rate'] < c['pass_rate']:
+        why.append('treatment pass rate is lower: quality regressed, savings do not count')
+    if c['tokens_per_pass'] and t['tokens_per_pass']:
+        r['adjusted_saving_pct'] = round(100 * (c['tokens_per_pass'] - t['tokens_per_pass']) / c['tokens_per_pass'], 1)
+    r['proven'] = not why and 'adjusted_saving_pct' in r
+    r['caveats'] = why
+    return r
+
+
 def main(argv):
+    if argv and argv[0] == 'quality':
+        if len(argv) < 2 or not os.path.isfile(argv[1]):
+            print('usage: tz bench quality TRIALS.json  (list of {arm: control|treatment, task, tokens, passed})', file=sys.stderr); return 2
+        r = quality(json.load(open(argv[1])))
+        for arm in ('control', 'treatment'):
+            v = r[arm]
+            print(f"{arm:9} n {v['n']} passed {v['passed']} pass-rate {v['pass_rate']} median tokens {v['median_tokens']} tokens/passed-task {v['tokens_per_pass']} [MEASURED]")
+        if 'adjusted_saving_pct' in r:
+            print(f"quality-adjusted saving {r['adjusted_saving_pct']}% (tokens per passed task)")
+        print('VERDICT: ' + ('PROVEN on these trials (still one model/task set)' if r['proven'] else 'NOT PROVEN: ' + '; '.join(r['caveats'])))
+        return 0
     if argv and argv[0] == 'results':
         import tzdash
         rs = tzdash.bench_results(argv[1] if len(argv) > 1 else None)

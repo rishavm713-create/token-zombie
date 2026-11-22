@@ -32,4 +32,16 @@ o=$("$Z/bin/tz" bench compare --baseline $TT/b.jsonl --baseline $TT/b.jsonl --op
 # no double counting: a populated ledger must NOT change net
 o=$(HOME=$HX "$Z/bin/tz" bench compare --baseline $TT/b.jsonl --optimized $TT/o.jsonl --both-passed)
 ok "ledger overhead NOT subtracted again (net 13000)" '[[ $o == *"net 13000 (54.2%)"* && $o == *"already INSIDE"* ]]'
+TQ=$(mktemp); python3 -c "
+import json
+L=[{'arm':'control','task':'a','tokens':1000,'passed':True}]*5+[{'arm':'treatment','task':'a','tokens':700,'passed':True}]*5
+json.dump(L,open('$TQ','w'))"
+o=$("$Z/bin/tz" bench quality $TQ)
+ok "quality: 30% adjusted saving, proven at 5+5" '[[ $o == *"saving 30.0%"* && $o == *"PROVEN"* && $o != *"NOT PROVEN"* ]]'
+python3 -c "
+import json
+L=[{'arm':'control','task':'a','tokens':1000,'passed':True}]*5+[{'arm':'treatment','task':'a','tokens':500,'passed':True}]*2+[{'arm':'treatment','task':'a','tokens':500,'passed':False}]*3
+json.dump(L,open('$TQ','w'))"
+o=$("$Z/bin/tz" bench quality $TQ)
+ok "quality: lower pass rate -> NOT PROVEN" '[[ $o == *"NOT PROVEN"* && $o == *"regressed"* ]]'
 echo "bench: pass $pass fail $fail"; [ $fail = 0 ]
