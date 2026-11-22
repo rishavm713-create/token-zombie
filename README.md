@@ -166,18 +166,6 @@ Protect unfinished work and make the next session easier to resume.
 
 Hooks and local tools feed a shared local state model. The system surfaces evidence and suggestions; the developer stays in control of actions.
 
-## 🖥 Product interface
-
-<div align="center">
-<img src="docs/img/dashboard-mobile.png" alt="TOKEN ZOMBIE mobile dashboard preview — demo data" width="330">
-<br><sub>RESPONSIVE DASHBOARD · Demo data</sub>
-<br><br>
-<img src="docs/img/mascot-states.png" alt="TOKEN ZOMBIE mascot states" width="620">
-<br><sub>MASCOT STATES · Idle / Working / Excited / Alert / Sleep</sub>
-</div>
-
-The in-chat toolbar and pane are implemented; a verified live capture is still pending. [Read the interface specification](docs/PANEL.md).
-
 ## 🚦 Implementation status
 
 | <span>IN THE REPOSITORY</span> | <span>VALIDATION REQUIRED</span> | <span>PLANNED / NOT BUILT</span> |
