@@ -32,7 +32,7 @@ HELP = """tz <command> [args]
   config                                         effective settings and where each comes from
   report                                         status + optimize + stats + capabilities in one view
   sup start|tick|status|next-session|task      supervisor: usage level -> auto checkpoint -> status bus (status.json)
-  route <prompt> [--model M]                    model advice + complexity (EST), logged; cannot switch the running chat
+  route <prompt> [--model M] | --write [FILE] [--yes]   model advice + /model line; --write adds a model-per-task rules block to CLAUDE.md (dry run without --yes)
   adapters [--rules NAME [--out F]]             supported agents + honest capabilities, rules file generation
   reg [list|add <localdir>|show <name>]         local GitHub-repo registry (no network)
   dash --out F | --serve                        HTML dashboard (127.0.0.1 only)

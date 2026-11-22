@@ -34,3 +34,7 @@ DONE + tested (`tests/test_gaps.sh`): `tz attr` per-MCP-server and subagent call
 
 ## Update (gap round 3, 2026-11-23)
 DONE + tested (`tests/test_gaps.sh`, `bin/tzmore.py`): `tz reconcile` (ledger.json vs tz.db vault, AGREE/MISMATCH within 10%); `tz vault-find WORDS` (task-level keyword retrieval over spilled outputs, originals via `tz recall`); `tz overlap SESSION_DIR` (files edited by 2+ subagents); `tz skills-outcome` (per-skill average rework score, correlation only). Already existed before this round: skill/plugin inventory, park/unpark profiles, per-prompt skill advice, instruction conflicts (`tz capabilities`/tzcap), skill security vetting (`tz-vet.sh`). Still not built: 5h/7d official usage view (host data), non-Claude adapters, installing/registry discovery of third-party skills (needs owner approval + licence/security gate), semantic memory (deferred by owner), pricing coverage beyond econ.json.
+
+## Round 4: model recommendation and instructions
+- `tz route <prompt>` now prints a `/model <name>` line to type (EST, advice only; tz cannot switch the running chat model) and the subagent model.
+- `tz route --write [FILE] [--yes]` writes a marked "model per task" rules block (haiku bulk, sonnet default, opus hard) into CLAUDE.md. Dry run without `--yes`; idempotent; only touches text between its markers. Test: tests/test_gaps.sh.

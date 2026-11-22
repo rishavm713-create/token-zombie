@@ -39,7 +39,32 @@ def route(prompt, override=None):
     return r
 
 
+RULES = '''<!-- TZ-MODEL-RULES -->
+# Model choice per task (written by `tz route --write`, advice for Claude, edit freely)
+- Pick the cheapest model that can do the task; say which one you use and why in one line.
+- haiku: bulk reading, grep/summaries, lists, renames, one-line fixes (use as a subagent: Agent tool `model: "haiku"`).
+- sonnet: normal implementation, debugging, tests, reviews, multi-file edits. Default for the main chat.
+- opus: architecture, security-sensitive work, hard bugs after sonnet failed twice, large refactors.
+- Do not start a subagent when a few direct reads answer it. Never change the model of the running chat yourself: if the task needs a different model, tell the user to run `/model <name>` and wait.
+- One task per chat; when a task is done say so and suggest a fresh chat (tz compact / tz handoff first).
+<!-- /TZ-MODEL-RULES -->
+'''
+
+
+def write_rules(path):
+    """Insert or replace the marked block in path (created if missing). Nothing outside the markers is touched."""
+    old = open(path, encoding='utf-8').read() if os.path.exists(path) else ''
+    a, b = old.find('<!-- TZ-MODEL-RULES -->'), old.find('<!-- /TZ-MODEL-RULES -->')
+    new = (old[:a] + RULES.rstrip('\n') + old[b + len('<!-- /TZ-MODEL-RULES -->'):]) if a >= 0 and b > a else (old.rstrip('\n') + ('\n\n' if old else '') + RULES)
+    open(path, 'w', encoding='utf-8').write(new)
+
+
 def main(argv):
+    if '--write' in argv:
+        i = argv.index('--write'); tgt = argv[i + 1] if len(argv) > i + 1 and not argv[i + 1].startswith('--') else 'CLAUDE.md'
+        if '--yes' not in argv:
+            print(RULES + f'\nDry run. Add --yes to write this block into {os.path.abspath(tgt)} (only between its markers).'); return 0
+        write_rules(tgt); print(f'wrote model rules block into {os.path.abspath(tgt)}'); return 0
     model = None
     if '--model' in argv:
         i = argv.index('--model')
@@ -58,6 +83,7 @@ def main(argv):
         e = tzcont.econ(m, time.time() - m['t'])
         print(f"session: next 10 turns {' | '.join(f'{x} ${e[10][x][1]:.2f}' for x in ('continue', 'compact', 'fresh'))} -> {tzcont.best(e)} "
               '[EST API-equivalent; details: tz stats]')
+    print(f"PRESS/TYPE: /model {r['model']}   (switch the main chat yourself; tz cannot). Subagents: model {r['subagent_model'] or r['model']}.")
     print('note: advice only; switch with /model yourself, tz cannot change the running chat model')
     return 0
 

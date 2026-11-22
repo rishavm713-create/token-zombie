@@ -44,6 +44,10 @@ for n in ('agent-a','agent-b'):
 assert mo.overlap([T+'/agent-a.jsonl',T+'/agent-b.jsonl'])=={'/x.py':['agent-a','agent-b']}
 open(T+'/s.jsonl','w').write(json.dumps({'message':{'content':[{'type':'tool_use','id':'1','name':'Skill','input':{'skill':'demo'}}]}})+'\n')
 assert mo.skills_outcome([T+'/s.jsonl'])=={'demo':(1,0)}
+# 8 model rules block: idempotent, preserves other text
+import tzroute as rt
+f=T+'/CLAUDE.md'; open(f,'w').write('# mine\nkeep me\n'); rt.write_rules(f); rt.write_rules(f)
+t2=open(f).read(); assert t2.count('TZ-MODEL-RULES -->')==2 and 'keep me' in t2 and 'haiku' in t2, t2
 # 5 rework score
 assert r.score(0,0,0,{},{})==0 and 0<r.score(10,5,2,{('B','k'):3},{})<=100
 PY
