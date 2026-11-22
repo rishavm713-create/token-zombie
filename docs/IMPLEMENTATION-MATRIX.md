@@ -68,3 +68,10 @@ Not claimed: any savings % beyond MEASURED rows; competitor parity from READMEs.
 
 ## Round 10: built-in skill finder (plan P3)
 `tz skills find Q` ranks a curated catalog (catalog/skills-seed.json, 26 entries, plus optional ~/.claude/token-zombie/catalog.json) by task fit and known licence, never stars. `tz skills preview DIR` scans a LOCAL clone (SKILL.md tokens EST, network/shell/filesystem/secrets flags, GREEN/YELLOW/RED). `tz skills stage DIR --yes` copies it to ~/.claude/token-zombie/skills-staged/ (refuses RED without --force); `unstage NAME` reverses. Limits: no network code, so TZ never fetches or refreshes the catalog itself (you clone, or add entries); licences are as reported in earlier research, unverified; staging is a copy for your review, not activation in Claude Code; catalog entries without a repo URL (e.g. ui-ux-pro-max, gstack) need a real source added; no skill-activation tracking beyond existing `tz skills-outcome`.
+
+## Round 11 — task profiles, skill usage, update check
+- `tz route` prints a PROFILE [EST]: read limit, subagent count, skill pack (from complexity + mode). Advice only.
+- `tz skills usage [LOGDIR]`: Skill tool calls counted from chat logs (MEASURED); load cost via `tz skills preview` (EST).
+- `tz skills updates`: staged skills compared with their local source (hash in manifest): CHANGED / same / source-missing. Local only, no network.
+- Not built: catalog refresh from a remote source and real repo URLs for ~8 entries (none supplied; not fabricated).
+- Test: tests/test_gaps.sh section 14.

@@ -69,6 +69,13 @@ g=T+'/sk_ok'; os.makedirs(g); open(g+'/SKILL.md','w').write('# s\nuse small edit
 b=T+'/sk_bad'; os.makedirs(b); open(b+'/SKILL.md','w').write('# s'); open(b+'/x.py','w').write('import os\nos.environ["API_KEY"]; subprocess.run("curl http://x")')
 assert tf.preview(g)['verdict']=='GREEN' and tf.preview(b)['verdict']=='RED' and 'secrets' in tf.preview(b)['flags']
 tf.STATE=T+'/st'; assert 'error' in tf.stage(b) and 'staged' in tf.stage(g) and tf.unstage('sk_ok') and not tf.unstage('sk_ok')
+# 14 activations, updates, profile
+lg2=T+'/sk.jsonl'; open(lg2,'w').write(json.dumps({'message':{'content':[{'type':'tool_use','name':'Skill','input':{'skill':'tdd'}},{'type':'tool_use','name':'Skill','input':{'skill':'tdd'}}]}})+'\n')
+ac=tf.activations([lg2]); assert ac=={'tdd':{'uses':2,'chats':1}}, ac
+g2=T+'/sk2'; os.makedirs(g2); open(g2+'/SKILL.md','w').write('v1'); tf.stage(g2); assert tf.updates()==[('sk2','same')]
+open(g2+'/SKILL.md','w').write('v2'); assert tf.updates()==[('sk2','CHANGED')]
+pf=rt.profile('fix a typo in readme'); assert pf['agents']==0 and pf['model']=='haiku', pf
+pf2=rt.profile('design the architecture and refactor the module'); assert pf2['agents']>=1 and 'EST' in pf2['basis']
 # 5 rework score
 assert r.score(0,0,0,{},{})==0 and 0<r.score(10,5,2,{('B','k'):3},{})<=100
 PY

@@ -39,6 +39,17 @@ def route(prompt, override=None):
     return r
 
 
+def profile(prompt, r=None):
+    """Explainable task profile from the route result. EST heuristic; advice only (nothing is changed or spawned)."""
+    r = r or route(prompt)
+    c = r['complexity']
+    reads = 'grep/line ranges only, <= 3 whole files' if c <= 2 else 'targeted reads, summaries via a haiku subagent for bulk' if c <= 4 else 'wide reads allowed, but delegate bulk reading to haiku'
+    agents = 0 if c <= 2 else 1 if c <= 4 else 2
+    packs = {'ENGINEERING': 'coding', 'AUDIT': 'setup (security audit)', 'CREATIVE': 'content', 'RESEARCH': 'content'}.get(r['mode'], 'none (keep skill packs off)')
+    why = f"complexity {c} ({r['mode']}) -> {r['model']}; agents {agents} because " + ('a few direct reads suffice' if agents == 0 else 'bulk reading can be offloaded' if agents == 1 else 'independent parts may run in parallel')
+    return dict(model=r['model'], read_limit=reads, agents=agents, skill_pack=packs, why=why, basis='EST')
+
+
 RULES = '''<!-- TZ-MODEL-RULES -->
 # Model choice per task (written by `tz route --write`, advice for Claude, edit freely)
 - Pick the cheapest model that can do the task; say which one you use and why in one line.
@@ -84,6 +95,8 @@ def main(argv):
         print(f"session: next 10 turns {' | '.join(f'{x} ${e[10][x][1]:.2f}' for x in ('continue', 'compact', 'fresh'))} -> {tzcont.best(e)} "
               '[EST API-equivalent; details: tz stats]')
     print(f"PRESS/TYPE: /model {r['model']}   (switch the main chat yourself; tz cannot). Subagents: model {r['subagent_model'] or r['model']}.")
+    pf = profile(' '.join(argv), r)
+    print(f"PROFILE [EST]: reads: {pf['read_limit']}; agents: {pf['agents']}; skill pack: {pf['skill_pack']}\n  why: {pf['why']}")
     print('note: advice only; switch with /model yourself, tz cannot change the running chat model')
     return 0
 

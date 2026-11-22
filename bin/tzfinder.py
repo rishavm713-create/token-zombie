@@ -72,6 +72,7 @@ def stage(d, force=False):
     if os.path.exists(dst):
         shutil.rmtree(dst)
     shutil.copytree(os.path.abspath(d), dst, ignore=shutil.ignore_patterns('.git'))
+    pv = dict(pv, source=os.path.abspath(d), hash=_hash(os.path.abspath(d)))
     json.dump(pv, open(os.path.join(dst, '.tz-manifest.json'), 'w'), indent=1)
     return {'staged': dst, 'preview': pv}
 
@@ -82,6 +83,61 @@ def unstage(name):
         return False
     shutil.rmtree(dst)
     return True
+
+
+def activations(files):
+    """{skill: {'uses': n, 'chats': m}} from Skill tool_use blocks in chat logs (MEASURED from the log). Footprint is not logged by the host:
+    use `tz skills preview DIR` (SKILL.md tokens EST) for the cost of one load."""
+    out = {}
+    for f in files:
+        seen = set()
+        try:
+            for line in open(f, encoding='utf-8', errors='ignore'):
+                if '"Skill"' not in line:
+                    continue
+                try:
+                    d = json.loads(line)
+                except ValueError:
+                    continue
+                for b in (d.get('message') or {}).get('content') or []:
+                    if isinstance(b, dict) and b.get('type') == 'tool_use' and b.get('name') == 'Skill':
+                        n = (b.get('input') or {}).get('skill')
+                        if n:
+                            e = out.setdefault(n, {'uses': 0, 'chats': 0}); e['uses'] += 1
+                            if n not in seen:
+                                seen.add(n); e['chats'] += 1
+        except OSError:
+            continue
+    return out
+
+
+def _hash(d):
+    import hashlib
+    h = hashlib.sha1()
+    for root, ds, fs in sorted(os.walk(d)):
+        ds[:] = sorted(x for x in ds if x != '.git')
+        for f in sorted(fs):
+            if f == '.tz-manifest.json':
+                continue
+            try:
+                h.update(f.encode() + open(os.path.join(root, f), 'rb').read())
+            except OSError:
+                pass
+    return h.hexdigest()[:12]
+
+
+def updates():
+    """[(name, status)] for staged skills: CHANGED (source dir content differs from what was staged), same, or source-missing. Local compare only."""
+    base = os.path.join(STATE, 'skills-staged')
+    res = []
+    for n in sorted(os.listdir(base)) if os.path.isdir(base) else []:
+        try:
+            m = json.load(open(os.path.join(base, n, '.tz-manifest.json')))
+        except (OSError, ValueError):
+            continue
+        src = m.get('source')
+        res.append((n, 'source-missing' if not src or not os.path.isdir(src) else 'same' if _hash(src) == m.get('hash') else 'CHANGED'))
+    return res
 
 
 def main(argv):
@@ -100,9 +156,20 @@ def main(argv):
         if '--yes' not in r:
             print(json.dumps(preview(d), indent=1)); print('dry run: add --yes to copy this into skills-staged (reversible: tz skills unstage NAME)'); return 0
         res = stage(d, '--force' in r); print(json.dumps(res, indent=1)); return 1 if 'error' in res else 0
+    if c == 'usage':
+        import glob
+        fs = glob.glob(os.path.join(r[0] if r else os.path.expanduser('~/.claude/projects'), '**', '*.jsonl'), recursive=True)
+        u = activations(fs)
+        for n, e in sorted(u.items(), key=lambda x: -x[1]['uses'])[:15]:
+            print(f"  {n:30} {e['uses']:4} uses in {e['chats']} chat(s)  [MEASURED from logs]")
+        print(f'{len(u)} skill(s) used across {len(fs)} log file(s); cost of one load: tz skills preview DIR (EST)' if u else 'no Skill calls found'); return 0
+    if c == 'updates':
+        for n, st in updates():
+            print(f'  {n:30} {st}')
+        return 0
     if c == 'unstage' and r:
         print('removed' if unstage(r[0]) else 'not staged'); return 0
-    print(__doc__ if False else 'usage: tz skills find QUERY | preview DIR | stage DIR [--yes] [--force] | unstage NAME'); return 2
+    print(__doc__ if False else 'usage: tz skills find QUERY | preview DIR | stage DIR [--yes] [--force] | unstage NAME | usage [LOGDIR] | updates'); return 2
 
 
 if __name__ == '__main__':
