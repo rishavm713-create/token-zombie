@@ -8,7 +8,7 @@
 
 **STOP THE WASTE. CONTROL THE SWARM. PROTECT THE WORKFLOW.**
 
-[🌐 Product Website](https://rishavm713-create.github.io/token-zombie/) · [⚡ Install](#-get-started) · [🧭 Feature Map](#-the-control-layer) · [🗺 Roadmap](docs/ROADMAP.md) · [🛠 Engineering Audit](docs/AUDIT.md)
+[🌐 Product Website](https://rishavm713-create.github.io/token-zombie/) · [⚡ Install](#-get-started) · [🧭 Feature Map](#-the-control-layer) · [🗺 Roadmap](docs/ROADMAP.md) · [🛠 Engineering Audit](docs/AUDIT.md) · [⚖ Competitive Positioning](docs/COMPETITIVE-POSITIONING.md)
 
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-7CFF9B?style=flat-square&labelColor=111812)
 ![Local first](https://img.shields.io/badge/LOCAL--FIRST-no%20telemetry-7CFF9B?style=flat-square&labelColor=111812)
@@ -204,6 +204,7 @@ Restart Claude Code, then run:
 | [Roadmap](docs/ROADMAP.md) | Built, validation, planned and deferred |
 | [Implementation matrix](docs/IMPLEMENTATION-MATRIX.md) | Feature-by-feature status |
 | [Audit](docs/AUDIT.md) | Evidence and remaining gaps |
+| [Competitive positioning](docs/COMPETITIVE-POSITIONING.md) | Competitor landscape, recent GitHub growth patterns and launch strategy |
 | [Limitations](docs/LIMITATIONS.md) | Known constraints |
 | [Security](SECURITY.md) | Privacy and safety boundaries |
 
