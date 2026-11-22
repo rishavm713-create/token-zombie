@@ -122,7 +122,7 @@ Read [SECURITY.md](SECURITY.md) and [LIMITATIONS.md](docs/LIMITATIONS.md).
 | [Limitations](docs/LIMITATIONS.md) | Known gaps and unverified behaviour |
 | [Toolbar / panel](docs/PANEL.md) | In-chat interface |
 | [CLI reference](docs/CLI.md) | Commands |
-| [Compatibility](docs/COMPAT.md) | Platform and adapter status |
+| [Compatibility](COMPAT.md) | Platform and adapter status |
 | [Security](SECURITY.md) | Privacy and safety model |
 | [Contributing](CONTRIBUTING.md) | Development and contribution guidance |
 
