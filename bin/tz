@@ -53,7 +53,7 @@ HELP = """tz <command> [args]
   shadow                                         trim rule: cuts made/would be made, originals re-read (set out_trim "shadow" to canary)
   live roi [--session S]                         per-agent cost vs outcome, advice flags (small/empty/failed/duplicate)
   systems [--json] [--session S]                 8 systems: happening / did / impact / evidence / status (state files only), writes systems.json
-  export [CHAT.jsonl] [--out F]                  append usage totals as one JSON line to a local file (for jq/Grafana/DuckDB; no network)
+  export [CHAT.jsonl] [--out F] | --otlp F [--preview]   usage totals as a JSON line, or OTLP/JSON metrics to a local file (no network, no prompts)
   find WORDS..                                   search handoff notes (all words match) for task-level recall
   doctor                                         one-screen health check (ledger, savings records, hooks, rules)
   recall <id> [--grep P] [--lines A-B]          full text of a tool output TZ trimmed (ids are in the trim note)

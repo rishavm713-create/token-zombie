@@ -117,6 +117,17 @@ def doctor():
     return r
 
 
+def otlp(rec, preview=False):
+    """OTLP/JSON metrics payload (resourceMetrics) from one export record. Counters only, no prompt content, no file paths."""
+    t = int(__import__('time').time() * 1e9)
+    def g(name, v):
+        return {'name': name, 'unit': '{token}', 'sum': {'aggregationTemporality': 2, 'isMonotonic': True,
+                'dataPoints': [{'asInt': str(int(v)), 'timeUnixNano': str(t), 'attributes': [{'key': 'tz.basis', 'value': {'stringValue': rec.get('basis', 'MEASURED')}}]}]}}
+    ms = [g('tz.' + k, rec[k]) for k in ('input_tokens', 'output_tokens', 'cache_read_tokens', 'cache_write_tokens')]
+    return {'resourceMetrics': [{'resource': {'attributes': [{'key': 'service.name', 'value': {'stringValue': 'token-zombie'}}]},
+            'scopeMetrics': [{'scope': {'name': 'tz.export.v1'}, 'metrics': ms}]}]}
+
+
 def main(argv):
     c, a = argv[0], argv[1:]
     state = os.path.expanduser('~/.claude/token-zombie')
@@ -135,6 +146,13 @@ def main(argv):
         import tzusage
         src = a[0] if a else tzusage.find_transcript(os.getcwd())
         out = a[a.index('--out') + 1] if '--out' in a else 'tz-export.jsonl'
+        if '--otlp' in a:  # opt-in: write OTLP/JSON to a LOCAL file; --preview prints it and writes nothing
+            import tzusage, tempfile
+            tmp = tempfile.mktemp(); rec = export(src, tmp); os.unlink(tmp)
+            pl = otlp(rec)
+            if '--preview' in a:
+                print(json.dumps(pl, indent=1)); print('preview only: counters, no prompts, no paths; nothing written or sent'); return 0
+            open(a[a.index('--otlp') + 1], 'w').write(json.dumps(pl)); print('wrote OTLP/JSON locally; sending it anywhere is your step (curl to your collector)'); return 0
         r = export(src, out); print(f'appended 1 record ({r["turns"]} turns, MEASURED) to {os.path.abspath(out)}; local file, nothing sent anywhere')
         return 0
     if c == 'find':

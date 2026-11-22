@@ -56,6 +56,10 @@ ex=tm.export(lg,T+'/out.jsonl'); assert ex['output_tokens']==5 and ex['cache_wri
 os.makedirs(T+'/hf',exist_ok=True); open(T+'/hf/a.md','w').write('# d\nfixed the Router bug in tzroute\nother\n')
 fr=tm.find_notes(T+'/hf',['router','bug']); assert len(fr)==1 and fr[0][1]==2
 assert tm.find_notes(T+'/hf',['nomatch'])==[] and all(x[0] in ('OK','WARN','INFO') for x in tm.doctor())
+# 11 otlp payload has counters only; resume stamps consumed
+pl=tm.otlp(ex); mets=pl['resourceMetrics'][0]['scopeMetrics'][0]['metrics']; assert {m['name'] for m in mets}>={'tz.output_tokens','tz.cache_write_tokens'} and 'path' not in json.dumps(pl).lower()
+os.makedirs(T+'/w/handoffs/tasks',exist_ok=True); h.handoff(T+'/w','t1',done=['a'],left=['b'],nxt='c'); h.resume(T+'/w'); h.resume(T+'/w')
+sj=json.load(open(h.newest_task(T+'/w'))); assert len(sj.get('consumed',[]))==2, sj
 # 5 rework score
 assert r.score(0,0,0,{},{})==0 and 0<r.score(10,5,2,{('B','k'):3},{})<=100
 PY

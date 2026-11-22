@@ -53,3 +53,10 @@ Skill collections (Everything Claude Code, Matt Pocock, Karpathy, Anthropic Skil
 
 ## Round 7: savings mismatch explained
 Cause: the vault table only has rows from 11-23 01:18 while ledger.json output-trim rows start 11-22, so the two covered different periods. `tz reconcile` now compares only ledger rows from the vault's first row onward: real data AGREE (7,449 vs 7,450 tok). The older 11-22 ledger rows are unverified by the vault, so the dashboard total still mixes verified and unverified trim savings.
+
+## Round 8: capability plan (TZ-COMPETITIVE-CAPABILITY-PLAN) mapped to code, 2026-11-23
+P0 evidence: full suite 803/0 (this round); MCP/subagent attribution BUILT (`tz attr`, UNAVAILABLE not zero); ledger-vs-vault reconcile AGREE; A/B runner built, **no real trial run (owner-approved spend)**; host hook check = `tz doctor` finds no TZ hooks in settings.json (owner install.sh).
+P1 context/continuity: vault search + recall (`tz vault-find` -> `tz recall --grep/--lines` -> full) BUILT; handoff chain id BUILT; continuation-consumed signal BUILT (`resume` stamps `consumed` in the state file); JS/TS skeleton BUILT; churn/conflict reports BUILT.
+P2 workflow: mode/route advice + `tz route --write` BUILT; overlap warning BUILT (`tz overlap`); skill outcome BUILT (`tz skills-outcome`); workflow templates and worktree isolation NOT built (opt-in later, host-dependent).
+P3 interop: `tz export --otlp F [--preview]` BUILT (OTLP/JSON metrics to a local file; counters only; sending is the user's step; not a live OTLP client); other-host adapters, vector memory, routing proxy NOT built by decision.
+Not claimed: any savings % beyond MEASURED rows; competitor parity from READMEs.

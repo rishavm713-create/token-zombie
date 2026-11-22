@@ -159,7 +159,13 @@ def handoff(cwd, task='', done=(), left=(), nxt='', test_cmd='', facts=()):
 def resume(cwd, run_tests=False):
     """Compare saved state with now. Returns (text, drift list). Read-only for the work tree."""
     try:
-        s = json.load(open(newest_task(cwd) or ''))
+        sp = newest_task(cwd) or ''
+        s = json.load(open(sp))
+        try:  # continuation-consumed signal: a new chat read this handoff (TZ's own state file, fail open)
+            s['consumed'] = list(s.get('consumed') or [])[-4:] + [int(time.time())]
+            json.dump(s, open(sp, 'w'), indent=1)
+        except OSError:
+            pass
     except (OSError, ValueError):
         try:  # no tz handoff yet: fall back to the active `tz next` task pack so a fresh chat still resumes
             import tznext
