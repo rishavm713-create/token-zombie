@@ -165,6 +165,15 @@ h2{font-size:clamp(38px,5vw,64px);line-height:1;letter-spacing:-.06em}
 .eco-link b{display:block;font-size:14px;letter-spacing:.04em}.eco-link span{font-size:12px;color:var(--soft)}.eco-link i{font-style:normal;color:var(--green)}
 .eco h2{margin:0 0 12px}
 @media(max-width:850px){.eco{grid-template-columns:1fr;padding:22px}.eco-photo{max-width:320px}}
+.mission{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center}
+.mission blockquote{margin:0;font-size:clamp(22px,2.6vw,32px);line-height:1.35;font-weight:700;letter-spacing:-.01em;border-left:3px solid var(--green);padding-left:26px}
+.mission blockquote span{color:var(--green)}.mission cite{display:block;margin-top:18px;font-size:12px;font-style:normal;color:var(--soft);letter-spacing:.1em}
+.mission p{color:var(--soft);line-height:1.75}
+.steps{list-style:none;padding:0;margin:22px 0 0;display:grid;gap:10px;counter-reset:s}
+.steps li{counter-increment:s;display:flex;gap:14px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:13px 16px;background:#0c1510;transition:transform .3s var(--ease),border-color .3s}
+.steps li:hover{transform:translateX(6px);border-color:var(--green)}
+.steps li:before{content:"0" counter(s);color:var(--green);font-weight:800;font-size:12px}
+@media(max-width:850px){.mission{grid-template-columns:1fr;gap:26px}}
 </style>
 
 </head>
@@ -172,7 +181,7 @@ h2{font-size:clamp(38px,5vw,64px);line-height:1;letter-spacing:-.06em}
 <div class="wrap">
 <nav class="topbar">
 <a class="brand" href="#"><span class="brandmark"><img src="img/mascot.svg" alt=""></span> TOKEN ZOMBIE</a>
-<div class="nav"><a href="#capabilities">Capabilities</a><a href="#interface">Interface</a><a href="#ecosystem">Creator</a><a href="ROADMAP.md">Roadmap</a><a href="https://github.com/rishavm713-create/token-zombie" class="navcta">GitHub ↗</a></div>
+<div class="nav"><a href="#capabilities">Capabilities</a><a href="#interface">Interface</a><a href="#mission">Mission</a><a href="#ecosystem">Creator</a><a href="ROADMAP.md">Roadmap</a><a href="https://github.com/rishavm713-create/token-zombie" class="navcta">GitHub ↗</a></div>
 </nav>
 
 <header class="hero">
@@ -307,6 +316,14 @@ h2{font-size:clamp(38px,5vw,64px);line-height:1;letter-spacing:-.06em}
 </div>
 </section>
 
+<section class="section" id="mission">
+<div class="section-head"><div><p class="eyebrow">PHILOSOPHY &amp; MISSION</p><h2>From a bad day<br>to a shared tool.</h2></div><p class="section-intro">TOKEN ZOMBIE is open source on purpose, so access to the solution never becomes another limitation for someone else.</p></div>
+<div class="mission">
+<div><blockquote>&ldquo;I built this because I experienced the problem. I made it open source because I <span>don&rsquo;t want access to the solution to become another limitation</span> for someone else.&rdquo;<cite>RISHAV MISHRA, CREATOR</cite></blockquote></div>
+<div><p>We cannot always choose the bad days that happen to us. We can choose what we build in response. The same idea runs through <em>The Absurdity of Life</em>: suffering does not dictate what we create or what we do to others. Batman and the Joker share the wound; they differ in the choice.</p>
+<ol class="steps"><li>Hit a real limit: context exhausted, tokens wasted, work lost.</li><li>Recognise that other developers hit it too.</li><li>Build a practical fix, local-first and honest about its limits.</li><li>Open the source to everyone, for free.</li></ol></div>
+</div></section>
+
 <section class="section" id="ecosystem">
 <div class="eco">
 <div class="eco-photo"><img src="img/rishav.webp" alt="Rishav Mishra, creator of TOKEN ZOMBIE" loading="lazy" width="900" height="900"></div>
@@ -323,7 +340,7 @@ h2{font-size:clamp(38px,5vw,64px);line-height:1;letter-spacing:-.06em}
 </div>
 <script>
 (function(){var d=document,r=d.documentElement;if(!('IntersectionObserver' in window))return;r.classList.add('js');
-var els=d.querySelectorAll('.eco,.section-head,.statstrip,.cap,.workflow,.show-card,.mascot-row,.status,.install,.doc,.hero-copy,.hero-actions,.hero-visual');
+var els=d.querySelectorAll('.mission>div,.eco,.section-head,.statstrip,.cap,.workflow,.show-card,.mascot-row,.status,.install,.doc,.hero-copy,.hero-actions,.hero-visual');
 els.forEach(function(e,i){e.classList.add('rv');e.style.setProperty('--d',((i%4)*70)+'ms')});
 var io=new IntersectionObserver(function(a){a.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}})},{threshold:.12});
 els.forEach(function(e){io.observe(e)});setTimeout(function(){els.forEach(function(e){e.classList.add('in')})},4000);
