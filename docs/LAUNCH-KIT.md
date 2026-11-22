@@ -62,7 +62,7 @@ Use a direct GitHub repository link in the post or its immediate reply. Do not r
 
 ## Public tester call
 
-Use GitHub's [Call for testers issue](https://github.com/rishavm713-create/token-zombie/issues/undefined) as the single feedback destination. Invite developers to test one real workflow and report failures; do not buy stars, use fake accounts, mass-DM strangers or post repetitive promotion.
+Use GitHub's [Call for testers issue](https://github.com/rishavm713-create/token-zombie/issues/2) as the single feedback destination. Invite developers to test one real workflow and report failures; do not buy stars, use fake accounts, mass-DM strangers or post repetitive promotion.
 
 
 ## Ready-to-post launch assets
@@ -75,7 +75,7 @@ TOKEN ZOMBIE is a local-first resource intelligence and workflow control layer f
 
 No telemetry. No model calls inside core hooks. Metrics are labelled MEASURED / EST / UNAVAILABLE.
 
-I am looking for developers to test it on real workflows and tell me what breaks. End-to-end savings are not proven yet; the benchmark method and current limitations are documented.
+I am looking for developers to test it on real workflows and tell me what breaks. One real session has produced an owner-reported 5,000,000-token saving; it is a single-session observation, not yet a controlled multi-trial benchmark. Evidence and accounting details are being prepared.
 
 https://github.com/rishavm713-create/token-zombie
 
@@ -85,7 +85,7 @@ https://github.com/rishavm713-create/token-zombie
 
 I have been working on TOKEN ZOMBIE, a Claude Code plugin that makes local resource and agent activity more visible. It flags repeated reads and other avoidable-work signals, supports recoverable output trimming, and helps preserve task state across sessions.
 
-I am not claiming a magic savings percentage: real with/without A/B trials are not complete. I would value critical feedback from people who use Claude Code for longer coding sessions.
+One real session has produced an owner-reported 5,000,000-token saving. It is a single-session observation, not a controlled multi-trial benchmark, and I am preparing the redacted evidence and accounting breakdown. I would value critical feedback from people who use Claude Code for longer coding sessions.
 
 Repository: https://github.com/rishavm713-create/token-zombie
 
@@ -99,7 +99,7 @@ I built TOKEN ZOMBIE to make long-running Claude Code sessions easier to inspect
 
 Core hooks are local and do not make network or model calls. Claude Code is the supported integration; other adapters are experimental rules-only outputs.
 
-I am deliberately not claiming an end-to-end token-saving percentage: real with/without A/B trials are not complete. The repository documents the implementation status, limitations and benchmark method. I would appreciate feedback on false positives, hook overhead, installation and real workflows.
+One real session has produced an owner-reported 5,000,000-token saving. It is a single-session observation, not a controlled multi-trial benchmark; the redacted evidence and accounting breakdown are being prepared. The repository documents the implementation status, limitations and benchmark method. I would appreciate feedback on false positives, hook overhead, installation and real workflows.
 
 https://github.com/rishavm713-create/token-zombie
 
@@ -111,7 +111,7 @@ I have been building TOKEN ZOMBIE — a local-first resource intelligence and wo
 
 It brings together resource signals, agent lifecycle visibility, avoidable-work detection, recoverable output trimming and project continuity.
 
-One principle matters to me: evidence over promises. Metrics are labelled MEASURED, EST or UNAVAILABLE, and I am not publishing end-to-end savings claims until controlled A/B trials support them.
+One principle matters to me: evidence over promises. Metrics are labelled MEASURED, EST or UNAVAILABLE, and I am distinguishing the 5-million-token single-session observation from controlled multi-trial results.
 
 I am opening the project to real-world testing and critical feedback.
 
