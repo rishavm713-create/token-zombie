@@ -35,8 +35,8 @@ assert not t.conflicts({'A.md':'Always run tests.','B.md':'Never commit secrets.
 import tzmore as mo, sqlite3
 db=T+'/tz.db'; c=sqlite3.connect(db); c.execute('CREATE TABLE vault(id TEXT, sid TEXT, t INT, tool TEXT, target TEXT, orig INT, shown INT)')
 c.execute("INSERT INTO vault VALUES('v1','s',1,'Bash','pytest tests/foo',4400,400)"); c.commit(); c.close()
-assert mo.reconcile([{'tok':1000,'basis':'measured','kind':'trim'}],db)[2]=='AGREE'
-assert mo.reconcile([{'tok':5000,'basis':'measured','kind':'trim'}],db)[2]=='MISMATCH'
+assert mo.reconcile([{'tok':1000,'basis':'measured','kind':'output-trim'}],db)[2]=='AGREE'
+assert mo.reconcile([{'tok':5000,'basis':'measured','kind':'output-trim'}],db)[2]=='MISMATCH'
 assert mo.reconcile([],T+'/none.db')[2].startswith('UNAVAILABLE')
 assert mo.vault_find(db,['pytest'])[0][0]=='v1' and not mo.vault_find(db,['zzzz'])
 for n in ('agent-a','agent-b'):
@@ -48,6 +48,14 @@ assert mo.skills_outcome([T+'/s.jsonl'])=={'demo':(1,0)}
 import tzroute as rt
 f=T+'/CLAUDE.md'; open(f,'w').write('# mine\nkeep me\n'); rt.write_rules(f); rt.write_rules(f)
 t2=open(f).read(); assert t2.count('TZ-MODEL-RULES -->')==2 and 'keep me' in t2 and 'haiku' in t2, t2
+# 9 export: one local jsonl record, MEASURED totals
+import tzmore as tm
+lg=T+'/e.jsonl'; open(lg,'w').write(json.dumps({'message':{'id':'m1','usage':{'input_tokens':3,'output_tokens':5,'cache_read_input_tokens':7,'cache_creation_input_tokens':11}}})+'\n')
+ex=tm.export(lg,T+'/out.jsonl'); assert ex['output_tokens']==5 and ex['cache_write_tokens']==11 and len(open(T+'/out.jsonl').read().splitlines())==1
+# 10 find + doctor
+os.makedirs(T+'/hf',exist_ok=True); open(T+'/hf/a.md','w').write('# d\nfixed the Router bug in tzroute\nother\n')
+fr=tm.find_notes(T+'/hf',['router','bug']); assert len(fr)==1 and fr[0][1]==2
+assert tm.find_notes(T+'/hf',['nomatch'])==[] and all(x[0] in ('OK','WARN','INFO') for x in tm.doctor())
 # 5 rework score
 assert r.score(0,0,0,{},{})==0 and 0<r.score(10,5,2,{('B','k'):3},{})<=100
 PY

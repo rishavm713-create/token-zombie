@@ -53,6 +53,9 @@ HELP = """tz <command> [args]
   shadow                                         trim rule: cuts made/would be made, originals re-read (set out_trim "shadow" to canary)
   live roi [--session S]                         per-agent cost vs outcome, advice flags (small/empty/failed/duplicate)
   systems [--json] [--session S]                 8 systems: happening / did / impact / evidence / status (state files only), writes systems.json
+  export [CHAT.jsonl] [--out F]                  append usage totals as one JSON line to a local file (for jq/Grafana/DuckDB; no network)
+  find WORDS..                                   search handoff notes (all words match) for task-level recall
+  doctor                                         one-screen health check (ledger, savings records, hooks, rules)
   recall <id> [--grep P] [--lines A-B]          full text of a tool output TZ trimmed (ids are in the trim note)
   state [--cwd D]                               compact authoritative handoffs/STATE.md (master, current work, session handoff)
   expensive [--transcript F] [--session S] [--force]  real cost signals -> verified checkpoint + fresh-chat startup line
@@ -90,7 +93,7 @@ def main(argv):
         if c in ('skills', 'capabilities', 'security', 'audit', 'instructions', 'profile'):
             import tzcap
             return tzcap.main([c, *rest])
-        mods = {'sup': 'tzsup', 'route': 'tzroute', 'adapters': 'tzadapters', 'reg': 'tzreg', 'dash': 'tzdash', 'companion': 'tzcompanion', 'mascot': 'tzmascot', 'hooks': 'tzhooks', 'live': 'tzlive', 'ledger': 'tzdb', 'compress': 'tzcompress', 'rework': 'tzrework', 'attr': 'tzattr', 'reconcile': 'tzmore', 'vault-find': 'tzmore', 'overlap': 'tzmore', 'skills-outcome': 'tzmore', 'conflicts': 'tzattr', 'preflight': 'tzpreflight', 'recall': 'tzout', 'next': 'tznext', 'state': 'tzcont', 'replay': 'tzcont', 'expensive': 'tzcont', 'waste-audit': 'tzcont', 'ondemand': 'tzondemand', 'systems': 'tzsystems', 'shadow': 'tzout'}
+        mods = {'sup': 'tzsup', 'route': 'tzroute', 'adapters': 'tzadapters', 'reg': 'tzreg', 'dash': 'tzdash', 'companion': 'tzcompanion', 'mascot': 'tzmascot', 'hooks': 'tzhooks', 'live': 'tzlive', 'ledger': 'tzdb', 'compress': 'tzcompress', 'rework': 'tzrework', 'attr': 'tzattr', 'reconcile': 'tzmore', 'export': 'tzmore', 'find': 'tzmore', 'doctor': 'tzmore', 'vault-find': 'tzmore', 'overlap': 'tzmore', 'skills-outcome': 'tzmore', 'conflicts': 'tzattr', 'preflight': 'tzpreflight', 'recall': 'tzout', 'next': 'tznext', 'state': 'tzcont', 'replay': 'tzcont', 'expensive': 'tzcont', 'waste-audit': 'tzcont', 'ondemand': 'tzondemand', 'systems': 'tzsystems', 'shadow': 'tzout'}
         if c in mods:
             return __import__(mods[c]).main(([c] if mods[c] in ('tzcont', 'tzout', 'tzattr', 'tzmore') else []) + rest)
         if c == 'overlay':  # build/run the native always-on-top window (Command Line Tools swiftc; installs nothing)
