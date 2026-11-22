@@ -8,7 +8,7 @@ Basis: read of `bin/`, `install.sh`, `tests/`. Not a claim of savings; savings n
 |---|---|---|
 | Hook overhead benchmark, all 18 events | BUILT (this round) | `tz hooks bench` now covers every registered event, MEASURED wall ms |
 | Live per-event hook time | BUILT, UNVERIFIED | `tz hooks live`; needs the hooks installed |
-| A/B runner with token caps | BUILT | `bin/tzab.py`, `tz bench compare`; zero real trials recorded yet = no proof |
+| A/B runner with token caps | BUILT | `bin/tzab.py`, `tz bench compare`; controlled multi-trial A/B remains incomplete |
 | Net savings (savings minus TZ overhead) | BUILT (synthetic) | `tz bench`; real-session net needs A/B runs |
 | Rework / retry-loop / repeated-edit counts | BUILT (this round) | `tz rework` (`bin/tzrework.py`, `tests/test_rework.sh`); counts only, not proven waste |
 | Quality-adjusted savings | BUILT as `tz bench quality` (calculator); no real data | needs real A/B trials |
