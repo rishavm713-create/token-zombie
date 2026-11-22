@@ -3,438 +3,271 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TOKEN ZOMBIE | Stop Claude Code Wasting Tokens</title>
-<meta name="description" content="Free tool that stops Claude Code from wasting tokens. Shows where tokens go, warns before a chat runs out, and saves your place. Runs on your computer.">
-<meta name="theme-color" content="#080d0a">
-<meta name="robots" content="index,follow">
+<meta name="description" content="Free plugin that stops Claude Code from wasting tokens. Finds repeated work, warns before a chat runs out, and saves your place. Runs on your computer.">
+<meta name="theme-color" content="#070b08">
 <link rel="canonical" href="https://rishavm713-create.github.io/token-zombie/">
-<meta property="og:title" content="TOKEN ZOMBIE | Claude Code Token Optimisation">
-<meta property="og:description" content="A local-first control layer for Claude Code: token visibility, context optimisation, agent signals and workflow continuity.">
+<meta property="og:title" content="TOKEN ZOMBIE | Stop Claude Code Wasting Tokens">
+<meta property="og:description" content="Free, local plugin for Claude Code. Find wasted tokens, get warned before a chat runs out, and continue in a fresh chat without re-explaining.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://rishavm713-create.github.io/token-zombie/">
-<meta property="og:image" content="https://rishavm713-create.github.io/token-zombie/img/brand-hero.svg">
+<meta property="og:image" content="https://rishavm713-create.github.io/token-zombie/img/social-preview.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="TOKEN ZOMBIE | Claude Code Token Optimisation">
-<meta name="twitter:description" content="Local-first token visibility, context optimisation and AI agent workflow control for Claude Code.">
-<meta name="twitter:image" content="https://rishavm713-create.github.io/token-zombie/img/brand-hero.svg">
+<meta name="twitter:image" content="https://rishavm713-create.github.io/token-zombie/img/social-preview.png">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"TOKEN ZOMBIE","applicationCategory":"DeveloperApplication","operatingSystem":"macOS, Linux","description":"A local-first Claude Code token optimisation and AI agent workflow control layer for resource visibility, context optimisation and session continuity.","url":"https://rishavm713-create.github.io/token-zombie/","codeRepository":"https://github.com/rishavm713-create/token-zombie","license":"https://opensource.org/license/mit"}
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"TOKEN ZOMBIE","applicationCategory":"DeveloperApplication","operatingSystem":"macOS, Linux","description":"Free, local Claude Code plugin that finds wasted tokens and saves your place between chats.","url":"https://rishavm713-create.github.io/token-zombie/","codeRepository":"https://github.com/rishavm713-create/token-zombie","license":"https://opensource.org/license/mit","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
 </script>
 <style>
-:root{color-scheme:dark;--bg:#080d0a;--bg2:#0b130e;--panel:#101a13;--panel2:#142219;--panel3:#192b1e;--fg:#edf7ef;--muted:#a1b4a5;--soft:#718578;--green:#83ffa0;--green2:#3dd66a;--line:#263a2c;--line2:#36533e;--amber:#f4c66c;--blue:#8ec9ff;--max:1160px}
-*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:88px}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow-x:hidden}
-body:before{content:"";position:absolute;inset:0 0 auto;height:850px;pointer-events:none;background:radial-gradient(ellipse at 78% 8%,#1a4928 0,transparent 38%),radial-gradient(ellipse at 8% 28%,#142a1a 0,transparent 38%);opacity:.65;z-index:-1}
-a{color:var(--green);text-decoration:none}a:hover{color:#c6ffd2}button{font:inherit}
-.wrap{width:min(var(--max),calc(100% - 44px));margin:auto}
-.topbar{height:76px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ffffff10;position:relative;z-index:3}
-.brand{display:flex;align-items:center;gap:11px;font-size:13px;font-weight:900;letter-spacing:.17em;color:var(--fg)}
-.brandmark{width:29px;height:29px;border:1px solid var(--green);border-radius:8px;display:grid;place-items:center;color:var(--green);font-size:16px;box-shadow:0 0 22px #6bff8c24}
-.nav{display:flex;align-items:center;gap:25px;color:var(--muted);font-size:13px}.nav a{color:inherit}.nav a:hover{color:var(--green)}
-.nav .navcta{border:1px solid var(--line2);padding:8px 13px;border-radius:7px;color:var(--green)}
-.hero{padding:74px 0 82px;display:grid;grid-template-columns:1.02fr .98fr;gap:38px;align-items:center;min-height:620px}
-.kicker{display:inline-flex;align-items:center;gap:9px;border:1px solid #46724e;background:#0f2015;padding:6px 11px;border-radius:99px;color:var(--green);font-size:10px;font-weight:850;letter-spacing:.15em;text-transform:uppercase}
-.pulse{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green)}
-h1{font-size:clamp(48px,6vw,78px);line-height:.98;letter-spacing:-.065em;margin:24px 0 19px;font-weight:900}
-h1 span{color:var(--green);text-shadow:0 0 38px #7cff9b22}
-.hero-copy{font-size:18px;line-height:1.65;color:#b6c8bb;max-width:570px}.hero-copy strong{color:var(--fg);font-weight:700}
-.hero-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:30px 0 25px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:13px 18px;border-radius:8px;font-size:13px;font-weight:850;transition:.2s;border:1px solid var(--line2)}
-.btn.primary{background:var(--green);color:#071009;border-color:var(--green);box-shadow:0 8px 28px #65ff8b20}.btn.primary:hover{background:#b1ffc0;transform:translateY(-2px)}
-.btn.ghost{color:var(--fg);background:#ffffff05}.btn.ghost:hover{border-color:var(--green);color:var(--green)}
-.trustline{display:flex;gap:18px;flex-wrap:wrap;color:var(--soft);font-size:11px;letter-spacing:.04em}.trustline span{display:flex;align-items:center;gap:6px}.check{color:var(--green);font-weight:900}
-.hero-visual{position:relative;min-width:0}.hero-visual:before{content:"";position:absolute;inset:12% 8%;background:#4cff7920;filter:blur(65px);border-radius:50%}
-.hero-frame{position:relative;border:1px solid #416448;border-radius:17px;background:linear-gradient(145deg,#15251a,#0c130e);padding:12px;box-shadow:0 25px 100px #0009,0 0 60px #4cff7910}
-.windowbar{height:28px;display:flex;align-items:center;gap:6px;padding:0 7px 9px;color:#7f9985;font-size:10px;letter-spacing:.1em}.dot{width:6px;height:6px;border-radius:50%;background:#42604a}
-.hero-shot{display:block;width:100%;height:auto;border-radius:9px;border:1px solid #ffffff12}
-.floating-tag{position:absolute;right:-18px;bottom:32px;background:#0e1b12;border:1px solid #4b7654;border-radius:9px;padding:11px 14px;box-shadow:0 12px 34px #0009;font-size:11px;color:var(--muted)}
-.floating-tag b{display:block;color:var(--green);font-size:13px;letter-spacing:.04em}
-.section{padding:90px 0;border-top:1px solid #ffffff10;position:relative}
-.section-head{display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:34px}
-.eyebrow{color:var(--green);font-size:10px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;margin:0 0 12px}
-h2{font-size:clamp(32px,4vw,48px);line-height:1.05;letter-spacing:-.05em;margin:0;font-weight:850}
-.section-intro{max-width:480px;color:var(--muted);font-size:14px;margin:0}
-.statstrip{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:12px;background:#0d1710;overflow:hidden;margin:10px 0 28px}
-.stat{padding:19px 20px;border-right:1px solid var(--line)}.stat:last-child{border:0}
-.stat .big{font-size:25px;font-weight:900;letter-spacing:-.05em;color:var(--green);display:block;line-height:1.2}.stat .small{font-size:10px;letter-spacing:.12em;color:var(--soft);text-transform:uppercase;font-weight:800}
-.note{font-size:11px;color:var(--soft);margin:12px 0 0}
-.cap-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-.cap{background:linear-gradient(145deg,#142219,#0d1510);border:1px solid var(--line);border-radius:13px;padding:24px;position:relative;overflow:hidden;min-height:270px;transition:.22s}
-.cap:hover{border-color:#5c9668;transform:translateY(-3px);box-shadow:0 18px 40px #0005}
-.cap:after{content:attr(data-no);position:absolute;right:18px;top:5px;font-size:74px;font-weight:950;color:#ffffff06;letter-spacing:-.08em}
-.cap-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;position:relative;z-index:1}
-.cap-icon{width:42px;height:42px;border:1px solid #426c4b;border-radius:10px;background:#193321;color:var(--green);display:grid;place-items:center}
-.cap-icon svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.cap-label{font-size:10px;color:var(--green);font-weight:900;letter-spacing:.16em}
-.cap h3{font-size:23px;letter-spacing:-.035em;margin:0 0 7px}.cap p{color:var(--muted);font-size:13px;margin:0 0 18px;max-width:490px}
-.feature-list{display:flex;flex-wrap:wrap;gap:7px}
-.feature-list span{font-size:10px;color:#c5d6c9;border:1px solid #2d4333;background:#0c160f;border-radius:5px;padding:5px 8px}
-.subfeatures{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
-.subfeature{padding:17px;border-left:2px solid var(--green2);background:#0c1510;border-radius:0 8px 8px 0}
-.subfeature b{display:block;font-size:12px;margin-bottom:5px}.subfeature p{margin:0;color:var(--soft);font-size:11px}
-.workflow{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0d1710}
-.step{padding:21px 17px;border-right:1px solid var(--line);position:relative}.step:last-child{border:0}
-.step-no{font-size:10px;color:var(--green);font-weight:900;letter-spacing:.15em}.step b{display:block;font-size:14px;margin:10px 0 5px}.step p{font-size:11px;color:var(--soft);margin:0}
-.showcase{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch}
-.show-card{border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#142119,#0c130e);padding:20px;overflow:hidden}
-.show-card img{width:100%;height:auto;display:block;border-radius:8px;border:1px solid #ffffff12}
-.show-card h3{font-size:19px;margin:18px 0 5px}.show-card p{font-size:12px;color:var(--muted);margin:0}
-.mascot-row{display:grid;grid-template-columns:.7fr 1.3fr;gap:24px;align-items:center;margin-top:18px;padding:22px;border:1px solid var(--line);border-radius:14px;background:#0d1710}
-.mascot-row img{width:100%;max-width:330px;display:block}.mascot-row h3{font-size:21px;margin:0 0 8px}.mascot-row p{color:var(--muted);font-size:13px;margin:0}
-.status-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.status{border:1px solid var(--line);border-radius:10px;padding:18px;background:#0d1710}
-.status .status-tag{display:inline-block;font-size:9px;letter-spacing:.12em;font-weight:900;padding:4px 7px;border-radius:4px;margin-bottom:12px}
-.status h3{font-size:15px;margin:0 0 6px}.status p{font-size:11px;color:var(--muted);margin:0}
-.built{color:var(--green);background:#153321}.verify{color:var(--amber);background:#332914}.planned{color:var(--blue);background:#14283a}
-.install{display:grid;grid-template-columns:1fr .8fr;gap:28px;align-items:center;border:1px solid #4a7652;border-radius:16px;background:radial-gradient(ellipse at 100% 0,#1c4428 0,transparent 55%),#0d1710;padding:35px}
-.install h2{font-size:38px}.install p{color:var(--muted);font-size:13px}.command{padding:16px;background:#050906;border:1px solid #36513b;border-radius:8px;color:var(--green);font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere}
-.command-label{font-size:9px;color:var(--soft);letter-spacing:.15em;font-weight:900;margin-bottom:8px}
-.doc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.doc{border:1px solid var(--line);border-radius:8px;padding:14px;background:#0c1510;color:var(--fg);font-size:12px}.doc:hover{border-color:var(--green)}.doc span{display:block;color:var(--soft);font-size:10px;margin-top:4px}
-.footer{padding:30px 0 50px;border-top:1px solid #ffffff10;display:flex;justify-content:space-between;gap:20px;color:var(--soft);font-size:11px}
-@media(max-width:850px){.hero{grid-template-columns:1fr;padding-top:50px;gap:34px}.hero-visual{max-width:700px}.section-head{display:block}.section-intro{margin-top:14px}.workflow{grid-template-columns:repeat(2,1fr)}.step{border-bottom:1px solid var(--line)}.subfeatures{grid-template-columns:1fr}.install{grid-template-columns:1fr}.doc-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:600px){.wrap{width:min(var(--max),calc(100% - 30px))}.topbar{height:64px}.nav{gap:12px;font-size:11px}.nav a:nth-child(1),.nav a:nth-child(2){display:none}.hero{padding:42px 0 58px;min-height:auto}.hero-copy{font-size:16px}h1{font-size:51px}.floating-tag{right:-5px;bottom:10px}.section{padding:62px 0}.statstrip{grid-template-columns:repeat(2,1fr)}.stat:nth-child(2){border-right:0}.stat:nth-child(-n+2){border-bottom:1px solid var(--line)}.cap-grid,.showcase,.status-grid{grid-template-columns:1fr}.cap{min-height:auto}.workflow{grid-template-columns:1fr}.step{border-right:0}.mascot-row{grid-template-columns:1fr}.mascot-row img{max-width:220px;margin:auto}.install{padding:22px}.install h2{font-size:31px}.footer{display:block}.footer span{display:block;margin-top:8px}}
+:root{color-scheme:dark;--bg:#070b08;--panel:#0e1610;--panel2:#121d15;--line:#22342a;--fg:#eef7f0;--muted:#a3b7a8;--green:#83ffa0;--green2:#3dd66a;--red:#ff9b8a;--ease:cubic-bezier(.2,.7,.2,1)}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;overflow-x:clip}
+body{background:var(--bg);color:var(--fg);font:18px/1.65 Inter,ui-sans-serif,-apple-system,"SF Pro Text","Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:clip}
+a{color:var(--green);text-decoration:none}
+img{max-width:100%;display:block}
+.wrap{width:min(1120px,100% - 48px);margin-inline:auto}
+#prog{position:fixed;inset:0 0 auto 0;height:2px;background:var(--green);transform:scaleX(0);transform-origin:0 50%;z-index:60}
 
+/* nav */
+.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:#070b08cc;border-bottom:1px solid #22342a80}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+.brand{display:flex;align-items:center;gap:10px;color:var(--fg);font-weight:800;letter-spacing:.12em;font-size:14px}
+.brand img{width:28px;height:28px}
+.links{display:flex;align-items:center;gap:28px;font-size:15px}
+.links a{color:var(--muted);transition:color .2s}.links a:hover{color:var(--green)}
+.links .gh{color:var(--green);border:1px solid var(--line);padding:8px 14px;border-radius:8px;white-space:nowrap}
 
-/* offer layer */
-.pains{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.pain{border:1px solid #2c4a33;border-radius:18px;padding:30px;background:linear-gradient(160deg,#142219,#0b130e);position:relative;overflow:hidden}
-.pain:before{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);opacity:.55}
-.pain b{display:block;font-size:13px;letter-spacing:.18em;color:#ff9b8a;font-weight:900;margin-bottom:14px}
-.pain h3{font-size:26px;line-height:1.15;margin:0 0 12px;letter-spacing:-.02em}.pain p{color:var(--muted);font-size:17px;line-height:1.6;margin:0}
-.stack{border:1px solid #3a6a45;border-radius:22px;background:linear-gradient(150deg,#142219,#0a120d);box-shadow:0 30px 80px #0008,0 0 0 1px #83ffa012 inset;overflow:hidden}
-.stackrow{display:grid;grid-template-columns:44px 1fr auto;gap:18px;align-items:center;padding:22px 30px;border-bottom:1px solid var(--line)}
-.stackrow .n{width:34px;height:34px;border-radius:50%;border:1px solid var(--green);color:var(--green);display:grid;place-items:center;font-size:14px;font-weight:800}
-.stackrow h3{margin:0 0 4px;font-size:21px;letter-spacing:-.01em}.stackrow p{margin:0;color:var(--muted);font-size:16px;line-height:1.5}
-.stackrow .tag{font-size:13px;letter-spacing:.14em;font-weight:900;color:var(--green)}
-.stacktotal{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;padding:30px;background:#0d1d12}
-.stacktotal .price{font-size:clamp(40px,6vw,64px);font-weight:900;letter-spacing:-.04em;color:var(--green);line-height:1}
-.stacktotal p{margin:0;color:var(--muted);font-size:17px;max-width:420px;line-height:1.5}
-.guar{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
-.guar div{border:1px solid var(--line);border-radius:14px;padding:22px;background:var(--panel)}
-.guar b{display:block;color:var(--green);font-size:15px;margin-bottom:8px}.guar span{color:var(--muted);font-size:16px;line-height:1.5}
-.faq{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.faq div{border:1px solid var(--line);border-radius:16px;padding:26px;background:var(--panel)}
-.faq h3{margin:0 0 10px;font-size:20px;letter-spacing:-.01em}.faq p{margin:0;color:var(--muted);font-size:17px;line-height:1.6}
-@media(max-width:850px){.pains,.guar,.faq{grid-template-columns:1fr 1fr}.stackrow{grid-template-columns:40px 1fr}.stackrow .tag{display:none}}
-@media(max-width:600px){.pains,.guar,.faq{grid-template-columns:1fr}.stackrow{padding:18px}.stacktotal{padding:22px}}
-@media(max-width:600px){.nav a[href="ROADMAP.md"],.nav a[href="#ecosystem"],.nav a[href="#interface"]{display:none}}
-/* readability */
-.kicker,.eyebrow,.cap-label,.status .status-tag,.command-label{font-size:13px!important}
-.note{font-size:14px!important}.feature-list span{font-size:15px!important}
-.step-no,.stat .small{font-size:13px!important}
-</style>
-<style id="premium">
-:root{--ease:cubic-bezier(.2,.7,.2,1)}
-body{font-feature-settings:"ss01","cv11";-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-::selection{background:#83ffa0;color:#06100a}
-.wrap{--max:1240px}
-.topbar{position:sticky;top:0;z-index:20;background:#080d0acc;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid #ffffff0d;margin:0 -22px;padding:0 22px}
-.brandmark{padding:0;overflow:hidden;background:#0f2015}.brandmark img{width:100%;height:100%;object-fit:cover;object-position:50% 12%;display:block}
-.hero{padding:96px 0 110px;min-height:700px;gap:56px}
-h1{font-size:clamp(54px,7.2vw,104px);line-height:.93;letter-spacing:-.07em;margin:26px 0 26px}
-h1 span{background:linear-gradient(100deg,#b6ffc7,#4ee07a 60%,#2fbf5c);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none}
-.hero-copy{font-size:19px;max-width:560px}
-.btn{padding:15px 22px;font-size:14px;transition:transform .25s var(--ease),background .25s,border-color .25s,box-shadow .25s}
-.btn.primary{box-shadow:0 10px 36px #5dff8730,inset 0 1px 0 #ffffff55}.btn.primary:hover{box-shadow:0 16px 48px #5dff8750}
-.btn:active{transform:translateY(0) scale(.98)}
-.hero-frame{transition:transform .5s var(--ease);transform:perspective(1200px) rotateY(-3deg) rotateX(1deg)}
-.hero-visual:hover .hero-frame{transform:perspective(1200px) rotateY(0) rotateX(0)}
-.hero-visual:before{inset:6% 0;background:#4cff7930;filter:blur(90px)}
-.section{padding:120px 0}
-.section-head{margin-bottom:48px}
-h2{font-size:clamp(38px,5vw,64px);line-height:1;letter-spacing:-.06em}
-.eyebrow{display:inline-flex;align-items:center;gap:10px}.eyebrow:before{content:"";width:22px;height:2px;background:var(--green);border-radius:2px}
-.statstrip{background:linear-gradient(145deg,#0f1a13,#0b130e);border-radius:16px}.stat{padding:26px 24px}.stat .big{font-size:38px}
-.cap{border-radius:18px;padding:30px;min-height:300px;transition:transform .35s var(--ease),border-color .3s,box-shadow .35s}
-.cap:before,.show-card:before{content:"";position:absolute;inset:0;background:radial-gradient(420px circle at var(--mx,50%) var(--my,0%),#5dff8718,transparent 60%);opacity:0;transition:opacity .3s;pointer-events:none}
-.cap:hover:before,.show-card:hover:before{opacity:1}.show-card{position:relative;border-radius:18px}
-.cap h3{font-size:26px}.cap p{font-size:14px}
-.workflow,.mascot-row,.status{border-radius:16px}
-.status{transition:transform .3s var(--ease),border-color .3s}.status:hover{transform:translateY(-3px);border-color:#4a7652}
-.doc{border-radius:12px;padding:18px;transition:transform .25s var(--ease),border-color .25s,background .25s}.doc:hover{transform:translateY(-3px);background:#112016}
-.install{border-radius:24px;padding:56px}.install h2{font-size:clamp(34px,4vw,52px)}
-.command{font-size:13px;padding:20px;border-radius:12px;box-shadow:inset 0 0 0 1px #5dff8710}
-.footer{display:grid;grid-template-columns:1fr auto;gap:18px 30px;padding:44px 0 56px;font-size:12px;align-items:start}
-.footer .fbrand{display:flex;align-items:center;gap:12px;color:var(--fg);font-weight:800;letter-spacing:.14em}
-.footer .fbrand img{width:34px;height:34px;border-radius:9px;object-fit:cover;object-position:50% 12%;border:1px solid #416448}
-.footer .rights{grid-column:1/-1;border-top:1px solid #ffffff10;padding-top:22px;color:var(--soft);line-height:1.8}
-.footer .rights b{color:var(--fg);font-weight:700}
-.js .rv{opacity:0;transform:translateY(26px);transition:opacity .8s var(--ease),transform .8s var(--ease);transition-delay:var(--d,0ms)}
-.js .rv.in{opacity:1;transform:none}
-@media(max-width:850px){.section{padding:80px 0}.hero{padding:56px 0 70px;min-height:auto}.hero-frame{transform:none}.install{padding:30px}.footer{grid-template-columns:1fr}.topbar{margin:0 -15px;padding:0 15px}}
-@media(prefers-reduced-motion:reduce){.js .rv{opacity:1;transform:none;transition:none}.hero-frame,.btn,.cap,.status,.doc{transition:none}.hero-frame{transform:none}html{scroll-behavior:auto}}
-/* motion layer */
-#prog{position:fixed;top:0;left:0;height:2px;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,#2ee66f,#83ffa0);z-index:50;box-shadow:0 0 12px #2ee66f}
-.hero{position:relative}
-.hero::before{content:"";position:absolute;inset:-10% -10% auto auto;width:640px;height:640px;background:radial-gradient(circle,#2ee66f2e,transparent 65%);filter:blur(30px);pointer-events:none;animation:drift 14s ease-in-out infinite alternate;z-index:0}
-.hero>*{position:relative;z-index:1}
-@keyframes drift{to{transform:translate(-120px,80px) scale(1.15)}}
-.hero h1 .w{display:inline-block;opacity:0;transform:translateY(.5em) rotate(2deg);animation:wd .9s var(--ease) forwards;animation-delay:calc(var(--i)*110ms + 150ms)}
-@keyframes wd{to{opacity:1;transform:none}}
-.hero h1 span.w{background:linear-gradient(100deg,#2ee66f 20%,#d6ffe0 45%,#2ee66f 70%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:wd .9s var(--ease) forwards,shine 4s linear 1.4s infinite;animation-delay:calc(var(--i)*110ms + 150ms),1.4s}
-@keyframes shine{to{background-position:-250% 0}}
-.hero-frame{animation:float 7s ease-in-out infinite}
-@keyframes float{50%{translate:0 -10px}}
-.btn.primary{position:relative;overflow:hidden}
-.btn.primary::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,#ffffff55,transparent);transform:skewX(-20deg);animation:sweep 3.6s ease-in-out 1.6s infinite}
-@keyframes sweep{60%,100%{left:140%}}
-.pulse{animation:pl 1.8s ease-out infinite}
-@keyframes pl{0%{box-shadow:0 0 0 0 #2ee66f99}100%{box-shadow:0 0 0 12px #2ee66f00}}
-.stat .big{font-variant-numeric:tabular-nums}
-.cap,.show-card,.doc{transition:transform .35s var(--ease),border-color .35s,box-shadow .35s}
-.cap:hover,.show-card:hover,.doc:hover{transform:translateY(-6px);box-shadow:0 18px 50px -20px #2ee66f55}
-.brandmark img{animation:bob 3s ease-in-out infinite}
-@keyframes bob{50%{transform:translateY(-2px) scale(1.06)}}
-@media(prefers-reduced-motion:reduce){#prog,.hero::before,.btn.primary::after{display:none}.hero h1 .w,.hero h1 span.w{opacity:1;transform:none;animation:none;-webkit-text-fill-color:initial;background:none;color:#2ee66f}.hero-frame,.pulse,.brandmark img{animation:none}}
-.eco{display:grid;grid-template-columns:.7fr 1.3fr;gap:36px;align-items:center;border:1px solid #2c4a33;border-radius:18px;background:radial-gradient(ellipse at 0 0,#1a3d24 0,transparent 55%),#0b130e;padding:34px}
-.eco-photo{position:relative;aspect-ratio:1;border-radius:16px;overflow:hidden;border:1px solid #416448}
-.eco-photo img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 1.2s var(--ease)}.eco:hover .eco-photo img{transform:scale(1.05)}
-.eco-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,#050806cc)}
-.eco-links{display:grid;gap:10px;margin-top:22px}
-.eco-link{display:flex;justify-content:space-between;align-items:center;gap:14px;border:1px solid var(--line);border-radius:12px;padding:15px 18px;background:#0c1510;color:var(--fg);transition:transform .3s var(--ease),border-color .3s,background .3s}
-.eco-link:hover{transform:translateX(6px);border-color:var(--green);background:#112016}
-.eco-link b{display:block;font-size:14px;letter-spacing:.04em}.eco-link span{font-size:12px;color:var(--soft)}.eco-link i{font-style:normal;color:var(--green)}
-.eco h2{margin:0 0 12px}
-@media(max-width:850px){.eco{grid-template-columns:1fr;padding:22px}.eco-photo{max-width:320px}}
-.mission{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center}
-.mission blockquote{margin:0;font-size:clamp(22px,2.6vw,32px);line-height:1.35;font-weight:700;letter-spacing:-.01em;border-left:3px solid var(--green);padding-left:26px}
-.mission blockquote span{color:var(--green)}.mission cite{display:block;margin-top:18px;font-size:12px;font-style:normal;color:var(--soft);letter-spacing:.1em}
-.mission p{color:var(--soft);line-height:1.75}
-.steps{list-style:none;padding:0;margin:22px 0 0;display:grid;gap:10px;counter-reset:s}
-.steps li{counter-increment:s;display:flex;gap:14px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:13px 16px;background:#0c1510;transition:transform .3s var(--ease),border-color .3s}
-.steps li:hover{transform:translateX(6px);border-color:var(--green)}
-.steps li:before{content:"0" counter(s);color:var(--green);font-weight:800;font-size:12px}
-@media(max-width:850px){.mission{grid-template-columns:1fr;gap:26px}}
-/* bigger type, tighter space, mobile */
-html,body{overflow-x:clip}.hero{overflow:clip}
-.vocab{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.vc{border:1px solid #2c4a33;border-radius:16px;padding:26px;background:linear-gradient(150deg,#142219,#0b130e);transition:transform .3s var(--ease),border-color .3s}
-.vc:hover{transform:translateY(-6px);border-color:var(--green)}
-.vc .vi{color:var(--green);font-weight:900;font-size:13px;letter-spacing:.16em}
-.vc h3{font-size:28px;margin:10px 0 8px;letter-spacing:-.03em}.vc p{font-size:16px;line-height:1.6;color:var(--muted);margin:0}
-body{font-size:17px;line-height:1.65}
-.eyebrow{font-size:13px}.cap-label,.step-no,.stat .small{font-size:12px}
-.section-intro{font-size:18px;max-width:520px}.hero-copy{font-size:20px}
-.cap p{font-size:17px;max-width:none}.cap h3{font-size:28px}.feature-list span{font-size:13px;padding:6px 10px}
-.step b{font-size:19px}.step p{font-size:15px}.stat .big{font-size:38px}
-.show-card h3{font-size:24px}.show-card p,.mascot-row p,.install p,.status p{font-size:16px}.status h3,.mascot-row h3{font-size:22px}
-.doc{font-size:15px}.trustline{font-size:14px}.subfeature b{font-size:15px}.subfeature p{font-size:14px}
-.nav{font-size:14px}.footer{font-size:14px}.btn{font-size:16px;padding:16px 24px}
-.section{padding:68px 0}.section-head{margin-bottom:32px}.cap{min-height:0}.hero{min-height:auto;padding:60px 0 68px}
-@media(max-width:850px){.vocab{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:600px){
-body{font-size:18px}.wrap{width:calc(100% - 32px)}
-.section{padding:48px 0}.section-head{margin-bottom:22px}.hero{padding:32px 0 44px;gap:26px}
-.hero h1{font-size:clamp(52px,16vw,72px);line-height:.98}.hero-copy{font-size:19px}
-.hero-actions{flex-direction:column}.hero-actions .btn{width:100%;justify-content:center;text-align:center;min-height:52px}
-.section h2,.install h2{font-size:clamp(34px,10vw,44px);line-height:1.05}
-.vocab{grid-template-columns:1fr}.vc{padding:22px}.vc h3{font-size:26px}
-.cap{padding:22px}.cap-grid,.show-grid,.doc-grid,.status-grid{grid-template-columns:1fr!important}
-.statstrip{grid-template-columns:repeat(2,1fr)}.stat .big{font-size:34px}
-.workflow{grid-template-columns:1fr}.step{padding:20px}
-.mascot-row{grid-template-columns:1fr;padding:22px}.mascot-row img{max-width:100%}
-.install{padding:24px}.command{font-size:12px}
-.eco-link{padding:16px}.nav a:nth-child(3){display:none}.navcta{white-space:nowrap;padding:8px 12px}.brand{font-size:12px}.nav{gap:14px}
-.footer .rights{font-size:14px}
+/* type */
+h1,h2,h3{letter-spacing:-.03em;line-height:1.08;font-weight:800}
+h1{font-size:clamp(44px,7vw,84px)}
+h2{font-size:clamp(34px,4.6vw,54px)}
+h3{font-size:22px;letter-spacing:-.015em;line-height:1.25}
+.eyebrow{display:flex;align-items:center;gap:12px;font-size:13px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--green);margin-bottom:18px}
+.eyebrow:before{content:"";width:24px;height:2px;background:var(--green);border-radius:2px}
+.lead{font-size:clamp(18px,2vw,21px);color:var(--muted);max-width:620px}
+.green{color:var(--green)}
+
+/* layout */
+section{padding:104px 0;position:relative}
+.head{max-width:700px;margin-bottom:52px}.head .lead{margin-top:18px}
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+.card{border:1px solid var(--line);background:linear-gradient(160deg,var(--panel2),var(--panel));border-radius:20px;padding:32px;transition:transform .35s var(--ease),border-color .35s,box-shadow .35s;position:relative;overflow:hidden}
+.card:hover{transform:translateY(-4px);border-color:#3a6a45;box-shadow:0 24px 60px #0007}
+.card p{color:var(--muted);margin-top:12px;font-size:17px}
+.tag{display:block;font-size:13px;font-weight:800;letter-spacing:.16em;color:var(--red);margin-bottom:16px}
+.tag.g{color:var(--green)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:16px 26px;border-radius:12px;font-weight:700;font-size:17px;border:1px solid var(--line);color:var(--fg);transition:transform .25s var(--ease),box-shadow .25s,border-color .25s;position:relative;overflow:hidden}
+.btn:hover{transform:translateY(-2px);border-color:#46724e}
+.btn.primary{background:var(--green);color:#04110a;border-color:var(--green);box-shadow:0 10px 40px #83ffa033}
+.btn.primary:hover{box-shadow:0 14px 54px #83ffa055}
+.btn.primary:after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,#fff7 50%,transparent 65%);transform:translateX(-120%);animation:shine 4.5s 1.5s infinite}
+@keyframes shine{to{transform:translateX(120%)}}
+
+/* hero */
+.hero{padding:88px 0 96px;overflow:hidden}
+.hero:before{content:"";position:absolute;width:760px;height:760px;right:-220px;top:-260px;background:radial-gradient(circle,#83ffa022,transparent 65%);animation:drift 16s ease-in-out infinite alternate;pointer-events:none}
+@keyframes drift{to{transform:translate(-80px,90px) scale(1.12)}}
+.hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:10px;border:1px solid #3a6a45;background:#0e2014;color:var(--green);font-size:13px;font-weight:800;letter-spacing:.14em;padding:8px 14px;border-radius:99px;margin-bottom:26px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 #83ffa088;animation:pl 2s infinite}
+@keyframes pl{70%{box-shadow:0 0 0 10px #83ffa000}100%{box-shadow:0 0 0 0 #83ffa000}}
+.hero h1 span{display:block;color:var(--green)}
+.hero .lead{margin:26px 0 34px}
+.cta{display:flex;gap:14px;flex-wrap:wrap}
+.trust{display:flex;gap:10px 26px;flex-wrap:wrap;margin-top:34px;color:var(--muted);font-size:15px}
+.trust b{color:var(--green);margin-right:6px}
+.frame{border:1px solid #2f5a3a;border-radius:20px;background:#0a120d;box-shadow:0 40px 100px #000a,0 0 80px #83ffa014;overflow:hidden;animation:float 7s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-10px)}}
+.bar{display:flex;gap:7px;padding:13px 16px;border-bottom:1px solid var(--line);align-items:center;font-size:12px;color:#6f8576;letter-spacing:.12em}
+.bar i{width:10px;height:10px;border-radius:50%;background:#2a3d30}
+.frame img.shot{padding:18px}
+
+/* stats */
+.stats{border-block:1px solid var(--line);background:#0a110c;padding:0}
+.stats .wrap{display:grid;grid-template-columns:repeat(4,1fr)}
+.stat{padding:34px 24px;border-left:1px solid var(--line)}.stat:first-child{border-left:0;padding-left:0}
+.stat b{display:block;font-size:clamp(34px,4vw,48px);letter-spacing:-.03em;color:var(--green);line-height:1.1}
+.stat span{color:var(--muted);font-size:15px}
+
+/* how */
+.num{font-size:15px;font-weight:800;color:var(--green);letter-spacing:.14em;margin-bottom:16px;display:block}
+
+/* showcase */
+.show{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:stretch}
+.show .card{padding:0;display:flex;flex-direction:column}
+.show .card .cap{padding:26px 30px}.show .card img{background:#0a120d;padding:18px}
+.show .card h3{font-size:20px}.show .card p{margin-top:8px;font-size:16px}
+
+/* offer */
+.stack{border:1px solid #3a6a45;border-radius:24px;background:linear-gradient(150deg,var(--panel2),#09110b);box-shadow:0 30px 90px #0008;overflow:hidden}
+.row{display:grid;grid-template-columns:40px 1fr auto;gap:20px;align-items:center;padding:24px 32px;border-bottom:1px solid var(--line);transition:background .3s}
+.row:hover{background:#142319}
+.row .n{width:34px;height:34px;border-radius:50%;border:1px solid var(--green);color:var(--green);display:grid;place-items:center;font-size:14px;font-weight:800}
+.row h3{font-size:21px}.row p{color:var(--muted);font-size:16px;margin-top:4px;line-height:1.5}
+.row .inc{font-size:13px;font-weight:800;letter-spacing:.14em;color:var(--green)}
+.total{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;padding:34px 32px;background:#0c1d11}
+.total .price{font-size:clamp(40px,6vw,66px);font-weight:900;letter-spacing:-.04em;color:var(--green);line-height:1}
+.total p{color:var(--muted);max-width:400px;font-size:17px;line-height:1.5}
+.guar{margin-top:18px}.guar .card{padding:24px}.guar h3{font-size:18px;color:var(--green)}.guar p{font-size:16px;margin-top:6px}
+
+/* faq */
+.faq .card{padding:28px}.faq h3{font-size:20px}
+
+/* install */
+.install{border:1px solid #3a6a45;border-radius:26px;padding:56px;background:radial-gradient(120% 140% at 0 0,#14301c,#0a120d 60%);display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.install .lead{margin-top:16px}
+.cmd{border:1px solid var(--line);background:#050806;border-radius:14px;padding:20px 22px;font:15px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--green);word-break:break-all;position:relative}
+.cmd small{display:block;color:#6f8576;letter-spacing:.14em;font-size:12px;margin-bottom:8px;font-family:inherit}
+.copy{margin-top:14px;width:100%;cursor:pointer;background:transparent;font:inherit;font-weight:700}
+.step2{color:var(--muted);font-size:15px;margin-top:14px}.step2 code{color:var(--green)}
+
+/* creator */
+.maker{display:grid;grid-template-columns:340px 1fr;gap:56px;align-items:center}
+.maker img{border-radius:24px;border:1px solid #2f5a3a;box-shadow:0 30px 80px #000a;aspect-ratio:1;object-fit:cover;width:100%}
+.maker blockquote{font-size:clamp(22px,2.6vw,30px);line-height:1.35;letter-spacing:-.02em;font-weight:700;margin:22px 0 10px}
+.maker blockquote span{color:var(--green)}
+.who{color:var(--muted);font-size:15px;letter-spacing:.14em;font-weight:700}
+.sites{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.sites a{border:1px solid var(--line);border-radius:12px;padding:12px 18px;font-weight:600;font-size:16px;transition:border-color .25s,transform .25s}
+.sites a:hover{border-color:#46724e;transform:translateY(-2px)}
+
+/* footer */
+footer{border-top:1px solid var(--line);padding:40px 0;color:var(--muted);font-size:15px}
+footer .wrap{display:flex;justify-content:space-between;gap:16px 30px;flex-wrap:wrap;align-items:center}
+footer .brand{font-size:13px}
+
+/* reveal */
+html.js .rv{opacity:0;transform:translateY(26px);transition:opacity .8s var(--ease),transform .8s var(--ease);transition-delay:calc(var(--i,0)*90ms)}
+html.js .rv.in{opacity:1;transform:none}
+
+/* tablet */
+@media(max-width:960px){
+.hero .wrap,.show,.install,.maker{grid-template-columns:1fr}
+.maker img{max-width:300px}
+.g3,.g4{grid-template-columns:1fr 1fr}
+.stats .wrap{grid-template-columns:1fr 1fr}.stat:nth-child(3){border-left:0;padding-left:0}.stat{border-top:1px solid var(--line)}.stat:nth-child(-n+2){border-top:0}
+.install{padding:40px}
 }
+/* phone */
+@media(max-width:640px){
+body{font-size:17px}
+.wrap{width:calc(100% - 32px)}
+section{padding:64px 0}.hero{padding:44px 0 56px}.head{margin-bottom:34px}
+.links a:not(.gh){display:none}
+.g2,.g3,.g4{grid-template-columns:1fr}
+.card{padding:24px}
+.cta .btn{width:100%}
+.row{grid-template-columns:36px 1fr;padding:20px}.row .inc{display:none}
+.total{padding:24px}
+.install{padding:28px 22px;border-radius:20px}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}html.js .rv{opacity:1;transform:none}}
 </style>
-
+<script>document.documentElement.classList.add('js')</script>
 </head>
 <body>
-<div class="wrap">
-<nav class="topbar">
-<a class="brand" href="#"><span class="brandmark"><img src="img/mascot.svg" alt=""></span> TOKEN ZOMBIE</a>
-<div class="nav"><a href="#capabilities">Features</a><a href="#offer">What you get</a><a href="#interface">Interface</a><a href="#mission">Mission</a><a href="#ecosystem">Creator</a><a href="ROADMAP.md">Roadmap</a><a href="https://github.com/rishavm713-create/token-zombie" class="navcta">GitHub ↗</a></div>
-</nav>
+<div id="prog"></div>
 
-<header class="hero">
+<nav class="nav"><div class="wrap">
+<a class="brand" href="#top"><img src="img/mascot.svg" alt="">TOKEN ZOMBIE</a>
+<div class="links"><a href="#how">How it works</a><a href="#offer">What you get</a><a href="#faq">FAQ</a><a href="#maker">Creator</a><a class="gh" href="https://github.com/rishavm713-create/token-zombie">GitHub ↗</a></div>
+</div></nav>
+
+<header class="hero" id="top"><div class="wrap">
 <div>
-<div class="kicker"><span class="pulse"></span> FREE · LOCAL · OPEN SOURCE</div>
-<h1>Make every<br>single token<br><span>count.</span></h1>
-<p class="hero-copy"><strong>Stop Claude Code from wasting tokens.</strong> TOKEN ZOMBIE shows where your tokens go, warns you before a chat runs out, and saves your place so a new chat can continue the work.</p>
-<div class="hero-actions"><a class="btn primary" href="#install">↳ Install free</a><a class="btn ghost" href="https://github.com/rishavm713-create/token-zombie">Explore the repository ↗</a></div>
-<div class="trustline"><span><b class="check">✓</b> Local-first</span><span><b class="check">✓</b> No telemetry</span><span><b class="check">✓</b> Never blocks you</span><span><b class="check">✓</b> MIT licensed</span></div>
+<div class="pill rv"><span class="dot"></span>FREE · LOCAL · OPEN SOURCE</div>
+<h1 class="rv" style="--i:1">Stop paying for tokens<span>Claude Code wastes.</span></h1>
+<p class="lead rv" style="--i:2">TOKEN ZOMBIE finds the repeated reads, looping sub-agents and runaway chats that eat your usage limit. It warns you early and saves your place, so a fresh chat picks up exactly where you stopped.</p>
+<div class="cta rv" style="--i:3"><a class="btn primary" href="https://github.com/rishavm713-create/token-zombie">Install free</a><a class="btn" href="https://github.com/rishavm713-create/token-zombie">View on GitHub</a></div>
+<div class="trust rv" style="--i:4"><span><b>✓</b>No telemetry</span><span><b>✓</b>Never blocks your chat</span><span><b>✓</b>MIT licence</span></div>
 </div>
-<div class="hero-visual">
-<div class="hero-frame"><div class="windowbar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span style="margin-left:8px">TOKEN ZOMBIE / IN CLAUDE CODE</span></div><img class="hero-shot" src="img/toolbar-live.svg" alt="TOKEN ZOMBIE toolbar in Claude Code with animated mascot"></div>
+<div class="frame rv" style="--i:3"><div class="bar"><i></i><i></i><i></i><span style="margin-left:8px">CLAUDE CODE</span></div><img class="shot" src="img/toolbar-live.svg" alt="TOKEN ZOMBIE toolbar inside Claude Code"></div>
+</div></header>
+
+<div class="stats"><div class="wrap">
+<div class="stat rv"><b>$0</b><span>Free, forever</span></div>
+<div class="stat rv" style="--i:1"><b>0</b><span>AI calls it makes</span></div>
+<div class="stat rv" style="--i:2"><b>100%</b><span>Runs on your computer</span></div>
+<div class="stat rv" style="--i:3"><b>1</b><span>Command to install</span></div>
+</div></div>
+
+<section id="problem"><div class="wrap">
+<div class="head rv"><p class="eyebrow">The problem</p><h2>Long chats quietly burn your limit.</h2><p class="lead">You hit the weekly limit and cannot tell where it went. Three leaks cause most of it.</p></div>
+<div class="grid g3">
+<div class="card rv"><span class="tag">LEAK 01</span><h3>The same file, read again and again</h3><p>Claude re-reads files and re-runs commands it already has. Every repeat is paid for, and re-sent with every later step.</p></div>
+<div class="card rv" style="--i:1"><span class="tag">LEAK 02</span><h3>Helpers that repeat each other</h3><p>Sub-agents duplicate work, stall or retry the same thing. You pay for effort that never moved the task forward.</p></div>
+<div class="card rv" style="--i:2"><span class="tag">LEAK 03</span><h3>The chat fills up and the work is lost</h3><p>When the context runs out, the thread of the task goes with it. You restart and spend tokens explaining it all again.</p></div>
+</div></div></section>
+
+<section id="how" style="background:#0a110c;border-block:1px solid var(--line)"><div class="wrap">
+<div class="head rv"><p class="eyebrow">How it works</p><h2>Find the zombies. Stop the infection.</h2><p class="lead">Wasted work behaves like a zombie: it keeps moving, never finishes, and spreads. TOKEN ZOMBIE hunts it in four steps.</p></div>
+<div class="grid g4">
+<div class="card rv"><span class="num">01 · DETECT</span><h3>Find the zombies</h3><p>Flags repeated reads and sub-agents that duplicate or stall.</p></div>
+<div class="card rv" style="--i:1"><span class="num">02 · CONTAIN</span><h3>Stop the infection</h3><p>Trims noisy tool output. The original is kept and can be recalled.</p></div>
+<div class="card rv" style="--i:2"><span class="num">03 · WARN</span><h3>Survive the session</h3><p>Warns you before the chat runs out, while there is still time to save the work.</p></div>
+<div class="card rv" style="--i:3"><span class="num">04 · REVIVE</span><h3>Pick up where you stopped</h3><p>A short handoff note lets a fresh chat continue without re-explaining.</p></div>
+</div></div></section>
+
+<section id="see"><div class="wrap">
+<div class="head rv"><p class="eyebrow">See it</p><h2>The numbers, right where you work.</h2><p class="lead">A small bar inside Claude Code for quick signals, and a dashboard for the details.</p></div>
+<div class="show">
+<div class="card rv"><img src="img/dashboard.png" alt="TOKEN ZOMBIE dashboard" loading="lazy"><div class="cap"><h3>Dashboard</h3><p>Usage, savings and warnings on one page. Opens on your computer only.</p></div></div>
+<div class="card rv" style="--i:1"><img src="img/mascot-states.png" alt="Zombie mascot states: idle, working, excited, alert, sleep" loading="lazy"><div class="cap"><h3>The zombie tells you the state</h3><p>Idle, working, excited, alert or asleep, so you know at a glance when to act.</p></div></div>
+</div></div></section>
+
+<section id="offer" style="background:#0a110c;border-block:1px solid var(--line)"><div class="wrap">
+<div class="head rv"><p class="eyebrow">What you get</p><h2>All you need to stop the waste.</h2><p class="lead">One install. Five tools working together. Nothing to configure before it starts helping.</p></div>
+<div class="stack rv">
+<div class="row"><span class="n">1</span><div><h3>Token usage you can read</h3><p>See where each chat spends. Measured numbers are kept apart from estimates.</p></div><span class="inc">INCLUDED</span></div>
+<div class="row"><span class="n">2</span><div><h3>Zombie detection</h3><p>Flags repeated reads and sub-agents that duplicate or stall, so you can stop them early.</p></div><span class="inc">INCLUDED</span></div>
+<div class="row"><span class="n">3</span><div><h3>Output trimming with recall</h3><p>Long tool output is cut down, and the original is always kept.</p></div><span class="inc">INCLUDED</span></div>
+<div class="row"><span class="n">4</span><div><h3>Save-your-place handoffs</h3><p>A short note and checkpoints, so a fresh chat continues without re-explaining.</p></div><span class="inc">INCLUDED</span></div>
+<div class="row" style="border-bottom:0"><span class="n">5</span><div><h3>Toolbar, dashboard and commands</h3><p>A bar in Claude Code, a dashboard and a command line, all showing the same numbers.</p></div><span class="inc">INCLUDED</span></div>
+<div class="total"><div class="price">Free. Forever.</div><p>Open source under the MIT licence. No account, no subscription, no upsell.</p><a class="btn primary" href="https://github.com/rishavm713-create/token-zombie">Install free</a></div>
 </div>
-</header>
+<div class="grid g4 guar">
+<div class="card rv"><h3>Never blocks you</h3><p>It advises. It does not stop or rewrite your chat.</p></div>
+<div class="card rv" style="--i:1"><h3>Stays on your computer</h3><p>No telemetry and no network calls in the core.</p></div>
+<div class="card rv" style="--i:2"><h3>Nothing is lost</h3><p>Trimmed output is kept and can be recalled.</p></div>
+<div class="card rv" style="--i:3"><h3>Easy to undo</h3><p>A written <a href="https://github.com/rishavm713-create/token-zombie#install">rollback guide</a> removes it cleanly.</p></div>
+</div></div></section>
 
-<section class="section" id="problem">
-<div class="section-head"><div><p class="eyebrow">THE PROBLEM</p><h2>Long chats quietly<br>burn your limit.</h2></div><p class="section-intro">You hit the weekly limit and cannot tell where it went. Three leaks cause most of it.</p></div>
-<div class="pains">
-<div class="pain"><b>LEAK 01</b><h3>The same file, read again and again</h3><p>Claude re-reads files and re-runs commands it already has. Every repeat is paid for, and every repeat is sent again with each step.</p></div>
-<div class="pain"><b>LEAK 02</b><h3>Helpers that repeat each other</h3><p>Sub-agents duplicate work, stall, or retry the same thing. You pay for effort that never moved the task forward.</p></div>
-<div class="pain"><b>LEAK 03</b><h3>The chat fills up and the work is lost</h3><p>When the context runs out, the thread of the task goes with it. You restart and spend tokens explaining it all again.</p></div>
-</div>
-</section>
-<section class="section" id="capabilities">
-<div class="section-head"><div><p class="eyebrow">WHAT IT DOES</p><h2>More than a token counter.</h2></div><p class="section-intro">Five jobs, one tool: count the waste, catch the zombies, trim the noise, save your work, and show it all in one place.</p></div>
-<div class="statstrip">
-<div class="stat"><span class="big">18</span><span class="small">Events it watches</span></div>
-<div class="stat"><span class="big">5</span><span class="small">Core features</span></div>
-<div class="stat"><span class="big">Local</span><span class="small">Data stays on your computer</span></div>
-<div class="stat"><span class="big">0</span><span class="small">AI calls it makes</span></div>
-</div>
-<p class="note">The 18 is the number of Claude Code events it listens to. The five features are groups, not performance claims.</p>
+<section id="faq"><div class="wrap">
+<div class="head rv"><p class="eyebrow">Questions</p><h2>Straight answers.</h2></div>
+<div class="grid g2 faq">
+<div class="card rv"><h3>How much does it cost?</h3><p>Nothing. It is free and open source, and it stays that way.</p></div>
+<div class="card rv" style="--i:1"><h3>Does it send my data anywhere?</h3><p>No. It runs on your computer. The core makes no network or AI calls.</p></div>
+<div class="card rv"><h3>Will it break my chats?</h3><p>No. It gives advice and never blocks. Anything it trims can be recalled.</p></div>
+<div class="card rv" style="--i:1"><h3>How much will I save?</h3><p>It depends on how you work. Every saving shown is labelled <em>measured</em> or <em>estimate</em>. We have not yet run a full before-and-after test, so we do not promise a figure. See the <a href="LIMITATIONS.md">limits</a>.</p></div>
+</div></div></section>
 
-<div class="cap-grid" style="margin-top:26px">
-<article class="cap" data-no="01">
-<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 6-7"/></svg></span><span class="cap-label">COUNT</span></div>
-<h3>See where tokens go</h3><p>Find out what your chats spend, and which numbers are measured and which are only estimates.</p>
-<div class="feature-list"><span>5m / 1h cache split</span><span>Thinking-token estimate</span><span>Incremental transcript scan</span><span>SQLite usage ledger</span></div>
-</article>
-<article class="cap" data-no="02">
-<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 20c0-4 2-6 6-6s6 2 6 6M15 15c3-.5 6 1 6 4"/></svg></span><span class="cap-label">HUNT</span></div>
-<h3>Catch wasted work</h3><p>Spot sub-agents that repeat each other, get stuck, or retry the same thing again and again.</p>
-<div class="feature-list"><span>Agent start / stop / ID</span><span>Agent ROI flags</span><span>Duplicate / empty / small agent flags</span><span>Estimated stalled-agent signal</span></div>
-</article>
-<article class="cap" data-no="03">
-<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h10M4 19h7"/><path d="m17 10 3 2-3 2M14 17l3 2-3 2"/></svg></span><span class="cap-label">TRIM</span></div>
-<h3>Trim the noise</h3><p>Cut long tool output down to what matters. The original is kept, so you can always get it back.</p>
-<div class="feature-list"><span>Large-read nudges</span><span>Repeated-read detection</span><span>Output trimming</span><span>Recall original output</span></div>
-</article>
-<article class="cap" data-no="04">
-<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="cap-label">SAVE</span></div>
-<h3>Never lose your place</h3><p>Save the state of unfinished work, so a fresh chat can continue exactly where you stopped.</p>
-<div class="feature-list"><span>Project STATE.md</span><span>Session handoffs</span><span>Checkpoints</span><span>Resume verification</span></div>
-</article>
-<article class="cap" data-no="05" style="grid-column:1/-1;min-height:0">
-<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 22h8M12 18v4M7 9h4M7 13h7M17 9h.01"/></svg></span><span class="cap-label">SEE</span></div>
-<h3>Everything in one place</h3><p>A small bar in Claude Code, a dashboard and a command line all show the same numbers.</p>
-<div class="feature-list"><span>In-chat toolbar</span><span>Agent / skill / token / optimisation metrics</span><span>Expandable detail pane</span><span>OFF / LITE / FULL / ULTRA modes</span></div>
-</article>
-</div>
-<div class="subfeatures">
-<div class="subfeature"><b>Honest measurement</b><p>MEASURED, EST and UNKNOWN stay distinct. Real end-to-end A/B savings are not yet established.</p></div>
-<div class="subfeature"><b>Reversible by design</b><p>Supported output trims retain originals for recall. Install and recovery flows include rollback paths.</p></div>
-<div class="subfeature"><b>Local-first privacy</b><p>No telemetry, network calls or model calls inside core hooks. Local recall may contain tool output.</p></div>
-</div>
-</section>
+<section id="install" style="padding-top:0"><div class="wrap">
+<div class="install rv">
+<div><p class="eyebrow">Get started · free</p><h2>Stop paying for wasted tokens.</h2><p class="lead">One command. Restart Claude Code, run the status command, and you are covered.</p></div>
+<div><div class="cmd"><small>PLUGIN INSTALL</small><span id="cmd">/plugin install token-zombie --marketplace rishavm713-create/token-zombie</span></div><a class="btn primary copy" href="https://github.com/rishavm713-create/token-zombie">Get it on GitHub</a><p class="step2">Then run <code>/token-zombie:tz</code>. <a href="https://github.com/rishavm713-create/token-zombie#install">Full guide</a></p></div>
+</div></div></section>
 
-<section class="section">
-<div class="section-head"><div><p class="eyebrow">HOW IT WORKS</p><h2>Hunt the waste.<br>Survive the session.</h2></div><p class="section-intro">TOKEN ZOMBIE watches quietly, shows you the waste, and helps you act. It never takes over your chat.</p></div>
-<div class="workflow">
-<div class="step"><span class="step-no">01 / SCOUT</span><b>Capture signals</b><p>Hooks and local state record activity, usage and context signals.</p></div>
-<div class="step"><span class="step-no">02 / TRACE</span><b>Build the picture</b><p>Ledger, agent lifecycle, skill and instruction signals add context.</p></div>
-<div class="step"><span class="step-no">03 / HUNT</span><b>Hunt the zombies</b><p>Zombie work, repeated reads and agent loops become visible.</p></div>
-<div class="step"><span class="step-no">04 / SURVIVE</span><b>Stop the infection</b><p>Shadow trims, recall, checkpoints and compaction checks preserve work.</p></div>
-<div class="step"><span class="step-no">05 / REVIVE</span><b>Resume with context</b><p>Handoffs and STATE.md help the next chat pick up the task.</p></div>
-</div>
-</section>
+<section id="maker" style="background:#0a110c;border-top:1px solid var(--line)"><div class="wrap">
+<div class="maker">
+<img class="rv" src="img/rishav.webp" alt="Rishav Mishra, creator of TOKEN ZOMBIE" loading="lazy" width="900" height="900">
+<div class="rv" style="--i:1"><p class="eyebrow">Built by Rishav Mishra</p>
+<blockquote>“I built this because I hit the problem myself. I made it open source because I <span>don’t want access to the solution to become another limitation</span> for someone else.”</blockquote>
+<div class="who">RISHAV MISHRA, CREATOR</div>
+<div class="sites"><a href="https://rishavm713-create.github.io/">Portfolio ↗</a><a href="https://editsutra.github.io/">EditSutra ↗</a><a href="https://github.com/rishavm713-create/token-zombie/discussions">Discussions ↗</a></div></div>
+</div></div></section>
 
-<section class="section" id="interface">
-<div class="section-head"><div><p class="eyebrow">THE CONTROL ROOM</p><h2>See the system.<br>Not just the prompt.</h2></div><p class="section-intro">A small bar inside Claude Code for quick signals, and a dashboard for the details.</p></div>
-<div class="showcase">
-<div class="show-card"><img src="img/toolbar-live.svg" alt="TOKEN ZOMBIE toolbar"><h3>In-chat toolbar</h3><p>Agents, skills used, tokens saved (EST) and optimizations, above the prompt. Layout from a real capture; mascot animated.</p></div>
-</div>
-<div class="mascot-row"><img src="img/mascot-states.png" alt="TOKEN ZOMBIE mascot idle, working, excited, alert and sleep states"><div><p class="eyebrow">THE ZOMBIE SIGNAL</p><h3>A visual state for the workflow.</h3><p>The mascot shows what your session is doing: alert, excited, working, sleeping or idle. It stands for wasted resources, not for AI itself.</p><p style="margin-top:12px"><a href="PANEL.md">Explore the toolbar and panel details →</a></p></div></div>
-</section>
+<footer><div class="wrap">
+<span class="brand"><img src="img/mascot.svg" alt="">TOKEN ZOMBIE</span>
+<span>© 2026 Rishav Mishra. All rights reserved. · <a href="https://github.com/rishavm713-create/token-zombie/blob/main/LICENSE">MIT licence</a> · <a href="https://github.com/rishavm713-create/token-zombie">GitHub ↗</a></span>
+</div></footer>
 
-<section class="section">
-<div class="section-head"><div><p class="eyebrow">HONEST STATUS</p><h2>Built means built.<br>Planned means planned.</h2></div><p class="section-intro">Still growing. We show what is built, what still needs checking, and what is only planned.</p></div>
-<div class="status-grid">
-<div class="status"><span class="status-tag built">IN REPOSITORY</span><h3>Built</h3><p>Usage tracking, handoffs, checkpoints, output trimming and recall, the dashboard and the toolbar.</p></div>
-<div class="status"><span class="status-tag verify">VERIFY ON HOST</span><h3>Needs real-world checking</h3><p>Some behaviours still need testing on a real Claude Code setup. Real before-and-after savings tests are not done yet.</p></div>
-<div class="status"><span class="status-tag planned">PLANNED</span><h3>Planned</h3><p>Smarter memory search, trimming for more languages than Python, and automatic promotion from trial mode to live.</p></div>
-</div>
-<p class="note">Only Claude Code is supported. Other tools are experimental. Treat all token-saving numbers as estimates.</p>
-</section>
-
-
-
-
-
-
-<section class="section" id="offer">
-<div class="section-head"><div><p class="eyebrow">WHAT YOU GET</p><h2>All you need to<br>stop the waste.</h2></div><p class="section-intro">One install. Five tools working together. Nothing to configure before it starts helping.</p></div>
-<div class="stack">
-<div class="stackrow"><span class="n">1</span><div><h3>Token usage you can read</h3><p>See where each chat spends, with measured numbers kept apart from estimates.</p></div><span class="tag">INCLUDED</span></div>
-<div class="stackrow"><span class="n">2</span><div><h3>Zombie detection</h3><p>Flags repeated reads and sub-agents that duplicate or stall, so you can stop them early.</p></div><span class="tag">INCLUDED</span></div>
-<div class="stackrow"><span class="n">3</span><div><h3>Output trimming with recall</h3><p>Long tool output is cut down, and the original is always kept so you can get it back.</p></div><span class="tag">INCLUDED</span></div>
-<div class="stackrow"><span class="n">4</span><div><h3>Save-your-place handoffs</h3><p>A short note and checkpoints, so a fresh chat continues the task without re-explaining.</p></div><span class="tag">INCLUDED</span></div>
-<div class="stackrow"><span class="n">5</span><div><h3>Toolbar, dashboard and commands</h3><p>A small bar inside Claude Code and a dashboard, all showing the same numbers.</p></div><span class="tag">INCLUDED</span></div>
-<div class="stacktotal"><div><div class="price">Free. Forever.</div></div><p>Open source under the MIT licence. No account, no subscription, no upsell.</p><a class="btn primary" href="#install">↳ Install free</a></div>
-</div>
-<div class="guar">
-<div><b>It never blocks you</b><span>It advises. It does not stop or rewrite your chat.</span></div>
-<div><b>Nothing leaves your computer</b><span>No telemetry and no network calls in the core.</span></div>
-<div><b>Nothing is lost</b><span>Trimmed output is kept and can be recalled.</span></div>
-<div><b>Easy to undo</b><span>A written rollback guide removes it cleanly.</span></div>
-</div>
-</section>
-<section class="section" id="faq">
-<div class="section-head"><div><p class="eyebrow">QUESTIONS</p><h2>Straight answers.</h2></div><p class="section-intro">What people ask before installing.</p></div>
-<div class="faq">
-<div><h3>How much does it cost?</h3><p>Nothing. It is free and open source, and it stays that way.</p></div>
-<div><h3>Does it send my data anywhere?</h3><p>No. It runs on your computer and the core makes no network or AI calls.</p></div>
-<div><h3>Will it break my chats?</h3><p>No. It gives advice and never blocks. Anything it trims can be recalled.</p></div>
-<div><h3>How much will I save?</h3><p>It depends on how you work. Saving numbers shown are labelled as estimates, and we have not yet run a full before-and-after test. We would rather say that than promise a figure.</p></div>
-</div>
-</section>
-<section class="section" id="install">
-<div class="install">
-<div><p class="eyebrow">GET STARTED · FREE</p><h2>Stop paying for<br>wasted tokens.</h2><p>One command. Restart Claude Code, run the status command, and you are protected. The full guide covers desktop, shell and rollback.</p><a class="btn primary" href="INSTALL.md">Read installation guide ↗</a></div>
-<div><div class="command-label">PLUGIN INSTALL COMMAND</div><div class="command">/plugin install token-zombie --marketplace rishavm713-create/token-zombie</div><p class="note">Then run <code>/token-zombie:tz</code>.</p></div>
-</div>
-</section>
-
-<section class="section">
-<div class="section-head"><div><p class="eyebrow">EXPLORE THE PROJECT</p><h2>Go deeper.</h2></div><p class="section-intro">Product documentation, architecture, safety boundaries and contribution guides.</p></div>
-<div class="doc-grid">
-<a class="doc" href="ROADMAP.md">Roadmap<span>What is built and planned</span></a>
-<a class="doc" href="IMPLEMENTATION-MATRIX.md">Implementation matrix<span>Feature-by-feature status</span></a>
-<a class="doc" href="AUDIT.md">Engineering audit<span>Evidence and remaining gaps</span></a>
-<a class="doc" href="METRICS.md">Metrics &amp; accounting<span>Definitions and calculations</span></a>
-<a class="doc" href="LIMITATIONS.md">Limitations<span>Known constraints</span></a>
-<a class="doc" href="PANEL.md">Toolbar &amp; panel<span>Interface behaviour</span></a>
-<a class="doc" href="INSTALL.md">Installation<span>Setup and rollback</span></a>
-<a class="doc" href="../SECURITY.md">Security<span>Privacy and safety model</span></a>
-</div>
-</section>
-
-<section class="section" id="vocab">
-<div class="section-head"><div><p class="eyebrow">THE ZOMBIE VOCABULARY</p><h2>Know your enemy.</h2></div><p class="section-intro">Every long AI session gets infected. These are the four things TOKEN ZOMBIE hunts.</p></div>
-<div class="vocab">
-<div class="vc"><span class="vi">01</span><h3>Zombies</h3><p>Work that burns tokens without moving the task: repeated reads, duplicate calls, stalled agents.</p></div>
-<div class="vc"><span class="vi">02</span><h3>Infection</h3><p>Context that spreads and pollutes: duplicate instructions, bloated rules, overlapping skills.</p></div>
-<div class="vc"><span class="vi">03</span><h3>Survival</h3><p>Warnings and checkpoints before the context runs out, so unfinished work is not lost.</p></div>
-<div class="vc"><span class="vi">04</span><h3>Revival</h3><p>Handoffs and state notes that bring the next chat back to life without starting over.</p></div>
-</div></section>
-
-<section class="section" id="mission">
-<div class="section-head"><div><p class="eyebrow">PHILOSOPHY &amp; MISSION</p><h2>From a bad day<br>to a shared tool.</h2></div><p class="section-intro">TOKEN ZOMBIE is open source on purpose, so access to the solution never becomes another limitation for someone else.</p></div>
-<div class="mission">
-<div><blockquote>&ldquo;I built this because I experienced the problem. I made it open source because I <span>don&rsquo;t want access to the solution to become another limitation</span> for someone else.&rdquo;<cite>RISHAV MISHRA, CREATOR</cite></blockquote></div>
-<div><p>I hit this problem myself: chats that ran out of room, tokens wasted on repeats, work lost. Other developers hit it too, so I built a fix and gave it away.</p>
-<ol class="steps"><li>Hit a real limit: context exhausted, tokens wasted, work lost.</li><li>Recognise that other developers hit it too.</li><li>Build a practical fix, local-first and honest about its limits.</li><li>Open the source to everyone, for free.</li></ol></div>
-</div></section>
-
-<section class="section" id="ecosystem">
-<div class="eco">
-<div class="eco-photo"><img src="img/rishav.webp" alt="Rishav Mishra, creator of TOKEN ZOMBIE" loading="lazy" width="900" height="900"></div>
-<div><p class="eyebrow">BUILT BY RISHAV MISHRA</p><h2>One builder.<br>Three connected tools.</h2><p class="section-intro">TOKEN ZOMBIE controls what your AI agents spend. EditSutra speeds up video editing in Premiere Pro. The portfolio shows the person and the work behind both.</p>
-<div class="eco-links">
-<a class="eco-link" href="https://rishavm713-create.github.io/"><div><b>Portfolio</b><span>Rishav Mishra: work, CV and contact</span></div><i>↗</i></a>
-<a class="eco-link" href="https://editsutra.github.io/"><div><b>EditSutra</b><span>AI-assisted editing inside Premiere Pro</span></div><i>↗</i></a>
-<a class="eco-link" href="https://github.com/rishavm713-create/token-zombie"><div><b>TOKEN ZOMBIE</b><span>You are here: Claude Code resource control</span></div><i>↗</i></a>
-</div></div></div>
-</section>
-
-<footer class="footer"><div class="fbrand"><img src="img/mascot.svg" alt=""> TOKEN ZOMBIE</div><span>Make every single token count. · <a href="https://github.com/rishavm713-create/token-zombie">GitHub ↗</a> · <a href="https://github.com/rishavm713-create/token-zombie/discussions">Discussions ↗</a></span>
-<div class="rights"><b>© 2026 Rishav Mishra. All rights reserved.</b><br>The TOKEN ZOMBIE name, mascot, logo and artwork are the property of Rishav Mishra. The source code is released under the <a href="https://github.com/rishavm713-create/token-zombie/blob/main/LICENSE">MIT License</a>.</div></footer>
-</div>
 <script>
-(function(){var d=document,r=d.documentElement;if(!('IntersectionObserver' in window))return;r.classList.add('js');
-var els=d.querySelectorAll('.pain,.stack,.guar div,.faq div,.vc,.mission>div,.eco,.section-head,.statstrip,.cap,.workflow,.show-card,.mascot-row,.status,.install,.doc,.hero-copy,.hero-actions,.hero-visual');
-els.forEach(function(e,i){e.classList.add('rv');e.style.setProperty('--d',((i%4)*70)+'ms')});
-var io=new IntersectionObserver(function(a){a.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}})},{threshold:.12});
-els.forEach(function(e){io.observe(e)});setTimeout(function(){els.forEach(function(e){e.classList.add('in')})},4000);
-d.querySelectorAll('.cap,.show-card').forEach(function(c){c.addEventListener('pointermove',function(e){var b=c.getBoundingClientRect();c.style.setProperty('--mx',(e.clientX-b.left)+'px');c.style.setProperty('--my',(e.clientY-b.top)+'px')})});
-
-var pg=d.createElement('div');pg.id='prog';d.body.appendChild(pg);
+(function(){var d=document,pg=d.getElementById('prog');
+var els=d.querySelectorAll('.rv');
+if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12,rootMargin:'0px 0px -6% 0px'});els.forEach(function(e){io.observe(e)})}
+setTimeout(function(){els.forEach(function(e){e.classList.add('in')})},4000);
 function sp(){var h=d.documentElement;pg.style.transform='scaleX('+(h.scrollTop/(h.scrollHeight-h.clientHeight||1))+')'}addEventListener('scroll',sp,{passive:true});sp();
-var h1=d.querySelector('.hero h1');if(h1){var n=0;(function walk(el){Array.prototype.slice.call(el.childNodes).forEach(function(c){if(c.nodeType===3){var f=d.createDocumentFragment();c.textContent.split(/(\s+)/).forEach(function(t){if(!t)return;if(/^\s+$/.test(t)){f.appendChild(d.createTextNode(t));return}var s=d.createElement('span');s.className='w';s.style.setProperty('--i',n++);s.textContent=t;f.appendChild(s)});c.replaceWith(f)}else if(c.nodeName==='SPAN'&&!c.classList.contains('w')){c.classList.add('w');c.style.setProperty('--i',n++)}else if(c.nodeType===1&&c.nodeName!=='BR')walk(c)})})(h1)}
-var so=new IntersectionObserver(function(a){a.forEach(function(x){if(!x.isIntersecting)return;so.unobserve(x.target);var e=x.target,t=parseInt(e.textContent,10);if(isNaN(t)||matchMedia('(prefers-reduced-motion:reduce)').matches)return;var t0=performance.now();(function f(n){var k=Math.min(1,(n-t0)/1200);e.textContent=Math.round(t*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(f)})(t0)})},{threshold:.6});
-d.querySelectorAll('.stat .big').forEach(function(e){if(/^\d+$/.test(e.textContent.trim()))so.observe(e)});
 })();
 </script>
 </body>
