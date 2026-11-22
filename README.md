@@ -141,7 +141,7 @@ flowchart LR
   S --> C[companion<br/>tz companion, 127.0.0.1]
 ```
 
-## Install
+## Optional statusline setup
 One step:
 ```
 /plugin install token-zombie --marketplace rishavm713-create/token-zombie
