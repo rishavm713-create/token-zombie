@@ -11,7 +11,17 @@ EVENTS = [('UserPromptSubmit', 'tz-guard.py', {'prompt': 'fix the bug'}),
           ('PreToolUse', 'tz-guard.py', {'tool_name': 'Read', 'tool_input': {'file_path': '/etc/hosts'}}),
           ('PreToolUse:Grep', 'tz-guard.py', {'tool_name': 'Grep', 'tool_input': {'pattern': 'x', 'path': '.'}}),
           ('PostToolUse', 'tz-guard.py', {'tool_name': 'Bash', 'tool_input': {'command': 'ls'}, 'tool_response': {}}),
-          ('Stop', 'tz-guard.py', {}), ('SessionStart', 'tz-start.py', {})]
+          ('Stop', 'tz-guard.py', {}), ('SessionStart', 'tz-start.py', {}),
+          ('PreCompact', 'tz-guard.py', {}), ('SessionEnd', 'tz-guard.py', {}),
+          ('SubagentStart', 'tz-guard.py', {'agent_id': 'a1', 'agent_type': 'general-purpose'}),
+          ('SubagentStop', 'tz-guard.py', {'agent_id': 'a1', 'agent_type': 'general-purpose'}),
+          ('InstructionsLoaded', 'tz-guard.py', {'file_path': '/tmp/CLAUDE.md', 'load_reason': 'session_start'}),
+          ('PostCompact', 'tz-guard.py', {'compact_summary': 'summary'}),
+          ('PostToolUseFailure', 'tz-guard.py', {'tool_name': 'Bash', 'tool_input': {'command': 'false'}, 'error': 'exit 1'}),
+          ('PostToolBatch', 'tz-guard.py', {}),
+          ('PreModelSwitch', 'tz-guard.py', {'model': 'claude-sonnet-5-5'}), ('PostModelSwitch', 'tz-guard.py', {'model': 'claude-opus-5-5'}),
+          ('WorktreeCreate', 'tz-guard.py', {'name': 'w1'}), ('WorktreeRemove', 'tz-guard.py', {'name': 'w1'}),
+          ('FileChanged', 'tz-guard.py', {'file_path': '/tmp/x.py'})]
 
 
 def transcript(path, mb):

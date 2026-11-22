@@ -19,6 +19,8 @@ It is not only a token saver. The aim is one local layer that watches, protects 
 Honest status: see [docs/IMPLEMENTATION-MATRIX.md](docs/IMPLEMENTATION-MATRIX.md) and [docs/LEFT.md](docs/LEFT.md) for what is built, partial or not built. Replacing other plugins and skills is the direction, not a measured claim.
 
 ## Built vs roadmap
+
+Item-by-item status of every research item (BUILT / PARTIAL / NOT BUILT / UNVERIFIED / HOST): [docs/AUDIT.md](docs/AUDIT.md). New: `tz rework` (retry/repeat counts) and `tz hooks bench` for all 18 hook events.
 **Built and tested (live features):** hook ledger on 18 events, agent lifecycle + ROI flags, compaction survival check, 5m/1h cache split, thinking-token EST, incremental transcript scan, Ledger/Priced/Mixed/Unpriced labels, one SQLite ledger (`tz ledger`), alerts with evidence, intervention and outcome, Context Vault index (`tz ledger --vault`), AST skeleton for Python files (`tz compress`, validated, fail open), shadow-mode output trim, recall search.
 
 **Roadmap, NOT built yet:** vector/semantic memory, AST compression for languages other than Python, a task-level vault index (today: by session, tool and file), automatic promotion CANARY to ACTIVE (today: advice only), host-verified PostCompact data (needs a real host run after `install.sh`).

@@ -61,3 +61,6 @@ Order = priority. Gated items need the owner's yes first.
 
 ## Round 4
 Built: tzdb ledger, alerts outcome, vault index, tz compress (Python), incremental scan, accounting labels. Nine-tab UI dropped by owner. Not built: semantic memory, non-Python AST, task vault index, auto promotion.
+
+## Round 5
+See docs/AUDIT.md: item-by-item labels. New: tz rework, hooks bench for 18 events. Open: real A/B trials, quality-adjusted savings, host verification, hook-event audit, website.
