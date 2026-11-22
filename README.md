@@ -16,17 +16,34 @@
 
 </div>
 
-> **Your AI agents are doing work. Can you see what that work is costing you?**
+> **AI coding agents are powerful. Their resource usage should not be a mystery.**
 >
-> TOKEN ZOMBIE is a local-first resource intelligence and workflow control layer for Claude Code. It helps you observe usage, understand agent activity, identify avoidable context work, preserve recoverable output and continue complex work safely.
-
-<div align="center">
-<img src="docs/img/dashboard.png" alt="TOKEN ZOMBIE dashboard preview — generated demo data" width="900">
-<br><sub>PRODUCT INTERFACE · Dashboard preview with demo data — not a live session or benchmark.</sub>
-</div>
-
----
-
+> TOKEN ZOMBIE is a local-first **AI agent resource intelligence and workflow control layer** for Claude Code. It makes token and context activity more visible, surfaces avoidable work, tracks agent activity, preserves recoverable tool output and helps carry unfinished work into the next session.
+>
+> **Observe agents. Detect waste. Optimise context. Protect the workflow.**
+>
+> It is not just a token counter or a shell-output compressor. It connects resource signals, agent lifecycle intelligence, context optimisation and project continuity in one developer-controlled layer.
+>
+> <div align="center">
+> <img src="docs/img/dashboard.png" alt="TOKEN ZOMBIE dashboard preview — generated demo data" width="900">
+> <br><sub>PRODUCT INTERFACE · Dashboard preview with demo data — not a live session or benchmark.</sub>
+> </div>
+>
+> ---
+>
+> ## Why it exists
+>
+> Long-running agent sessions can accumulate repeated reads, oversized tool output, duplicated agent work and context that is difficult to carry forward. Developers need more than a token total: they need to understand where resources are going, what work is happening and how to preserve progress without sacrificing task quality.
+>
+> TOKEN ZOMBIE is designed around that wider problem:
+>
+> - **See resource signals:** token activity, cache activity, agent usage and cost signals, with explicit evidence labels.
+> - **Find avoidable work:** repeated reads, oversized outputs and agent patterns that may indicate duplication or low value.
+> - **Keep work recoverable:** supported output trims retain originals for recall; checkpoints and handoffs preserve project continuity.
+> - **Stay in control:** local-first operation, non-blocking advice and no model calls inside core hooks.
+>
+> The goal is not to maximise a headline savings percentage. It is to make resource use understandable and reduce avoidable work while preserving output quality.
+>
 ## ☣ The control layer
 
 Not another token counter. Five connected systems work together across your AI workflow.
