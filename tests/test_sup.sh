@@ -83,7 +83,7 @@ TOK=$(cat "$H/.claude/token-zombie/companion.token")
 ok "companion: no token = 401" '[ "$(curl -s -o /dev/null -w %{http_code} http://127.0.0.1:$P/status.json)" = 401 ]'
 ok "companion: wrong token = 401" '[ "$(curl -s -o /dev/null -w %{http_code} "http://127.0.0.1:$P/status.json?token=x")" = 401 ]'
 ok "companion: token serves status" '[[ $(curl -s "http://127.0.0.1:$P/status.json?token=$TOK") == *mascot* ]]'
-ok "companion: token file mode 600" '[ "$(stat -f %Lp "$H/.claude/token-zombie/companion.token" 2>/dev/null || stat -c %a "$H/.claude/token-zombie/companion.token")" = 600 ]'
+ok "companion: token file mode 600" '[ "$(stat -c %a "$H/.claude/token-zombie/companion.token" 2>/dev/null || stat -f %Lp "$H/.claude/token-zombie/companion.token")" = 600 ]'
 ok "companion bound to loopback only" 'lsof -nP -iTCP:$P -sTCP:LISTEN 2>/dev/null | grep -q "127.0.0.1:$P"'
 kill $CP 2>/dev/null; wait $CP 2>/dev/null
 # profile save/apply/rollback (dry-run default, fake skillpack)

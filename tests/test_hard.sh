@@ -82,7 +82,7 @@ ok "dash --serve: no token 401, token 200 HTML, bad host 403" '[ "$(c "http://12
 kill $DP; wait $DP 2>/dev/null
 ok "no stray tz servers left running" '! pgrep -f "bin/tz (companion|dash) --(serve )?--?port?" >/dev/null && ! pgrep -f "tz (companion|dash).*--port" >/dev/null'
 # --- overlay (native): build with CLT swiftc, selftest parity with python mascot
-if [ -x "$Z/overlay/build/TZOverlay" ] || bash "$Z/overlay/build.sh" >/dev/null 2>&1; then
+if [ "$(uname)" = Darwin ] && { [ -x "$Z/overlay/build/TZOverlay" ] || bash "$Z/overlay/build.sh" >/dev/null 2>&1; }; then
   mkdir -p "$T/ov"; for lv in NORMAL ELEVATED CRITICAL; do
     echo "{\"ts\":1,\"level\":\"$lv\",\"ctx_pct\":5,\"risk\":\"low\"}" >"$T/ov/status.json"
     py=$(python3 -c "import sys;sys.path.insert(0,\"$Z/bin\");from tzmascot import mascot_state;print(mascot_state({\"ts\":1,\"level\":\"$lv\"}))")
@@ -90,7 +90,7 @@ if [ -x "$Z/overlay/build/TZOverlay" ] || bash "$Z/overlay/build.sh" >/dev/null 
     ok "overlay parity $lv ($py)" '[[ $sw == *"$py"* ]]'
   done
   echo '{bad' >"$T/ov/status.json"; ok "overlay survives corrupt status" '[[ $(TZ_STATE_DIR="$T/ov" "$Z/overlay/build/TZOverlay" --selftest) == *SLEEP* ]]'
-else echo "overlay: swiftc unavailable, skipped"; fi
+else echo "overlay: not macOS or swiftc unavailable, skipped"; fi
 # --- A/B integrity: killed runner is counted, hard caps clamp, NOT COMPARABLE
 cat >"$T/claude" <<'PY'
 #!/usr/bin/env python3
