@@ -4,7 +4,7 @@
 
 # MAKE EVERY SINGLE TOKEN COUNT.
 
-### AI AGENT RESOURCE INTELLIGENCE FOR CLAUDE CODE
+### AI AGENT RESOURCE INTELLIGENCE & WORKFLOW CONTROL FOR CLAUDE CODE
 
 **STOP THE WASTE. CONTROL THE SWARM. PROTECT THE WORKFLOW.**
 
@@ -24,6 +24,20 @@
 >
 > It is not just a token counter or a shell-output compressor. It connects resource signals, agent lifecycle intelligence, context optimisation and project continuity in one developer-controlled layer.
 >
+### Try it in Claude Code
+
+```text
+/plugin install token-zombie --marketplace rishavm713-create/token-zombie
+```
+
+Restart Claude Code, then run:
+
+```text
+/token-zombie:tz
+```
+
+[Installation, verification and rollback →](docs/INSTALL.md)
+
 > <div align="center">
 > <img src="docs/img/dashboard.png" alt="TOKEN ZOMBIE dashboard preview — generated demo data" width="900">
 > <br><sub>PRODUCT INTERFACE · Dashboard preview with demo data — not a live session or benchmark.</sub>
