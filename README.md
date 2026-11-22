@@ -8,7 +8,7 @@
 
 **STOP THE WASTE. CONTROL THE SWARM. PROTECT THE WORKFLOW.**
 
-[🌐 Product Website](https://rishavm713-create.github.io/token-zombie/) · [⚡ Install](#-get-started) · [🧭 Feature Map](#-the-control-layer) · [🗺 Roadmap](docs/ROADMAP.md) · [🛠 Engineering Audit](docs/AUDIT.md) · [⚖ Competitive Positioning](docs/COMPETITIVE-POSITIONING.md)
+[🌐 Product Website](https://rishavm713-create.github.io/token-zombie/) · [⚡ Install](#-get-started) · [🧭 Feature Map](#-the-control-layer) · [🗺 Roadmap](docs/ROADMAP.md) · [🛠 Engineering Audit](docs/AUDIT.md) · [⚖ Competitive Positioning](docs/COMPETITIVE-POSITIONING.md) · [🚀 Launch Kit](docs/LAUNCH-KIT.md)
 
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-7CFF9B?style=flat-square&labelColor=111812)
 ![Local first](https://img.shields.io/badge/LOCAL--FIRST-no%20telemetry-7CFF9B?style=flat-square&labelColor=111812)
@@ -57,6 +57,20 @@ Restart Claude Code, then run:
 > - **Stay in control:** local-first operation, non-blocking advice and no model calls inside core hooks.
 >
 > The goal is not to maximise a headline savings percentage. It is to make resource use understandable and reduce avoidable work while preserving output quality.
+
+### Try it in Claude Code
+
+```text
+/plugin install token-zombie --marketplace rishavm713-create/token-zombie
+```
+
+Restart Claude Code, then run:
+
+```text
+/token-zombie:tz
+```
+
+[Installation, verification and rollback →](docs/INSTALL.md)
 >
 ## ☣ The control layer
 
