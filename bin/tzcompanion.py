@@ -73,7 +73,25 @@ def handler(tok, port=None):
                 self.send_response(401); self.end_headers(); self.wfile.write(b'token required'); return
             if u.path == '/status.json':
                 import tzbus
-                body = json.dumps(tzbus.read_bus()).encode()
+                status = tzbus.read_bus()
+                # Derive dashboard totals from the local savings ledger; keep measured and estimated separate.
+                ledger_path = os.path.expanduser('~/.claude/token-zombie/ledger.json')
+                try:
+                    entries = json.load(open(ledger_path, encoding='utf-8'))
+                    if not isinstance(entries, list):
+                        entries = []
+                except Exception:
+                    entries = []
+                measured = [e for e in entries if isinstance(e, dict) and e.get('basis') == 'measured'
+                            and isinstance(e.get('tok'), (int, float)) and e.get('tok', 0) > 0
+                            and not str(e.get('kind', '')).startswith('overhead')]
+                estimated = [e for e in entries if isinstance(e, dict) and e.get('basis') == 'est'
+                             and isinstance(e.get('tok'), (int, float)) and e.get('tok', 0) > 0
+                             and not str(e.get('kind', '')).startswith('overhead')]
+                status['tokens_saved_measured'] = sum(e['tok'] for e in measured)
+                status['tokens_saved_estimated'] = sum(e['tok'] for e in estimated)
+                status['optimizations'] = len(measured) + len(estimated)
+                body = json.dumps(status).encode()
                 ct = 'application/json'
             elif u.path == '/':
                 body, ct = PAGE.encode(), 'text/html; charset=utf-8'
