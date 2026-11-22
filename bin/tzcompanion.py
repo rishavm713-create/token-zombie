@@ -1,19 +1,51 @@
 #!/usr/bin/env python3
-# Companion: tiny local server, 127.0.0.1 only, token-authenticated, serves status.json + a small always-visible page.
+# Companion: token-authenticated, localhost-only live dashboard. Reads local status + savings ledger; no network/AI.
 # Token file ~/.claude/token-zombie/companion.token (mode 600), send as ?token= or header X-TZ-Token.
-# NOT built (BLOCKED): native always-on-top overlay (Swift/Electron needs toolchain install approval). Open the page in a pinned/PiP window instead.
 import hmac, json, os, secrets, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from tzmascot import mascot_state, svg, EMOJI
 
-PAGE = """<!doctype html><meta charset=utf-8><title>TZ</title><body style="margin:0;font:13px system-ui;background:#111;color:#ddd;text-align:center">
-<div id=m style="font-size:40px"></div><div id=t></div>
-<script>const q=new URLSearchParams(location.search).get('token');
-async function u(){try{const r=await fetch('/status.json?token='+q);const s=await r.json();
-document.getElementById('m').textContent=s.emoji||'😴';
-document.getElementById('t').textContent=(s.mascot||'SLEEP')+' '+(s.level||'?')+' ctx '+(s.ctx_pct??'?')+'% risk '+(s.risk||'?')}catch(e){document.getElementById('t').textContent='offline'}}
-u();setInterval(u,5000)</script>"""
-
+PAGE = """<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark"><title>TOKEN ZOMBIE</title>
+<style>
+:root{color-scheme:dark;--bg:#171717;--panel:#292929;--line:#35ad55;--green:#43b765;--muted:#aaa;--white:#f3f3f3}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--bg);color:var(--white);font:15px/1.4 Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;padding:24px}
+.shell{max-width:1180px;margin:auto}.top{min-height:112px;border:1.5px solid var(--line);border-radius:22px;background:var(--panel);display:flex;align-items:center;gap:24px;padding:18px 24px;flex-wrap:wrap;box-shadow:0 0 0 1px #35ad5520}
+.brand{display:flex;align-items:center;gap:14px;min-width:220px;flex:1}.zombie{font-size:52px;line-height:1}.wordmark{font-size:24px;font-weight:650;white-space:nowrap;letter-spacing:-.7px}.wordmark b{color:var(--green)}
+.metrics{display:flex;align-items:center;justify-content:space-around;gap:clamp(14px,3vw,42px);flex:3;flex-wrap:wrap}.metric{text-align:center;min-width:100px}.value{font-size:30px;font-weight:650;letter-spacing:-1px;font-variant-numeric:tabular-nums}.value.saved{color:var(--green)}.label{color:var(--muted);font-size:13px;letter-spacing:.3px;text-transform:uppercase}
+.state{display:flex;align-items:center;gap:10px;white-space:nowrap;font-size:17px}.dot{width:12px;height:12px;border-radius:50%;background:#92929d}.dot.live{background:var(--green);box-shadow:0 0 12px #43b76580}
+.sub{margin:18px 4px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.sub strong{color:var(--white);font-weight:550}.foot{margin-top:30px;color:#777;font-size:12px}
+@media(max-width:760px){body{padding:12px}.top{gap:18px;padding:18px}.brand{min-width:100%;justify-content:center}.metrics{flex:1 1 100%;gap:18px}.metric{min-width:calc(50% - 18px)}.state{width:100%;justify-content:center}.value{font-size:26px}}
+</style></head><body><main class="shell">
+<header class="top" aria-label="TOKEN ZOMBIE live status">
+<div class="brand"><div class="zombie" id="mascot" aria-hidden="true">🧟</div><div class="wordmark">TOKEN <b>ZOMBIE</b></div></div>
+<div class="metrics">
+<div class="metric"><div class="value" id="agents">—</div><div class="label">Agents</div></div>
+<div class="metric"><div class="value" id="skills">—</div><div class="label">Skills used</div></div>
+<div class="metric"><div class="value saved" id="saved">—</div><div class="label">Tokens saved</div></div>
+<div class="metric"><div class="value" id="optimizations">—</div><div class="label">Optimizations</div></div>
+</div><div class="state"><span class="dot" id="dot"></span><span id="mode">CONNECTING</span></div>
+</header>
+<div class="sub"><span><strong id="level">Waiting for local status</strong> · Context <strong id="context">—</strong> · Risk <strong id="risk">—</strong></span><span id="updated">Refreshing every 5 seconds</span></div>
+<div class="foot">LOCAL-FIRST · LIVE DATA FROM YOUR TOKEN ZOMBIE INSTALLATION · NO CLOUD TELEMETRY</div>
+</main><script>
+const token=new URLSearchParams(location.search).get('token');
+const fmt=n=>{if(n===null||n===undefined||!Number.isFinite(Number(n)))return '—';n=Number(n);return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':Math.round(n).toLocaleString()};
+async function refresh(){try{const r=await fetch('/status.json?token='+encodeURIComponent(token||''),{cache:'no-store'});if(!r.ok)throw Error('offline');const s=await r.json();
+document.getElementById('mascot').textContent=s.emoji||({CHOMP:'🧟',HAPPY:'😊',ALERT:'🚨',SLEEP:'😴',CELEBRATE:'🎉'}[s.mascot]||'🧟');
+document.getElementById('agents').textContent=fmt(s.agents_running??s.agent_count);
+document.getElementById('skills').textContent=fmt(s.skills_used??s.skill_count);
+document.getElementById('saved').textContent=fmt(s.tokens_saved_measured??s.tokens_saved);
+document.getElementById('optimizations').textContent=fmt(s.optimizations??s.optimization_count);
+document.getElementById('level').textContent=s.level||'Status available';
+document.getElementById('context').textContent=s.ctx_pct===undefined?'—':s.ctx_pct+'%';
+document.getElementById('risk').textContent=s.risk||'—';
+const active=s.activity==='working';document.getElementById('dot').classList.toggle('live',active);document.getElementById('mode').textContent=active?'ACTIVE':s.activity==='idle'?'IDLE':'STATUS';
+document.getElementById('updated').textContent='Updated '+new Date().toLocaleTimeString();
+}catch(e){document.getElementById('mode').textContent='OFFLINE';document.getElementById('level').textContent='Waiting for local TOKEN ZOMBIE service';document.getElementById('dot').classList.remove('live')}}
+refresh();setInterval(refresh,5000);
+</script></body></html>"""
 
 def token():
     p = os.path.expanduser('~/.claude/token-zombie/companion.token')
@@ -24,16 +56,13 @@ def token():
         os.close(fd)
     return open(p).read().strip()
 
-
 def host_ok(h, port):
     """DNS-rebinding guard: only accept Host 127.0.0.1:<port> or localhost:<port>."""
     return (h or '') in (f'127.0.0.1:{port}', f'localhost:{port}')
 
-
 def handler(tok, port=None):
     import http.server
     from urllib.parse import urlparse, parse_qs
-
     class H(http.server.BaseHTTPRequestHandler):
         def do_GET(self):
             u = urlparse(self.path)
@@ -44,7 +73,7 @@ def handler(tok, port=None):
                 self.send_response(401); self.end_headers(); self.wfile.write(b'token required'); return
             if u.path == '/status.json':
                 import tzbus
-                body = json.dumps(tzbus.read_bus()).encode()  # always valid JSON, even when status.json is missing/corrupt
+                body = json.dumps(tzbus.read_bus()).encode()
                 ct = 'application/json'
             elif u.path == '/':
                 body, ct = PAGE.encode(), 'text/html; charset=utf-8'
@@ -53,15 +82,12 @@ def handler(tok, port=None):
             self.send_response(200); self.send_header('Content-Type', ct); self.send_header('Cache-Control', 'no-store')
             self.send_header('X-Content-Type-Options', 'nosniff'); self.send_header('Content-Security-Policy', "default-src 'none'; script-src 'unsafe-inline'; connect-src 'self'")
             self.end_headers(); self.wfile.write(body)
-
         def do_POST(self):
             self.send_response(405); self.end_headers()
         do_PUT = do_DELETE = do_POST
-
         def log_message(self, *a):
             pass
     return H
-
 
 def parse_port(argv, dflt):
     try:
@@ -72,10 +98,9 @@ def parse_port(argv, dflt):
         print('tz: --port must be a number 1024-65535', file=sys.stderr)
         return None
 
-
 def main(argv):
     import socketserver
-    socketserver.TCPServer.allow_reuse_address = True  # restart right after stop
+    socketserver.TCPServer.allow_reuse_address = True
     port = parse_port(argv, 8766)
     if port is None:
         return 2
@@ -90,7 +115,6 @@ def main(argv):
         except KeyboardInterrupt:
             pass
     return 0
-
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))
