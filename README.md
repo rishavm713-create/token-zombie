@@ -8,7 +8,7 @@
 
 **STOP THE WASTE. CONTROL THE SWARM. PROTECT THE WORKFLOW.**
 
-[🌐 Product Website](https://rishavm713-create.github.io/token-zombie/) · [⚡ Install](#-get-started) · [🧭 Feature Map](#-the-control-layer) · [🎨 Design System](docs/DESIGN-SYSTEM.md) · [🗺 Roadmap](docs/ROADMAP.md) · [🛠 Engineering Audit](docs/AUDIT.md) · [⚖ Competitive Positioning](docs/COMPETITIVE-POSITIONING.md) · [🚀 Launch Kit](docs/LAUNCH-KIT.md)
+[🌐 Product Website](https://rishavm713-create.github.io/token-zombie/) · [⚡ Install](#-install) · [🧭 Feature Map](#-the-control-layer) · [🎨 Design System](docs/DESIGN-SYSTEM.md) · [🗺 Roadmap](docs/ROADMAP.md) · [🛠 Engineering Audit](docs/AUDIT.md) · [⚖ Competitive Positioning](docs/COMPETITIVE-POSITIONING.md) · [🚀 Launch Kit](docs/LAUNCH-KIT.md)
 
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-7CFF9B?style=flat-square&labelColor=111812)
 ![Local first](https://img.shields.io/badge/LOCAL--FIRST-no%20telemetry-7CFF9B?style=flat-square&labelColor=111812)
@@ -55,7 +55,7 @@ claude plugin install token-zombie --marketplace rishavm713-create/token-zombie
 
 Long Claude Code sessions can accumulate repeated reads, oversized tool output, duplicated agent work and context that is hard to carry forward. TOKEN ZOMBIE makes these signals easier to inspect and act on.
 
-TOKEN ZOMBIE is designed around that wider problem:
+Core capabilities:
 
 - **See resource signals:** token activity, cache activity, agent usage and cost signals, with explicit evidence labels.
 - **Find avoidable work:** repeated reads, oversized outputs and agent patterns that may indicate duplication or low value.
@@ -63,7 +63,6 @@ TOKEN ZOMBIE is designed around that wider problem:
 - **Stay in control:** local-first operation, non-blocking advice and no model calls inside core hooks.
 
 The goal is useful, quality-preserving optimisation—not a headline savings percentage.
-
 
 > **Observed single-session result:** The project owner reports one real TOKEN ZOMBIE session with **5,000,000 tokens saved**. This is a single-session observation, not a controlled multi-trial benchmark or a guarantee of typical savings. The raw session evidence, token accounting breakdown, task-quality check and TOKEN ZOMBIE overhead are being prepared for publication. See [benchmark evidence status](docs/BENCHMARK-METHOD.md#observed-single-session-result).
 
@@ -149,7 +148,7 @@ Protect unfinished work and make the next session easier to resume.
 | **Mode controls** | OFF / LITE / FULL / ULTRA |
 | **Dashboard** | Local resource and workflow overview |
 | **Terminal statusline** | Compact session visibility |
-| **Local companion** | Local companion interface |
+| **Local companion** | Token-authenticated local dashboard |
 | **Mascot states** | Alert, excited, working, sleep and idle |
 | **CLI** | Status, optimize, audit, review, handoff, checkpoint, resume, report and more |
 | **Native overlay** | Implemented; visual verification pending |
@@ -177,7 +176,7 @@ Hooks and local tools feed a shared local state model. The system surfaces evide
 <br><sub>MASCOT STATES · Idle / Working / Excited / Alert / Sleep</sub>
 </div>
 
-The in-chat toolbar and pane are implemented in the repository, but a verified public capture of the live toolbar is not published yet. [Read the interface specification](docs/PANEL.md).
+The in-chat toolbar and pane are implemented; a verified live capture is still pending. [Read the interface specification](docs/PANEL.md).
 
 ## 🚦 Implementation status
 
