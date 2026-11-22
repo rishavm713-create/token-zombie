@@ -11,14 +11,14 @@ PAGE = """<!doctype html>
 <style>
 :root{color-scheme:dark;--bg:#050505;--panel:#101010;--line:#303030;--green:#7CFC00;--muted:#A3A3A3;--white:#F5F5F5}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--bg);color:var(--white);font:15px/1.4 Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;padding:24px}
-.shell{max-width:1180px;margin:auto}.top{min-height:112px;border:1.5px solid var(--line);border-radius:22px;background:var(--panel);display:flex;align-items:center;gap:24px;padding:18px 24px;flex-wrap:wrap;box-shadow:0 0 0 1px #35ad5520}
-.brand{display:flex;align-items:center;gap:14px;min-width:220px;flex:1}.zombie{font-size:52px;line-height:1}.wordmark{font-size:24px;font-weight:650;white-space:nowrap;letter-spacing:-.7px}.wordmark b{color:var(--green)}
-.metrics{display:flex;align-items:center;justify-content:space-around;gap:clamp(14px,3vw,42px);flex:3;flex-wrap:wrap}.metric{text-align:center;min-width:100px}.value{font-size:30px;font-weight:650;letter-spacing:-1px;font-variant-numeric:tabular-nums}.value.saved{color:var(--green)}.label{color:var(--muted);font-size:13px;letter-spacing:.3px;text-transform:uppercase}
-.state{display:flex;align-items:center;gap:10px;white-space:nowrap;font-size:17px}.dot{width:12px;height:12px;border-radius:50%;background:#92929d}.dot.live{background:var(--green);box-shadow:0 0 12px #43b76580}
-.sub{margin:18px 4px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.sub strong{color:var(--white);font-weight:550}.foot{margin-top:30px;color:#777;font-size:12px}
-@media(max-width:760px){body{padding:12px}.top{gap:18px;padding:18px}.brand{min-width:100%;justify-content:center}.metrics{flex:1 1 100%;gap:18px}.metric{min-width:calc(50% - 18px)}.state{width:100%;justify-content:center}.value{font-size:26px}}
+.shell{max-width:1320px;margin:34px auto}.top-wrap{background:#252525;border-radius:24px;padding:12px 14px 54px;margin-bottom:18px;box-shadow:0 14px 38px #0005}
+.top{min-height:150px;border:1.5px solid #35b95a;border-radius:24px;background:#292929;display:flex;align-items:center;gap:clamp(18px,3vw,44px);padding:20px 30px;flex-wrap:wrap;box-shadow:0 0 0 1px #35ad5520}
+.brand{display:flex;align-items:center;gap:22px;min-width:260px;flex:1}.zombie{width:104px;height:104px;display:grid;place-items:center;flex:none}.zombie svg{width:104px;height:104px;filter:drop-shadow(0 5px 7px #0008)}.wordmark{font-size:clamp(22px,2vw,30px);font-weight:650;white-space:nowrap;letter-spacing:-.8px}
+.metrics{display:flex;align-items:center;justify-content:space-around;gap:clamp(14px,2.6vw,38px);flex:3;flex-wrap:wrap}.metric{text-align:center;min-width:112px}.value{font-size:clamp(26px,2.4vw,34px);font-weight:650;letter-spacing:-1px;font-variant-numeric:tabular-nums}.value.saved{color:#43b765}.label{color:#b0b0b0;font-size:clamp(11px,1.15vw,15px);letter-spacing:.35px;text-transform:uppercase;white-space:nowrap}
+.state{display:flex;align-items:center;gap:12px;white-space:nowrap;font-size:clamp(15px,1.5vw,21px);padding:10px 16px}.dot{width:13px;height:13px;border-radius:50%;background:#92929d}.dot.live{background:#43b765;box-shadow:0 0 12px #43b76580}
+.sub{margin:18px 4px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.sub strong{color:var(--white);font-weight:550}.foot{margin-top:30px;color:#777;font-size:12px;letter-spacing:.8px}@media(max-width:760px){body{padding:12px}.shell{margin:12px auto}.top-wrap{padding:10px 10px 28px}.top{gap:16px;padding:16px;justify-content:center}.brand{min-width:100%;justify-content:center}.zombie,.zombie svg{width:82px;height:82px}.metrics{flex:1 1 100%;gap:18px}.metric{min-width:calc(50% - 18px)}.state{width:100%;justify-content:center}.value{font-size:26px}}
 </style></head><body><main class="shell">
-<header class="top" aria-label="TOKEN ZOMBIE live status">
+<section class="top-wrap"><header class="top" aria-label="TOKEN ZOMBIE live status">
 <div class="brand"><div class="zombie" id="mascot" aria-hidden="true">🧟</div><div class="wordmark">TOKEN <b>ZOMBIE</b></div></div>
 <div class="metrics">
 <div class="metric"><div class="value" id="agents">—</div><div class="label">Agents</div></div>
@@ -26,14 +26,14 @@ PAGE = """<!doctype html>
 <div class="metric"><div class="value saved" id="saved">—</div><div class="label">Tokens saved</div></div>
 <div class="metric"><div class="value" id="optimizations">—</div><div class="label">Optimizations</div></div>
 </div><div class="state"><span class="dot" id="dot"></span><span id="mode">CONNECTING</span></div>
-</header>
+</header></section>
 <div class="sub"><span><strong id="level">Waiting for local status</strong> · Context <strong id="context">—</strong> · Risk <strong id="risk">—</strong></span><span id="updated">Refreshing every 5 seconds</span></div>
 <div class="foot">LOCAL-FIRST · LIVE DATA FROM YOUR TOKEN ZOMBIE INSTALLATION · NO CLOUD TELEMETRY</div>
 </main><script>
 const token=new URLSearchParams(location.search).get('token');
 const fmt=n=>{if(n===null||n===undefined||!Number.isFinite(Number(n)))return '—';n=Number(n);return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':Math.round(n).toLocaleString()};
 async function refresh(){try{const r=await fetch('/status.json?token='+encodeURIComponent(token||''),{cache:'no-store'});if(!r.ok)throw Error('offline');const s=await r.json();
-document.getElementById('mascot').textContent=s.emoji||({CHOMP:'🧟',HAPPY:'😊',ALERT:'🚨',SLEEP:'😴',CELEBRATE:'🎉'}[s.mascot]||'🧟');
+
 document.getElementById('agents').textContent=fmt(s.agents_running??s.agent_count);
 document.getElementById('skills').textContent=fmt(s.skills_used??s.skill_count);
 document.getElementById('saved').textContent=fmt(s.tokens_saved_measured??s.tokens_saved);
@@ -46,6 +46,7 @@ document.getElementById('updated').textContent='Updated '+new Date().toLocaleTim
 }catch(e){document.getElementById('mode').textContent='OFFLINE';document.getElementById('level').textContent='Waiting for local TOKEN ZOMBIE service';document.getElementById('dot').classList.remove('live')}}
 refresh();setInterval(refresh,5000);
 </script></body></html>"""
+PAGE = PAGE.replace("<div class=\"zombie\" id=\"mascot\" aria-hidden=\"true\">🧟</div>", "<div class=\"zombie\" id=\"mascot\" aria-hidden=\"true\">" + svg("SLEEP") + "</div>")
 
 def token():
     p = os.path.expanduser('~/.claude/token-zombie/companion.token')
