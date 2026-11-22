@@ -45,8 +45,8 @@ claude plugin install token-zombie --marketplace rishavm713-create/token-zombie
 [Installation, verification and rollback →](docs/INSTALL.md)
 
 <div align="center">
-<img src="docs/img/dashboard.png" alt="TOKEN ZOMBIE dashboard preview — generated demo data" width="900">
-<br><sub>PRODUCT INTERFACE · Dashboard preview with demo data — not a live session or benchmark.</sub>
+<img src="docs/img/toolbar-live.svg" alt="TOKEN ZOMBIE toolbar inside Claude Code with animated mascot" width="900">
+<br><sub>THE TOOLBAR IN CLAUDE CODE · layout from a real capture, mascot animated. Tokens saved is an EST from the owner's own session, not a benchmark.</sub>
 </div>
 
 ---
