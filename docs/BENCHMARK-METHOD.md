@@ -11,3 +11,18 @@ Principle: same task, same start repo, same model and settings, same acceptance 
 7. Quality-adjusted savings = tokens per PASSED task, control vs treatment. `tz bench quality TRIALS.json` (list of {arm, task, tokens, passed}); verdict PROVEN only with 5+ trials per arm and no pass-rate drop.
 Cost warning: 3 tasks x 10 trials is 30 real sessions on your plan. Start with 1 task x 5+5 to see the spread.
 Limits: few trials = anecdote; one model; synthetic tasks; results do not transfer to your project automatically.
+
+
+## Observed single-session result
+
+The project owner reports one real TOKEN ZOMBIE session with **5,000,000 tokens saved**. This is a real-world single-session observation supplied by the project owner, not a hypothetical estimate. It is not yet a controlled multi-trial A/B benchmark and must not be generalized to other sessions.
+
+**Publication status:** awaiting the session's redacted raw usage evidence and calculation breakdown. Before presenting this as independently reproducible proof, attach:
+- the redacted session usage summary or transcript-derived evidence;
+- baseline / counterfactual method used to calculate the 5,000,000 figure;
+- input, output, cache-read and cache-creation components separately;
+- measured versus estimated portions, including any token-equivalent assumptions;
+- task completion and quality validation;
+- TOKEN ZOMBIE hook / output overhead and net-savings calculation.
+
+Until those details are attached, describe it as an **owner-reported observed single-session result**. Do not call it a controlled A/B result, median saving, or typical performance.
