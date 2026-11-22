@@ -18,6 +18,6 @@ HOME="$T/empty" bash "$Z/install.sh" --restore >/dev/null 2>&1; ok "restore with
 echo '{"model":"orig","hooks":{"Stop":[{"hooks":[{"type":"command","command":"echo old"}]}]}}' > "$S"; i >/dev/null; sleep 1; i >/dev/null; i --restore >/dev/null
 ok "restore after repeated install returns original, not an installed state" 'grep -q orig "$S" && ! grep -q token-zombie "$S"'
 # failed install leaves settings intact (unwritable conf dir is not enough; bad JSON covered above)
-ok "idempotent: install x2 keeps one tz-guard per event" 'i >/dev/null; i >/dev/null; [ "$(grep -c "tz-guard.py" "$S")" = 7 ]'
+ok "idempotent: install x2 keeps one tz-guard per event" 'i >/dev/null; i >/dev/null; [ "$(grep -c "tz-guard.py" "$S")" = 17 ]'
 ok "statusline of user preserved in config for rollback" 'i --uninstall >/dev/null; ! grep -q tz-status "$S"'
 echo "install: pass $pass fail $fail"; [ $fail = 0 ]

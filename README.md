@@ -6,10 +6,23 @@
 
 Local-first token saver for Claude Code. It watches chat size and plan usage, nudges you to hand off before a chat gets expensive, and audits what loads into every chat. No network, no telemetry; nothing leaves your machine.
 
+## Why it exists
+The same task, equal quality, fewer resources. TOKEN ZOMBIE was built after one small UI change burned about 68% of a 5-hour limit: a chat past 100k tokens re-sent its whole history on every step, screenshots stayed in context, agents duplicated work, and nothing showed where the tokens went.
+
+It is not only a token saver. The aim is one local layer that watches, protects and continues the work, so you need fewer separate plugins, skills and agent stacks to get the same result:
+- **See** where tokens, cache writes (5m / 1h), agents and cost go, with every number labelled MEASURED, EST or UNAVAILABLE. No invented metrics.
+- **Protect** quality: compaction survival check, output trims run in shadow mode first, originals always recoverable (`tz recall`).
+- **Control** agents: exact lifecycle by agent id, duplicate / small / empty / stalled agent flags, cost per agent.
+- **Continue** unfinished work across chats (`handoffs/STATE.md`, `tz resume`) instead of rebuilding context.
+- **Local only**: no network, no telemetry, no model calls inside hooks. Advice never blocks you.
+
+Honest status: see [docs/IMPLEMENTATION-MATRIX.md](docs/IMPLEMENTATION-MATRIX.md) and [docs/LEFT.md](docs/LEFT.md) for what is built, partial or not built. Replacing other plugins and skills is the direction, not a measured claim.
+
 What is in it:
-- **Guard hooks** on 7 events (UserPromptSubmit, PostToolUse, PreToolUse(Read), SessionStart, PreCompact, Stop, SessionEnd): size warnings, big-Read and duplicate-read advice. Advice never blocks.
+- **Guard hooks** on 18 events (UserPromptSubmit, PostToolUse, PreToolUse, SessionStart, PreCompact, PostCompact, Stop, SessionEnd, SubagentStart/Stop, InstructionsLoaded, PostToolUseFailure, PostToolBatch, Pre/PostModelSwitch, WorktreeCreate/Remove, FileChanged): size warnings, big-Read and duplicate-read advice. Advice never blocks.
 - **Supervisor** (`tz sup`): usage level, auto checkpoint, status bus (`status.json`), next-session brief.
 - **Handoffs and checkpoints**: `tz handoff` / `tz resume` / `tz checkpoint` keep task state across chats and verify it against git and tests.
+- **Context continuity**: `tz state` keeps one compact `handoffs/STATE.md` (master facts, current work, session handoff; a section is rewritten only when its facts change). `tz expensive` reads real usage and repeated reads, saves a verified checkpoint and prints the manual fresh-chat step (the desktop app cannot switch chats for you). `tz waste-audit` finds duplicated handoff docs, repeated reads and long pasted briefs.
 - **Optimizer**: repeated reads and commands, output filter, task classification and model advice, savings ledger net of tz's own overhead.
 - **Skill / plugin / MCP audit**: inventory, overlaps, GREEN/YELLOW/RED static scan.
 - **Modes**: off, lite, full, ultra.
@@ -61,7 +74,7 @@ After install, a one-line bar sits above the prompt (Claude Code desktop and ter
 |---|---|---|
 | AGENTS | subagents running now (`$.agent.list`) | MEASURED; `—` when unknown |
 | SKILLS USED | skills the model invoked this session (Skill tool), from the hook ledger; `tz live skills` lists installed/enabled/discovered/loaded/invoked apart | MEASURED count, dash = UNKNOWN |
-| TOKENS SAVED · EST | output tz actually cut, net of its own overhead (chars / 4) | EST; no A/B baseline |
+| TOKENS SAVED · EST | today since local midnight, all chats: measured savings (rtk, output trims, denied re-reads) net of TZ overhead, plus the fresh-chat counterfactual (split in the panel details) | measured + EST parts; no A/B baseline |
 | OPTIMIZATIONS | filter actions that actually ran | MEASURED |
 
 Exact rules and limits: [docs/METRICS.md](docs/METRICS.md).

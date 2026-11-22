@@ -8,11 +8,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from tzlib import chat_tokens, cfg, LIMIT, HARD, advice
 
 # prompt words -> skill pack (~/.claude/skillpack). Hint printed once per pack per chat, so it costs ~30 tokens only when matched.
-PACKS = {'video': 'video|caption|shorts|reel|podcast|youtube edit', 'motion': 'motion graphic|explainer|animated|manim|launch film',
-         'sound': 'sfx|sound effect|audio clean|voice clean', 'remotion': 'remotion|hyperframes', 'design': 'ui design|polish ui|design system|critique',
-         'web': 'gsap|clone (a )?site|slides', 'content': 'youtube script|thumbnail|newsletter|seo title', 'linkedin': 'linkedin',
-         'social': 'instagram|carousel', 'seo': r'\bseo\b|\bgeo\b', 'book': 'novel|chapter|manuscript|kdp|book cover',
-         'jobs': 'job search|cover letter|apply for', 'admin': 'invoice|inbox|meeting notes|expense', 'coding': 'refactor|write tests|tdd|code review|spec'}
+from tzlib import PACKS  # skill pack keyword map, shared with tz route
 
 
 def pack_hint(data):
@@ -63,7 +59,17 @@ def _diag(where, ev=''):
 ev = ''
 data = {}
 OUT = [0]  # chars TZ injects this event (its own token overhead)
+CTX = [0]  # of those, chars that enter the model's context (advice text; a trimmed output replaces, it adds nothing)
 LIVE = ['']  # live-ledger advice (dedupe, old agents), merged into this event's additionalContext
+
+
+def tzbus_mood(kind):
+    """Mascot mood on an event that already fired (no extra reads); never raises."""
+    try:
+        import tzbus
+        tzbus.mood(kind)
+    except Exception:
+        pass
 
 
 def emit(obj):
@@ -72,6 +78,7 @@ def emit(obj):
         hs['additionalContext'] = (hs.get('additionalContext', '') + '\n' + LIVE[0]).strip()
     LIVE[0] = ''  # one JSON object per hook run: pending advice goes out here or not at all
     t = json.dumps(obj); OUT[0] += len(t); print(t)
+    CTX[0] += len(hs.get('additionalContext') or '') + len(hs.get('permissionDecisionReason') or '')
 
 
 def used_tokens(data):
@@ -106,9 +113,42 @@ try:
             LIVE[0] = ''
     except Exception:
         _diag('live', ev)
-    if ev in ('Stop', 'SessionEnd', 'PreCompact', 'SubagentStop'):
+    if ev == 'Stop' and advice('next_task'):  # turn closed past the limit: tell the user to /compact (advice, once per 25k)
+        try:
+            import tzcont
+            m = tzcont.compact_hint(data, used_tokens(data))
+            pc = tzcont.pack_cleanup(data)
+            m = '\n'.join(x for x in (m, pc, tzcont.untested_advice(data)) if x)
+            if m:
+                tzbus_mood('compact')
+                emit({'systemMessage': m, **({'hookSpecificOutput': {'hookEventName': ev}} if LIVE[0] else {})})
+        except Exception:
+            _diag('compact', ev)
+    if ev == 'Stop':  # keep the fresh-chat saving in TOKENS SAVED current (scan of recent logs, at most every 5 min)
+        try:
+            import tzopt
+            fj = os.path.join(tzopt.STATE, 'fresh.json')
+            if not os.path.exists(fj) or time.time() - os.path.getmtime(fj) > 300:
+                tzopt.fresh_file()
+        except Exception:
+            _diag('fresh', ev)
+    if ev == 'SessionEnd':  # on-demand: turn off what this chat turned on (verified, logged)
+        try:
+            import tzondemand
+            tzondemand.session_end(data.get('session_id', ''))
+            import tzcont
+            tzcont.release_claims(data.get('session_id', ''))
+        except Exception:
+            _diag('ondemand', ev)
+    if ev in ('Stop', 'SessionEnd', 'PreCompact', 'SubagentStop', 'SubagentStart', 'InstructionsLoaded', 'PostCompact') + ('PostToolBatch', 'PreModelSwitch', 'PostModelSwitch', 'WorktreeCreate', 'WorktreeRemove', 'FileChanged'):
         sys.exit(0)
     if ev == 'PreToolUse' and data.get('tool_name', 'Read') != 'Read':
+        if data.get('tool_name') in ('Edit', 'Write', 'MultiEdit', 'NotebookEdit') and advice('next_task'):
+            try:  # another live chat claimed this file: warn BEFORE the write (advice only)
+                import tzcont
+                LIVE[0] = (LIVE[0] + '\n' + tzcont.file_guard(data)).strip()
+            except Exception:
+                _diag('fileguard', ev)
         if LIVE[0]:
             emit({'hookSpecificOutput': {'hookEventName': 'PreToolUse'}})
         sys.exit(0)
@@ -123,7 +163,6 @@ try:
                 from tzopt import read_decision, ledger
                 r = read_decision(data)
                 if r:
-                    ledger('overhead-hook', len(r.get('additionalContext') or r.get('permissionDecisionReason') or ''), 'measured', data.get('session_id', 'x'))
                     emit({'hookSpecificOutput': r})
             except Exception:
                 pass
@@ -141,13 +180,51 @@ try:
             'If only part is needed: grep -n, then Read with offset+limit. If the task needs the whole file, '
             'repeat the same Read: it will be allowed.'}}))
         sys.exit(0)
-    if ev == 'PostToolUse':  # big Read/Grep/WebFetch/MCP output: trim before the model sees it, full text kept (tz recall)
+    if ev in ('PostToolUse', 'PostToolUseFailure') and advice('next_task'):  # circuit breaker: same tool/command failing 3x (advice only)
+        try:
+            import tzcont
+            m = tzcont.breaker(data)
+            if m:
+                tzbus_mood('churn')
+                LIVE[0] = (LIVE[0] + '\n' + m).strip()
+        except Exception:
+            _diag('breaker', ev)
+    if ev == 'PostToolUseFailure':
+        if LIVE[0]:
+            emit({'hookSpecificOutput': {'hookEventName': ev}})
+        sys.exit(0)
+    if ev == 'PostToolUse':  # verified test pass -> task record + checkpoint (silent); before the trim, which exits
+        try:
+            import tznext
+            tznext.on_tool(data)
+        except Exception:
+            _diag('next', ev)
+        try:  # churn counters (per-file edits/reads, images); judged on the next prompt
+            import tzcont
+            tzcont.churn_tool(data)
+            tzcont.churn_step(data)
+            if advice('next_task'):  # loop + claim-board lines, sent with this call's output
+                LIVE[0] = (LIVE[0] + '\n' + tzcont.tool_advice(data)).strip()
+        except Exception:
+            _diag('churn', ev)
+        if (data.get('tool_name') or '') == 'Bash':  # rtk's measured cut feeds TOKENS SAVED / OPTIMIZATIONS live
+            try:
+                from tzopt import rtk_delta
+                rtk_delta(data.get('session_id', 'x'))
+            except Exception:
+                _diag('rtk', ev)
+    if ev == 'PostToolUse':  # big Read/Grep/WebFetch/MCP/Bash output: trim before the model sees it, full text kept (tz recall)
         tool = data.get('tool_name') or ''
-        if tool in ('Read', 'Grep', 'WebFetch') or tool.startswith('mcp__'):
+        if tool in ('Read', 'Grep', 'WebFetch', 'Bash') or tool.startswith('mcp__'):
             try:
                 from tzout import trim
-                out, _ = trim(data)
+                out, saved = trim(data)
                 if out:
+                    try:  # measured cut feeds TOKENS SAVED / OPTIMIZATIONS on the bar
+                        from tzopt import ledger
+                        ledger('output-trim', saved, 'measured', data.get('session_id', 'x'), 'trim ' + tool)
+                    except Exception:
+                        pass
                     try:  # tzlive must not call this result "still above" any more
                         tzlive.edit(data.get('session_id', 'x'), lambda s: s['calls'].get(tzlive.key(data), {}).update(trimmed=1))
                     except Exception:
@@ -156,12 +233,6 @@ try:
                     sys.exit(0)
             except Exception:
                 _diag('out', ev)
-    if ev == 'PostToolUse':  # verified test pass -> task record + checkpoint (silent)
-        try:
-            import tznext
-            tznext.on_tool(data)
-        except Exception:
-            _diag('next', ev)
     used = used_tokens(data)
     k = used // 1000
     if used >= HARD and ev in ('PostToolUse', 'UserPromptSubmit'):  # before the limit: cheap safe checkpoint, no commands run
@@ -172,6 +243,8 @@ try:
             _diag('next', ev)
     if ev == 'PostToolUse':
         if used < HARD:
+            if LIVE[0]:
+                emit({'hookSpecificOutput': {'hookEventName': ev}})
             sys.exit(0)
         # speak once per 25k step so it never costs tokens on every tool call
         state = os.path.expanduser(f"~/.claude/token-zombie/guard-{data.get('session_id', 'x')}")
@@ -189,8 +262,36 @@ try:
                'then move the rest of the task to a fresh session (mcp__ccd_session__hand_off_to_session if available, '
                'else tell the owner: "new chat, say: read <handoff path> and continue").')
     else:
+        cont = ''
+        if advice('next_task'):  # early churn: one line of checkpoint advice, merged into this event's output
+            try:
+                import tzcont
+                ch = tzcont.churn_prompt(data, used)
+                if ch:
+                    tzbus_mood('churn' if 'churn' in ch else 'fresh')
+                    LIVE[0] = (LIVE[0] + '\n' + ch).strip()
+            except Exception:
+                _diag('churn', ev)
+        if used >= LIMIT // 2 and advice('next_task'):  # expensive chat (growth, spend, repeated reads): verified checkpoint + manual step, once
+            try:
+                import tzcont
+                cont = tzcont.on_prompt(data, used)
+            except Exception:
+                _diag('cont', ev)
+        if cont and used < LIMIT:
+            emit({'hookSpecificOutput': {'hookEventName': ev, 'additionalContext': cont}})
+            sys.exit(0)
         if used < LIMIT:
             hint = pack_hint(data) if advice('pack_hints') else ''
+            try:  # on-demand: optional capability the prompt needs is off
+                import tzondemand
+                w = tzondemand.want(data.get('prompt')) if advice('pack_hints') else []
+                if w:
+                    hint = (hint + ' ' if hint else '') + ('TOKEN ZOMBIE (suggestion): this task may need ' + ', '.join(w)
+                            + ' (off now). If so: tz ondemand on ' + ' '.join(w) + ' --session ' + data.get('session_id', '')
+                            + ' ; it is turned off again when this chat ends.')
+            except Exception:
+                _diag('ondemand', ev)
             if hint:
                 emit(({'hookSpecificOutput': {'hookEventName': ev, 'additionalContext': hint}}))
             sys.exit(0)
@@ -199,6 +300,8 @@ try:
         msg = (f'TOKEN ZOMBIE: chat is {k}k tokens past start. If this prompt continues the unfinished task, keep going until it is done, '
                'no big reads or images. If it is a NEW task: write the handoff first, then start it in a fresh session '
                '(mcp__ccd_session__start_session, context "fresh", short brief + handoff path; else tell the owner to open a new chat).')
+        if cont:
+            msg += '\n' + cont
     emit(({'hookSpecificOutput': {'hookEventName': ev, 'additionalContext': msg}}))
 except SystemExit:
     pass
@@ -209,6 +312,9 @@ finally:
         if LIVE[0] and not OUT[0]:
             emit({'hookSpecificOutput': {'hookEventName': ev}})
         import tzlive
+        if CTX[0]:  # TZ's own context cost, every hook path, one entry per event
+            from tzopt import ledger
+            ledger('overhead-hook', CTX[0], 'measured', data.get('session_id', 'x'), 'advice text ' + ev)
         tzlive.timing(data.get('session_id', 'x'), ev + (':' + data['tool_name'] if data.get('tool_name') else ''),
                       (time.perf_counter() - T0) * 1000, OUT[0])
     except Exception:

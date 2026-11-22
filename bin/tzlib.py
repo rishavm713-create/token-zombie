@@ -7,6 +7,8 @@ DEFAULTS = {'limit': 100000,    # growth past first reply: suggest fresh session
             'read_warn': 40000, # bytes: first whole Read of a bigger file asks for a targeted read once
             'plan_warn': 90, 'plan_stop': 97,  # plan-usage % (only from real provider data)
             'startup_warn': 60000,
+            'fresh_overlap': 30, # %: prompt words already seen in this chat at or above this => follow-up, stay
+            'cache_ttl': 300,   # seconds: provider prompt-cache life; idle longer => staying re-writes the whole history
             'ctx_window': 200000}  # tokens: ESTIMATE of the model context window (logs do not state it)  # tokens: --startup warns when the median new-chat size is above this
 try:
     _conf = json.load(open(os.path.expanduser('~/.claude/token-zombie/config.json')))
@@ -96,3 +98,11 @@ def skills_off(root=os.path.expanduser('~/.claude/skills-off')):
     except Exception:
         pass
     return n, tok
+
+
+# Skill pack keyword map (prompt words -> ~/.claude/skillpack pack). Used by tz-guard hints and tz route.
+PACKS = {'video': 'video|caption|shorts|reel|podcast|youtube edit', 'motion': 'motion graphic|explainer|animated|manim|launch film',
+         'sound': 'sfx|sound effect|audio clean|voice clean', 'remotion': 'remotion|hyperframes', 'design': 'ui design|polish ui|design system|critique',
+         'web': 'gsap|clone (a )?site|slides', 'content': 'youtube script|thumbnail|newsletter|seo title', 'linkedin': 'linkedin',
+         'social': 'instagram|carousel', 'seo': r'\bseo\b|\bgeo\b', 'book': 'novel|chapter|manuscript|kdp|book cover',
+         'jobs': 'job search|cover letter|apply for', 'admin': 'invoice|inbox|meeting notes|expense', 'coding': 'refactor|write tests|tdd|code review|spec'}

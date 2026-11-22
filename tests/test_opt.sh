@@ -51,4 +51,11 @@ q="{\"hook_event_name\":\"PreToolUse\",\"session_id\":\"gi\",\"tool_input\":{\"f
 o=$(echo "$q" | g); ok "guard: first small read quiet" '[ -z "$o" ]'
 o=$(echo "$q" | g); ok "guard: repeat unchanged read => advice, never deny" '[[ $o == *additionalContext* && $o != *deny* ]]'
 o=$(o_ stats); ok "hook advice counted as overhead" '[[ $o == *"overhead [measured]"* && $o != *"overhead [measured] 0 tok"* ]]'
+# 24h $ estimate + subagent cost/share
+R2="$H/.claude/projects/pp"; mkdir -p "$R2/sx/subagents"; n2=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+echo "{\"timestamp\":\"$n2\",\"message\":{\"id\":\"q1\",\"model\":\"opus\",\"usage\":{\"input_tokens\":1000000,\"cache_read_input_tokens\":10000000,\"cache_creation_input_tokens\":800000,\"output_tokens\":100000}}}" > "$R2/sx.jsonl"
+echo "{\"timestamp\":\"$n2\",\"message\":{\"id\":\"q2\",\"model\":\"haiku\",\"usage\":{\"input_tokens\":1000000,\"output_tokens\":0}}}" > "$R2/sx/subagents/agent-zz.jsonl"
+o=$(o_ stats); ok "24h: \$ per row (opus 5+0.1*5*... = \$17.50) and EST label" '[[ $o == *"main  opus"*"~\$17.50"* && $o == *"EST API-equivalent list price; plan quota separate"* ]]'
+ok "24h: top subagent line with calls and \$" '[[ $o == *"top subagent agent-zz: 1 calls"*"~\$1.00"* ]]'
+ok "24h: subagent share measured" '[[ $o == *"subagents did "*"% of tokens"* ]]'
 echo "opt: pass $pass fail $fail"; [ $fail = 0 ]

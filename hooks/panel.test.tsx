@@ -185,7 +185,7 @@ test('/tz opens the pane; an unplaced pane falls back to the status line', async
 const LEDGER = JSON.stringify([
   { t: NOW - 10, kind: 'filter', tok: 500, basis: 'measured' },
   { t: 1, kind: 'dup-read-flagged', tok: 900, basis: 'est' },
-  { t: 1, kind: 'overhead-hook', tok: 20, basis: 'measured' },
+  { t: NOW - 10, kind: 'overhead-hook', tok: 20, basis: 'measured' },
 ])
 
 test('slim bar: one row on terminal, no feed, unknowns as dashes', async ($, on) => {
@@ -193,7 +193,7 @@ test('slim bar: one row on terminal, no feed, unknowns as dashes', async ($, on)
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
   const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
   expect(await ui.find({ type: 'Text', text: /^TOKEN ZOMBIE$/ })).toBeDefined()
-  expect(await ui.find({ type: 'Text', text: /^FULL$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^FULL$/ })).toBeUndefined() // owner: no mode chip on the bar
   expect(await ui.find({ type: 'Text', text: /— agents/ })).toBeDefined()
   expect(await ui.find({ type: 'Text', text: /— skills/ })).toBeDefined()
   expect(await ui.find({ type: 'Text', text: /recent|none yet|supervisor|model/ })).toBeUndefined()
@@ -217,17 +217,17 @@ test('slim bar on desktop: real numbers, green saved, svg mascot, chevron opens 
   }
   expect((await val(/^AGENTS$/))?.text).toBe('3')
   expect((await val(/^SKILLS USED$/))?.text).toBe('3') // invoked only: loaded/discovered/on-disk never counted
-  const saved = await val(/^TOKENS SAVED · EST$/)
+  const saved = await val(/^TOKENS SAVED$/)
   expect(saved?.text).toBe('480')
   expect(saved?.props.color).toBe('green')
   expect((await val(/^OPTIMIZATIONS$/))?.text).toBe('1')
-  expect(await ui.find({ type: 'Text', text: /^ULTRA$/ })).toBeDefined()
+  expect((await ui.find({ type: 'Button', key: 'tz-mode' }))?.props.label).toBe('ULTRA') // mode replaces the Open button; press cycles it
+  expect(await ui.find({ type: 'Text', text: /EST/ })).toBeUndefined()
   const svg = await ui.find({ type: 'Svg' })
   expect(svg?.props.source).toBe('<svg>excited</svg>')
   expect(svg?.props.alt).toMatch(/mascot: excited/)
   expect(await ui.find({ type: 'Text', text: /recent|none yet/ })).toBeUndefined()
-  await ui.press({ plugin: 'token-zombie', key: 'tz-expand' })
-  expect(opened).toEqual(['token-zombie'])
+  expect(await ui.find({ type: 'Button', key: 'tz-expand' })).toBeUndefined() // desktop: no Open button, /tz opens the pane
   await ui.unmount()
 })
 
@@ -244,4 +244,84 @@ test('slim bar: working state while a turn runs; yields to a survey', async ($, 
   const q = await $.ui.mount({ ...BAND, surface: 'desktop', props: { ...BAND.props, hasSurvey: true } })
   expect(await q.find({ type: 'Text', text: /TOKEN ZOMBIE/ })).toBeUndefined()
   await q.unmount()
+})
+
+test('slim bar mascot follows event moods from mood.json (advice => alert, saving => excited, expired => ignored)', async ($, on) => {
+  const fs: Record<string, string> = { 'status.json': JSON.stringify({ ts: NOW - 30, level: 'NORMAL' }), 'zombie-alert.svg': '<svg>a</svg>', 'zombie-excited.svg': '<svg>e</svg>' }
+  world(on, fs)
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  const alt = async (mood: object) => {
+    fs['mood.json'] = JSON.stringify(mood)
+    await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+    const ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
+    const a = (await ui.find({ type: 'Svg' }))?.props.alt
+    await ui.unmount()
+    return a
+  }
+  expect(await alt({ kind: 'churn', ts: NOW - 5 })).toMatch(/alert/)
+  expect(await alt({ kind: 'compact', ts: NOW - 5 })).toMatch(/alert/)
+  expect(await alt({ kind: 'save', ts: NOW - 5 })).toMatch(/excited/)
+  expect(await alt({ kind: 'test', ts: NOW - 500 })).not.toMatch(/excited|alert/)
+})
+
+test('TOKENS SAVED split: measured + fresh chats (EST) last 24h; old fresh.json => 0', async ($, on) => {
+  const fs: Record<string, string> = { 'fresh.json': JSON.stringify({ ts: NOW - 60, tok: 150000, n: 1, today: 150000, n_today: 1, basis: 'EST' }) }
+  world(on, fs)
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await ui.find({ type: 'Text', text: /0 measured \+ 150K fresh chats \[EST input-eq\], last 24h/ })).toBeDefined()
+  await ui.unmount()
+  fs['fresh.json'] = JSON.stringify({ ts: NOW - 90000, tok: 5, n: 1, today: 5 })
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await ui.find({ type: 'Text', text: /0 measured \+ 0 fresh chats/ })).toBeDefined()
+  await ui.unmount()
+})
+
+test('econ row shows when econ.json now is < 1 h old, hidden when older', async ($, on) => {
+  const en = (ts: number) => JSON.stringify({ now: { ts, continue: 1.5, compact: 0.5, fresh: 0.25, best: 'fresh' } })
+  const fs: Record<string, string> = { 'econ.json': en(NOW - 60) }
+  world(on, fs)
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await ui.find({ type: 'Text', text: /stay \$1\.50 compact \$0\.50 fresh \$0\.25 -> fresh \[EST\]/ })).toBeDefined()
+  await ui.unmount()
+  fs['econ.json'] = en(NOW - 7200)
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await ui.find({ type: 'Text', text: /stay \$/ })).toBeUndefined()
+  await ui.unmount()
+})
+
+test('coding row shows edits/test runs from coding.json when < 24 h old, hidden when older or no edits', async ($, on) => {
+  const cj = (ts: number, edits = 3) => JSON.stringify({ ts, edits, runs: 2, last: 'pass', unt: 1 })
+  const fs: Record<string, string> = { 'coding.json': cj(NOW - 60) }
+  world(on, fs)
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await ui.find({ type: 'Text', text: /3 code edits, 2 test runs, last test pass, 1 untested/ })).toBeDefined()
+  await ui.unmount()
+  fs['coding.json'] = cj(NOW - 90000)
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await ui.find({ type: 'Text', text: /code edits/ })).toBeUndefined()
+  await ui.unmount()
+})
+
+test('24h line: today used tokens from history.json + on/off events in last 24 h', async ($, on) => {
+  const d = new Date(NOW * 1000)
+  const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  const caps = [{ t: NOW - 100, act: 'on', cap: 'x', ok: true }, { t: NOW - 200, act: 'off', cap: 'x', ok: true }, { t: NOW - 90000, act: 'on', cap: 'y', ok: true }]
+  const fs: Record<string, string> = { 'history.json': JSON.stringify({ [day]: { used: 1_200_000, calls: 5 } }), 'caps.jsonl': caps.map(e => JSON.stringify(e)).join('\n') + '\n' }
+  world(on, fs)
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await ui.find({ type: 'Text', text: /used 1\.2M, 2 on\/off/ })).toBeDefined()
+  await ui.unmount()
+  delete fs['history.json']
+  delete fs['caps.jsonl']
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await ui.find({ type: 'Text', text: /on\/off/ })).toBeUndefined()
+  await ui.unmount()
 })

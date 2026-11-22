@@ -134,12 +134,36 @@ def grade(path):
     return 'GREEN', ev
 
 
+def _claude_files(cwd, home):
+    """CLAUDE.md files Claude Code loads: global (+@imports), cwd and parents, .claude/CLAUDE.md. Read-only."""
+    out = []
+    def add(p, depth=0):
+        p = os.path.abspath(os.path.expanduser(p))
+        if p in out or not os.path.isfile(p):
+            return
+        out.append(p)
+        if depth < 4:
+            for m in re.finditer(r'^\s*@(\S+)', open(p, encoding='utf-8', errors='ignore').read(), re.M):
+                q = m.group(1)
+                add(q if q.startswith(('/', '~')) else os.path.join(os.path.dirname(p), q), depth + 1)
+    add(os.path.join(home, '.claude', 'CLAUDE.md'))
+    d, chain = os.path.abspath(cwd), []
+    while True:
+        chain.append(d)
+        if os.path.dirname(d) == d:
+            break
+        d = os.path.dirname(d)
+    for d in reversed(chain):
+        add(os.path.join(d, 'CLAUDE.md'))
+        add(os.path.join(d, '.claude', 'CLAUDE.md'))
+    return out
+
+
 def instructions(cwd, home=None):
-    """Instruction files loaded every chat (global + project CLAUDE.md): size, est tokens, duplicate lines across files. Read-only."""
+    """Instruction files loaded every chat: size, est tokens, duplicate lines across files. Read-only."""
     home = home or os.path.expanduser('~')
-    fs = [p for p in (os.path.join(home, '.claude', 'CLAUDE.md'), os.path.join(cwd, 'CLAUDE.md'), os.path.join(cwd, '.claude', 'CLAUDE.md')) if os.path.isfile(p)]
     rows, seen, dup = [], {}, []
-    for p in fs:
+    for p in _claude_files(cwd, home):
         t = open(p, encoding='utf-8', errors='ignore').read()
         rows.append((p, len(t) // 4, t.count('\n') + 1))
         for l in {x.strip() for x in t.splitlines() if len(x.strip()) > 40}:
@@ -147,6 +171,53 @@ def instructions(cwd, home=None):
                 dup.append(l[:70])
             seen.setdefault(l, p)
     return rows, dup
+
+
+_OPP = [
+    (r'\balways\b', r'\bnever\b'),
+    (r'\buse\b', r"\bavoid\b|\b(?:don't|do not|never) use\b"),
+    (r'\bon\b', r'\boff\b'),
+    (r'\bcommit\b', r"\b(?:no|don't|do not|never) commit"),
+    (r'\bsonnet\b', r'\bopus\b'),
+    (r'\benglish\b', r'\bhindi\b'),
+    (r'\b(?:terse|short|brief|concise)\b', r'\b(?:detailed|verbose|thorough|long)\b'),
+]
+_STOP = set('that this with from your have will when only each every then than them they into over also should must keep make sure rule rules file files chat chats'.split())
+
+
+def _rules(cwd, home):
+    out = []
+    for p in _claude_files(cwd, home):
+        for i, l in enumerate(open(p, encoding='utf-8', errors='ignore').read().splitlines(), 1):
+            t = l.strip().lstrip('-*0123456789.) ').strip()
+            if len(t) < 15 or l.lstrip().startswith(('#', '@')):
+                continue
+            out.append((p, i, t, re.sub(r'\W+', ' ', t.lower()).strip()))
+    return out
+
+
+def conflicts(cwd, home=None):
+    """Likely opposite rules + duplicate rule lines across CLAUDE.md files. Keyword heuristic (EST), read-only."""
+    home = home or os.path.expanduser('~')
+    rs = _rules(cwd, home)
+    conf, dups, seen = [], [], {}
+    for i, (p, n, t, norm) in enumerate(rs):
+        if len(norm) > 25 and norm in seen and seen[norm][0] != p:
+            dups.append((seen[norm], (p, n), t[:70]))
+        seen.setdefault(norm, (p, n))
+        wi = {w for w in norm.split() if len(w) >= 4 and w not in _STOP}
+        for q, m, u, nu in rs[i + 1:]:
+            if nu == norm:
+                continue
+            common = wi & {w for w in nu.split() if len(w) >= 4 and w not in _STOP}
+            for a, b in _OPP:
+                if (re.search(a, norm) and re.search(b, nu) and not re.search(b, norm) and not re.search(a, nu)) or \
+                   (re.search(b, norm) and re.search(a, nu) and not re.search(a, norm) and not re.search(b, nu)):
+                    kw = {w for pat in (a, b) for w in re.findall(r'[a-z]+', pat) if len(w) > 2}
+                    if len(common - kw) >= 2:
+                        conf.append(((p, n, t), (q, m, u), a))
+                        break
+    return conf, dups
 
 
 def profile(prompt, inv, home, apply=False):
@@ -222,6 +293,7 @@ def main(argv):
     ap.add_argument('cmd', choices=['skills', 'capabilities', 'security', 'audit', 'instructions', 'profile'])
     ap.add_argument('arg', nargs='*')
     ap.add_argument('--yes', action='store_true')
+    ap.add_argument('--effect', action='store_true', help='skills: per-skill uses, tokens after, tests passing (30 d local logs, EST)')
     ap.add_argument('--home', default=os.path.expanduser('~'))
     a = ap.parse_args(argv)
     if a.cmd == 'security':
@@ -240,6 +312,13 @@ def main(argv):
             print(f'{p}: ~{t} tok est, {n} lines' + ('  <- large: trim or move detail to on-demand files' if t > 2000 else ''))
         print(f'duplicate long lines across files: {len(dup)}' + ''.join(f'\n  {d}' for d in dup[:5]))
         print('Loaded every chat; estimate = chars/4.')
+        conf, dups = conflicts(os.getcwd(), a.home)
+        for x, y, t in dups[:10]:
+            print(f'duplicate: {x[0]}:{x[1]} = {y[0]}:{y[1]}  "{t}"')
+        for x, y, k in conf[:10]:
+            print(f'[EST keyword heuristic] possible conflict:\n  {x[0]}:{x[1]} {x[2][:80]}\n  {y[0]}:{y[1]} {y[2][:80]}')
+        if not conf:
+            print('no likely conflicts found [EST keyword heuristic]')
         return 0
     inv = inventory(a.home)
     if a.cmd == 'profile' and a.arg and a.arg[0] in ('save', 'apply', 'rollback') and len(a.arg) > 1:
@@ -247,6 +326,10 @@ def main(argv):
         return 0
     if a.cmd == 'profile':
         print('\n'.join(profile(' '.join(a.arg), inv, a.home, a.yes)))
+        return 0
+    if a.cmd == 'skills' and a.effect:
+        import tzcont
+        print('\n'.join(tzcont.skill_effect_lines(tzcont.skill_effect(os.path.join(a.home, '.claude', 'projects')))))
         return 0
     if a.cmd == 'skills':
         if a.arg:

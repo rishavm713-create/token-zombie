@@ -31,6 +31,7 @@ Five skill states, never mixed (`tz live skills` prints all five, MEASURED):
 - **Mod bar SKILLS USED** = invoked skills in this session, from the hook ledger `~/.claude/token-zombie/live-<session>.json`. It shows a dash (UNKNOWN) until a hook writes that file.
 - **HTML dashboard SKILLS ENABLED** = folders in `~/.claude/skills/` that hold a `SKILL.md`. That is not usage.
 ## TOKENS SAVED · EST
+- **Window:** rolling last 24 h, all chats added together (owner 2026-11-22). Includes rtk's measured cut after each Bash call (kind `rtk`).
 - **What it is:** tokens that TOKEN ZOMBIE actually cut from tool output, net of its own overhead.
 - **Calculation**, over the entries in `ledger.json` (the last 2000 are kept):
   - `saved = Σ tok (basis = "measured", kind not starting "overhead") − Σ tok (kind starting "overhead")`
@@ -48,6 +49,7 @@ Five skill states, never mixed (`tz live skills` prints all five, MEASURED):
   - It measures only what passes through `tz filter`. Shorter chats from handoffs and earlier compaction are real effects, but they are not counted.
 
 ## OPTIMIZATIONS (dashboard: OPTIMIZATIONS EXECUTED)
+- **Window:** rolling last 24 h, all chats.
 - **What it is:** the number of `ledger.json` entries with `basis = "measured"` whose kind does not start with `overhead`. Each one is an action that actually ran, for example one filtered command output.
 - **Label:** MEASURED.
 - **Limits:**
@@ -64,3 +66,10 @@ One state is picked, in this fixed order. The first rule that matches wins.
 5. **idle:** everything else.
 
 `bin/tzzombie.py` (`visual_state`) and `hooks/panel.tsx` (`visual`) apply the same order. The dashboard chip shows the state that the SVG animates.
+
+## Rolling 24h window (`tz stats`, 2026-11-22)
+- `LAST 24H` = usage rows from `~/.claude/projects/**/*.jsonl` (main chats and `subagents/`), timestamp in the last 24 h, deduped by message id. Used = input + cache read + cache write + output [MEASURED]; cache reads dominate and are cheap re-sends.
+- Split by main/agent and model. Ledger entries in the same 24 h: saved [measured], saved [est], TZ overhead [measured], each apart.
+- History: one snapshot per local date in `~/.claude/token-zombie/history.json` (used, calls, measured, est, overhead); last 7 days printed.
+- The panel's TOKENS SAVED block uses the same rolling 24 h (`tzdash.window`); the fresh-chat part is input-eq [EST].
+- Fresh-chat saving [EST counterfactual from MEASURED contexts] (`tzopt.fresh_saved`): a chat started within 12 h after a chat of >= 50k in the same project; per call of the new chat, old last context - this call's context. A floor (the old chat would have grown). Written to `fresh.json` by `tz stats` and at chat start (detached). Per owner it is added into the panel/dashboard TOKENS SAVED number (today); the split "measured + fresh chats [EST]" is in the panel details and `tz stats`. Never written to the ledger as measured.

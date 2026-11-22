@@ -155,8 +155,15 @@ def on_tool(data):
     if not t:
         return
     m = re.findall(r'TOTAL pass \d+ fail 0|pass[ :]+\d+[^"\\]{0,30}', txt)
-    record_test(cwd, t, cmd[:200], True, m[-1] if m else 'pass', 'hook')
+    # keep only the test segment of a chained line: replaying the whole (cut) line ran other commands and failed
+    seg = next(x for x in re.split(r'\s*(?:;|&&|\|\|)\s*', cmd) if TESTCMD.search(x))
+    record_test(cwd, t, seg.split('|')[0].replace('2>&1', '').strip()[:200], True, m[-1] if m else 'pass', 'hook')
     checkpoint(cwd, 'verified-test-pass')
+    try:
+        import tzbus
+        tzbus.mood('test')
+    except Exception:
+        pass
 
 
 def _replies(path):

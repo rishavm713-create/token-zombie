@@ -44,6 +44,8 @@ import json,sys
 p=sys.argv[1]+'/handoffs/tasks/T-c.json'; t=json.load(open(p)); t['test']={}; json.dump(t,open(p,'w'))
 PY
 g "$NONT"; ok "non-test command ignored" '! grep -q "\"src\": \"hook\"" "$P/handoffs/tasks/T-c.json"'
+CHAIN="{\"session_id\":\"s1\",\"cwd\":\"$P\",\"hook_event_name\":\"PostToolUse\",\"tool_name\":\"Bash\",\"tool_input\":{\"command\":\"cd x && bash tests/run_all.sh 2>&1 | tail -1; bin/tz state\"},\"tool_response\":{\"stdout\":\"TOTAL pass 5 fail 0\"}}"; g "$CHAIN"
+ok "chained command: only the test segment is recorded" 'grep -q "\"cmd\": \"bash tests/run_all.sh\"" "$P/handoffs/tasks/T-c.json"'
 # before-limit checkpoint
 big=$(python3 -c "print('x'*900000)"); echo "$big" > "$T/big.txt"
 TR="$H/.claude/projects/x"; mkdir -p "$TR"
@@ -58,6 +60,7 @@ ok "before-limit checkpoint path works, gated task untouched" '[ $? = 0 ] && gre
 echo "{bad" > "$P/handoffs/tasks/T-bad.json"; o=$(n); ok "corrupt task file skipped" '[[ $o == *"NEXT"* ]]'
 # resume with only local state in a fresh process
 o=$(HOME="$T/empty" python3 "$Z/bin/tznext.py" --cwd "$P" pack); ok "fresh process resumes from files only" '[[ $o == *"task pack [c]"* ]]'
+o=$(cd "$P" && HOME="$T/empty" python3 "$Z/bin/tz" resume 2>&1); ok "tz resume falls back to tz next pack when no tz handoff" '[[ $o == *"from tz next"* && $o == *"task pack [c]"* ]]'
 # measure
 python3 - "$T/s1.jsonl" <<'PY'
 import json,sys

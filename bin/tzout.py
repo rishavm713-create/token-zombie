@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Output trim + recall. PostToolUse: a big Read/Grep/WebFetch/MCP result is cut before the model sees it
 # (hookSpecificOutput.updatedToolOutput, same shape as the tool's own output; host keeps the original on a shape mismatch).
-# The full text is kept locally: `tz recall <id> [--grep P] [--lines A-B]`. Bash is never touched (rtk owns Bash).
+# The full text is kept locally: `tz recall <id> [--grep P] [--lines A-B]`. Bash: only stdout still > TZ_OUT_MAX after rtk.
 # Independent implementation; idea seen in context-mode (ELv2), no code copied. Verified on claude 2.1.318 (Read, Glob).
 import hashlib, json, os, re, sys, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -95,6 +95,11 @@ def trim(d):
             if not c:
                 return None, 0
             r['content'], saved = c
+        elif tool == 'Bash' and isinstance(r, dict) and isinstance(r.get('stdout'), str):  # only what rtk left big
+            c = cut(r['stdout'], OTHER_MAX, False)
+            if not c:
+                return None, 0
+            r['stdout'], saved = c
         elif tool == 'WebFetch' and isinstance(r, dict) and isinstance(r.get('result'), str):
             c = cut(r['result'], OTHER_MAX, False)
             if not c:
@@ -122,11 +127,10 @@ def trim(d):
             return None, 0
         if saved <= 0:
             return None, 0
-        try:
-            from tzopt import ledger
-            ledger('out-trim', saved, 'measured', d.get('session_id', 'x'))
-        except Exception:
-            pass
+        shadow = _conf().get('out_trim') == 'shadow'
+        _shadow_log('trim', tool, saved, 'shadow' if shadow else 'live')
+        if shadow:  # canary: measure what would be cut, change nothing the model sees
+            return None, 0
         return {'hookEventName': 'PostToolUse', 'updatedToolOutput': r}, saved
     except Exception:
         return None, 0
@@ -145,13 +149,117 @@ def _mark_trimmed(session, fp):
     json.dump(c, open(p + '.tmp', 'w')); os.replace(p + '.tmp', p)
 
 
+def _shadow_log(kind, tool, n, mode):
+    try:
+        os.makedirs(STATE, exist_ok=True)
+        with open(os.path.join(STATE, 'shadow.jsonl'), 'a') as f:
+            f.write(json.dumps(dict(t=int(time.time()), kind=kind, tool=tool, chars=int(n), mode=mode)) + '\n')
+    except Exception:
+        pass
+
+
+def shadow_report(days=7):
+    """`tz shadow`: what the trim rule did/would do, and how often the original was needed again (recall) = quality-risk proxy."""
+    cut = time.time() - days * 86400; a = {}
+    try:
+        for ln in open(os.path.join(STATE, 'shadow.jsonl')):
+            try:
+                e = json.loads(ln)
+            except Exception:
+                continue
+            if e.get('t', 0) >= cut:
+                k = (e['kind'], e.get('mode', ''))
+                v = a.setdefault(k, [0, 0]); v[0] += 1; v[1] += e.get('chars', 0)
+    except OSError:
+        pass
+    tr = [(k, v) for k, v in a.items() if k[0] == 'trim']; rc = sum(v[0] for k, v in a.items() if k[0] == 'recall')
+    if not tr and not rc:
+        print(f'shadow ({days} d): no data. Set out_trim to "shadow" in {STATE}/config.json to measure a trim without applying it.'); return 0
+    for (k, m), (n, c) in sorted(tr):
+        print(f'trim [{m}] {n} cuts, {c:,} chars (~{c // 4:,} tok EST) {"would be saved" if m == "shadow" else "saved"}')
+    n_tr = sum(v[0] for k, v in tr)
+    print(f'originals re-read via tz recall: {rc}' + (f' = {100 * rc // max(1, n_tr)}% of cuts [MEASURED counts; high % = trim hides needed text, review before keeping it on]' if n_tr else ''))
+    st, c, r = lifecycle()
+    print(f'lifecycle stage: {st} ({c} cuts, {r} recalls). ACTIVE needs >=20 live cuts and recalls <=10% of cuts [advice only].')
+    return 0
+
+
+def lifecycle():
+    """Shadow lifecycle stage of the output trim: RECORD (no data) > RECOMMEND (data, trim off) > SHADOW (measuring) > CANARY (live, recall rate high) > ACTIVE (live, recall rate low).
+    Promotion is advice only; the owner changes out_trim in config.json."""
+    mode = _conf().get('out_trim', 'off'); cuts = rc = 0
+    try:
+        for ln in open(os.path.join(STATE, 'shadow.jsonl')):
+            try:
+                e = json.loads(ln)
+            except Exception:
+                continue
+            cuts += e.get('kind') == 'trim'; rc += e.get('kind') == 'recall'
+    except OSError:
+        pass
+    if mode == 'shadow':
+        st = 'SHADOW'
+    elif mode in ('on', 'live', True):
+        st = 'ACTIVE' if cuts >= 20 and rc * 10 <= cuts else 'CANARY'
+    else:
+        st = 'RECOMMEND' if cuts else 'RECORD'
+    return st, cuts, rc
+
+
+def memdir():
+    return os.path.expanduser('~/.claude/projects/' + os.getcwd().replace('/', '-').replace('_', '-') + '/memory')
+
+
+def _src(rid):
+    """id -> file: 10-hex spill file, h:<handoff>.md (./handoffs), m:<memory>.md (project memory dir). None if not found / unsafe."""
+    if re.fullmatch(r'[0-9a-f]{10}', rid):
+        return os.path.join(RECALL, rid + '.txt')
+    m = re.fullmatch(r'([hm]):([\w.-]+\.md)', rid)
+    if m:
+        return os.path.join(os.path.join(os.getcwd(), 'handoffs') if m.group(1) == 'h' else memdir(), m.group(2))
+    return None
+
+
+def search(query, limit=8, handoffs='', memory=''):
+    """`tz recall --search WORDS`: rank the spilled outputs with SQLite FTS5 (bm25), built in memory from the kept files [independent code]."""
+    import sqlite3
+    db = sqlite3.connect(':memory:')
+    try:
+        db.execute('create virtual table t using fts5(id unindexed, body)')
+    except sqlite3.OperationalError:
+        print('FTS5 not available in this Python: use --grep'); return 1
+    for f in os.listdir(RECALL) if os.path.isdir(RECALL) else []:
+        if re.fullmatch(r'[0-9a-f]{10}\.txt', f):
+            db.execute('insert into t values (?,?)', (f[:10], open(os.path.join(RECALL, f), encoding='utf-8', errors='replace').read()))
+    for f in (sorted(os.listdir(handoffs)) if handoffs and os.path.isdir(handoffs) else []):  # progressive retrieval: handoff notes as extra index (no new store)
+        if f.endswith('.md'):
+            db.execute('insert into t values (?,?)', ('h:' + f, open(os.path.join(handoffs, f), encoding='utf-8', errors='replace').read()))
+    for f in (sorted(os.listdir(memory)) if memory and os.path.isdir(memory) else []):  # Claude-Mem style: memory notes, same index
+        if f.endswith('.md') and f != 'MEMORY.md':
+            db.execute('insert into t values (?,?)', ('m:' + f, open(os.path.join(memory, f), encoding='utf-8', errors='replace').read()))
+    q = ' '.join('"' + w.replace('"', '') + '"' for w in query.split())
+    if not q:
+        print('usage: tz recall --search WORDS'); return 2
+    rows = db.execute("select id, snippet(t,1,'[',']','...',12) from t where t match ? order by bm25(t) limit ?", (q, limit)).fetchall()
+    for rid, sn in rows:
+        print(f"{rid}: {' '.join(sn.split())[:200]}")
+    if not rows:
+        print('no match')
+    return 0
+
+
 def recall(argv):
+    if argv[:1] == ['--search']:
+        h, m = '--handoffs' in argv, '--memory' in argv
+        return search(' '.join(w for w in argv[1:] if w not in ('--handoffs', '--memory')), handoffs=os.path.join(os.getcwd(), 'handoffs') if h else '',
+                      memory=memdir() if m else '')
     rid = argv[0] if argv else ''
-    if not re.fullmatch(r'[0-9a-f]{10}', rid):
-        print('usage: tz recall <id> [--grep PATTERN] [--lines A-B]'); return 2
-    p = os.path.join(RECALL, rid + '.txt')
+    p = _src(rid)
+    if not p:
+        print('usage: tz recall <id|h:file.md|m:file.md> [--grep PATTERN] [--lines A-B]  |  tz recall --search WORDS [--handoffs] [--memory]'); return 2
     if not os.path.exists(p):
         print(f'no recall {rid} (kept: last {KEEP_FILES})'); return 1
+    _shadow_log('recall', rid[:12], 0, 'live')
     lines = open(p, encoding='utf-8').read().split('\n')
     if '--grep' in argv:
         pat = re.compile(argv[argv.index('--grep') + 1], re.I)
@@ -169,11 +277,19 @@ def recall(argv):
 
 def main(argv):
     """`tz recall <id> ...` (bin/tz passes the args after 'recall'); `tzout.py hook < payload` for tests/probes."""
+    if argv[:1] == ['shadow']:
+        return shadow_report()
     if argv[:1] == ['recall']:
         argv = argv[1:]
     if argv[:1] == ['hook']:
-        out, _ = trim(json.load(sys.stdin))
+        d = json.load(sys.stdin)
+        out, saved = trim(d)
         if out:
+            try:  # standalone hook path; tz-guard writes its own single entry
+                from tzopt import ledger
+                ledger('output-trim', saved, 'measured', d.get('session_id', 'x'), 'trim ' + (d.get('tool_name') or ''))
+            except Exception:
+                pass
             print(json.dumps({'hookSpecificOutput': out}))
         return 0
     return recall(argv)

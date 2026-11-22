@@ -6,15 +6,31 @@ ASCII = {'CHOMP': '(x_x) nom nom', 'HAPPY': '(^_^)', 'ALERT': '(O_O)!', 'SLEEP':
 EYES = {'CHOMP': 'x x', 'HAPPY': '^ ^', 'ALERT': 'O O', 'SLEEP': '- -', 'CELEBRATE': '* *'}
 
 
+WORRY = ('churn', 'fresh', 'compact')  # advice fired: churn, stay-or-fresh, /compact past the limit
+CHEER = ('save', 'test')  # a measured saving (trim, rtk, denied dup read) or a verified test pass
+IDLE_S = 1800
+
+
+def night(h):
+    return isinstance(h, int) and (h >= 23 or h < 6)
+
+
 def mascot_state(s):
-    """s = status bus dict (may be empty). ALERT beats everything; SLEEP when no data or idle; CELEBRATE right after a task closed."""
+    """s = status bus dict (may be empty); read_bus adds mood/idle_s/hour. ALERT beats everything; then event moods;
+    SLEEP when no data, long idle or night (unless working); CELEBRATE right after a task closed."""
     if not s or not s.get('ts'):
         return 'SLEEP'
     if s.get('level') in ('CRITICAL', 'EXHAUSTED', 'APPROACHING LIMIT') or s.get('risk') == 'high':
         return 'ALERT'
-    if s.get('task_just_done'):
+    if s.get('mood') in WORRY:
+        return 'ALERT'
+    if s.get('task_just_done') or s.get('mood') in CHEER:
         return 'CELEBRATE'
-    if s.get('level') == 'ELEVATED' or s.get('activity') == 'working':  # activity only 'working' when hook-measured
+    if s.get('activity') == 'working':  # activity only 'working' when hook-measured
+        return 'CHOMP'
+    if (s.get('idle_s') or 0) > IDLE_S or night(s.get('hour')):
+        return 'SLEEP'
+    if s.get('level') == 'ELEVATED':
         return 'CHOMP'
     return 'HAPPY' if s.get('level') == 'NORMAL' else 'SLEEP'
 

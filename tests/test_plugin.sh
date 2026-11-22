@@ -34,7 +34,7 @@ ok "hook plan matches install.sh (matchers, scripts)" 'py "
 import json,sys,re
 z=sys.argv[1]; h=json.load(open(z+\"/hooks/hooks.json\"))[\"hooks\"]
 plan=re.search(r\"plan = \((.*?)\)\n    for ev\",open(z+\"/install.sh\").read(),re.S).group(1)
-want=re.findall(r\"\(\x27(\w+)\x27, (None|\x27\x27|\x27[\w|]+\x27), (\w+)\)\",plan); assert len(want)==9
+want=re.findall(r\"\(\x27(\w+)\x27, (None|\x27\x27|\x27[\w|]+\x27), (\w+)\)\",plan); assert len(want)==19
 nm={\"guard\":\"tz-guard.py\",\"start\":\"tz-start.py\",\"compact\":\"tz-compact.py\"}
 got=[]
 for e,gs in h.items():

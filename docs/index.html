@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TOKEN ZOMBIE</title>
+<meta name="description" content="Local-first resource intelligence for Claude Code. Make every single token count.">
+<style>
+:root{--bg:#0e1511;--fg:#e8f0ea;--mut:#9bb0a2;--acc:#7CFF9B;--card:#16201a;--line:#24342a}
+@media (prefers-color-scheme:light){:root{--bg:#f6faf7;--fg:#13201a;--mut:#4d6556;--acc:#0b7a3a;--card:#fff;--line:#d5e3da}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,sans-serif}
+main{max-width:860px;margin:0 auto;padding:48px 16px}
+h1{font-size:clamp(2rem,6vw,3.2rem);margin:.2em 0}h2{margin-top:2em}
+.tag{color:var(--acc);font-weight:700;letter-spacing:.04em}.mut{color:var(--mut)}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.card b{color:var(--acc)}pre{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px;overflow:auto}
+a{color:var(--acc)}img{max-width:100%;height:auto}
+</style></head><body><main>
+<img src="img/brand-hero.svg" alt="TOKEN ZOMBIE" width="640">
+<p class="tag">MAKE EVERY SINGLE TOKEN COUNT.</p>
+<h1>Resource intelligence for Claude Code</h1>
+<p>Same task, equal quality, fewer resources. TOKEN ZOMBIE watches, protects and continues your work. Local only: no network, no telemetry, no model calls inside hooks.</p>
+<p><a href="https://github.com/rishavm713-create/token-zombie">GitHub</a> · <a href="https://github.com/rishavm713-create/token-zombie/blob/main/docs/IMPLEMENTATION-MATRIX.md">What is built</a></p>
+
+<h2>Why it exists</h2>
+<p>One small UI change burned about 68% of a 5-hour limit: a chat past 100k tokens re-sent its whole history on every step, screenshots stayed in context, agents duplicated work, and nothing showed where the tokens went. It is not only a token saver. The aim is one local layer so you need fewer separate plugins, skills and agent stacks. That is the direction, not a measured claim.</p>
+
+<h2>What it does</h2>
+<div class="grid">
+<div class="card"><b>See</b><br>Tokens, 5m/1h cache writes, agents and cost, labelled MEASURED, EST or UNAVAILABLE. No invented numbers.</div>
+<div class="card"><b>Protect</b><br>Compaction survival check, output trims tried in shadow mode first, originals always recoverable with <code>tz recall</code>.</div>
+<div class="card"><b>Control</b><br>Exact agent lifecycle, duplicate, small, empty and stalled agent flags, cost per agent.</div>
+<div class="card"><b>Continue</b><br>STATE.md and handoffs carry unfinished work across chats. <code>tz resume</code>.</div>
+</div>
+
+<h2>Install</h2>
+<pre>claude plugin install token-zombie --marketplace rishavm713-create/token-zombie</pre>
+<p class="mut">Hooks beyond the plugin defaults are activated by running <code>install.sh</code> yourself. Advice never blocks you. Status of every feature: built, partial or not built, in the matrix above.</p>
+</main></body></html>

@@ -127,6 +127,13 @@ def resume(cwd, run_tests=False):
     try:
         s = json.load(open(newest_task(cwd) or ''))
     except (OSError, ValueError):
+        try:  # no tz handoff yet: fall back to the active `tz next` task pack so a fresh chat still resumes
+            import tznext
+            p = tznext.pack(cwd)
+        except Exception:
+            p = ''
+        if p:
+            return 'TZ resume (from tz next, no tz handoff yet):\n' + p, ['no-handoff']
         return 'TZ resume: no valid task state in handoffs/tasks/. Run `tz handoff` first, or read the newest handoffs/*.md.', ['no-state']
     now = snapshot(cwd)
     drift = []

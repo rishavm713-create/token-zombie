@@ -10,7 +10,7 @@ SPAN = {'five_hour': ('5h', 18000), 'seven_day': ('7d', 604800)}
 
 def totals(path):
     """Sum real usage from a chat log: dict in/out/cache_read/cache_write/last_ctx/turns + first/last timestamps + ctx points."""
-    t = dict(inp=0, out=0, cr=0, cw=0, last=0, turns=0, t0=None, t1=None, pts=[])
+    t = dict(inp=0, out=0, cr=0, cw=0, last=0, turns=0, t0=None, t1=None, pts=[], w5=0, w1h=0, think=0)
     seen = set()
     if not path or not os.path.isfile(path):
         return t
@@ -32,6 +32,12 @@ def totals(path):
                 continue
             seen.add(key)
             i, o, cr, cw = (u.get(k) or 0 for k in ('input_tokens', 'output_tokens', 'cache_read_input_tokens', 'cache_creation_input_tokens'))
+            cc = u.get('cache_creation')  # 5-minute vs 1-hour cache writes [MEASURED when the host logs the split]
+            if isinstance(cc, dict):
+                t['w5'] += cc.get('ephemeral_5m_input_tokens') or 0; t['w1h'] += cc.get('ephemeral_1h_input_tokens') or 0
+            for b in (m.get('content') or []):  # thinking tokens are inside output_tokens; chars/4 is an EST of their share
+                if isinstance(b, dict) and b.get('type') == 'thinking':
+                    t['think'] += len(b.get('thinking') or '') // 4
             t['inp'] += i; t['out'] += o; t['cr'] += cr; t['cw'] += cw; t['turns'] += 1
             t['last'] = i + cr + cw
             ts = _ts(d.get('timestamp'))

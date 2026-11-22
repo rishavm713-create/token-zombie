@@ -52,7 +52,7 @@ test('bar numbers follow agent.list, skills invoked this session and ledger.json
   }
   expect(await val(/^AGENTS$/)).toBe('1')
   expect(await val(/^SKILLS USED$/)).toBe('1')
-  expect(await val(/^TOKENS SAVED · EST$/)).toBe('100')
+  expect(await val(/^TOKENS SAVED$/)).toBe('100')
   expect(await val(/^OPTIMIZATIONS$/)).toBe('1')
   expect(JSON.parse(w.writes['/h/.claude/token-zombie/agents.json']!).running).toBe(1)
 
@@ -63,7 +63,7 @@ test('bar numbers follow agent.list, skills invoked this session and ledger.json
   await clock.advance(61_000)
   expect(await val(/^AGENTS$/)).toBe('4')
   expect(await val(/^SKILLS USED$/)).toBe('3')
-  expect(await val(/^TOKENS SAVED · EST$/)).toBe('300')
+  expect(await val(/^TOKENS SAVED$/)).toBe('300')
   expect(await val(/^OPTIMIZATIONS$/)).toBe('3')
   expect(JSON.parse(w.writes['/h/.claude/token-zombie/agents.json']!).running).toBe(4)
   await ui.unmount()

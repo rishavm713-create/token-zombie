@@ -15,6 +15,9 @@ def text(c):  # tool_result content: str or list of {type:text}
     return c if isinstance(c, str) else ''
 
 
+ASK = None  # owner's newest typed message (first 200 chars)
+
+
 def scan(path):
     """(last test cmd, ok?, last output line, next step) from the newest part of the chat log."""
     cmd = res = nxt = None
@@ -27,7 +30,18 @@ def scan(path):
     except OSError:
         return cmd, ok, res, nxt
     results, plan = {}, []
+    global ASK
     for line in lines:
+        if '"type":"user"' in line.replace(' ', '') and '"tool_result"' not in line:
+            try:
+                c = json.loads(line).get('message', {}).get('content')
+                t = c if isinstance(c, str) else ' '.join(x.get('text', '') for x in c if isinstance(x, dict) and x.get('type') == 'text')
+                t = ' '.join(t.split())
+                if t and not t.startswith('<'):  # skip hook/system-injected turns
+                    ASK = t[:200]
+            except Exception:
+                pass
+            continue
         if '"tool_use"' not in line and '"tool_result"' not in line:
             continue
         try:
@@ -47,6 +61,19 @@ def scan(path):
                 items = i.get('items') or i.get('todos')  # update_plan / TodoWrite: full list
                 if isinstance(items, list):
                     plan = [dict(x) for x in items if isinstance(x, dict)]
+                elif str(b.get('name', '')).endswith('wrap_up') and plan:  # wrap_up checks off the whole list
+                    for x in plan:
+                        x['status'] = 'completed'
+                elif (i.get('done') or i.get('start')) and plan:  # update_plan {"done": [2], "start": 4}, 1-based
+                    for n in i.get('done') or []:
+                        if isinstance(n, int) and 0 < n <= len(plan):
+                            plan[n - 1]['status'] = 'completed'
+                    s = i.get('start')
+                    if isinstance(s, int) and 0 < s <= len(plan):
+                        for x in plan:
+                            if x.get('status') == 'in_progress':
+                                x['status'] = 'pending'
+                        plan[s - 1]['status'] = 'in_progress'
                 elif i.get('advance') and plan:  # update_plan advance: current done, next pending starts
                     cur = next((x for x in plan if x.get('status') == 'in_progress'), None)
                     if cur:
@@ -87,6 +114,7 @@ try:
                                                      if changed else 'none or not a git repo'),
             'Last test: ' + (f"`{cmd}` -> {'exit 0' if ok else 'FAILED'}: {res}" if cmd and ok is not None else
                              f'`{cmd}` (no result logged)' if cmd else 'none in recent log'),
+            'Owner last asked: ' + (ASK or 'not found in log'),
             'Next step: ' + (nxt or 'not recorded; check the summary and the daily handoff'),
             'Verify before claiming done: rerun the test above.']
     os.makedirs(OUT, exist_ok=True)

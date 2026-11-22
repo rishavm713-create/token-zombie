@@ -90,4 +90,29 @@ g "$GP" >/dev/null; o=$(g "${GP/PostToolUse/PreToolUse}")
 ok "trimmed Grep: no 'still above' note" '[[ $o != *"still above"* ]]'
 GP2="${GP/trim1/trim2}"; echo "$GP2" | HOME="$H" TZ_SUP=0 TZ_OUT=0 python3 "$Z/bin/tz-guard.py" >/dev/null; o=$(g "${GP2/PostToolUse/PreToolUse}")
 ok "untrimmed Grep: 'still above' note kept" '[[ $o == *"still above"* ]]'
+# SubagentStart/Stop by agent_id, InstructionsLoaded, PostCompact (registered hooks, exact data)
+for J in '{"hook_event_name":"SubagentStart","session_id":"hk1","agent_id":"a1","agent_type":"Explore"}' '{"hook_event_name":"SubagentStart","session_id":"hk1","agent_id":"a2","agent_type":"Plan"}' '{"hook_event_name":"SubagentStop","session_id":"hk1","agent_id":"a1"}' '{"hook_event_name":"InstructionsLoaded","session_id":"hk1","file_path":"'"$Z"'/README.md","load_reason":"session_start"}' '{"hook_event_name":"PostCompact","session_id":"hk1","trigger":"auto"}'; do g "$J" >/dev/null; done
+o=$(HOME="$H" python3 -c "import json;s=json.load(open('$H/.claude/token-zombie/live-hk1.json'));print(s['agents']['a1']['status'],s['agents']['a2']['status'],len(s['instr']),len(s['compact']),s['notes'].get('unmatched_subagent_stops',0))")
+ok "hooks: agent_id exact stop (a1 done, a2 running), 1 instr file, 1 compaction, 0 unmatched" '[[ $o == "done running 1 1 0" ]]'
+AG='{"hook_event_name":"PreToolUse","session_id":"dd1","tool_name":"Agent","tool_use_id":"t1","tool_input":{"subagent_type":"Explore","description":"Find auth code"}}'
+g "$AG" >/dev/null; o=$(g "${AG/t1/t2}")
+ok "duplicate agent assignment: advice on 2nd identical, none on 1st" '[[ $o == *"same type and description"* ]]'
+o=$(g "${AG/dd1/dd2}"); ok "first agent in a chat: no duplicate advice" '[[ $o != *"same type and description"* ]]'
+# agent ROI (cost per agent_id from subagent transcripts) + compaction verification
+RS=roi1; mkdir -p "$H/.claude/projects/p/$RS/subagents"
+printf '%s\n' '{"message":{"id":"m1","model":"claude-sonnet-4-5","usage":{"input_tokens":100,"output_tokens":50},"content":[{"type":"text","text":"done"}]}}' > "$H/.claude/projects/p/$RS/subagents/agent-r1.jsonl"
+for J in '{"hook_event_name":"SubagentStart","session_id":"roi1","agent_id":"r1","agent_type":"Explore"}' '{"hook_event_name":"SubagentStop","session_id":"roi1","agent_id":"r1"}'; do g "$J" >/dev/null; done
+o=$(HOME="$H" python3 "$Z/bin/tz" live roi --session roi1); ok "agent ROI: cost joined by agent_id, small spawn flagged" '[[ $o == *"1 agents"* && $o == *"calls 1"* && $o == *small* ]]'
+printf '# Continuation x\nChanged files (git, uncommitted): bin/tzlive.py, bin/tzout.py\nOwner last asked: verify compaction summaries\n' > "$H/.claude/token-zombie/compact-cv1.md"
+g '{"hook_event_name":"PostCompact","session_id":"cv1","trigger":"auto","compact_summary":"unrelated text"}' >/dev/null
+o=$(g '{"hook_event_name":"UserPromptSubmit","session_id":"cv1","prompt":"go"}'); ok "weak compaction summary: one advice naming the note" '[[ $o == *"compaction summary kept only"* && $o == *compact-cv1.md* ]]'
+o=$(g '{"hook_event_name":"UserPromptSubmit","session_id":"cv1","prompt":"go"}'); ok "compaction advice only once" '[[ $o != *"compaction summary kept only"* ]]'
+g '{"hook_event_name":"PostCompact","session_id":"cv2","trigger":"auto"}' >/dev/null
+ok "no summary text: verdict unknown, never guessed" '[ "$(HOME="$H" python3 -c "import json;print(json.load(open(\"$H/.claude/token-zombie/live-cv2.json\"))[\"compact\"][-1][\"verdict\"])")" = unknown ]'
+for J in '{"hook_event_name":"PostToolBatch","session_id":"ev1"}' '{"hook_event_name":"PreModelSwitch","session_id":"ev1","model":"opus"}' '{"hook_event_name":"PostModelSwitch","session_id":"ev1","model":"sonnet"}' '{"hook_event_name":"WorktreeCreate","session_id":"ev1","worktree_path":"/w/a"}' '{"hook_event_name":"WorktreeRemove","session_id":"ev1","worktree_path":"/w/a"}'; do g "$J" >/dev/null; done
+o=$(HOME="$H" python3 -c "import json;s=json.load(open('$H/.claude/token-zombie/live-ev1.json'));print(s['events']['tool_batches'],[m['model'] for m in s['models']],s['worktrees']['/w/a']['state'])")
+ok "batch/model-switch/worktree events recorded" '[[ $o == "1 ['"'"'opus'"'"', '"'"'sonnet'"'"'] removed" ]]'
+mkdir -p "$H/.claude/projects/p/st1/subagents"; echo '{"message":{"id":"m","model":"claude-sonnet-4-5","usage":{"input_tokens":5,"output_tokens":5}}}' > "$H/.claude/projects/p/st1/subagents/agent-q1.jsonl"; touch -t 202001010000 "$H/.claude/projects/p/st1/subagents/agent-q1.jsonl"
+g '{"hook_event_name":"SubagentStart","session_id":"st1","agent_id":"q1","agent_type":"Explore"}' >/dev/null
+o=$(HOME="$H" python3 "$Z/bin/tz" live roi --session st1); ok "stalled agent flagged (running, transcript quiet)" '[[ $o == *stalled* ]]'
 rm -rf "$T"; echo "live: pass $pass fail $fail"; [ $fail = 0 ]

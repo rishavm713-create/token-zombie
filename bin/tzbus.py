@@ -8,6 +8,7 @@ import json, os, time
 ACT_STALE = 900
 WORK = ('UserPromptSubmit', 'PreToolUse', 'PostToolUse', 'SubagentStop', 'PreCompact', 'SessionStart')
 IDLE = ('Stop', 'SessionEnd')
+MOOD_TTL = 120  # seconds an event mood (advice fired, saving, test pass) shows on the mascot
 
 
 def sdir():
@@ -35,6 +36,11 @@ def record_event(ev, session=''):
     write('activity.json', dict(event=ev, ts=int(time.time()), session=session))
 
 
+def mood(kind):
+    """Hooks call this only when an event fires (churn/fresh/compact advice, a saving, a test pass): one tiny write, no reads."""
+    write('mood.json', dict(kind=kind, ts=int(time.time())))
+
+
 def activity(now=None):
     """(value, source): working|idle|UNKNOWN, 'hook' when measured."""
     a = read('activity.json', {})
@@ -52,5 +58,12 @@ def read_bus(now=None):
     """status.json merged with live activity; {} when nothing recorded. Always a dict, never raises."""
     s = read('status.json', {})
     if s:
+        now = now or time.time()
         s['activity'], s['activity_src'] = activity(now)
+        m = read('mood.json', {})
+        if isinstance(m.get('ts'), (int, float)) and now - m['ts'] <= MOOD_TTL:
+            s['mood'] = m.get('kind')
+        if isinstance(s.get('ts'), (int, float)):
+            s['idle_s'] = int(now - s['ts'])
+        s['hour'] = time.localtime(now).tm_hour
     return s

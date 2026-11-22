@@ -1,0 +1,131 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TOKEN ZOMBIE preview</title>
+<style>
+:root{--bg:#0b0f0c;--pn:#101712;--ln:#2a7a3a;--g:#39ff6a;--tx:#d7e6da;--dm:#7d9484;--am:#ffb02e;--rd:#ff5d5d;--bl:#5ad1ff}
+*{box-sizing:border-box}body{margin:0;background:#050705;color:var(--tx);font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;padding:16px}
+.note{max-width:760px;margin:0 auto 10px;color:var(--dm);font-size:12px}
+.bar,.pane{max-width:760px;margin:0 auto;background:var(--bg);border:1px solid var(--g);border-radius:8px}
+.bar{display:flex;align-items:center;gap:14px;padding:7px 12px;flex-wrap:wrap}
+.z{font-size:20px}.t b{color:var(--g)}.pill{border:1px solid var(--g);color:var(--g);border-radius:10px;padding:0 8px;font-size:11px}
+.k{color:var(--dm);font-size:11px}.v{font-weight:600}.dot{width:8px;height:8px;border-radius:50%;background:var(--g);display:inline-block;margin-right:4px}
+.pane{margin-top:8px;padding:12px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0;border-bottom:1px solid #1d3a25;padding-bottom:6px}
+.tabs button{background:none;border:1px solid transparent;color:var(--dm);font:inherit;padding:2px 9px;border-radius:5px;cursor:pointer}
+.tabs button.on{color:var(--g);border-color:var(--g)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}@media(max-width:640px){.grid{grid-template-columns:repeat(2,1fr)}}
+.c{background:var(--pn);border:1px solid #1d3a25;border-radius:6px;padding:8px}.c .n{font-size:20px;font-weight:600}
+.tag{font-size:10px;border-radius:4px;padding:0 5px;margin-left:4px;border:1px solid}
+.M{color:var(--g)}.E{color:var(--am)}.U{color:var(--dm)}.N{color:var(--rd)}
+.sec{display:none}.sec.on{display:block}
+.q{margin:6px 0;padding:6px 8px;border-left:2px solid var(--g);background:var(--pn)}
+.q i{color:var(--dm);font-style:normal;display:inline-block;width:92px}
+details{margin:6px 0}summary{cursor:pointer;color:var(--g)}
+.bt{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.bt button{background:none;border:1px solid var(--ln);color:var(--tx);font:inherit;border-radius:5px;padding:2px 9px}
+table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:2px 6px;border-bottom:1px solid #1d3a25;font-weight:400}th{color:var(--dm)}
+.tg{font-weight:600}
+</style>
+<div class="note">PREVIEW for approval, not the live panel. Numbers marked MEASURED are from this machine's real files (status.json, this chat). EST rows are formulas from those. Everything else says UNAVAILABLE or NOT YET SUPPORTED. Click the tabs.</div>
+<div class="bar"><span class="z">🧟</span><span class="t">TOKEN <b>ZOMBIE</b></span><span class="pill">full</span>
+<span><span class="k">AGENTS</span> <span class="v">0</span></span><span><span class="k">SKILLS USED</span> <span class="v">0</span></span>
+<span><span class="k">SAVED·MEAS</span> <span class="v">see Resource</span></span><span><span class="k">ALERTS</span> <span class="v" style="color:var(--am)">1</span></span>
+<span><span class="dot"></span>Active</span><span class="k">⌄</span></div>
+<div class="pane">
+<div class="t" style="font-size:15px">TOKEN <b>ZOMBIE</b> <span class="k">MAKE EVERY SINGLE TOKEN COUNT.</span></div>
+<div class="tabs" id="tabs"></div>
+
+<div class="sec on" id="s0"><div class="grid">
+<div class="c"><div class="k">AGENTS RUNNING<span class="tag M">MEASURED</span></div><div class="n">0</div><div class="k">host agent.list</div></div>
+<div class="c"><div class="k">CONTEXT<span class="tag M">MEASURED</span></div><div class="n">62%</div><div class="k">ELEVATED · 125k last call</div></div>
+<div class="c"><div class="k">NEXT CALL<span class="tag E">EST</span></div><div class="n">$0.04</div><div class="k">warm cache, 0.1x history</div></div>
+<div class="c"><div class="k">CHECKPOINT<span class="tag M">MEASURED</span></div><div class="n">none</div><div class="k">no checkpoint this chat</div></div>
+<div class="c"><div class="k">TOKENS SAVED<span class="tag M">MEAS</span></div><div class="n">from ledger</div><div class="k">+ fresh-chat <span class="E">EST</span> shown apart</div></div>
+<div class="c"><div class="k">OPTIMISATIONS<span class="tag M">MEASURED</span></div><div class="n">from ledger</div><div class="k">executed, last 24 h</div></div>
+<div class="c"><div class="k">MODEL<span class="tag M">MEASURED</span></div><div class="n" style="font-size:14px">sonnet 5.5</div><div class="k">route: no switch advised</div></div>
+<div class="c"><div class="k">HEALTH</div><div class="n" style="color:var(--am)">WATCH</div><div class="k">ctx elevated, 1 alert</div></div>
+</div>
+<details open><summary>Resource intelligence (this chat)</summary>
+<table><tr><th>input</th><th>output</th><th>cache read</th><th>cache write</th><th>thinking</th></tr>
+<tr><td>136</td><td>40.8k</td><td>6.51M</td><td>172.5k</td><td class="U">UNAVAILABLE</td></tr></table>
+<div class="k">MEASURED from transcript usage, deduped by message id. Cost: API-equivalent EST, plan quota separate.</div></details>
+</div>
+
+<div class="sec" id="s1">
+<div class="q"><i>happening</i>Same Bash command failed 3x in a row (breaker), or same file read twice</div>
+<div class="q"><i>TZ did</i>One advice line injected, once per fingerprint. Never blocks.</div>
+<div class="q"><i>impact</i>Loop length after advice <span class="tag U">UNAVAILABLE</span> (not yet tracked)</div>
+<div class="q"><i>evidence</i>churn-&lt;chat&gt;.json fails list · live ledger calls · <b>tz replay</b></div>
+<table><tr><th>signal</th><th>source</th><th>state</th></tr>
+<tr><td>repeated tool calls</td><td>churn / live ledger</td><td class="M">MEASURED</td></tr>
+<tr><td>failed retry loop</td><td>breaker (PostToolUse result)</td><td class="M">MEASURED</td></tr>
+<tr><td>other chat editing same file</td><td>claims.json + pid alive</td><td class="M">MEASURED</td></tr>
+<tr><td>stalled agent</td><td>needs SubagentStart hook</td><td class="N">NOT YET SUPPORTED</td></tr></table>
+<div class="bt"><button>Replay chat</button></div></div>
+
+<div class="sec" id="s2">
+<table><tr><th>state</th><th>meaning</th><th>count</th></tr>
+<tr><td>discovered</td><td>listed in system prompt</td><td class="M">tz live skills</td></tr>
+<tr><td>installed / enabled</td><td>on disk / switched on</td><td class="M">skillpack, caps</td></tr>
+<tr><td>loaded</td><td>body read into context</td><td class="M">live ledger</td></tr>
+<tr><td>activated / invoked</td><td>Skill tool called</td><td class="M">live ledger</td></tr>
+<tr><td>instructions loaded (CLAUDE.md…)</td><td>InstructionsLoaded hook</td><td class="N">NOT YET SUPPORTED</td></tr>
+<tr><td>MCP usage</td><td>attributionMcpServer in transcript</td><td class="E">partial, not wired</td></tr></table>
+<div class="k">All optional packs stay OFF. Core + security never disabled.</div>
+<div class="bt"><button>Audit skills</button><button>Skills effect</button></div></div>
+
+<div class="sec" id="s3">
+<table><tr><th>agent</th><th>model</th><th>status</th><th>tokens</th><th>cost</th></tr>
+<tr><td class="U" colspan="5">no agents running now (host agent.list). History: tz live agents, per-agent tokens <span class="M">MEASURED</span>, cost <span class="E">EST</span></td></tr></table>
+<div class="k">Parent/child, failed/interrupted/cancelled lifecycle: NOT YET SUPPORTED (needs SubagentStart + SubagentStop hooks).</div>
+<div class="bt"><button>Live agents</button></div></div>
+
+<div class="sec" id="s4">
+<table><tr><th>signal</th><th>value</th><th>label</th></tr>
+<tr><td>context used</td><td>125k of 200k (62%)</td><td class="M">MEASURED</td></tr>
+<tr><td>duplicate reads</td><td>reads-&lt;chat&gt;.json</td><td class="M">MEASURED</td></tr>
+<tr><td>large outputs trimmed</td><td>ledger output-trim</td><td class="M">MEASURED</td></tr>
+<tr><td>original recoverable</td><td>tz recall id · <b>--search</b> (FTS5)</td><td class="M">MEASURED</td></tr>
+<tr><td>breakdown system/tools/history</td><td>host gives no split</td><td class="U">UNAVAILABLE</td></tr></table>
+<div class="bt"><button>Recall search</button><button>Optimize</button></div></div>
+
+<div class="sec" id="s5">
+<div class="q"><i>risk</i>medium · context 62% · compactions this chat: 1</div>
+<table><tr><th>10 turns</th><th>input-eq</th><th>$ (API-eq)</th></tr>
+<tr><td>continue</td><td colspan="2" class="E">EST from measured history, hit rate, growth</td></tr>
+<tr><td>compact</td><td colspan="2" class="E">EST</td></tr>
+<tr><td>fresh + handoff</td><td colspan="2" class="E">EST</td></tr></table>
+<div class="k">Recommendation = cheapest projected, never a fixed threshold.</div>
+<div class="bt"><button>Compact</button><button>Checkpoint</button></div></div>
+
+<div class="sec" id="s6">
+<table><tr><th>item</th><th>source</th><th>label</th></tr>
+<tr><td>objective, decisions, next</td><td>handoffs/&lt;date&gt;.md + STATE.md</td><td class="M">MEASURED</td></tr>
+<tr><td>open tasks</td><td>supervisor tasks</td><td class="M">MEASURED</td></tr>
+<tr><td>changed files</td><td>git / churn files</td><td class="M">MEASURED</td></tr>
+<tr><td>blocked / upcoming split, test status</td><td>no structured source</td><td class="U">UNAVAILABLE</td></tr></table>
+<div class="bt"><button>Make handoff</button><button>Checkpoint</button></div></div>
+
+<div class="sec" id="s7">
+<table><tr><th>by model</th><th>in / out / cache r / cache w</th><th>$ API-eq</th></tr>
+<tr><td colspan="3" class="U">rolling 24 h from history.json; window resets, records kept (nothing deleted)</td></tr></table>
+<div class="k">Saved MEASURED, minus TZ overhead (EST) = net. Estimated savings shown on their own line, never added.</div>
+<div class="k">Overhead: guard hook 37 ms median, 0 chars of context when silent <span class="M">MEASURED</span>.</div>
+<div class="bt"><button>Copy report</button><button>Board</button></div></div>
+<div class="sec" id="s8">
+<table><tr><th>tokens (this chat)</th><th>count</th><th>label</th></tr>
+<tr><td>input</td><td>136</td><td class="M">MEASURED</td></tr><tr><td>output</td><td>40,821</td><td class="M">MEASURED</td></tr>
+<tr><td>cache read</td><td>6,508,077</td><td class="M">MEASURED</td></tr><tr><td>cache write</td><td>172,517 (1 h part priced 2x)</td><td class="M">MEASURED</td></tr>
+<tr><td>thinking</td><td>not in usage</td><td class="U">UNAVAILABLE</td></tr>
+<tr><td>next call (warm)</td><td>0.1x history + one reply</td><td class="E">EST</td></tr>
+<tr><td>main vs subagent split</td><td>subagent rows in transcript</td><td class="E">partial</td></tr>
+<tr><td>TZ overhead</td><td>hook ms + injected chars</td><td class="M">MEASURED</td></tr></table>
+<div class="k">$ = API-equivalent list price, not your plan quota. Unknown model price stays unknown.</div>
+<div class="bt"><button>Copy</button><button>Stats</button></div></div>
+</div>
+<script>
+var T=['Overview','Zombie','Infection','Resource','Agents','Context','Survival','Continuity','24h'];
+var order=['s0','s8','s1','s2','s3','s4','s5','s6','s7'];
+var names=['Overview','Resource','Zombie detect','Infection','Agents','Context','Survival','Continuity','24h report'];
+var tb=document.getElementById('tabs');
+names.forEach(function(n,i){var b=document.createElement('button');b.textContent=n;if(!i)b.className='on';
+b.onclick=function(){[].forEach.call(tb.children,function(x){x.className=''});b.className='on';
+order.forEach(function(s,j){document.getElementById(s).className='sec'+(i===j?' on':'')})};tb.appendChild(b)});
+</script>

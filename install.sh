@@ -40,7 +40,7 @@ for ev, gs in h.items():
         die(f'hooks.{ev} has an unexpected shape; nothing changed.')
 before = json.dumps(s, indent=2, sort_keys=True).splitlines()
 guard, start, status, compact = (f'python3 "{d}/bin/{n}"' for n in ('tz-guard.py', 'tz-start.py', 'tz-status.py', 'tz-compact.py'))
-EVENTS = ('UserPromptSubmit', 'PostToolUse', 'PreToolUse', 'SessionStart', 'PreCompact', 'Stop', 'SessionEnd', 'SubagentStop')
+EVENTS = ('UserPromptSubmit', 'PostToolUse', 'PreToolUse', 'SessionStart', 'PreCompact', 'Stop', 'SessionEnd', 'SubagentStop', 'SubagentStart', 'InstructionsLoaded', 'PostCompact', 'PostToolUseFailure', 'PostToolBatch', 'PreModelSwitch', 'PostModelSwitch', 'WorktreeCreate', 'WorktreeRemove', 'FileChanged')
 mine = lambda c: 'token-zombie/bin/' in c or 'chat-size-guard.py' in c
 
 
@@ -74,9 +74,11 @@ if mode == '--uninstall':
         s.pop('hooks', None)
     msg = 'token-zombie removed (old chat-size-guard not restored; use the settings backup if you want it)'
 else:
-    plan = (('UserPromptSubmit', None, guard), ('PostToolUse', '', guard), ('PreToolUse', 'Read|Grep|Glob|WebSearch|WebFetch|Agent|Task', guard), ('SessionStart', None, start),
+    plan = (('UserPromptSubmit', None, guard), ('PostToolUse', '', guard), ('PreToolUse', 'Read|Grep|Glob|WebSearch|WebFetch|Agent|Task|Edit|Write|MultiEdit|NotebookEdit', guard), ('SessionStart', None, start),
             ('PreCompact', None, guard), ('PreCompact', None, compact), ('Stop', None, guard), ('SessionEnd', None, guard),
-            ('SubagentStop', None, guard))
+            ('SubagentStop', None, guard), ('SubagentStart', None, guard), ('InstructionsLoaded', None, guard),
+            ('PostCompact', None, guard), ('PostToolUseFailure', None, guard),
+            ('PostToolBatch', None, guard), ('PreModelSwitch', None, guard), ('PostModelSwitch', None, guard), ('WorktreeCreate', None, guard), ('WorktreeRemove', None, guard), ('FileChanged', None, guard))
     for ev, m, cmd in (() if slo else plan):
         g = {'hooks': [{'type': 'command', 'command': cmd, 'timeout': 5}]}
         if m is not None:

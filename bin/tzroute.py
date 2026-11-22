@@ -6,6 +6,10 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import tzopt
 # EST relative cost per 1M output tokens (USD, list-price ballpark, labelled EST, edit as prices change)
 COST = {'haiku': 1.0, 'sonnet': 3.0, 'opus': 15.0}
+# per-mode work limits (advice): reads before acting, subagents worth starting
+WORK = {'QUICK': 'reads <=2, no subagents', 'STANDARD': 'reads <=5 (grep/line ranges), no subagents',
+        'RESEARCH': 'subagent haiku for bulk reading, main reads summaries only', 'ENGINEERING': 'read the touched files first, <=2 subagents (sonnet)',
+        'AUDIT': '1 reviewer subagent (sonnet) + tz security', 'CREATIVE': 'reads <=3, no subagents'}
 SIG = [(r'architect|race condition|security|migrat|design system|refactor', 3), (r'debug|implement|build|test|integrat', 2), (r'multi|several|all |across|entire', 2),
        (r'typo|rename|one line|list|count|show', -2)]
 
@@ -44,6 +48,16 @@ def main(argv):
     r = route(' '.join(argv), model)
     print(f"route: model {r['model']} ({r['source']}) mode {r['mode']} complexity {r['complexity']}/5 [EST]"
           f"{', subagents: ' + r['subagent_model'] if r['subagent_model'] else ''}; ~${r['cost_per_mtok_est']}/Mtok out [EST]")
+    from tzlib import PACKS
+    packs = [p for p, rx in PACKS.items() if re.search(rx, ' '.join(argv).lower())]
+    print(f"work: {WORK.get(r['mode'], '-')}; skills: " + (', '.join(f'skillpack on {p}' for p in packs) + ' (off when done)' if packs else 'none needed (specialist skills on demand)'))
+    from tzusage import find_transcript
+    import tzcont
+    m = tzcont.measure(find_transcript(os.getcwd()))
+    if m:
+        e = tzcont.econ(m, time.time() - m['t'])
+        print(f"session: next 10 turns {' | '.join(f'{x} ${e[10][x][1]:.2f}' for x in ('continue', 'compact', 'fresh'))} -> {tzcont.best(e)} "
+              '[EST API-equivalent; details: tz stats]')
     print('note: advice only; switch with /model yourself, tz cannot change the running chat model')
     return 0
 

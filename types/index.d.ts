@@ -16,6 +16,7 @@ export type Files = {
   host: { cost_usd: number; ts: number; session?: string } | null
   isHostFresh: boolean
   mode: string
+  mood?: { kind: string; ts: number } | null // last event mood from bin/tzbus.py mood()
 }
 // The slim bar's four headline numbers; null = unknown (shown as an em dash), never a made-up number.
 export type Bar = {
@@ -26,6 +27,9 @@ export type Bar = {
   opts: number
   hasLedger: boolean
   recentAt: number
+  fresh?: { tok: number; n: number } | null
+  day?: { used: number; events: number } | null
+  econ?: { cont: number; compact: number; fresh: number; best: string } | null
 }
 export type Act = { id: string; tool: string; isDone: boolean }
 export type Note = { label: string; lines: string[]; err: string }

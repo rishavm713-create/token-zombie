@@ -17,7 +17,7 @@ ok "reduced-motion respected" 'grep -q "prefers-reduced-motion" "$T/d.html"'
 
 # measured inputs
 printf '{"running":3,"total":4,"ts":%s}' "$NOW" >"$S/agents.json"
-printf '[{"t":%s,"kind":"filter","tok":500,"basis":"measured"},{"t":1,"kind":"dup-read-flagged","tok":900,"basis":"est"},{"t":1,"kind":"overhead-hook","tok":20,"basis":"measured"}]' "$NOW" >"$S/ledger.json"
+printf '[{"t":%s,"kind":"filter","tok":500,"basis":"measured"},{"t":%s,"kind":"dup-read-flagged","tok":900,"basis":"est"},{"t":%s,"kind":"overhead-hook","tok":20,"basis":"measured"}]' "$NOW" "$NOW" "$NOW" >"$S/ledger.json"
 printf '{"ts":%s,"level":"NORMAL","activity":"idle","cwd":"x"}' "$NOW" >"$S/status.json"
 tz dash --out "$T/m.html" >/dev/null
 ok "agents running from fresh agents.json (3, MEASURED)" 'grep -A2 "AGENTS RUNNING" "$T/m.html" | grep -q "class=\"val\">3<"'
@@ -47,12 +47,12 @@ ok "unknown state falls back to idle" "HOME='$H' python3 -c \"import sys;sys.pat
 # slim bar default view (v0.3.1): one bar is the <summary>, full detail behind <details>, one mascot inside the bar
 ok "bar: details collapsed by default, bar is its summary" 'grep -q "<details class=tzx><summary class=tzbar" "$T/m.html" && ! grep -q "class=tzx open" "$T/m.html"'
 ok "bar: mascot sits inside the bar, drawn once" 'grep -q "<span class=bz><svg class=\"tz-zombie" "$T/m.html" && [ "$(grep -o "<svg class=\"tz-zombie" "$T/m.html" | wc -l | tr -d " ")" = 1 ]'
-for l in AGENTS "SKILLS ON" "TOKENS SAVED" OPTIMIZATIONS; do ok "bar label: $l" "grep -q 'class=bl>$l' '$T/m.html'"; done
-ok "bar: saved is green and EST-tagged (480)" 'grep -q "<span class=\"bm g\"><b class=bn>480</b><span class=bl>TOKENS SAVED <i>EST</i>" "$T/m.html"'
+for l in AGENTS "SKILLS USED" "TOKENS SAVED" OPTIMIZATIONS; do ok "bar label: $l" "grep -q 'class=bl>$l' '$T/m.html'"; done
+ok "bar: saved is green, no EST tag on the bar (480)" 'grep -q "<span class=\"bm g\"><b class=bn>480</b><span class=bl>TOKENS SAVED</span>" "$T/m.html"'
 ok "bar: agents 3, opts 1" 'grep -q "<b class=bn>3</b><span class=bl>AGENTS" "$T/m.html" && grep -q "<b class=bn>1</b><span class=bl>OPTIMIZATIONS" "$T/m.html"'
 ok "bar: mode pill + status dot + chevron" 'grep -q "class=\"pill\">FULL<" "$T/m.html" && grep -q "class=\"dot " "$T/m.html" && grep -q "class=chev" "$T/m.html"'
 ok "bar: no description/notes/feed in the summary" '! sed -n "/<summary class=tzbar/,/<\/summary>/p" "$T/m.html" | grep -qE "class=note|class=tile|<table|Ledger"'
-ok "bar: big numbers abbreviated (12345 -> 12K)" 'printf "[{\"t\":1,\"kind\":\"filter\",\"tok\":12345,\"basis\":\"measured\"}]" >"$S/ledger.json" && tz dash --out "$T/k.html" >/dev/null && grep -q "<b class=bn>12K</b>" "$T/k.html"'
+ok "bar: big numbers abbreviated (12345 -> 12K)" 'printf "[{\"t\":$NOW,\"kind\":\"filter\",\"tok\":12345,\"basis\":\"measured\"}]" >"$S/ledger.json" && tz dash --out "$T/k.html" >/dev/null && grep -q "<b class=bn>12K</b>" "$T/k.html"'
 printf '{"mode":"off"}' >"$S/config.json"
 ok "bar: mode off => dim pill + Off state" 'tz dash --out "$T/o.html" >/dev/null && grep -q "class=\"pill off\">OFF<" "$T/o.html" && grep -q "class=\"dot off\"" "$T/o.html"'
 rm -f "$S/config.json"

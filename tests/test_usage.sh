@@ -27,4 +27,7 @@ o=$(u forecast --transcript "$T/c.jsonl"); ok "forecast shows burn + state only"
 o=$(u status --transcript "$T/none.jsonl"); ok "missing log handled" '[[ $o == *"no token usage"* ]]'
 o=$(u status --rate-limits '{bad' 2>&1); ok "bad rate-limits JSON => error" '[[ $o == *"not valid JSON"* ]]'
 echo '{"message":{"usage":{"input_tokens":5}}} garbage' > "$T/g.jsonl"; o=$(u status --transcript "$T/g.jsonl"); ok "corrupt log line skipped" '[[ $o == *"no token usage"* ]]'
+J=$(mktemp); echo '{"uuid":"a","message":{"id":"m1","usage":{"input_tokens":1,"output_tokens":9,"cache_creation":{"ephemeral_5m_input_tokens":7,"ephemeral_1h_input_tokens":3}},"content":[{"type":"thinking","thinking":"abcdefgh"}]}}' > $J
+o=$(HOME="$H" python3 -c "import sys;sys.path.insert(0,'$Z/bin');import tzusage as u;t=u.totals('$J');print(t['w5'],t['w1h'],t['think'])")
+ok "cache 5m/1h split + thinking est" '[[ $o == "7 3 2" ]]'
 echo "usage: pass $pass fail $fail"; [ $fail = 0 ]

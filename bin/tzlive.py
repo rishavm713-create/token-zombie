@@ -28,7 +28,7 @@ def path(session):
 
 def blank():
     return {'hooks': {}, 'skills': {'discovered': {}, 'loaded': {}, 'invoked': {}}, 'agents': {}, 'calls': {}, 'gen': 0,
-            'dedupe': {'advised': 0, 'compactions': 0}, 'notes': {}}
+            'dedupe': {'advised': 0, 'compactions': 0}, 'notes': {}, 'instr': {}, 'compact': [], 'events': {}, 'models': [], 'worktrees': {}}
 
 
 def _load(p):
@@ -83,6 +83,11 @@ def on_event(data, now=None):
                 name = p[1:].split()[0] if len(p) > 1 else ''
                 if name and (':' in name or os.path.isfile(os.path.expanduser(f'~/.claude/skills/{name}/SKILL.md'))):
                     _bump(s['skills']['loaded'], name)
+            lc = (s.get('compact') or [{}])[-1]
+            if lc.get('verdict') == 'weak' and not lc.get('advised'):  # deterministic fallback: summary missed the saved facts
+                lc['advised'] = 1
+                adv = (f"TOKEN ZOMBIE (check): the compaction summary kept only {lc.get('hit')}/{lc.get('of')} saved key facts; missing: "
+                       + ', '.join(lc.get('missing', [])[:6]) + f". The verified continuation note is {lc.get('note')}; read it before continuing.")
             old = [a for i, a in s['agents'].items() if a.get('status') == 'running' and now - a.get('t0', now) > AGENT_OLD
                    and not s['notes'].get(i)]
             for i, a in s['agents'].items():
@@ -94,6 +99,13 @@ def on_event(data, now=None):
                        + '. If the result is no longer needed, stop it (TaskStop); otherwise ignore this note.')
         elif ev == 'PreToolUse':
             if tool in AGENT and tid:
+                d0 = ' '.join(str(ti.get('description', '')).lower().split())
+                dup = [a for a in s['agents'].values() if d0 and a.get('status') in ('running', 'starting', 'done')
+                       and ' '.join(str(a.get('desc', '')).lower().split()) == d0 and a.get('type') == (ti.get('subagent_type') or 'general')]
+                if dup:  # same type + same description already assigned in this chat (advice only)
+                    _bump(s['notes'], 'dup_agent_advised')
+                    adv = (f"TOKEN ZOMBIE (check): an agent with the same type and description ('{d0[:50]}') was already started in this chat"
+                           f" ({dup[0].get('status')}). Reuse its result (SendMessage) unless this is a deliberate re-run; the call is allowed.")
                 s['agents'][tid] = dict(type=ti.get('subagent_type') or 'general', model=ti.get('model') or 'inherit',
                                         bg=bool(ti.get('run_in_background')), status='starting', t0=int(now), desc=str(ti.get('description', ''))[:60])
             elif tool in SAFE_FS + SAFE_WEB:
@@ -120,7 +132,37 @@ def on_event(data, now=None):
                 s['gen'] += 1
             if len(s['calls']) > 300:  # keep the file small
                 s['calls'] = dict(sorted(s['calls'].items(), key=lambda kv: kv[1]['t'])[-200:])
+        elif ev == 'SubagentStart':  # exact agent identity from the hook (MEASURED)
+            aid = data.get('agent_id') or ''
+            if aid:
+                s['agents'][aid] = dict(type=data.get('agent_type') or 'general', model='inherit', bg=False, status='running',
+                                        t0=int(now), desc='', by_hook=1)
+        elif ev == 'InstructionsLoaded':  # which instruction files entered context, and why (size is bytes; tokens = EST size/4)
+            f = str(data.get('file_path') or '')[:200]
+            if f:
+                try:
+                    sz = os.path.getsize(f)
+                except OSError:
+                    sz = 0
+                s.setdefault('instr', {})[f] = dict(reason=str(data.get('load_reason') or '')[:30], bytes=sz, est_tokens=sz // 4, t=int(now))
+        elif ev == 'PostToolBatch':  # batch size only (the host payload's exact fields are not assumed)
+            _bump(s.setdefault('events', {}), 'tool_batches')
+        elif ev in ('PreModelSwitch', 'PostModelSwitch'):  # attempt vs actual model, both recorded as given by the host
+            m = str(data.get('model') or data.get('new_model') or data.get('to') or '')[:60]
+            s.setdefault('models', []).append(dict(t=int(now), ev=ev, model=m or 'not-in-payload'))
+            s['models'] = s['models'][-20:]
+        elif ev in ('WorktreeCreate', 'WorktreeRemove'):
+            w = str(data.get('worktree_path') or data.get('path') or data.get('name') or '?')[:120]
+            s.setdefault('worktrees', {})[w] = dict(state='created' if ev == 'WorktreeCreate' else 'removed', t=int(now))
+        elif ev == 'PostCompact':
+            v = verify_compact(data.get('session_id', 'x'), data.get('compact_summary'))
+            s.setdefault('compact', []).append(dict(t=int(now), trigger=str(data.get('trigger') or '')[:20], **v))
+            s['compact'] = s['compact'][-20:]
         elif ev == 'SubagentStop':
+            aid = data.get('agent_id') or ''
+            if aid and aid in s['agents']:
+                s['agents'][aid]['status'] = 'done'; s['agents'][aid]['t1'] = int(now)
+                return adv
             run = [a for a in s['agents'].values() if a.get('status') == 'running']
             if len(run) == 1:
                 run[0]['status'] = 'done'; run[0]['t1'] = int(now)
@@ -128,6 +170,85 @@ def on_event(data, now=None):
                 _bump(s['notes'], 'unmatched_subagent_stops')
         return adv
     return edit(data.get('session_id', 'x'), fn)
+
+
+def agent_costs(sid, home=None):
+    """{agent_id: {calls, tok, usd, result_chars}} from this session's subagent transcripts. Tokens MEASURED, $ EST (list price)."""
+    import glob, tzopt
+    out = {}
+    h = home or os.path.expanduser('~')
+    for f in sorted(glob.glob(os.path.join(h, f'.claude/projects/*/{sid}/subagents/*.jsonl'))) if sid else []:
+        n, ie, o, usd, seen, last = 0, 0, 0, 0.0, set(), 0
+        for raw in open(f, 'rb'):
+            if b'"usage"' not in raw:
+                continue
+            try:
+                m = (json.loads(raw).get('message') or {}); u = m.get('usage')
+            except Exception:
+                continue
+            if not isinstance(u, dict) or m.get('id') in seen:
+                continue
+            seen.add(m.get('id')); x, c = tzopt._cost(m.get('model'), u); n += 1; ie += x; o += u.get('output_tokens') or 0; usd += c
+            last = sum(len(b.get('text', '')) for b in (m.get('content') or []) if isinstance(b, dict) and b.get('type') == 'text')
+        out[os.path.basename(f)[:-6].replace('agent-', '', 1)] = dict(calls=n, tok=int(ie + o), usd=round(usd, 4), result_chars=last)
+    return out
+
+
+SMALL_CALLS, SMALL_TOK = 2, 20000
+STALL_SEC = 600
+
+
+def roi(sid, s=None, home=None):
+    """Per-agent cost vs outcome. Flags (EST, advice only): small = could have run inline; empty = no result text; failed; duplicate."""
+    s = s or _load(path(sid)); costs = agent_costs(sid, home); rows = []
+    seen = {}
+    for aid, a in s['agents'].items():
+        c = costs.get(aid) or costs.get(aid.replace('toolu_', ''), {})
+        d = ' '.join(str(a.get('desc', '')).lower().split())
+        fl = []
+        if a.get('status') == 'running' and a.get('by_hook'):  # stalled: running by hooks but its transcript has been quiet
+            try:
+                import glob
+                fs = glob.glob(os.path.join(home or os.path.expanduser('~'), f'.claude/projects/*/{sid}/subagents/agent-{aid}.jsonl'))
+                if fs and time.time() - max(os.path.getmtime(x) for x in fs) > STALL_SEC:
+                    fl.append('stalled')
+            except OSError:
+                pass
+        if c and c['calls'] <= SMALL_CALLS and c['tok'] < SMALL_TOK:
+            fl.append('small')
+        if c and not c['result_chars'] and a.get('status') == 'done':
+            fl.append('empty')
+        if a.get('status') == 'failed':
+            fl.append('failed')
+        if d and (a.get('type'), d) in seen:
+            fl.append('duplicate')
+        seen[(a.get('type'), d)] = 1
+        rows.append(dict(id=aid, type=a.get('type'), status=a.get('status'), desc=a.get('desc', ''), flags=fl, **{k: c.get(k) for k in ('calls', 'tok', 'usd')}))
+    for aid, c in costs.items():  # transcripts with no hook record (hooks not registered yet): cost only, labelled
+        if aid not in s['agents'] and not any(r['id'].endswith(aid) for r in rows):
+            rows.append(dict(id=aid, type='?', status='no-hook-record', desc='', flags=[], calls=c['calls'], tok=c['tok'], usd=c['usd']))
+    return rows
+
+
+def verify_compact(sid, summary, out=None):
+    """Compare the PreCompact continuation note with the summary the model kept. Deterministic, text only.
+    verdict: ok (>= half of the key terms present) | weak | unknown (no summary text or no note: never guessed)."""
+    import re
+    note = os.path.join(out or sdir(), f"compact-{sid}.md")
+    if not isinstance(summary, str) or not summary.strip() or not os.path.isfile(note):
+        return dict(verdict='unknown', note=note if os.path.isfile(note) else '')
+    txt = open(note).read()
+    terms = []
+    for ln in txt.splitlines()[1:]:  # key facts: file names, the owner's last ask words, test command
+        for w in re.findall(r"[\w./-]{5,}", ln.split(':', 1)[-1]):
+            w = w.strip('./-')
+            if len(w) >= 5 and w.lower() not in ('changed', 'files', 'uncommitted', 'recorded', 'before', 'claiming', 'rerun', 'above', 'found', 'asked', 'check', 'summary', 'daily', 'handoff', 'step', 'test') and w not in terms:
+                terms.append(w)
+    terms = terms[:12]
+    s_low = summary.lower()
+    miss = [w for w in terms if w.lower() not in s_low]
+    hit = len(terms) - len(miss)
+    return dict(verdict=('ok' if terms and hit * 2 >= len(terms) else 'weak' if terms else 'unknown'), hit=hit, of=len(terms), missing=miss[:8], note=note)
 
 
 def discovered(session, names):
@@ -169,12 +290,21 @@ def latest_session():
 def main(argv):
     import argparse
     ap = argparse.ArgumentParser(prog='tz live')
-    ap.add_argument('cmd', nargs='?', default='show', choices=['show', 'skills', 'agents'])
+    ap.add_argument('cmd', nargs='?', default='show', choices=['show', 'skills', 'agents', 'roi'])
     ap.add_argument('--session')
     ap.add_argument('--json', action='store_true')
     a = ap.parse_args(argv)
     sid = a.session or latest_session()
     s = _load(path(sid)) if sid else blank()
+    if a.cmd == 'roi':
+        r = roi(sid, s)
+        if a.json:
+            print(json.dumps(r)); return 0
+        tot = sum(x['usd'] or 0 for x in r)
+        print(f"agent ROI this session ({sid or 'none'}): {len(r)} agents, ~${tot:.2f} [tokens MEASURED, $ EST list price]; flags are advice, not verdicts")
+        for x in r:
+            print(f"  {x['status']:14} {x['type']} calls {x['calls']} tok {x['tok']} ~${x['usd'] or 0:.2f} {','.join(x['flags']) or 'ok'} '{x['desc']}'")
+        return 0
     if a.cmd == 'skills':
         inv = skill_inventory(); sk = s['skills']
         r = dict(**inv, discovered=len(sk['discovered']), loaded=len(set(sk['loaded']) | set(sk['invoked'])), invoked=len(sk['invoked']),
@@ -195,6 +325,11 @@ def main(argv):
               + (f" | unmatched stops {s['notes']['unmatched_subagent_stops']}" if s['notes'].get('unmatched_subagent_stops') else ''))
         for i, x in s['agents'].items():
             print(f"  {x.get('status'):8} {x.get('type')} model={x.get('model')} bg={x.get('bg')} '{x.get('desc', '')}'")
+        try:  # per-subagent cost from this session's subagent transcripts [measured tokens, EST $]
+            for k, c in agent_costs(sid).items():
+                print(f"  {k}: {c['calls']} calls, {c['tok']:,} input-eq+out tok, ~${c['usd']:.2f} [EST API-equivalent list price]")
+        except Exception:
+            pass
         return 0
     if a.json:
         print(json.dumps(s)); return 0

@@ -27,4 +27,15 @@ c security "$T/none" 2>/dev/null; ok "bad dir => exit 2" '[ $? = 2 ]'
 o=$(c audit); ok "audit summarises all skill dirs" '[[ $o == *"audited 3 of 3"* ]]'
 cp -r "$T/r" "$H/.claude/skills/evil"; o=$(c audit); r=$?; ok "audit exit 1 on RED" '[[ $o == *"RED evil"* && $r = 1 ]]'
 ok "read-only: settings untouched" 'grep -q "a@b" "$H/.claude/settings.json"'
+# instructions conflicts
+P="$T/proj"; mkdir -p "$P"; mkdir -p "$H/.claude"
+printf 'Always commit changes after each finished task in this project.\nReply in short terse messages for the owner always.\n' > "$H/.claude/CLAUDE.md"
+printf 'Never commit changes after each finished task in this project.\nReply in short terse messages for the owner always.\n' > "$P/CLAUDE.md"
+o=$(cd "$P" && python3 "$Z/bin/tzcap.py" instructions --home "$H")
+ok "conflict found with both file:line" '[[ $o == *"EST keyword heuristic] possible conflict"* && $o == *"CLAUDE.md:1"* ]]'
+ok "duplicate found" '[[ $o == *"duplicate: "*"CLAUDE.md:2"* ]]'
+printf 'Use pytest for running every unit test here.\n' > "$H/.claude/CLAUDE.md"
+printf 'Keep replies short and plain for the owner.\n' > "$P/CLAUDE.md"
+o=$(cd "$P" && python3 "$Z/bin/tzcap.py" instructions --home "$H")
+ok "clean files => none" '[[ $o == *"no likely conflicts found"* && $o != *"duplicate: "* ]]'
 echo "cap: pass $pass fail $fail"; [ $fail = 0 ]

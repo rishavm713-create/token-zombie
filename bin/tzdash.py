@@ -33,6 +33,12 @@ def bench_results(ev=None):
     return out
 
 
+def window(led, now):
+    """Entries in the rolling last 24 h, all chats (owner 2026-11-22). Exact and measurable (the 5h plan reset is not visible to the desktop app)."""
+    start = now - 86400
+    return [x for x in led if isinstance(x.get('t'), (int, float)) and x['t'] >= start]
+
+
 def metrics(bus, now=None):
     """The four headline numbers. Each: (value, tag, note). tag = MEASURED | EST | UNKNOWN; never a made-up number."""
     import time
@@ -45,11 +51,15 @@ def metrics(bus, now=None):
     on = sum(os.path.isfile(os.path.join(sk, d, 'SKILL.md')) for d in os.listdir(sk)) if os.path.isdir(sk) else 0
     off_n, off_tok = skills_off()
     skills = (on, 'MEASURED', f'enabled on disk; {off_n} kept off (~{off_tok} tok/chat startup) [EST]')
-    led = [x for x in _j('ledger.json', []) if isinstance(x, dict) and isinstance(x.get('tok'), (int, float))]
+    led = window([x for x in _j('ledger.json', []) if isinstance(x, dict) and isinstance(x.get('tok'), (int, float))], now)
     done = [x for x in led if x.get('basis') == 'measured' and not str(x.get('kind', '')).startswith('overhead')]
     over = sum(x['tok'] for x in led if str(x.get('kind', '')).startswith('overhead'))
     net = sum(x['tok'] for x in done) - over
-    saved = (f'{net:,}' if led else '0', 'EST', 'output cut by tz (MEASURED chars / 4), net of hook overhead; no A/B baseline, not a proven saving')
+    fj = _j('fresh.json', {})
+    import time as _t
+    fr = fj.get('tok', 0) if isinstance(fj.get('ts'), (int, float)) and fj['ts'] >= now - 86400 and isinstance(fj.get('tok'), int) else 0
+    net += fr  # fresh-chat counterfactual (EST), shown inside TOKENS SAVED per owner; split kept in tz stats
+    saved = (f'{net:,}' if led or fr else '0', 'EST', 'output cut by tz (MEASURED chars / 4), net of hook overhead; no A/B baseline, not a proven saving')
     opts = (len(done), 'MEASURED', 'filters/optimizations actually applied (ledger)')
     recent = any(isinstance(x.get('t'), (int, float)) and now - x['t'] <= 120 and x['tok'] > 0 for x in done)
     return {'agents': agents, 'skills': skills, 'saved': saved, 'opts': opts}, recent
@@ -66,6 +76,12 @@ def render():
     reg = {k: r for k, r in _j('registry.json', {}).items() if isinstance(r, dict)}
     e = html.escape
     rows = ''.join(f'<tr><td>{e(str(k))}</td><td>{e(str(v))}</td></tr>' for k, v in s.items() if k not in ('limits', 'tokens', 'label'))
+    try:
+        import tzondemand, time as _t
+        caps = ''.join(f"<tr><td>{_t.strftime('%H:%M', _t.localtime(x['t']))}</td><td>{e(x['act'])}</td><td>{e(x['cap'])}</td><td>{'ok' if x['ok'] else 'FAIL'}</td><td>{e(x.get('note', ''))}</td></tr>"
+                       for x in tzondemand.events(_t.time() - 86400)[-20:]) or '<tr><td>no events</td></tr>'
+    except Exception:
+        caps = '<tr><td>UNKNOWN</td></tr>'
     b = bench_results()
     brow = ''.join(f'<tr><td>{e(f)}</td><td>{t}</td><td>{e(str(x))}</td></tr>' for f, t, x in b) or '<tr><td colspan=3>no A/B evidence: UNKNOWN (not run)</td></tr>'
     rrow = ''.join(f"<tr><td>{e(k)}</td><td>{e(r.get('grade',''))}</td><td>{e(r.get('license',''))}</td></tr>" for k, r in reg.items()) or '<tr><td colspan=3>empty</td></tr>'
@@ -78,8 +94,7 @@ def render():
         if key == 'saved' and isinstance(v, str) and v.replace(',', '').lstrip('-').isdigit():
             n = int(v.replace(',', ''))
             v = f'{n / 1e6:.1f}M' if abs(n) >= 1e6 else f'{round(n / 1e3)}K' if abs(n) >= 1e4 else f'{n / 1e3:.1f}K' if abs(n) >= 1e3 else str(n)
-        tag = ' <i>EST</i>' if m[key][1] == 'EST' else ''
-        return f'<span class="bm{cls}"><b class=bn>{e(str(v))}</b><span class=bl>{label}{tag}</span></span>'
+        return f'<span class="bm{cls}"><b class=bn>{e(str(v))}</b><span class=bl>{label}</span></span>'
     tile = lambda key, label: (f'<div class="tile"><div class="lab">{label}</div><div class="val">{e(str(m[key][0]))}</div>'
                                f'<div class="tag t-{m[key][1].lower()}">{m[key][1]}</div><div class="note">{e(m[key][2])}</div></div>')
     return f"""<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=refresh content=15><title>TOKEN ZOMBIE</title>
@@ -119,7 +134,7 @@ table{{border-collapse:collapse;width:100%;margin:8px 0}}td{{padding:3px 10px 3p
 <div class=wrap>
 <details class=tzx><summary class=tzbar aria-label="TOKEN ZOMBIE bar: open details"><span class=bz>{svg_zombie(vs)}</span>
 <span class=bt><span class=bh><h1>TOKEN <b>ZOMBIE</b></h1><span class=btag>MAKE EVERY SINGLE TOKEN COUNT.</span></span><span data-m={e(str(mode))} class="pill{' off' if mode == 'off' else ''}">{e(str(mode)).upper()}</span></span>
-<span class=bms>{bnum('agents', 'AGENTS')}{bnum('skills', 'SKILLS ON')}{bnum('saved', 'TOKENS SAVED', ' g')}{bnum('opts', 'OPTIMIZATIONS')}</span>
+<span class=bms>{bnum('agents', 'AGENTS')}{bnum('skills', 'SKILLS USED')}{bnum('saved', 'TOKENS SAVED', ' g')}{bnum('opts', 'OPTIMIZATIONS')}</span>
 <span class=bs><span class="dot {e(state.lower())}"></span>{state}<span class=chev></span></span></summary>
 <div class=full><div class=card>
 <div class=head>
@@ -127,6 +142,7 @@ table{{border-collapse:collapse;width:100%;margin:8px 0}}td{{padding:3px 10px 3p
 <div class=chips style="margin-top:0"><span class="chip st-{e(vs)}">mascot <b>{e(vs.upper())}</b></span><span class=chip>mode <b>{e(str(mode)).upper()}</b></span><span class=chip>context <b>{e(ctxs)}</b></span><span class=chip>level <b>{e(str(s.get('level', '—')))}</b></span><span class=chip>supervisor <b>{e(str(s.get('state', '—')))}</b></span></div></div>
 <div class=grid>{tile('agents', 'AGENTS RUNNING')}{tile('skills', 'SKILLS ENABLED')}{tile('saved', 'TOKENS SAVED')}{tile('opts', 'OPTIMIZATIONS EXECUTED')}</div>
 </div>
+<details><summary>On-demand capabilities, last 24h (MEASURED events)</summary><table>{caps}</table></details>
 <details><summary>Status bus (ctx% actual/est, minutes est)</summary><table>{rows or '<tr><td>no status: run tz sup tick</td></tr>'}</table></details>
 <details><summary>Ledger (last 20)</summary><pre>{e(json.dumps(led, indent=1)[:2000])}</pre></details>
 <details><summary>A/B benchmark evidence (MEASURED only if present)</summary><table>{brow}</table></details>

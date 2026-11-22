@@ -111,10 +111,23 @@ echo "{\"hook_event_name\":\"PreCompact\",\"session_id\":\"c1\",\"trigger\":\"au
 n="$H/.claude/token-zombie/compact-c1.md"
 ok "compact note: changed file, failed test, next step" 'grep -q "a.py" "$n" && grep -q "FAILED: pass 3, fail 1" "$n" && grep -q "Next step: wire hook" "$n"'
 ok "compact note small (<= 1500 chars)" '[ $(wc -c < "$n") -le 1500 ]'
+cat > "$T/c2.jsonl" <<'J'
+{"type":"user","message":{"content":"build the old thing"}}
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"p1","name":"mcp__ccd_turn__update_plan","input":{"items":[{"content":"old step","status":"in_progress"},{"content":"old two","status":"pending"},{"content":"old three","status":"pending"}]}}]}}
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"p2","name":"mcp__ccd_turn__update_plan","input":{"done":[1],"start":3}}]}}
+{"type":"user","message":{"content":"<system-reminder>x</system-reminder>"}}
+J
+echo "{\"session_id\":\"c2\",\"trigger\":\"auto\",\"cwd\":\"$T/repo\",\"transcript_path\":\"$T/c2.jsonl\"}" | HOME="$H" python3 "$Z/bin/tz-compact.py"
+n2="$H/.claude/token-zombie/compact-c2.md"
+ok "compact note: done/start honoured, owner ask kept, injected turns skipped" 'grep -q "Next step: old three" "$n2" && grep -q "Owner last asked: build the old thing" "$n2"'
+echo '{"type":"assistant","message":{"content":[{"type":"tool_use","id":"w1","name":"mcp__ccd_turn__wrap_up","input":{"recap":"r"}}]}}' >> "$T/c2.jsonl"
+echo '{"type":"user","message":{"content":[{"type":"text","text":"now do the new thing"}]}}' >> "$T/c2.jsonl"
+echo "{\"session_id\":\"c2\",\"trigger\":\"auto\",\"cwd\":\"$T/repo\",\"transcript_path\":\"$T/c2.jsonl\"}" | HOME="$H" python3 "$Z/bin/tz-compact.py"
+ok "compact note: wrap_up closes the old list (no stale step), new ask shown" 'grep -q "Next step: all listed steps done" "$n2" && grep -q "Owner last asked: now do the new thing" "$n2"'
 o=$(echo "{\"source\":\"compact\",\"session_id\":\"c1\",\"cwd\":\"$T/p1\"}" | HOME="$H" python3 "$Z/bin/tz-start.py")
 ok "after compact: note injected, HANDOFF not repeated" '[[ $o == *"wire hook"* && $o != *top2* ]]'
 o=$(echo "{\"source\":\"compact\",\"session_id\":\"none\",\"cwd\":\"$T/p1\"}" | HOME="$H" python3 "$Z/bin/tz-start.py")
-ok "after compact without note: silent" '[ -z "$o" ]'
+ok "after compact without note: no continuation, only lean rules" '[[ -z "$o" || ( $o == *"lean rules"* && $o != *continuation* ) ]]'
 echo "{\"hook_event_name\":\"PreCompact\",\"session_id\":\"c2\",\"cwd\":\"$T\",\"transcript_path\":\"$T/none.jsonl\"}" | HOME="$H" python3 "$Z/bin/tz-compact.py"
 ok "compact without git/log: still writes, says none" 'grep -q "none in recent log" "$H/.claude/token-zombie/compact-c2.md"'
 

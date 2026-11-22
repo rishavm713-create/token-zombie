@@ -30,10 +30,35 @@ import sys;sys.path.insert(0,\"$Z/bin\")
 from tzmascot import mascot_state as m
 assert m({})==\"SLEEP\" and m({\"ts\":1,\"level\":\"CRITICAL\"})==\"ALERT\" and m({\"ts\":1,\"level\":\"NORMAL\",\"task_just_done\":True})==\"CELEBRATE\"
 assert m({\"ts\":1,\"level\":\"ELEVATED\"})==\"CHOMP\" and m({\"ts\":1,\"level\":\"NORMAL\"})==\"HAPPY\" and m({\"ts\":1,\"level\":\"NORMAL\",\"risk\":\"high\"})==\"ALERT\""'
+# mascot follows events + time: hooks write mood.json only when an event fires; read_bus merges mood/idle/hour
+ok "mascot event + time mapping (pure)" 'python3 -c "
+import sys;sys.path.insert(0,\"$Z/bin\")
+from tzmascot import mascot_state as m
+b={\"ts\":1,\"level\":\"NORMAL\",\"hour\":12,\"idle_s\":10}
+assert [m(dict(b,mood=k)) for k in (\"churn\",\"fresh\",\"compact\",\"save\",\"test\")]==[\"ALERT\"]*3+[\"CELEBRATE\"]*2
+assert m(dict(b,level=\"CRITICAL\",mood=\"save\"))==\"ALERT\" and m(b)==\"HAPPY\"
+assert m(dict(b,hour=23))==\"SLEEP\" and m(dict(b,hour=3))==\"SLEEP\" and m(dict(b,hour=6))==\"HAPPY\"
+assert m(dict(b,idle_s=1801))==\"SLEEP\" and m(dict(b,hour=2,activity=\"working\"))==\"CHOMP\" and m(dict(b,hour=2,mood=\"test\"))==\"CELEBRATE\""'
+ok "mascot events end-to-end (fake HOME): saving/advice set mood, TTL expires, TZ night" 'HOME="$T/hm" TZ=UTC python3 -c "
+import sys,json,time,os;sys.path.insert(0,\"$Z/bin\")
+import tzbus,tzopt,tzmascot as M
+d=tzbus.sdir();json.dump({\"ts\":time.time(),\"level\":\"NORMAL\"},open(d+\"/status.json\",\"w\"))
+noon=time.mktime(time.strptime(\"2026-11-22 12:00\",\"%Y-%m-%d %H:%M\"))
+tzopt.ledger(\"overhead-hook\",400,\"measured\");assert not os.path.exists(d+\"/mood.json\")
+tzopt.ledger(\"dup-read-flagged\",400,\"est\");assert not os.path.exists(d+\"/mood.json\")
+tzopt.ledger(\"output-trim\",4000,\"measured\");assert tzbus.read(\"mood.json\",{})[\"kind\"]==\"save\"
+n=time.time();s=tzbus.read_bus(n);assert s[\"mood\"]==\"save\" and M.mascot_state(s)==\"CELEBRATE\"
+assert \"mood\" not in tzbus.read_bus(n+121)
+tzbus.mood(\"compact\");assert M.mascot_state(tzbus.read_bus())==\"ALERT\"
+json.dump({\"kind\":\"x\",\"ts\":0},open(d+\"/mood.json\",\"w\"))
+s=tzbus.read_bus(noon+11*3600);s[\"idle_s\"]=5;assert s[\"hour\"]==23 and M.mascot_state(s)==\"SLEEP\"
+s=tzbus.read_bus(noon);s[\"idle_s\"]=5;assert s[\"hour\"]==12 and M.mascot_state(s)==\"HAPPY\"
+"'
 # route
 o=$(tz route fix a typo); ok "route simple -> haiku/EST" '[[ $o == *"model haiku"* && $o == *EST* ]]'
 o=$(tz route design a distributed architecture and refactor everything across the entire repo); ok "route hard -> not haiku" '[[ $o != *"model haiku"* ]]'
 o=$(tz route --model opus fix typo); ok "override honoured" '[[ $o == *"model opus (override)"* ]]'
+o=$(tz route refactor the parser and write tests); ok "route: work limits + skill pack advice" '[[ $o == *"work: "*"subagents"* && $o == *"skillpack on coding"* ]]'
 o=$(TZ_MODEL=sonnet tz route fix typo); ok "env override" '[[ $o == *"model sonnet (override)"* ]]'
 ok "routing logged" '[ $(wc -l <"$H/.claude/token-zombie/routing.jsonl") -ge 3 ]'
 ok "route says cannot switch" '[[ $(tz route x) == *"cannot change"* ]]'

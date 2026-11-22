@@ -16,7 +16,7 @@ ok "hook tick wrote bus at CRITICAL" '[ -f "$BUS" ] && grep -q CRITICAL "$BUS"'
 ok "auto checkpoint refreshed git snapshot (f uncommitted)" 'grep -rq "checkpoint" "$T/proj/handoffs/tasks" 2>/dev/null'
 ok "TZ_SUP=0 disables tick" 'rm "$BUS"; echo "{\"hook_event_name\":\"UserPromptSubmit\",\"transcript_path\":\"$T/c.jsonl\",\"cwd\":\"$T/proj\",\"prompt\":\"hi\"}" | TZ_SUP=0 HOME="$H" python3 "$Z/bin/tz-guard.py" >/dev/null 2>&1; [ ! -f "$BUS" ]'
 tz sup next-session --cwd "$T/proj" >/dev/null; ok "next-session without --yes launches nothing" '[ ! -f "$T/claude.log" ]'
-tz sup next-session --cwd "$T/proj" --yes >/dev/null; sleep 1; ok "--yes launches stub claude -p once" '[ "$(grep -c "^-p" "$T/claude.log")" = 1 ]'
+tz sup next-session --cwd "$T/proj" --yes >/dev/null; for _ in $(seq 50); do grep -q "^-p" "$T/claude.log" 2>/dev/null && break; sleep 0.1; done; ok "--yes launches stub claude -p once" '[ "$(grep -c "^-p" "$T/claude.log")" = 1 ]'
 tz sup tick --transcript "$T/c.jsonl" --cwd "$T/proj" >/dev/null
 tz dash --out "$T/d.html" >/dev/null; ok "dash reflects bus (CRITICAL, ALERT)" 'grep -q CRITICAL "$T/d.html" && grep -q "ALERT" "$T/d.html"'
 ok "statusline-side: mascot cmd reads bus" '[[ $(tz mascot) == *ALERT* ]]'
