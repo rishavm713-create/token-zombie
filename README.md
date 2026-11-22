@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/img/logo.svg" width="560" alt="TOKEN ZOMBIE. Make every single token count."></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/img/logo-light.svg"><img src="docs/img/logo.svg" width="560" alt="TOKEN ZOMBIE. Make every single token count."></picture></p>
 
 # TOKEN ZOMBIE
 
