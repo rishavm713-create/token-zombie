@@ -8,7 +8,7 @@
 
 **STOP THE WASTE. CONTROL THE SWARM. PROTECT THE WORKFLOW.**
 
-[🌐 Product Website](https://rishavm713-create.github.io/token-zombie/) · [⚡ Install](#-get-started) · [🧭 Feature Map](#-the-control-layer) · [🗺 Roadmap](docs/ROADMAP.md) · [🛠 Engineering Audit](docs/AUDIT.md) · [⚖ Competitive Positioning](docs/COMPETITIVE-POSITIONING.md) · [🚀 Launch Kit](docs/LAUNCH-KIT.md)
+[🌐 Product Website](https://rishavm713-create.github.io/token-zombie/) · [⚡ Install](#-get-started) · [🧭 Feature Map](#-the-control-layer) · [🎨 Design System](docs/DESIGN-SYSTEM.md) · [🗺 Roadmap](docs/ROADMAP.md) · [🛠 Engineering Audit](docs/AUDIT.md) · [⚖ Competitive Positioning](docs/COMPETITIVE-POSITIONING.md) · [🚀 Launch Kit](docs/LAUNCH-KIT.md)
 
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-7CFF9B?style=flat-square&labelColor=111812)
 ![Local first](https://img.shields.io/badge/LOCAL--FIRST-no%20telemetry-7CFF9B?style=flat-square&labelColor=111812)
@@ -220,7 +220,7 @@ Restart Claude Code, then run:
 
 | Guide | Purpose |
 |---|---|
-| [Installation](docs/INSTALL.md) | Setup, statusline and rollback |
+| [Design system](docs/DESIGN-SYSTEM.md) | Brand colours, layout, typography and GitHub visual rules |\n| [Installation](docs/INSTALL.md) | Setup, statusline and rollback |
 | [CLI](docs/CLI.md) | Command reference |
 | [Toolbar & panel](docs/PANEL.md) | In-chat control surface |
 | [Modes](docs/MODES.md) | OFF / LITE / FULL / ULTRA |
