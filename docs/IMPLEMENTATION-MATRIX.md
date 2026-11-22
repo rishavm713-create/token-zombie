@@ -22,3 +22,6 @@ Labels in output: MEASURED (read from files/hooks), EST (derived), UNAVAILABLE (
 | 15 | Process | this matrix, LEFT.md, handoff | — | DONE | — |
 
 Host approval needed: re-run `./install.sh` to activate the 9 new hook events (not run by the agent). Until then those fields read UNAVAILABLE.
+
+## Update (round 4)
+Built since the table above: `tzdb.py` single SQLite ledger (events/alerts/vault), alert evidence -> intervention -> outcome, vault index (by session, tool, file; original vs shown chars), `tzcompress.py` Python AST skeleton (validated, fail open, reversible via recall), `tzusage.totals_inc` incremental scan, `acct_state` Ledger/Priced/Mixed/Unpriced. Dropped by owner: nine-tab UI. Still not built: semantic memory, non-Python AST, task-level vault index, auto canary->active.

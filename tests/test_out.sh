@@ -85,5 +85,18 @@ printf 'a\nthe zebra decision\n' > "$HOME/w/handoffs/n.md"; printf 'zebra memory
 (cd "$HOME/w" && python3 "$B/tz" recall --search zebra --handoffs --memory) | grep -q 'h:n.md' && (cd "$HOME/w" && python3 "$B/tz" recall --search zebra --memory) | grep -q 'm:f.md' && ok recall-search-memory-handoffs || no recall-search-memory-handoffs
 (cd "$HOME/w" && python3 "$B/tz" recall h:n.md --lines 2-2) | grep -q 'zebra' && ok recall-around-id || no recall-around-id
 (cd "$HOME/w" && python3 "$B/tz" recall 'h:../../x.md') | grep -q usage && ok recall-id-no-traversal || no recall-id-no-traversal
+
+# tzcompress: validated skeleton, fail open
+printf 'import os\n\ndef f(a):\n    """Doc one.\n    more"""\n    x = 1\n    return x\n\nclass C:\n    def m(self):\n        return 2\n' > "$HOME/c.py"
+o=$(python3 "$B/tz" compress "$HOME/c.py"); [[ $o == *"def f(a)"* && $o == *"Doc one."* && $o != *"x = 1"* && $o == *"tz recall"* ]] && ok compress-skeleton || no compress-skeleton
+printf 'def broken(:\n' > "$HOME/b.py"; o=$(python3 "$B/tz" compress "$HOME/b.py"); [[ $o == *"original kept"* ]] && ok compress-fail-open || no compress-fail-open
+# tzdb: ledger, alerts, vault
+python3 -c "
+import sys;sys.path.insert(0,'$B');import tzdb as d
+d.record('SubagentStart','s1',agent='a');d.alert_open('s1','UserPromptSubmit','TOKEN ZOMBIE: big chat',1000);d.alert_resolve('s1','PreCompact',900);d.vault_add('abc','s1','Read','/x/f.py',5000,800)"
+[[ $(python3 "$B/tz" ledger) == *SubagentStart* ]] && ok ledger-events || no ledger-events
+[[ $(python3 "$B/tz" ledger --alerts) == *"acted"*"compact"* ]] && ok alert-outcome || no alert-outcome
+[[ $(python3 "$B/tz" ledger --vault --file f.py) == *"orig=5,000 shown=800"* ]] && ok vault-index || no vault-index
+
 echo "out: pass $NP fail $NF"
 exit $F

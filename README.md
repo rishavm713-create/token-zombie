@@ -18,6 +18,11 @@ It is not only a token saver. The aim is one local layer that watches, protects 
 
 Honest status: see [docs/IMPLEMENTATION-MATRIX.md](docs/IMPLEMENTATION-MATRIX.md) and [docs/LEFT.md](docs/LEFT.md) for what is built, partial or not built. Replacing other plugins and skills is the direction, not a measured claim.
 
+## Built vs roadmap
+**Built and tested (live features):** hook ledger on 18 events, agent lifecycle + ROI flags, compaction survival check, 5m/1h cache split, thinking-token EST, incremental transcript scan, Ledger/Priced/Mixed/Unpriced labels, one SQLite ledger (`tz ledger`), alerts with evidence, intervention and outcome, Context Vault index (`tz ledger --vault`), AST skeleton for Python files (`tz compress`, validated, fail open), shadow-mode output trim, recall search.
+
+**Roadmap, NOT built yet:** vector/semantic memory, AST compression for languages other than Python, a task-level vault index (today: by session, tool and file), automatic promotion CANARY to ACTIVE (today: advice only), host-verified PostCompact data (needs a real host run after `install.sh`).
+
 What is in it:
 - **Guard hooks** on 18 events (UserPromptSubmit, PostToolUse, PreToolUse, SessionStart, PreCompact, PostCompact, Stop, SessionEnd, SubagentStart/Stop, InstructionsLoaded, PostToolUseFailure, PostToolBatch, Pre/PostModelSwitch, WorktreeCreate/Remove, FileChanged): size warnings, big-Read and duplicate-read advice. Advice never blocks.
 - **Supervisor** (`tz sup`): usage level, auto checkpoint, status bus (`status.json`), next-session brief.

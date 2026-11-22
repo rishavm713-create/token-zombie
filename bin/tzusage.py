@@ -48,6 +48,53 @@ def totals(path):
     return t
 
 
+def acct_state(models):
+    """Accounting label for a list of model names [MEASURED counts]: Ledger = no model recorded (tokens only), Priced = every reply has a known list price, Mixed = some, Unpriced = none."""
+    ms = [m for m in models if m]
+    if not ms:
+        return 'Ledger'
+    k = sum(1 for m in ms if any(f in m.lower() for f in ('opus', 'sonnet', 'haiku')))
+    return 'Priced' if k == len(ms) else ('Mixed' if k else 'Unpriced')
+
+
+def totals_inc(path, state_file):
+    """Incremental scan: only bytes after the saved offset, and only up to the last complete line (an unfinished line is left for next time).
+    Returns the same dict as totals(); offset + running totals live in state_file. Falls back to a full scan if the log shrank."""
+    try:
+        st = json.load(open(state_file))
+    except Exception:
+        st = {}
+    try:
+        size = os.path.getsize(path)
+    except OSError:
+        return totals(path)
+    if st.get('off', 0) > size or 't' not in st:
+        st = {'off': 0, 't': None}
+    base = st.get('t') or dict(inp=0, out=0, cr=0, cw=0, last=0, turns=0, t0=None, t1=None, pts=[], w5=0, w1h=0, think=0)
+    with open(path, 'rb') as f:
+        f.seek(st['off']); chunk = f.read()
+    end = chunk.rfind(b'\n') + 1
+    if end:
+        import tempfile
+        with tempfile.NamedTemporaryFile('wb', delete=False) as tmp:
+            tmp.write(chunk[:end])
+        try:
+            d = totals(tmp.name)
+        finally:
+            os.unlink(tmp.name)
+        for k in ('inp', 'out', 'cr', 'cw', 'turns', 'w5', 'w1h', 'think'):
+            base[k] += d[k]
+        base['last'] = d['last'] or base['last']
+        base['t0'] = base['t0'] or d['t0']; base['t1'] = d['t1'] or base['t1']
+        base['pts'] = (base['pts'] + d['pts'])[-200:]
+        try:
+            os.makedirs(os.path.dirname(state_file), exist_ok=True)
+            json.dump(dict(off=st['off'] + end, t=base), open(state_file, 'w'))
+        except OSError:
+            pass
+    return base
+
+
 def _ts(v):
     try:
         return dt.datetime.fromisoformat(str(v).replace('Z', '+00:00')).timestamp()

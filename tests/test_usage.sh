@@ -30,4 +30,14 @@ echo '{"message":{"usage":{"input_tokens":5}}} garbage' > "$T/g.jsonl"; o=$(u st
 J=$(mktemp); echo '{"uuid":"a","message":{"id":"m1","usage":{"input_tokens":1,"output_tokens":9,"cache_creation":{"ephemeral_5m_input_tokens":7,"ephemeral_1h_input_tokens":3}},"content":[{"type":"thinking","thinking":"abcdefgh"}]}}' > $J
 o=$(HOME="$H" python3 -c "import sys;sys.path.insert(0,'$Z/bin');import tzusage as u;t=u.totals('$J');print(t['w5'],t['w1h'],t['think'])")
 ok "cache 5m/1h split + thinking est" '[[ $o == "7 3 2" ]]'
+I="$T/inc.jsonl"; SF="$T/inc.state"; echo '{"uuid":"a","message":{"id":"m1","usage":{"input_tokens":10,"output_tokens":1}}}' > $I
+o=$(python3 -c "import sys;sys.path.insert(0,'$Z/bin');import tzusage as u;print(u.totals_inc('$I','$SF')['inp'])")
+printf '{"uuid":"b","message":{"id":"m2","usage":{"input_tokens":5,"output_tokens":1}}}\n{"uuid":"c","mess' >> $I
+o2=$(python3 -c "import sys;sys.path.insert(0,'$Z/bin');import tzusage as u;print(u.totals_inc('$I','$SF')['inp'])")
+printf 'age":{"id":"m3","usage":{"input_tokens":7,"output_tokens":1}}}\n' >> $I
+o3=$(python3 -c "import sys;sys.path.insert(0,'$Z/bin');import tzusage as u;print(u.totals_inc('$I','$SF')['inp'])")
+ok "incremental scan: partial line waits, no double count (10,15,22)" '[[ "$o $o2 $o3" == "10 15 22" ]]'
+o=$(python3 -c "import sys;sys.path.insert(0,'$Z/bin');import tzusage as u;print(u.acct_state(['claude-sonnet-4-5']),u.acct_state(['x','sonnet']),u.acct_state(['x']),u.acct_state([]))")
+ok "Ledger/Priced/Mixed/Unpriced" '[[ $o == "Priced Mixed Unpriced Ledger" ]]'
+
 echo "usage: pass $pass fail $fail"; [ $fail = 0 ]

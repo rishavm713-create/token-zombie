@@ -58,3 +58,6 @@ Order = priority. Gated items need the owner's yes first.
 - Stalled-agent flag in `tz live roi` (running, transcript quiet >10 min).
 - See docs/IMPLEMENTATION-MATRIX.md. Not built: thinking-token split, incremental scan, AST compression, vault index, CANARY/ACTIVE gates, unified SQLite ledger, FileChanged, 9-tab UI (owner decision).
 - Full suite + plugin test: all pass (19/0). Nothing committed. GitHub upload + website: waiting for repo visibility answer.
+
+## Round 4
+Built: tzdb ledger, alerts outcome, vault index, tz compress (Python), incremental scan, accounting labels. Nine-tab UI dropped by owner. Not built: semantic memory, non-Python AST, task vault index, auto promotion.

@@ -12,6 +12,7 @@ READ_MAX = int(os.environ.get('TZ_OUT_READ_MAX', 20000))  # chars kept from a wh
 # 6000-line file at ~34k chars, so a higher limit never fires
 OTHER_MAX = int(os.environ.get('TZ_OUT_MAX', 12000))  # chars kept from Grep content / WebFetch / MCP text (~3k tok)
 KEEP_FILES = 200
+_last_rid = ['', 0]  # id of the most recent spill, for the vault index
 
 
 def _conf():
@@ -44,7 +45,7 @@ def cut(text, limit, head_only):
     if len(text) <= limit:
         return None
     lines = text.split('\n')
-    rid = spill(text)
+    rid = spill(text); _last_rid[0] = rid; _last_rid[1] = len(text)
     if head_only:  # Read: keep line numbers right, so only a head is kept
         keep, n = [], 0
         for ln in lines:
@@ -129,6 +130,11 @@ def trim(d):
             return None, 0
         shadow = _conf().get('out_trim') == 'shadow'
         _shadow_log('trim', tool, saved, 'shadow' if shadow else 'live')
+        try:
+            import tzdb
+            tzdb.vault_add(_last_rid[0], d.get('session_id', 'x'), tool, ti.get('file_path') or ti.get('pattern') or ti.get('command') or ti.get('url') or '', _last_rid[1], max(0, _last_rid[1] - saved))
+        except Exception:
+            pass
         if shadow:  # canary: measure what would be cut, change nothing the model sees
             return None, 0
         return {'hookEventName': 'PostToolUse', 'updatedToolOutput': r}, saved

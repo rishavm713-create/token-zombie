@@ -77,8 +77,22 @@ def emit(obj):
     if LIVE[0] and 'permissionDecision' not in hs:
         hs['additionalContext'] = (hs.get('additionalContext', '') + '\n' + LIVE[0]).strip()
     LIVE[0] = ''  # one JSON object per hook run: pending advice goes out here or not at all
+    try:  # alert evidence -> later outcome (acted/ignored), in the SQLite ledger
+        m = (hs.get('additionalContext') or '') + (obj.get('systemMessage') or '')
+        if m.strip() and 'TOKEN ZOMBIE' in m:
+            import tzdb
+            tzdb.alert_open(data.get('session_id', 'x'), data.get('hook_event_name') or '', m.strip(), _tsize())
+    except Exception:
+        pass
     t = json.dumps(obj); OUT[0] += len(t); print(t)
     CTX[0] += len(hs.get('additionalContext') or '') + len(hs.get('permissionDecisionReason') or '')
+
+
+def _tsize():
+    try:
+        return os.path.getsize(data.get('transcript_path') or '')
+    except OSError:
+        return 0
 
 
 def used_tokens(data):
@@ -106,6 +120,14 @@ try:
             tzbus.record_event(ev, data.get('session_id', ''))
     except Exception:
         _diag('supervisor', ev)
+    try:  # SQLite ledger: one row per event; resolve open alerts
+        import tzdb
+        sid_ = data.get('session_id', 'x')
+        if ev not in ('PreToolUse', 'PostToolUse'):
+            tzdb.record(ev, sid_, tool=data.get('tool_name') or '', agent=data.get('agent_id') or '')
+        tzdb.alert_resolve(sid_, ev, _tsize())
+    except Exception:
+        _diag('ledger', ev)
     try:  # live ledger: skill states, agent lifecycle, conservative dedupe (advice only)
         import tzlive
         LIVE[0] = tzlive.on_event(data) or ''

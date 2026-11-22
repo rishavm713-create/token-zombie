@@ -42,6 +42,8 @@ HELP = """tz <command> [args]
   hooks bench|live                              hook wall-time baseline (temp HOME) / live per-event hook time + injected chars
   live [show|skills|agents]                     this session: skill states, agent lifecycle, dedupe advices (MEASURED from hooks)
   preflight [--evidence D] [--validate D] [--smoke --yes]  A/B readiness: offline checks; validate a finished run; paid smoke run
+  ledger                                         one SQLite ledger: event counts; --alerts (evidence/intervention/outcome), --vault [--tool T] [--file F]
+  compress FILE.py                               AST skeleton (validated, fail open, original in tz recall)
   shadow                                         trim rule: cuts made/would be made, originals re-read (set out_trim "shadow" to canary)
   live roi [--session S]                         per-agent cost vs outcome, advice flags (small/empty/failed/duplicate)
   systems [--json] [--session S]                 8 systems: happening / did / impact / evidence / status (state files only), writes systems.json
@@ -82,7 +84,7 @@ def main(argv):
         if c in ('skills', 'capabilities', 'security', 'audit', 'instructions', 'profile'):
             import tzcap
             return tzcap.main([c, *rest])
-        mods = {'sup': 'tzsup', 'route': 'tzroute', 'adapters': 'tzadapters', 'reg': 'tzreg', 'dash': 'tzdash', 'companion': 'tzcompanion', 'mascot': 'tzmascot', 'hooks': 'tzhooks', 'live': 'tzlive', 'preflight': 'tzpreflight', 'recall': 'tzout', 'next': 'tznext', 'state': 'tzcont', 'replay': 'tzcont', 'expensive': 'tzcont', 'waste-audit': 'tzcont', 'ondemand': 'tzondemand', 'systems': 'tzsystems', 'shadow': 'tzout'}
+        mods = {'sup': 'tzsup', 'route': 'tzroute', 'adapters': 'tzadapters', 'reg': 'tzreg', 'dash': 'tzdash', 'companion': 'tzcompanion', 'mascot': 'tzmascot', 'hooks': 'tzhooks', 'live': 'tzlive', 'ledger': 'tzdb', 'compress': 'tzcompress', 'preflight': 'tzpreflight', 'recall': 'tzout', 'next': 'tznext', 'state': 'tzcont', 'replay': 'tzcont', 'expensive': 'tzcont', 'waste-audit': 'tzcont', 'ondemand': 'tzondemand', 'systems': 'tzsystems', 'shadow': 'tzout'}
         if c in mods:
             return __import__(mods[c]).main(([c] if mods[c] in ('tzcont', 'tzout') else []) + rest)
         if c == 'overlay':  # build/run the native always-on-top window (Command Line Tools swiftc; installs nothing)

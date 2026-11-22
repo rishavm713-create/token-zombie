@@ -31,6 +31,12 @@ a{color:var(--acc)}img{max-width:100%;height:auto}
 <div class="card"><b>Continue</b><br>STATE.md and handoffs carry unfinished work across chats. <code>tz resume</code>.</div>
 </div>
 
+<h2>Built vs roadmap</h2>
+<div class="grid">
+<div class="card"><b>Live (built and tested)</b><br>Hook ledger on 18 events, agent lifecycle and ROI flags, compaction check, 5m/1h cache split, incremental transcript scan, Ledger/Priced/Mixed/Unpriced labels, SQLite ledger, alerts with evidence and outcome, Context Vault index, Python AST skeleton, shadow-mode trim.</div>
+<div class="card"><b>Roadmap (not built yet)</b><br>Semantic memory, AST compression beyond Python, task-level vault index, automatic canary-to-active promotion, host-verified PostCompact data.</div>
+</div>
+
 <h2>Install</h2>
 <pre>claude plugin install token-zombie --marketplace rishavm713-create/token-zombie</pre>
 <p class="mut">Hooks beyond the plugin defaults are activated by running <code>install.sh</code> yourself. Advice never blocks you. Status of every feature: built, partial or not built, in the matrix above.</p>
