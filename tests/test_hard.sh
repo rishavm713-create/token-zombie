@@ -17,7 +17,8 @@ hook UserPromptSubmit >/dev/null; ok "UserPromptSubmit => working (hook)" '[ "$(
 ok "status.json says activity source" 'grep -q "\"activity_src\": \"hook\"" "$BUS"'
 ok "working => CHOMP" '[[ $(tz mascot) == *CHOMP* ]]'
 hook PostToolUse ',"tool_name":"Bash"' >/dev/null; ok "tool event refreshes activity.json only (no tick: tick_ms unchanged file)" 'grep -q PostToolUse "$ST/activity.json"'
-hook Stop >/dev/null; ok "Stop => idle => HAPPY" '[[ $(tz mascot) == *HAPPY* ]] && grep -q "\"activity\": \"idle\"" "$BUS"'
+hook Stop >/dev/null; NIGHT=$(date +%H); NIGHT=$((10#$NIGHT)); WANT=HAPPY; { [ $NIGHT -ge 23 ] || [ $NIGHT -lt 6 ]; } && WANT=SLEEP  # mascot sleeps 23:00-06:00 by design
+ok "Stop => idle => HAPPY (SLEEP at night)" '[[ $(tz mascot) == *$WANT* ]] && grep -q "\"activity\": \"idle\"" "$BUS"'
 python3 - "$ST/activity.json" <<'PY'
 import json,sys,time
 json.dump({"event":"PostToolUse","ts":int(time.time())-5000,"session":"s1"},open(sys.argv[1],'w'))
