@@ -60,3 +60,8 @@ P1 context/continuity: vault search + recall (`tz vault-find` -> `tz recall --gr
 P2 workflow: mode/route advice + `tz route --write` BUILT; overlap warning BUILT (`tz overlap`); skill outcome BUILT (`tz skills-outcome`); workflow templates and worktree isolation NOT built (opt-in later, host-dependent).
 P3 interop: `tz export --otlp F [--preview]` BUILT (OTLP/JSON metrics to a local file; counters only; sending is the user's step; not a live OTLP client); other-host adapters, vector memory, routing proxy NOT built by decision.
 Not claimed: any savings % beyond MEASURED rows; competitor parity from READMEs.
+
+## Round 9
+- `tz workflow [plan|build|test|review]` checklists with checkpoints and `tz worktree TASK` (prints the isolating `git worktree add` command; TZ never runs it). Advice only.
+- install.sh applied on this host (backup made, `--restore` undoes it); `tz doctor` shows 19 TZ hooks. Live behaviour of the 9 newer hook events is not yet observed in a fresh chat.
+- Still not done: real A/B trial (spends usage, needs owner go), OTLP against a real collector, other-host adapters / vector memory / routing proxy (rejected by plan).

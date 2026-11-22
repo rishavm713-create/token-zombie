@@ -128,6 +128,26 @@ def otlp(rec, preview=False):
             'scopeMetrics': [{'scope': {'name': 'tz.export.v1'}, 'metrics': ms}]}]}
 
 
+WORKFLOWS = {
+    'plan': ['State the goal and acceptance check in 2 lines.', 'List files to read (grep first, no whole-file reads).', 'Write the smallest plan; name what is out of scope.', 'CHECKPOINT: user approves the plan before any edit.'],
+    'build': ['One step at a time; smallest complete change; reuse existing code.', 'After each step run the single relevant check.', 'CHECKPOINT: tz handoff if the chat passes ~100k tokens.'],
+    'test': ['Add one real test for new logic.', 'Run it; loop until it passes; never weaken the test.', 'Run the full suite once at the end (background if > 2 min).'],
+    'review': ['Read the diff only, not whole files.', 'List correctness and security findings, most severe first.', 'CHECKPOINT: user decides which findings to fix.'],
+}
+
+
+def workflow(name=None):
+    """Checklist text for plan|build|test|review (or all). Advice only; nothing runs and no agent is spawned."""
+    names = [name] if name in WORKFLOWS else list(WORKFLOWS)
+    return '\n'.join(f'{n}:\n' + '\n'.join(f'  {i}. {x}' for i, x in enumerate(WORKFLOWS[n], 1)) for n in names)
+
+
+def worktree_cmd(task, base='HEAD'):
+    """The git command that isolates one task/agent in its own worktree+branch (never run by TZ)."""
+    slug = ''.join(ch if ch.isalnum() else '-' for ch in task.lower()).strip('-')[:40] or 'task'
+    return f'git worktree add ../{slug} -b tz/{slug} {base}'
+
+
 def main(argv):
     c, a = argv[0], argv[1:]
     state = os.path.expanduser('~/.claude/token-zombie')
@@ -165,6 +185,12 @@ def main(argv):
     if c == 'doctor':
         for stt, tx in doctor():
             print(f'  [{stt}] {tx}')
+        return 0
+    if c == 'workflow':
+        print(workflow(a[0] if a else None)); return 0
+    if c == 'worktree':
+        cmd = worktree_cmd(' '.join(a) or 'task')
+        print(f'isolate this task so parallel agents never touch the same files:\n  {cmd}\nrun it yourself (TZ does not create worktrees); remove later: git worktree remove ../<dir>')
         return 0
     if c == 'vault-find':
         r = vault_find(db, a)
