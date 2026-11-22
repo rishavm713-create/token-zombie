@@ -16,13 +16,13 @@
 
 </div>
 
-> **AI coding agents are powerful. Their resource usage should not be a mystery.**
+> **Understand where your AI coding-agent context goes — and keep work recoverable.**
 >
-> TOKEN ZOMBIE is a local-first **AI agent resource intelligence and workflow control layer** for Claude Code. It makes token and context activity more visible, surfaces avoidable work, tracks agent activity, preserves recoverable tool output and helps carry unfinished work into the next session.
+> TOKEN ZOMBIE is a **local-first Claude Code token-optimization and agent-workflow control layer**. It tracks resource signals, surfaces repeated or oversized work, supports recoverable tool-output trimming, and helps preserve project continuity between sessions.
 >
-> **Observe agents. Detect waste. Optimise context. Protect the workflow.**
+> **Resource visibility · Context optimisation · Agent signals · Session continuity**
 >
-> It is not just a token counter or a shell-output compressor. It connects resource signals, agent lifecycle intelligence, context optimisation and project continuity in one developer-controlled layer.
+> Unlike tools focused only on shell-output compression or persistent memory, TOKEN ZOMBIE brings these operational signals together in one developer-controlled workflow.
 >
 ### Try it in Claude Code
 
@@ -53,7 +53,7 @@ claude plugin install token-zombie --marketplace rishavm713-create/token-zombie
 
 ## Why it exists
 
-Long-running agent sessions can accumulate repeated reads, oversized tool output, duplicated agent work and context that is difficult to carry forward. Developers need more than a token total: they need to understand where resources are going, what work is happening and how to preserve progress without sacrificing task quality.
+Long Claude Code sessions can accumulate repeated reads, oversized tool output, duplicated agent work and context that is hard to carry forward. TOKEN ZOMBIE makes these signals easier to inspect and act on.
 
 TOKEN ZOMBIE is designed around that wider problem:
 
@@ -62,7 +62,7 @@ TOKEN ZOMBIE is designed around that wider problem:
 - **Keep work recoverable:** supported output trims retain originals for recall; checkpoints and handoffs preserve project continuity.
 - **Stay in control:** local-first operation, non-blocking advice and no model calls inside core hooks.
 
-The goal is not to maximise a headline savings percentage. It is to make resource use understandable and reduce avoidable work while preserving output quality.
+The goal is useful, quality-preserving optimisation—not a headline savings percentage.
 
 
 > **Observed single-session result:** The project owner reports one real TOKEN ZOMBIE session with **5,000,000 tokens saved**. This is a single-session observation, not a controlled multi-trial benchmark or a guarantee of typical savings. The raw session evidence, token accounting breakdown, task-quality check and TOKEN ZOMBIE overhead are being prepared for publication. See [benchmark evidence status](docs/BENCHMARK-METHOD.md#observed-single-session-result).
@@ -70,7 +70,7 @@ The goal is not to maximise a headline savings percentage. It is to make resourc
 
 ## ☣ The control layer
 
-Not another token counter. Five connected systems work together across your AI workflow.
+Five connected systems for Claude Code resource visibility and workflow control.
 
 <table>
 <tr>
@@ -189,21 +189,11 @@ The in-chat toolbar and pane are implemented in the repository, but a verified p
 
 [Full roadmap](docs/ROADMAP.md) · [Implementation matrix](docs/IMPLEMENTATION-MATRIX.md) · [Engineering audit](docs/AUDIT.md) · [Known limitations](docs/LIMITATIONS.md)
 
-## ⚡ Get started
+## ⚡ Install
 
-**Install through Claude Code:**
+Install from the Claude Code marketplace, restart Claude Code, then run `/token-zombie:tz`.
 
-```text
-/plugin install token-zombie --marketplace rishavm713-create/token-zombie
-```
-
-Restart Claude Code, then run:
-
-```text
-/token-zombie:tz
-```
-
-[Full installation guide →](docs/INSTALL.md)
+[Full installation, verification and rollback guide →](docs/INSTALL.md)
 
 ## 🔒 Local-first by design
 
