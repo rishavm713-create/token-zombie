@@ -4,9 +4,9 @@
 
 # MAKE EVERY SINGLE TOKEN COUNT.
 
-### AI AGENT RESOURCE INTELLIGENCE & WORKFLOW CONTROL FOR CLAUDE CODE
+### Stop Claude Code from wasting your tokens.
 
-**STOP THE WASTE. CONTROL THE SWARM. PROTECT THE WORKFLOW.**
+**Free. Runs on your computer. Nothing is sent anywhere.**
 
 [🌐 Product Website](https://rishavm713-create.github.io/token-zombie/) · [⚡ Install](#-install) · [🧭 Feature Map](#-the-control-layer) · [🎨 Design System](docs/DESIGN-SYSTEM.md) · [🗺 Roadmap](docs/ROADMAP.md) · [🛠 Engineering Audit](docs/AUDIT.md) · [⚖ Competitive Positioning](docs/COMPETITIVE-POSITIONING.md) · [🚀 Launch Kit](docs/LAUNCH-KIT.md)
 
@@ -16,14 +16,13 @@
 
 </div>
 
-> **Understand where your AI coding-agent context goes — and keep work recoverable.**
+> **TOKEN ZOMBIE finds the work that burns tokens for nothing and helps you stop it.**
 >
-> TOKEN ZOMBIE is a **local-first Claude Code token-optimization and agent-workflow control layer**. It tracks resource signals, surfaces repeated or oversized work, supports recoverable tool-output trimming, and helps preserve project continuity between sessions.
->
-> **Resource visibility · Context optimisation · Agent signals · Session continuity**
->
-> Unlike tools focused only on shell-output compression or persistent memory, TOKEN ZOMBIE brings these operational signals together in one developer-controlled workflow.
->
+> - Shows where your Claude Code tokens go
+> - Warns you before a long chat runs out of room
+> - Saves a short note so a new chat can pick up where you left off
+> - Everything stays on your computer, no telemetry
+
 ### Try it in Claude Code
 
 ```text
