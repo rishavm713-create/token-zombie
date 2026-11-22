@@ -36,42 +36,34 @@ Restart Claude Code, then run:
 /token-zombie:tz
 ```
 
-[Installation, verification and rollback →](docs/INSTALL.md)
+Shell form:
 
-> <div align="center">
-> <img src="docs/img/dashboard.png" alt="TOKEN ZOMBIE dashboard preview — generated demo data" width="900">
-> <br><sub>PRODUCT INTERFACE · Dashboard preview with demo data — not a live session or benchmark.</sub>
-> </div>
->
-> ---
->
-> ## Why it exists
->
-> Long-running agent sessions can accumulate repeated reads, oversized tool output, duplicated agent work and context that is difficult to carry forward. Developers need more than a token total: they need to understand where resources are going, what work is happening and how to preserve progress without sacrificing task quality.
->
-> TOKEN ZOMBIE is designed around that wider problem:
->
-> - **See resource signals:** token activity, cache activity, agent usage and cost signals, with explicit evidence labels.
-> - **Find avoidable work:** repeated reads, oversized outputs and agent patterns that may indicate duplication or low value.
-> - **Keep work recoverable:** supported output trims retain originals for recall; checkpoints and handoffs preserve project continuity.
-> - **Stay in control:** local-first operation, non-blocking advice and no model calls inside core hooks.
->
-> The goal is not to maximise a headline savings percentage. It is to make resource use understandable and reduce avoidable work while preserving output quality.
-
-### Try it in Claude Code
-
-```text
-/plugin install token-zombie --marketplace rishavm713-create/token-zombie
-```
-
-Restart Claude Code, then run:
-
-```text
-/token-zombie:tz
+```bash
+claude plugin install token-zombie --marketplace rishavm713-create/token-zombie
 ```
 
 [Installation, verification and rollback →](docs/INSTALL.md)
+
+<div align="center">
+<img src="docs/img/dashboard.png alt="TOKEN ZOMBIE dashboard preview — generated demo data" width="900">
+<br><sub>PRODUCT INTERFACE · Dashboard preview with demo data — not a live session or benchmark.</sub>
+</div>
+
+---
+
+## Why it exists
+
+Long-running agent sessions can accumulate repeated reads, oversized tool output, duplicated agent work and context that is difficult to carry forward. Developers need more than a token total: they need to understand where resources are going, what work is happening and how to preserve progress without sacrificing task quality.
 >
+TOKEN ZOMBIE is designed around that wider problem:
+
+- **See resource signals:** token activity, cache activity, agent usage and cost signals, with explicit evidence labels.
+- **Find avoidable work:** repeated reads, oversized outputs and agent patterns that may indicate duplication or low value.
+- **Keep work recoverable:** supported output trims retain originals for recall; checkpoints and handoffs preserve project continuity.
+- **Stay in control:** local-first operation, non-blocking advice and no model calls inside core hooks.
+
+The goal is not to maximise a headline savings percentage. It is to make resource use understandable and reduce avoidable work while preserving output quality.
+
 ## ☣ The control layer
 
 Not another token counter. Five connected systems work together across your AI workflow.
