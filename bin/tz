@@ -41,6 +41,8 @@ HELP = """tz <command> [args]
   overlay build|run                             native always-on-top status window (macOS, swiftc from Command Line Tools)
   bench quality TRIALS.json                         tokens per PASSED task, control vs treatment (needs 5+5 trials to count as proof)
   bench results [dir]                           A/B evidence into view
+  attr [LOG]                                         MCP/subagent calls + result size (MEASURED)
+  conflicts FILE...                                  contradictory always/never rules across instruction files
   rework [LOG] [--json]                              repeat/retry/loop counts from a chat log (MEASURED counts)
   hooks bench|live                              hook wall-time baseline (temp HOME) / live per-event hook time + injected chars
   live [show|skills|agents]                     this session: skill states, agent lifecycle, dedupe advices (MEASURED from hooks)
@@ -87,9 +89,9 @@ def main(argv):
         if c in ('skills', 'capabilities', 'security', 'audit', 'instructions', 'profile'):
             import tzcap
             return tzcap.main([c, *rest])
-        mods = {'sup': 'tzsup', 'route': 'tzroute', 'adapters': 'tzadapters', 'reg': 'tzreg', 'dash': 'tzdash', 'companion': 'tzcompanion', 'mascot': 'tzmascot', 'hooks': 'tzhooks', 'live': 'tzlive', 'ledger': 'tzdb', 'compress': 'tzcompress', 'rework': 'tzrework', 'preflight': 'tzpreflight', 'recall': 'tzout', 'next': 'tznext', 'state': 'tzcont', 'replay': 'tzcont', 'expensive': 'tzcont', 'waste-audit': 'tzcont', 'ondemand': 'tzondemand', 'systems': 'tzsystems', 'shadow': 'tzout'}
+        mods = {'sup': 'tzsup', 'route': 'tzroute', 'adapters': 'tzadapters', 'reg': 'tzreg', 'dash': 'tzdash', 'companion': 'tzcompanion', 'mascot': 'tzmascot', 'hooks': 'tzhooks', 'live': 'tzlive', 'ledger': 'tzdb', 'compress': 'tzcompress', 'rework': 'tzrework', 'attr': 'tzattr', 'conflicts': 'tzattr', 'preflight': 'tzpreflight', 'recall': 'tzout', 'next': 'tznext', 'state': 'tzcont', 'replay': 'tzcont', 'expensive': 'tzcont', 'waste-audit': 'tzcont', 'ondemand': 'tzondemand', 'systems': 'tzsystems', 'shadow': 'tzout'}
         if c in mods:
-            return __import__(mods[c]).main(([c] if mods[c] in ('tzcont', 'tzout') else []) + rest)
+            return __import__(mods[c]).main(([c] if mods[c] in ('tzcont', 'tzout', 'tzattr') else []) + rest)
         if c == 'overlay':  # build/run the native always-on-top window (Command Line Tools swiftc; installs nothing)
             ov = os.path.join(D, '..', 'overlay')
             if rest[:1] == ['build']:

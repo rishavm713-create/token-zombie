@@ -23,6 +23,14 @@ assert 'FAILING' in s.ci_line([{'conclusion':'failure','name':'ci','headBranch':
 # 4 JS skeleton: bodies cut, strings with braces safe, fail open on imbalance
 sk,ok=c.js_skeleton('function a(x) { const s = "}"; return 1 }\nclass B { m(q): string { return "x" } }\n'); assert ok and sk.count('{ ... }')==2 and 'return' not in sk, sk
 assert c.js_skeleton('function a( { oops')[1] is False
+# 6 attribution + conflicts
+import tzattr as t
+L=[{'message':{'content':[{'type':'tool_use','id':'1','name':'mcp__srv__q','input':{}},{'type':'tool_use','id':'2','name':'Task','input':{}}]}},
+   {'message':{'content':[{'type':'tool_result','tool_use_id':'1','content':'x'*400},{'type':'tool_result','tool_use_id':'2','content':'y','is_error':True}]}}]
+open(T+'/a.jsonl','w').write('\n'.join(map(json.dumps,L)))
+r2=t.attribute(T+'/a.jsonl'); assert r2['mcp:srv']['calls']==1 and r2['mcp:srv']['result_chars']>=400 and r2['subagent']['errors']==1, r2
+cf=t.conflicts({'A.md':'Always read whole files before editing them.','B.md':'Never read whole files; use line ranges.'}); assert cf and cf[0][:2]==('A.md','B.md'), cf
+assert not t.conflicts({'A.md':'Always run tests.','B.md':'Never commit secrets.'})
 # 5 rework score
 assert r.score(0,0,0,{},{})==0 and 0<r.score(10,5,2,{('B','k'):3},{})<=100
 PY

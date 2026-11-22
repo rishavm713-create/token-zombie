@@ -78,6 +78,8 @@ def main(argv):
     print(f"  files edited 3+ times: {r['files_edited_3plus'] or 'none'}")
     print(f"  rework score {r['rework_score']}/100 (weighted ratio of the counts above; 0 = none; not a quality claim)")
     print(f"  test runs {r['test_runs']}, fail->pass cycles {r['test_fail_then_pass']}")
+    if r['rework_score'] >= 30 or r['retry_loops']:
+        print('  ADVICE: churn is high; save state now (tz checkpoint) and consider a fresh chat for the next task. Advice only.')
     print('  these are repeat counts, not proven waste; quality-adjusted savings need an A/B run (tz bench compare).')
     return 0
 
