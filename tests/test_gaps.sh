@@ -31,6 +31,19 @@ open(T+'/a.jsonl','w').write('\n'.join(map(json.dumps,L)))
 r2=t.attribute(T+'/a.jsonl'); assert r2['mcp:srv']['calls']==1 and r2['mcp:srv']['result_chars']>=400 and r2['subagent']['errors']==1, r2
 cf=t.conflicts({'A.md':'Always read whole files before editing them.','B.md':'Never read whole files; use line ranges.'}); assert cf and cf[0][:2]==('A.md','B.md'), cf
 assert not t.conflicts({'A.md':'Always run tests.','B.md':'Never commit secrets.'})
+# 7 reconcile, vault-find, overlap, skills-outcome
+import tzmore as mo, sqlite3
+db=T+'/tz.db'; c=sqlite3.connect(db); c.execute('CREATE TABLE vault(id TEXT, sid TEXT, t INT, tool TEXT, target TEXT, orig INT, shown INT)')
+c.execute("INSERT INTO vault VALUES('v1','s',1,'Bash','pytest tests/foo',4400,400)"); c.commit(); c.close()
+assert mo.reconcile([{'tok':1000,'basis':'measured','kind':'trim'}],db)[2]=='AGREE'
+assert mo.reconcile([{'tok':5000,'basis':'measured','kind':'trim'}],db)[2]=='MISMATCH'
+assert mo.reconcile([],T+'/none.db')[2].startswith('UNAVAILABLE')
+assert mo.vault_find(db,['pytest'])[0][0]=='v1' and not mo.vault_find(db,['zzzz'])
+for n in ('agent-a','agent-b'):
+    open(T+f'/{n}.jsonl','w').write(json.dumps({'message':{'content':[{'type':'tool_use','id':'1','name':'Edit','input':{'file_path':'/x.py'}}]}})+'\n')
+assert mo.overlap([T+'/agent-a.jsonl',T+'/agent-b.jsonl'])=={'/x.py':['agent-a','agent-b']}
+open(T+'/s.jsonl','w').write(json.dumps({'message':{'content':[{'type':'tool_use','id':'1','name':'Skill','input':{'skill':'demo'}}]}})+'\n')
+assert mo.skills_outcome([T+'/s.jsonl'])=={'demo':(1,0)}
 # 5 rework score
 assert r.score(0,0,0,{},{})==0 and 0<r.score(10,5,2,{('B','k'):3},{})<=100
 PY
