@@ -178,6 +178,31 @@ h2{font-size:clamp(32px,4vw,48px);line-height:1.05;letter-spacing:-.05em;margin:
 <p class="note">Other adapters are experimental rules-file outputs only; Claude Code is the supported integration. Some accounting, pricing and agent intelligence remain partial. See the audit and limitations before relying on any estimate.</p>
 </section>
 
+
+<section class="section" id="capability-detail">
+<div class="section-head"><div><p class="eyebrow">THE FULL FEATURE SET</p><h2>One system.<br>Five jobs.</h2></div><p class="section-intro">The repository contains more than a token counter. Explore the working surfaces and the evidence boundaries behind each capability.</p></div>
+<div class="cap-grid">
+<article class="cap" data-no="01"><div class="cap-top"><span class="cap-icon">◈</span><span class="cap-label">RESOURCE ACCOUNTING</span></div><h3>Know where resources go</h3><p>Usage signals, cache windows, local ledgers, estimates and hook overhead in one accounting layer.</p><div class="feature-list"><span>5m / 1h cache split</span><span>Incremental transcript scan</span><span>SQLite event ledger</span><span>Ledger / Priced / Mixed / Unpriced</span><span>Thinking-token estimate</span><span>Usage reports</span></div></article>
+<article class="cap" data-no="02"><div class="cap-top"><span class="cap-icon">◎</span><span class="cap-label">AGENT INTELLIGENCE</span></div><h3>Understand the swarm</h3><p>Follow agent lifecycles and highlight behaviours that deserve a developer's attention.</p><div class="feature-list"><span>Agent start / stop / ID</span><span>ROI flags</span><span>Duplicate / small / empty signals</span><span>Estimated stall signals</span><span>Retries &amp; repeated edits</span><span>Skill &amp; instruction signals</span></div></article>
+<article class="cap" data-no="03"><div class="cap-top"><span class="cap-icon">⌁</span><span class="cap-label">CONTEXT OPTIMISATION</span></div><h3>Reduce noise. Keep originals.</h3><p>Find repeated reads and trim supported tool output while retaining recoverable originals.</p><div class="feature-list"><span>Large-read nudges</span><span>Repeated-read advice</span><span>Output trimming</span><span>tz recall</span><span>Python AST skeleton</span><span>Shadow mode</span><span>FTS5 / keyword recall</span><span>Context Vault index</span></div></article>
+<article class="cap" data-no="04"><div class="cap-top"><span class="cap-icon">⬡</span><span class="cap-label">WORKFLOW CONTINUITY</span></div><h3>Protect unfinished work</h3><p>Carry project state forward through safe handoffs, checkpoints and resume checks.</p><div class="feature-list"><span>STATE.md</span><span>Session handoffs</span><span>Checkpoints</span><span>Resume verification</span><span>Compaction survival</span><span>Supervisor status</span><span>Next-session brief</span></div></article>
+<article class="cap" data-no="05" style="grid-column:1/-1;min-height:0"><div class="cap-top"><span class="cap-icon">▣</span><span class="cap-label">DEVELOPER CONTROL SURFACE</span></div><h3>See it. Inspect it. Decide.</h3><p>One local state model powers the interface and the command-line workflows.</p><div class="feature-list"><span>In-chat toolbar &amp; pane</span><span>OFF / LITE / FULL / ULTRA</span><span>Dashboard</span><span>Terminal statusline</span><span>Local companion</span><span>Mascot states</span><span>Review / Audit / Board</span><span>CLI command suite</span><span>Native overlay · visual check pending</span></div></article>
+</div>
+</section>
+<section class="section">
+<div class="section-head"><div><p class="eyebrow">VISUAL SYSTEM MAP</p><h2>Signals become<br>developer decisions.</h2></div><p class="section-intro">The layers share local state. Each one contributes context to the next; the developer remains in control of action.</p></div>
+<div class="workflow"><div class="step"><span class="step-no">01</span><b>OBSERVE</b><p>Hooks, usage and local events</p></div><div class="step"><span class="step-no">02</span><b>UNDERSTAND</b><p>Ledger, agents and context</p></div><div class="step"><span class="step-no">03</span><b>DETECT</b><p>Repeated work and risk signals</p></div><div class="step"><span class="step-no">04</span><b>PROTECT</b><p>Recall, checkpoints and safe points</p></div><div class="step"><span class="step-no">05</span><b>CONTINUE</b><p>Handoff and verified resume</p></div></div>
+</section>
+<section class="section">
+<div class="section-head"><div><p class="eyebrow">BUILD / VERIFY / PLAN</p><h2>Honest status.<br>No fake checkmarks.</h2></div><p class="section-intro">Implementation, host verification and future work are deliberately kept separate.</p></div>
+<div class="status-grid">
+<div class="status"><span class="status-tag built">IN REPOSITORY</span><h3>Implemented in code</h3><p>Local SQLite ledger, hook event tracking, handoffs, checkpoints, output trimming and recall, Python AST skeleton, dashboard, toolbar/pane components and CLI.</p></div>
+<div class="status"><span class="status-tag verify">VALIDATION REQUIRED</span><h3>Verify on real host</h3><p>Some hook payloads and interface behaviours require owner-run checks. Model pricing and subagent/MCP attribution remain partial. No real A/B savings trials are recorded.</p></div>
+<div class="status"><span class="status-tag planned">PLANNED</span><h3>Future development</h3><p>Semantic/vector retrieval, AST compression beyond Python, task-level Context Vault indexing and deeper task-aware resource selection.</p></div>
+</div>
+<p class="note">Compatibility beyond Claude Code is experimental rules-file output only. Dashboard image uses demo data; it is not a live session or benchmark.</p>
+</section>
+
 <section class="section" id="install">
 <div class="install">
 <div><p class="eyebrow">GET STARTED / CLAUDE CODE</p><h2>Put your agents<br>on the radar.</h2><p>Install the plugin, restart Claude Code and open the TOKEN ZOMBIE status command. The full guide covers desktop, shell, optional statusline and rollback.</p><a class="btn primary" href="INSTALL.md">Read installation guide ↗</a></div>
