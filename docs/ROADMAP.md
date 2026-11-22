@@ -60,6 +60,19 @@ See [Compatibility](../COMPAT.md).
 - Lossy source-code compression.
 - Blocking developer tools merely to reduce token usage.
 
+
+## Feature-by-feature status at a glance
+
+| Area | Available in repository | Validation / gap |
+|---|---|---|
+| Resource accounting | SQLite ledger, incremental scan, cache split, labelled usage states | Pricing and agent/MCP attribution remain partial |
+| Agent intelligence | Lifecycle signals, ROI flags and heuristic stall/duplicate signals | Idle, overlap, interruption and outcome confidence need more validation |
+| Context optimisation | Supported output trim + recall, Python AST skeleton, shadow advice, keyword index | Other languages and task-level indexing not built |
+| Workflow continuity | Project state, handoffs, checkpoints and resume verification | Host-specific compaction and resume paths need real-session checks |
+| Developer control | CLI, dashboard and toolbar/pane components | Public live-toolbar capture and some host UI checks pending |
+| Measurement | Ledger, overhead accounting and A/B harness code | No real end-to-end A/B trials recorded |
+
+
 ## How priorities change
 
 A capability moves from planned to in-development only when implementation work starts. It moves to available only when the code and relevant tests support the claim. Host-dependent features remain marked unverified until tested on the actual host. Savings claims require real A/B evidence and quality checks.
