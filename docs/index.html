@@ -2,59 +2,204 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TOKEN ZOMBIE — Make Every Single Token Count</title>
-<meta name="description" content="Local-first AI agent resource intelligence for Claude Code. Observe agent activity, detect workflow waste, protect context and continue work.">
-<meta name="theme-color" content="#0b100d">
+<title>TOKEN ZOMBIE — AI Agent Resource Intelligence</title>
+<meta name="description" content="The local-first control layer for Claude Code. Resource accounting, agent intelligence, context optimisation, workflow continuity and a live control surface.">
+<meta name="theme-color" content="#080d0a">
 <meta property="og:title" content="TOKEN ZOMBIE — Make Every Single Token Count">
-<meta property="og:description" content="AI Agent Resource Intelligence for Claude Code. Stop the waste. Control the swarm. Protect the workflow.">
+<meta property="og:description" content="Observe agents. Detect waste. Optimise context. Protect the workflow.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://rishavm713-create.github.io/token-zombie/">
 <style>
-:root{color-scheme:dark;--bg:#090e0b;--panel:#111a14;--panel2:#152119;--fg:#edf7ef;--muted:#9eb2a3;--green:#7cff9b;--line:#26392c;--max:1080px}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#1a3321 0,transparent 55%),var(--bg);color:var(--fg);font:16px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,sans-serif}
-a{color:var(--green);text-decoration:none}a:hover{text-decoration:underline}main{max-width:var(--max);margin:auto;padding:28px 22px 90px}
-nav{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 0 28px;color:var(--muted);font-size:14px}
-.brand{color:var(--fg);font-weight:850;letter-spacing:.13em}.navlinks{display:flex;gap:18px;flex-wrap:wrap}
-.hero{text-align:center;padding:38px 0 54px}.hero img{width:min(100%,680px);height:auto}.eyebrow{color:var(--green);font-size:12px;letter-spacing:.2em;font-weight:800;margin:22px 0 8px}
-h1{font-size:clamp(34px,6vw,66px);line-height:1.03;letter-spacing:-.045em;margin:10px 0 18px}h2{font-size:clamp(25px,4vw,36px);line-height:1.15;letter-spacing:-.03em;margin:0 0 16px}h3{margin:0 0 8px;font-size:17px}
-.lead{max-width:760px;margin:0 auto;color:#c2d1c6;font-size:clamp(17px,2.2vw,21px)}
-.actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:28px 0}.btn{display:inline-block;padding:12px 19px;border-radius:8px;border:1px solid var(--green);font-weight:750}.primary{background:var(--green);color:#07100a}.secondary{color:var(--fg);border-color:#405746}
-.pills{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;color:var(--muted);font-size:12px}.pills span{border:1px solid var(--line);border-radius:99px;padding:5px 10px}
-.preview{margin:30px auto 0;max-width:900px;border:1px solid var(--line);border-radius:14px;background:#0e1711;padding:12px;box-shadow:0 24px 80px #0008}.preview img{display:block;width:100%;border-radius:8px}
-section{padding:56px 0;border-top:1px solid var(--line)}.section-intro{color:var(--muted);max-width:720px;margin:0 0 24px}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card{background:linear-gradient(145deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:12px;padding:20px}.card p{margin:0;color:var(--muted)}.tag{font-size:11px;letter-spacing:.14em;color:var(--green);font-weight:800}
-.split{display:grid;grid-template-columns:1.05fr .95fr;gap:30px;align-items:center}.split img{width:100%;border:1px solid var(--line);border-radius:12px}
-pre{overflow:auto;background:#050906;border:1px solid var(--line);border-radius:10px;padding:18px;color:var(--green);font-size:14px}.muted{color:var(--muted)}ul{padding-left:20px;color:var(--muted)}li{margin:7px 0}
-footer{padding:35px 0;color:var(--muted);border-top:1px solid var(--line);font-size:13px}
-@media(max-width:700px){main{padding:16px 16px 60px}.navlinks{gap:10px}.grid,.split{grid-template-columns:1fr}.hero{padding-top:24px}.card{padding:17px}section{padding:42px 0}}
+:root{color-scheme:dark;--bg:#080d0a;--bg2:#0b130e;--panel:#101a13;--panel2:#142219;--panel3:#192b1e;--fg:#edf7ef;--muted:#a1b4a5;--soft:#718578;--green:#83ffa0;--green2:#3dd66a;--line:#263a2c;--line2:#36533e;--amber:#f4c66c;--blue:#8ec9ff;--max:1160px}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:88px}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow-x:hidden}
+body:before{content:"";position:absolute;inset:0 0 auto;height:850px;pointer-events:none;background:radial-gradient(ellipse at 78% 8%,#1a4928 0,transparent 38%),radial-gradient(ellipse at 8% 28%,#142a1a 0,transparent 38%);opacity:.65;z-index:-1}
+a{color:var(--green);text-decoration:none}a:hover{color:#c6ffd2}button{font:inherit}
+.wrap{width:min(var(--max),calc(100% - 44px));margin:auto}
+.topbar{height:76px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ffffff10;position:relative;z-index:3}
+.brand{display:flex;align-items:center;gap:11px;font-size:13px;font-weight:900;letter-spacing:.17em;color:var(--fg)}
+.brandmark{width:29px;height:29px;border:1px solid var(--green);border-radius:8px;display:grid;place-items:center;color:var(--green);font-size:16px;box-shadow:0 0 22px #6bff8c24}
+.nav{display:flex;align-items:center;gap:25px;color:var(--muted);font-size:13px}.nav a{color:inherit}.nav a:hover{color:var(--green)}
+.nav .navcta{border:1px solid var(--line2);padding:8px 13px;border-radius:7px;color:var(--green)}
+.hero{padding:74px 0 82px;display:grid;grid-template-columns:1.02fr .98fr;gap:38px;align-items:center;min-height:620px}
+.kicker{display:inline-flex;align-items:center;gap:9px;border:1px solid #46724e;background:#0f2015;padding:6px 11px;border-radius:99px;color:var(--green);font-size:10px;font-weight:850;letter-spacing:.15em;text-transform:uppercase}
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green)}
+h1{font-size:clamp(48px,6vw,78px);line-height:.98;letter-spacing:-.065em;margin:24px 0 19px;font-weight:900}
+h1 span{color:var(--green);text-shadow:0 0 38px #7cff9b22}
+.hero-copy{font-size:18px;line-height:1.65;color:#b6c8bb;max-width:570px}.hero-copy strong{color:var(--fg);font-weight:700}
+.hero-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:30px 0 25px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:13px 18px;border-radius:8px;font-size:13px;font-weight:850;transition:.2s;border:1px solid var(--line2)}
+.btn.primary{background:var(--green);color:#071009;border-color:var(--green);box-shadow:0 8px 28px #65ff8b20}.btn.primary:hover{background:#b1ffc0;transform:translateY(-2px)}
+.btn.ghost{color:var(--fg);background:#ffffff05}.btn.ghost:hover{border-color:var(--green);color:var(--green)}
+.trustline{display:flex;gap:18px;flex-wrap:wrap;color:var(--soft);font-size:11px;letter-spacing:.04em}.trustline span{display:flex;align-items:center;gap:6px}.check{color:var(--green);font-weight:900}
+.hero-visual{position:relative;min-width:0}.hero-visual:before{content:"";position:absolute;inset:12% 8%;background:#4cff7920;filter:blur(65px);border-radius:50%}
+.hero-frame{position:relative;border:1px solid #416448;border-radius:17px;background:linear-gradient(145deg,#15251a,#0c130e);padding:12px;box-shadow:0 25px 100px #0009,0 0 60px #4cff7910}
+.windowbar{height:28px;display:flex;align-items:center;gap:6px;padding:0 7px 9px;color:#7f9985;font-size:10px;letter-spacing:.1em}.dot{width:6px;height:6px;border-radius:50%;background:#42604a}
+.hero-shot{display:block;width:100%;height:auto;border-radius:9px;border:1px solid #ffffff12}
+.floating-tag{position:absolute;right:-18px;bottom:32px;background:#0e1b12;border:1px solid #4b7654;border-radius:9px;padding:11px 14px;box-shadow:0 12px 34px #0009;font-size:11px;color:var(--muted)}
+.floating-tag b{display:block;color:var(--green);font-size:13px;letter-spacing:.04em}
+.section{padding:90px 0;border-top:1px solid #ffffff10;position:relative}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:34px}
+.eyebrow{color:var(--green);font-size:10px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;margin:0 0 12px}
+h2{font-size:clamp(32px,4vw,48px);line-height:1.05;letter-spacing:-.05em;margin:0;font-weight:850}
+.section-intro{max-width:480px;color:var(--muted);font-size:14px;margin:0}
+.statstrip{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:12px;background:#0d1710;overflow:hidden;margin:10px 0 28px}
+.stat{padding:19px 20px;border-right:1px solid var(--line)}.stat:last-child{border:0}
+.stat .big{font-size:25px;font-weight:900;letter-spacing:-.05em;color:var(--green);display:block;line-height:1.2}.stat .small{font-size:10px;letter-spacing:.12em;color:var(--soft);text-transform:uppercase;font-weight:800}
+.note{font-size:11px;color:var(--soft);margin:12px 0 0}
+.cap-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.cap{background:linear-gradient(145deg,#142219,#0d1510);border:1px solid var(--line);border-radius:13px;padding:24px;position:relative;overflow:hidden;min-height:270px;transition:.22s}
+.cap:hover{border-color:#5c9668;transform:translateY(-3px);box-shadow:0 18px 40px #0005}
+.cap:after{content:attr(data-no);position:absolute;right:18px;top:5px;font-size:74px;font-weight:950;color:#ffffff06;letter-spacing:-.08em}
+.cap-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;position:relative;z-index:1}
+.cap-icon{width:42px;height:42px;border:1px solid #426c4b;border-radius:10px;background:#193321;color:var(--green);display:grid;place-items:center}
+.cap-icon svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.cap-label{font-size:10px;color:var(--green);font-weight:900;letter-spacing:.16em}
+.cap h3{font-size:23px;letter-spacing:-.035em;margin:0 0 7px}.cap p{color:var(--muted);font-size:13px;margin:0 0 18px;max-width:490px}
+.feature-list{display:flex;flex-wrap:wrap;gap:7px}
+.feature-list span{font-size:10px;color:#c5d6c9;border:1px solid #2d4333;background:#0c160f;border-radius:5px;padding:5px 8px}
+.subfeatures{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+.subfeature{padding:17px;border-left:2px solid var(--green2);background:#0c1510;border-radius:0 8px 8px 0}
+.subfeature b{display:block;font-size:12px;margin-bottom:5px}.subfeature p{margin:0;color:var(--soft);font-size:11px}
+.workflow{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0d1710}
+.step{padding:21px 17px;border-right:1px solid var(--line);position:relative}.step:last-child{border:0}
+.step-no{font-size:10px;color:var(--green);font-weight:900;letter-spacing:.15em}.step b{display:block;font-size:14px;margin:10px 0 5px}.step p{font-size:11px;color:var(--soft);margin:0}
+.showcase{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch}
+.show-card{border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#142119,#0c130e);padding:20px;overflow:hidden}
+.show-card img{width:100%;height:auto;display:block;border-radius:8px;border:1px solid #ffffff12}
+.show-card h3{font-size:19px;margin:18px 0 5px}.show-card p{font-size:12px;color:var(--muted);margin:0}
+.mascot-row{display:grid;grid-template-columns:.7fr 1.3fr;gap:24px;align-items:center;margin-top:18px;padding:22px;border:1px solid var(--line);border-radius:14px;background:#0d1710}
+.mascot-row img{width:100%;max-width:330px;display:block}.mascot-row h3{font-size:21px;margin:0 0 8px}.mascot-row p{color:var(--muted);font-size:13px;margin:0}
+.status-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.status{border:1px solid var(--line);border-radius:10px;padding:18px;background:#0d1710}
+.status .status-tag{display:inline-block;font-size:9px;letter-spacing:.12em;font-weight:900;padding:4px 7px;border-radius:4px;margin-bottom:12px}
+.status h3{font-size:15px;margin:0 0 6px}.status p{font-size:11px;color:var(--muted);margin:0}
+.built{color:var(--green);background:#153321}.verify{color:var(--amber);background:#332914}.planned{color:var(--blue);background:#14283a}
+.install{display:grid;grid-template-columns:1fr .8fr;gap:28px;align-items:center;border:1px solid #4a7652;border-radius:16px;background:radial-gradient(ellipse at 100% 0,#1c4428 0,transparent 55%),#0d1710;padding:35px}
+.install h2{font-size:38px}.install p{color:var(--muted);font-size:13px}.command{padding:16px;background:#050906;border:1px solid #36513b;border-radius:8px;color:var(--green);font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere}
+.command-label{font-size:9px;color:var(--soft);letter-spacing:.15em;font-weight:900;margin-bottom:8px}
+.doc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.doc{border:1px solid var(--line);border-radius:8px;padding:14px;background:#0c1510;color:var(--fg);font-size:12px}.doc:hover{border-color:var(--green)}.doc span{display:block;color:var(--soft);font-size:10px;margin-top:4px}
+.footer{padding:30px 0 50px;border-top:1px solid #ffffff10;display:flex;justify-content:space-between;gap:20px;color:var(--soft);font-size:11px}
+@media(max-width:850px){.hero{grid-template-columns:1fr;padding-top:50px;gap:34px}.hero-visual{max-width:700px}.section-head{display:block}.section-intro{margin-top:14px}.workflow{grid-template-columns:repeat(2,1fr)}.step{border-bottom:1px solid var(--line)}.subfeatures{grid-template-columns:1fr}.install{grid-template-columns:1fr}.doc-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.wrap{width:min(var(--max),calc(100% - 30px))}.topbar{height:64px}.nav{gap:12px;font-size:11px}.nav a:nth-child(1),.nav a:nth-child(2){display:none}.hero{padding:42px 0 58px;min-height:auto}.hero-copy{font-size:16px}h1{font-size:51px}.floating-tag{right:-5px;bottom:10px}.section{padding:62px 0}.statstrip{grid-template-columns:repeat(2,1fr)}.stat:nth-child(2){border-right:0}.stat:nth-child(-n+2){border-bottom:1px solid var(--line)}.cap-grid,.showcase,.status-grid{grid-template-columns:1fr}.cap{min-height:auto}.workflow{grid-template-columns:1fr}.step{border-right:0}.mascot-row{grid-template-columns:1fr}.mascot-row img{max-width:220px;margin:auto}.install{padding:22px}.install h2{font-size:31px}.footer{display:block}.footer span{display:block;margin-top:8px}}
 </style>
 </head>
-<body><main>
-<nav><a class="brand" href="#">TOKEN ZOMBIE</a><div class="navlinks"><a href="#capabilities">Capabilities</a><a href="ROADMAP.md">Roadmap</a><a href="INSTALL.md">Docs</a><a href="https://github.com/rishavm713-create/token-zombie">GitHub ↗</a></div></nav>
+<body>
+<div class="wrap">
+<nav class="topbar">
+<a class="brand" href="#"><span class="brandmark">☣</span> TOKEN ZOMBIE</a>
+<div class="nav"><a href="#capabilities">Capabilities</a><a href="#interface">Interface</a><a href="ROADMAP.md">Roadmap</a><a href="https://github.com/rishavm713-create/token-zombie" class="navcta">GitHub ↗</a></div>
+</nav>
+
 <header class="hero">
-<img src="img/brand-hero.svg" alt="TOKEN ZOMBIE mascot and brand">
-<p class="eyebrow">MAKE EVERY SINGLE TOKEN COUNT.</p>
-<h1>Your AI agents need<br>resource intelligence.</h1>
-<p class="lead">See what your Claude Code agents consume. Detect inefficient patterns. Protect context and continuity. Keep control of your workflow.</p>
-<div class="actions"><a class="btn primary" href="#install">Get started</a><a class="btn secondary" href="https://github.com/rishavm713-create/token-zombie">Explore on GitHub ↗</a></div>
-<div class="pills"><span>LOCAL-FIRST</span><span>NO TELEMETRY</span><span>NON-BLOCKING ADVICE</span><span>MIT LICENSE</span></div>
-<div class="preview"><img src="img/dashboard.png" alt="TOKEN ZOMBIE dashboard preview using demo data"><p class="muted">Interface preview · demo data, not measured production savings.</p></div>
+<div>
+<div class="kicker"><span class="pulse"></span> AI AGENT RESOURCE INTELLIGENCE</div>
+<h1>Make every<br>single token<br><span>count.</span></h1>
+<p class="hero-copy"><strong>Your AI agents need a control layer.</strong> TOKEN ZOMBIE gives Claude Code visibility into resource use, agent activity, context waste and unfinished work — all from a local-first system.</p>
+<div class="hero-actions"><a class="btn primary" href="#install">↳ Install TOKEN ZOMBIE</a><a class="btn ghost" href="https://github.com/rishavm713-create/token-zombie">Explore the repository ↗</a></div>
+<div class="trustline"><span><b class="check">✓</b> Local-first</span><span><b class="check">✓</b> No telemetry</span><span><b class="check">✓</b> Non-blocking advice</span><span><b class="check">✓</b> MIT licensed</span></div>
+</div>
+<div class="hero-visual">
+<div class="hero-frame"><div class="windowbar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span style="margin-left:8px">TOKEN ZOMBIE / RESOURCE DASHBOARD</span></div><img class="hero-shot" src="img/dashboard.png" alt="TOKEN ZOMBIE dashboard preview, generated with demo data"></div>
+<div class="floating-tag"><b>OBSERVE · DETECT · PROTECT</b>One local intelligence layer</div>
+</div>
 </header>
-<section><div class="split"><div><p class="tag">THE PROBLEM</p><h2>Agent work is growing.<br>Visibility is not.</h2><p class="section-intro">Long conversations, repeated context, agent activity and tool output can make resource use hard to understand. TOKEN ZOMBIE adds a local layer for observing activity and protecting unfinished work.</p><p class="muted">The goal is not to cut tokens at any cost. It is to use resources deliberately while preserving useful work and quality.</p></div><div class="card"><h3>One local control layer</h3><ul><li>See resource signals and agent activity.</li><li>Get evidence-backed workflow advice.</li><li>Keep originals recoverable where trimming is supported.</li><li>Carry project state into the next session.</li></ul></div></div></section>
-<section id="capabilities"><p class="tag">OBSERVE · DETECT · OPTIMISE · PROTECT</p><h2>What it does</h2><p class="section-intro">A practical set of local capabilities, with measurements labelled honestly and host-dependent behaviour called out.</p><div class="grid">
-<div class="card"><p class="tag">01 / OBSERVE</p><h3>Resource visibility</h3><p>Local hook ledger, token and cache signals, agent activity and clear MEASURED / EST / UNKNOWN labels.</p></div>
-<div class="card"><p class="tag">02 / DETECT</p><h3>Workflow signals</h3><p>Flags for repeated reads, large context loads, duplicate or low-value agent activity and rework patterns.</p></div>
-<div class="card"><p class="tag">03 / OPTIMISE</p><h3>Reversible optimisation</h3><p>Supported output trimming, recall of originals, Python AST skeleton compression and shadow-mode advice.</p></div>
-<div class="card"><p class="tag">04 / PROTECT</p><h3>Continuity and recovery</h3><p>Compaction checks, handoffs, checkpoints and a project state that helps a new chat continue the work.</p></div>
-</div></section>
-<section><div class="split"><div><p class="tag">SEE THE INTERFACE</p><h2>A dashboard for the work behind the prompt.</h2><p class="section-intro">The dashboard and mascot captures in this repository use demo data. The in-chat toolbar is implemented, but a verified public capture is not yet published.</p><a href="PANEL.md">Explore toolbar details →</a></div><img src="img/dashboard-mobile.png" alt="Mobile-width dashboard preview using demo data"></div></section>
-<section><p class="tag">TRANSPARENT DEVELOPMENT</p><h2>What works. What comes next.</h2><div class="grid">
-<div class="card"><h3>Available in the codebase</h3><p>18-event hook ledger, SQLite ledger, handoffs/checkpoints, output trim and recall, Python AST skeleton compression, dashboard and toolbar components. Some host behaviours still need live verification.</p></div>
-<div class="card"><h3>Validation and next priorities</h3><p>Real-host verification, real A/B trials, stronger resource attribution and improved agent-state intelligence.</p></div>
-<div class="card"><h3>Planned</h3><p>Semantic retrieval, broader language-aware compression and a task-level vault index. These are not shipped features.</p></div>
-<div class="card"><h3>Experimental</h3><p>Non-Claude adapters currently produce rules files only; they do not offer equivalent hooks or statusline integration.</p></div>
-</div><p style="margin-top:20px"><a href="ROADMAP.md">Full roadmap →</a> · <a href="IMPLEMENTATION-MATRIX.md">Implementation matrix →</a> · <a href="LIMITATIONS.md">Limitations →</a></p></section>
-<section id="install"><p class="tag">START IN CLAUDE CODE</p><h2>Try TOKEN ZOMBIE.</h2><p class="section-intro">Install the plugin, restart Claude Code, then inspect the current session's status.</p><pre>/plugin install token-zombie --marketplace rishavm713-create/token-zombie</pre><p>Then run <code>/token-zombie:tz</code>.</p><div class="actions" style="justify-content:flex-start"><a class="btn primary" href="INSTALL.md">Installation guide</a><a class="btn secondary" href="https://github.com/rishavm713-create/token-zombie">Star / inspect on GitHub ↗</a></div></section>
-<section><p class="tag">LOCAL BY DESIGN</p><h2>Your workflow stays yours.</h2><p class="section-intro">Core hooks make no network calls, send no telemetry and make no model calls. Advice is non-blocking. Read the security and limitations documents before enabling optional integrations.</p><a href="../SECURITY.md">Security model →</a> · <a href="LIMITATIONS.md">Known limitations →</a></section>
-<footer>© TOKEN ZOMBIE · MAKE EVERY SINGLE TOKEN COUNT. · <a href="https://github.com/rishavm713-create/token-zombie">GitHub repository</a></footer>
-</main></body></html>
+
+<section class="section" id="capabilities">
+<div class="section-head"><div><p class="eyebrow">THE PRODUCT / CAPABILITY MAP</p><h2>Not another token counter.</h2></div><p class="section-intro">Five connected systems work together: account for resources, understand agent behaviour, optimise context, protect work and keep the developer in control.</p></div>
+<div class="statstrip">
+<div class="stat"><span class="big">18</span><span class="small">Registered hook events</span></div>
+<div class="stat"><span class="big">5</span><span class="small">Resource intelligence pillars</span></div>
+<div class="stat"><span class="big">Local</span><span class="small">Data stays on device</span></div>
+<div class="stat"><span class="big">0</span><span class="small">Core hook model calls</span></div>
+</div>
+<p class="note">18 refers to registered hook events in the repository. Feature coverage and live-host verification vary; see the audit. The five pillars are product groupings, not performance claims.</p>
+
+<div class="cap-grid" style="margin-top:26px">
+<article class="cap" data-no="01">
+<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 6-7"/></svg></span><span class="cap-label">OBSERVE / ACCOUNT</span></div>
+<h3>Resource Intelligence</h3><p>Understand where context, tokens, cache activity and resource signals are coming from. Separate observed data from estimates.</p>
+<div class="feature-list"><span>5m / 1h cache split</span><span>Thinking-token estimate</span><span>Incremental transcript scan</span><span>SQLite usage ledger</span><span>Ledger / Priced / Mixed / Unpriced</span><span>Model-cost estimates</span><span>Hook overhead benchmark</span><span>Usage &amp; session reports</span></div>
+</article>
+<article class="cap" data-no="02">
+<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 20c0-4 2-6 6-6s6 2 6 6M15 15c3-.5 6 1 6 4"/></svg></span><span class="cap-label">DETECT / UNDERSTAND</span></div>
+<h3>Agent &amp; Workflow Intelligence</h3><p>Track the agent lifecycle and surface patterns that may indicate duplicated effort, stalled work or wasted iterations.</p>
+<div class="feature-list"><span>Agent start / stop / ID</span><span>Agent ROI flags</span><span>Duplicate / empty / small agent flags</span><span>Estimated stalled-agent signal</span><span>Retry &amp; repeated-edit counts</span><span>Idle / overlap signals · partial</span><span>Skill state discovery</span><span>Instruction-load intelligence</span></div>
+</article>
+<article class="cap" data-no="03">
+<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h10M4 19h7"/><path d="m17 10 3 2-3 2M14 17l3 2-3 2"/></svg></span><span class="cap-label">OPTIMISE / RETRIEVE</span></div>
+<h3>Context &amp; Output Optimisation</h3><p>Reduce unnecessary context where supported, keep the original recoverable and validate transformations before relying on them.</p>
+<div class="feature-list"><span>Large-read nudges</span><span>Repeated-read detection</span><span>Output trimming</span><span>Recall original output</span><span>Python AST skeleton</span><span>Shadow-mode trimming</span><span>Keyword recall / FTS5</span><span>Context Vault index</span></div>
+</article>
+<article class="cap" data-no="04">
+<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="cap-label">PROTECT / CONTINUE</span></div>
+<h3>Workflow Survival &amp; Continuity</h3><p>Preserve the state of unfinished work, verify what changed and make it easier to continue safely in a fresh session.</p>
+<div class="feature-list"><span>Project STATE.md</span><span>Session handoffs</span><span>Checkpoints</span><span>Resume verification</span><span>Compaction survival check</span><span>Safe-point warnings</span><span>Supervisor status bus</span><span>Next-session brief</span><span>Task wrap &amp; recovery</span></div>
+</article>
+<article class="cap" data-no="05" style="grid-column:1/-1;min-height:0">
+<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 22h8M12 18v4M7 9h4M7 13h7M17 9h.01"/></svg></span><span class="cap-label">CONTROL / VISUALISE</span></div>
+<h3>One Developer Control Surface</h3><p>See the system without navigating a pile of separate tools. The toolbar, pane, dashboard and CLI share a local state model.</p>
+<div class="feature-list"><span>In-chat toolbar</span><span>Agent / skill / token / optimisation metrics</span><span>Expandable detail pane</span><span>OFF / LITE / FULL / ULTRA modes</span><span>Review / Audit / Board actions</span><span>HTML dashboard</span><span>Terminal statusline</span><span>Local companion</span><span>Mascot states</span><span>CLI command suite</span><span>Native overlay · visual check pending</span></div>
+</article>
+</div>
+<div class="subfeatures">
+<div class="subfeature"><b>Honest measurement</b><p>MEASURED, EST and UNKNOWN stay distinct. Real end-to-end A/B savings are not yet established.</p></div>
+<div class="subfeature"><b>Reversible by design</b><p>Supported output trims retain originals for recall. Install and recovery flows include rollback paths.</p></div>
+<div class="subfeature"><b>Local-first privacy</b><p>No telemetry, network calls or model calls inside core hooks. Local recall may contain tool output.</p></div>
+</div>
+</section>
+
+<section class="section">
+<div class="section-head"><div><p class="eyebrow">HOW IT WORKS</p><h2>From raw activity<br>to protected progress.</h2></div><p class="section-intro">TOKEN ZOMBIE connects resource observation to practical workflow actions — without silently taking over the session.</p></div>
+<div class="workflow">
+<div class="step"><span class="step-no">01 / OBSERVE</span><b>Capture signals</b><p>Hooks and local state record activity, usage and context signals.</p></div>
+<div class="step"><span class="step-no">02 / UNDERSTAND</span><b>Build the picture</b><p>Ledger, agent lifecycle, skill and instruction signals add context.</p></div>
+<div class="step"><span class="step-no">03 / DETECT</span><b>Surface waste</b><p>Repeated work, large reads and agent patterns become visible.</p></div>
+<div class="step"><span class="step-no">04 / PROTECT</span><b>Keep work safe</b><p>Shadow trims, recall, checkpoints and compaction checks preserve work.</p></div>
+<div class="step"><span class="step-no">05 / CONTINUE</span><b>Resume with context</b><p>Handoffs and STATE.md help the next chat pick up the task.</p></div>
+</div>
+</section>
+
+<section class="section" id="interface">
+<div class="section-head"><div><p class="eyebrow">THE CONTROL ROOM</p><h2>See the system.<br>Not just the prompt.</h2></div><p class="section-intro">A compact in-chat surface for quick signals, with a dashboard for deeper inspection. Published captures use demo data and are labelled accordingly.</p></div>
+<div class="showcase">
+<div class="show-card"><img src="img/dashboard.png" alt="TOKEN ZOMBIE dashboard desktop preview"><h3>Resource dashboard</h3><p>Metric cards, activity signals and mascot state in one view. Screenshot uses demo data.</p></div>
+<div class="show-card"><img src="img/dashboard-mobile.png" alt="TOKEN ZOMBIE dashboard mobile preview"><h3>Responsive overview</h3><p>Dashboard layout adapted for narrow screens. Screenshot uses demo data.</p></div>
+</div>
+<div class="mascot-row"><img src="img/mascot-states.png" alt="TOKEN ZOMBIE mascot idle, working, excited, alert and sleep states"><div><p class="eyebrow">THE ZOMBIE SIGNAL</p><h3>A visual state for the workflow.</h3><p>The mascot reflects alert, excited, working, sleep or idle states according to the documented priority rules. It represents uncontrolled resource waste — not AI itself.</p><p style="margin-top:12px"><a href="PANEL.md">Explore the toolbar and panel details →</a></p></div></div>
+</section>
+
+<section class="section">
+<div class="section-head"><div><p class="eyebrow">TRANSPARENT STATUS</p><h2>Built means built.<br>Planned means planned.</h2></div><p class="section-intro">The product is actively evolving. We show implementation status and verification limits instead of dressing roadmap items up as finished features.</p></div>
+<div class="status-grid">
+<div class="status"><span class="status-tag built">IN REPOSITORY</span><h3>Implemented capabilities</h3><p>Hook ledger, SQLite ledger, handoffs, checkpoints, output trim and recall, Python AST skeleton, dashboard and toolbar components.</p></div>
+<div class="status"><span class="status-tag verify">VERIFY ON HOST</span><h3>Real-host validation</h3><p>Some hook payloads and UI behaviours need owner-run host verification. Real A/B savings trials are not recorded yet.</p></div>
+<div class="status"><span class="status-tag planned">PLANNED</span><h3>Future capabilities</h3><p>Semantic/vector memory, non-Python AST compression, task-level vault index and automatic CANARY-to-ACTIVE promotion.</p></div>
+</div>
+<p class="note">Other adapters are experimental rules-file outputs only; Claude Code is the supported integration. Some accounting, pricing and agent intelligence remain partial. See the audit and limitations before relying on any estimate.</p>
+</section>
+
+<section class="section" id="install">
+<div class="install">
+<div><p class="eyebrow">GET STARTED / CLAUDE CODE</p><h2>Put your agents<br>on the radar.</h2><p>Install the plugin, restart Claude Code and open the TOKEN ZOMBIE status command. The full guide covers desktop, shell, optional statusline and rollback.</p><a class="btn primary" href="INSTALL.md">Read installation guide ↗</a></div>
+<div><div class="command-label">PLUGIN INSTALL COMMAND</div><div class="command">/plugin install token-zombie --marketplace rishavm713-create/token-zombie</div><p class="note">Then run <code>/token-zombie:tz</code>.</p></div>
+</div>
+</section>
+
+<section class="section">
+<div class="section-head"><div><p class="eyebrow">EXPLORE THE PROJECT</p><h2>Go deeper.</h2></div><p class="section-intro">Product documentation, architecture, safety boundaries and contribution guides.</p></div>
+<div class="doc-grid">
+<a class="doc" href="ROADMAP.md">Roadmap<span>What is built and planned</span></a>
+<a class="doc" href="IMPLEMENTATION-MATRIX.md">Implementation matrix<span>Feature-by-feature status</span></a>
+<a class="doc" href="AUDIT.md">Engineering audit<span>Evidence and remaining gaps</span></a>
+<a class="doc" href="METRICS.md">Metrics &amp; accounting<span>Definitions and calculations</span></a>
+<a class="doc" href="LIMITATIONS.md">Limitations<span>Known constraints</span></a>
+<a class="doc" href="PANEL.md">Toolbar &amp; panel<span>Interface behaviour</span></a>
+<a class="doc" href="INSTALL.md">Installation<span>Setup and rollback</span></a>
+<a class="doc" href="../SECURITY.md">Security<span>Privacy and safety model</span></a>
+</div>
+</section>
+
+<footer class="footer"><div>☣ TOKEN ZOMBIE · MAKE EVERY SINGLE TOKEN COUNT.</div><span>Local-first AI Agent Resource Intelligence · <a href="https://github.com/rishavm713-create/token-zombie">GitHub repository ↗</a></span></footer>
+</div>
+</body>
+</html>
