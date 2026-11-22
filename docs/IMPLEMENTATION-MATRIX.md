@@ -50,3 +50,6 @@ Skill collections (Everything Claude Code, Matt Pocock, Karpathy, Anthropic Skil
 - `tz doctor`: one-screen health check (ledger, savings agreement, hooks, rules block).
 - `tz reconcile` narrowed to `output-trim` rows (RTK rows are RTK's own savings, not in TZ's vault). Real data still MISMATCH: ledger 79,229 vs vault 7,450 tok. Cause not found; do not quote the dashboard savings figure.
 - Host finding: no TZ hooks in ~/.claude/settings.json on this machine (install.sh re-run still owner-only).
+
+## Round 7: savings mismatch explained
+Cause: the vault table only has rows from 11-23 01:18 while ledger.json output-trim rows start 11-22, so the two covered different periods. `tz reconcile` now compares only ledger rows from the vault's first row onward: real data AGREE (7,449 vs 7,450 tok). The older 11-22 ledger rows are unverified by the vault, so the dashboard total still mixes verified and unverified trim savings.

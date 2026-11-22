@@ -9,15 +9,16 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 
 def reconcile(ledger, db):
-    """(ledger_tok, vault_tok, status). ledger = list of ledger.json rows; db = path to tz.db. Tolerance 10%."""
-    led = sum(x['tok'] for x in ledger if isinstance(x, dict) and isinstance(x.get('tok'), (int, float))
-              and x.get('basis') == 'measured' and x.get('kind') == 'output-trim')  # rtk rows are RTK's own savings, not in TZ's vault; overhead rows are costs
+    """(ledger_tok, vault_tok, status). Only ledger rows from the vault's first row onward are compared (the vault may start later than the ledger). Tolerance 10%."""
     try:
         c = sqlite3.connect(db)
-        v = (c.execute('SELECT COALESCE(SUM(orig-shown),0) FROM vault').fetchone()[0] or 0) // 4
-        c.close()
+        v, t0 = c.execute('SELECT COALESCE(SUM(orig-shown),0), MIN(t) FROM vault').fetchone()
+        c.close(); v = (v or 0) // 4
     except Exception:
-        return led, None, 'UNAVAILABLE (no vault db)'
+        return 0, None, 'UNAVAILABLE (no vault db)'
+    led = sum(x['tok'] for x in ledger if isinstance(x, dict) and isinstance(x.get('tok'), (int, float))
+              and x.get('basis') == 'measured' and x.get('kind') == 'output-trim'  # rtk rows are RTK's own savings; overhead rows are costs
+              and (t0 is None or not isinstance(x.get('t'), (int, float)) or x['t'] >= t0 - 5))
     if not led and not v:
         return led, v, 'EMPTY'
     return led, v, 'AGREE' if abs(led - v) <= 0.1 * max(led, v) else 'MISMATCH'
