@@ -45,6 +45,8 @@ claude plugin install token-zombie --marketplace rishavm713-create/token-zombie
 [Installation, verification and rollback →](docs/INSTALL.md)
 
 <div align="center">
+](docs/img/dashboard.png)
+
 <img src="docs/img/dashboard.png" alt="TOKEN ZOMBIE dashboard preview — generated demo data" width="900">
 <br><sub>PRODUCT INTERFACE · Dashboard preview with demo data — not a live session or benchmark.</sub>
 </div>
@@ -166,9 +168,13 @@ Hooks and local tools feed a shared local state model. The system surfaces evide
 ## 🖥 Product interface
 
 <div align="center">
+](docs/img/dashboard-mobile.png)
+
 <img src="docs/img/dashboard-mobile.png" alt="TOKEN ZOMBIE mobile dashboard preview — demo data" width="330">
 <br><sub>RESPONSIVE DASHBOARD · Demo data</sub>
 <br><br>
+](docs/img/mascot-states.png)
+
 <img src="docs/img/mascot-states.png" alt="TOKEN ZOMBIE mascot states" width="620">
 <br><sub>MASCOT STATES · Idle / Working / Excited / Alert / Sleep</sub>
 </div>
