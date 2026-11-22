@@ -52,3 +52,21 @@ Website redesign: lowest priority by owner decision. Real demo video and launch:
 
 ## Not building (decided)
 Nine-tab UI, RTK-style clone, full Claude-Mem replacement, auto agent spawning, vector memory before keyword retrieval proves insufficient, lossy source compression, blocking tools to save tokens.
+
+## Final audit table
+Real-host status is NOT VERIFIED for every row until the owner runs docs/HOST-VERIFY.md. Evidence = test file in this repo (synthetic data).
+| FEATURE | IMPLEMENTATION | TEST | REAL-HOST | EVIDENCE | REMAINING LIMITATION |
+|---|---|---|---|---|---|
+| 18-event hook ledger | BUILT | test_install*, test_live | NOT VERIFIED | suite 795/0 | host payload fields unconfirmed |
+| Hook overhead | BUILT | tz hooks bench | live NOT VERIFIED | 28-89 ms/event on dev machine | live p95/failures need install |
+| Incremental scan + accounting | BUILT | test_usage | n/a | suite | pricing/MCP/subagent attribution PARTIAL |
+| SQLite ledger, alerts, vault | BUILT | test_out | NOT VERIFIED | suite | task-level index NOT BUILT |
+| Agent lifecycle/ROI/stalled | BUILT | test_live | NOT VERIFIED | suite | stalled is EST; interrupted/cancelled NOT BUILT |
+| Compaction verification | BUILT | test_out | HOST DEPENDENT | suite | needs `compact_summary` |
+| Python AST compression | BUILT | test_out | n/a | suite | Python only |
+| Rework counts | BUILT | test_rework | NOT VERIFIED | suite | counts, not proven waste |
+| Install/uninstall/restore | BUILT | test_install, test_install2 | NOT VERIFIED | suite | Linux unverified |
+| A/B runner + compare | BUILT | test_ab, test_bench | NOT RUN | none | zero real trials: no savings claim |
+| Quality-adjusted savings | NOT BUILT | none | n/a | none | needs A/B data |
+| Website | PARTIAL | none | n/a | docs/index.html | redesign pending, lowest priority |
+Launch readiness verdict: NOT launch-ready. Engineering substantial; proof (A/B, host verification), demo and website outstanding.
