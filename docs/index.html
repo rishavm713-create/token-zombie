@@ -155,6 +155,16 @@ h2{font-size:clamp(38px,5vw,64px);line-height:1;letter-spacing:-.06em}
 .brandmark img{animation:bob 3s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-2px) scale(1.06)}}
 @media(prefers-reduced-motion:reduce){#prog,.hero::before,.btn.primary::after{display:none}.hero h1 .w,.hero h1 span.w{opacity:1;transform:none;animation:none;-webkit-text-fill-color:initial;background:none;color:#2ee66f}.hero-frame,.pulse,.brandmark img{animation:none}}
+.eco{display:grid;grid-template-columns:.7fr 1.3fr;gap:36px;align-items:center;border:1px solid #2c4a33;border-radius:18px;background:radial-gradient(ellipse at 0 0,#1a3d24 0,transparent 55%),#0b130e;padding:34px}
+.eco-photo{position:relative;aspect-ratio:1;border-radius:16px;overflow:hidden;border:1px solid #416448}
+.eco-photo img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 1.2s var(--ease)}.eco:hover .eco-photo img{transform:scale(1.05)}
+.eco-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,#050806cc)}
+.eco-links{display:grid;gap:10px;margin-top:22px}
+.eco-link{display:flex;justify-content:space-between;align-items:center;gap:14px;border:1px solid var(--line);border-radius:12px;padding:15px 18px;background:#0c1510;color:var(--fg);transition:transform .3s var(--ease),border-color .3s,background .3s}
+.eco-link:hover{transform:translateX(6px);border-color:var(--green);background:#112016}
+.eco-link b{display:block;font-size:14px;letter-spacing:.04em}.eco-link span{font-size:12px;color:var(--soft)}.eco-link i{font-style:normal;color:var(--green)}
+.eco h2{margin:0 0 12px}
+@media(max-width:850px){.eco{grid-template-columns:1fr;padding:22px}.eco-photo{max-width:320px}}
 </style>
 
 </head>
@@ -162,7 +172,7 @@ h2{font-size:clamp(38px,5vw,64px);line-height:1;letter-spacing:-.06em}
 <div class="wrap">
 <nav class="topbar">
 <a class="brand" href="#"><span class="brandmark"><img src="img/mascot.svg" alt=""></span> TOKEN ZOMBIE</a>
-<div class="nav"><a href="#capabilities">Capabilities</a><a href="#interface">Interface</a><a href="ROADMAP.md">Roadmap</a><a href="https://github.com/rishavm713-create/token-zombie" class="navcta">GitHub ↗</a></div>
+<div class="nav"><a href="#capabilities">Capabilities</a><a href="#interface">Interface</a><a href="#ecosystem">Creator</a><a href="ROADMAP.md">Roadmap</a><a href="https://github.com/rishavm713-create/token-zombie" class="navcta">GitHub ↗</a></div>
 </nav>
 
 <header class="hero">
@@ -297,12 +307,23 @@ h2{font-size:clamp(38px,5vw,64px);line-height:1;letter-spacing:-.06em}
 </div>
 </section>
 
+<section class="section" id="ecosystem">
+<div class="eco">
+<div class="eco-photo"><img src="img/rishav.webp" alt="Rishav Mishra, creator of TOKEN ZOMBIE" loading="lazy" width="900" height="900"></div>
+<div><p class="eyebrow">BUILT BY RISHAV MISHRA</p><h2>One builder.<br>Three connected tools.</h2><p class="section-intro">TOKEN ZOMBIE controls what your AI agents spend. EditSutra speeds up video editing in Premiere Pro. The portfolio shows the person and the work behind both.</p>
+<div class="eco-links">
+<a class="eco-link" href="https://rishavm713-create.github.io/"><div><b>Portfolio</b><span>Rishav Mishra: work, CV and contact</span></div><i>↗</i></a>
+<a class="eco-link" href="https://editsutra.github.io/"><div><b>EditSutra</b><span>AI-assisted editing inside Premiere Pro</span></div><i>↗</i></a>
+<a class="eco-link" href="https://github.com/rishavm713-create/token-zombie"><div><b>TOKEN ZOMBIE</b><span>You are here: Claude Code resource control</span></div><i>↗</i></a>
+</div></div></div>
+</section>
+
 <footer class="footer"><div class="fbrand"><img src="img/mascot.svg" alt=""> TOKEN ZOMBIE</div><span>Make every single token count. · <a href="https://github.com/rishavm713-create/token-zombie">GitHub ↗</a> · <a href="https://github.com/rishavm713-create/token-zombie/discussions">Discussions ↗</a></span>
 <div class="rights"><b>© 2026 Rishav Mishra. All rights reserved.</b><br>The TOKEN ZOMBIE name, mascot, logo and artwork are the property of Rishav Mishra. The source code is released under the <a href="https://github.com/rishavm713-create/token-zombie/blob/main/LICENSE">MIT License</a>.</div></footer>
 </div>
 <script>
 (function(){var d=document,r=d.documentElement;if(!('IntersectionObserver' in window))return;r.classList.add('js');
-var els=d.querySelectorAll('.section-head,.statstrip,.cap,.workflow,.show-card,.mascot-row,.status,.install,.doc,.hero-copy,.hero-actions,.hero-visual');
+var els=d.querySelectorAll('.eco,.section-head,.statstrip,.cap,.workflow,.show-card,.mascot-row,.status,.install,.doc,.hero-copy,.hero-actions,.hero-visual');
 els.forEach(function(e,i){e.classList.add('rv');e.style.setProperty('--d',((i%4)*70)+'ms')});
 var io=new IntersectionObserver(function(a){a.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}})},{threshold:.12});
 els.forEach(function(e){io.observe(e)});setTimeout(function(){els.forEach(function(e){e.classList.add('in')})},4000);
