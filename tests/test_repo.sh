@@ -32,7 +32,7 @@ PY'
 ok "plugin.json license MIT" 'python3 -c "import json;assert json.load(open(\".claude-plugin/plugin.json\"))[\"license\"]==\"MIT\""'
 ok "README images exist" 'python3 - <<PY
 import re,os
-r=open("README.md").read(); imgs=re.findall(r"\]\((docs/img/[^)]+\.png)\)",r)
+r=open("README.md").read(); imgs=re.findall(r"(?:\]\(|src=\")(docs/img/[^)\"]+\.(?:png|svg))",r)
 assert imgs and all(os.path.isfile(i) for i in imgs),imgs
 PY'
 echo "pass $pass fail $fail"; [ $fail = 0 ]
