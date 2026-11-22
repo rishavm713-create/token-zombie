@@ -1,130 +1,155 @@
-# TOKEN ZOMBIE
+<div align="center">
 
-<p align="center"><img src="docs/img/brand-hero.svg" alt="TOKEN ZOMBIE — Make every single token count" width="760"></p>
+<img src="docs/img/brand-hero.svg" alt="TOKEN ZOMBIE" width="760">
 
-<p align="center">
-  <strong>MAKE EVERY SINGLE TOKEN COUNT.</strong><br>
-  <em>STOP THE WASTE. CONTROL THE SWARM. PROTECT THE WORKFLOW.</em>
-</p>
+# MAKE EVERY SINGLE TOKEN COUNT.
 
-<p align="center">
-  <strong>AI Agent Resource Intelligence for Claude Code</strong><br>
-  See what your agents consume. Catch workflow waste. Protect context and continuity.
-</p>
+### AI AGENT RESOURCE INTELLIGENCE FOR CLAUDE CODE
 
-<p align="center">
-  <a href="#install">Install</a> ·
-  <a href="#what-it-is">What it is</a> ·
-  <a href="docs/ROADMAP.md">Roadmap</a> ·
-  <a href="docs/IMPLEMENTATION-MATRIX.md">Implementation status</a> ·
-  <a href="docs/LIMITATIONS.md">Limitations</a>
-</p>
+**STOP THE WASTE. CONTROL THE SWARM. PROTECT THE WORKFLOW.**
 
-<p align="center">
-  <img alt="Platform" src="https://img.shields.io/badge/platform-Claude%20Code-7CFF9B?style=flat&labelColor=111812">
-  <img alt="License" src="https://img.shields.io/badge/license-MIT-7CFF9B?style=flat&labelColor=111812">
-  <img alt="Privacy" src="https://img.shields.io/badge/privacy-local--first-7CFF9B?style=flat&labelColor=111812">
-</p>
+[**Install TOKEN ZOMBIE →**](#-get-started) · [Explore the capabilities](#-the-control-layer) · [Roadmap](docs/ROADMAP.md) · [Engineering audit](docs/AUDIT.md)
 
-> **Your AI agents are doing work. Can you see what that work is costing you?**
+![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-7CFF9B?style=flat-square&labelColor=111812)
+![Local first](https://img.shields.io/badge/LOCAL--FIRST-no%20telemetry-7CFF9B?style=flat-square&labelColor=111812)
+![License](https://img.shields.io/badge/license-MIT-7CFF9B?style=flat-square&labelColor=111812)
 
-TOKEN ZOMBIE is a local-first resource-intelligence layer for Claude Code. It observes token and cache activity, tracks agent work, flags inefficient patterns, protects useful context, and helps carry unfinished work into the next session.
+</div>
 
-It is not just a token counter. It brings **visibility, guardrails, optimisation advice and workflow continuity** into one local control layer.
+> **Your agents are doing work. TOKEN ZOMBIE helps you see the resource use, spot wasteful patterns and protect the work that matters.**
 
-<p align="center">
-  <img src="docs/img/dashboard.png" alt="TOKEN ZOMBIE dashboard — illustrative demo data" width="760">
-  <br><sub>Dashboard preview · generated with demo data, not a live user session.</sub>
-</p>
+<table>
+<tr>
+<td width="50%" valign="top">
 
-## Install
+### ☣ RESOURCE INTELLIGENCE
+Track token and cache signals, usage ledgers, cost estimates and hook overhead. Every value is labelled **MEASURED**, **EST** or **UNKNOWN**.
+
+</td>
+<td width="50%" valign="top">
+
+### 🧠 AGENT INTELLIGENCE
+Track agent lifecycle, ROI flags, duplicate or empty work, estimated stalls, retries and repeated edits.
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### ⚡ CONTEXT OPTIMISATION
+Large-read nudges, repeated-read detection, supported output trimming, reversible recall, Python AST skeletons and shadow mode.
+
+</td>
+<td width="50%" valign="top">
+
+### 🛡 WORKFLOW SURVIVAL
+Compaction checks, project state, checkpoints, handoffs, resume verification and supervisor signals.
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### 🎛 DEVELOPER CONTROL SURFACE
+In-chat toolbar, expandable pane, four headline metrics, mode controls, dashboard, statusline and CLI.
+
+</td>
+<td width="50%" valign="top">
+
+### 🔒 LOCAL-FIRST BY DESIGN
+No telemetry, no network calls or model calls inside core hooks. Advice is non-blocking; supported trims preserve originals for recall.
+
+</td>
+</tr>
+</table>
+
+<div align="center">
+
+<img src="docs/img/dashboard.png" alt="TOKEN ZOMBIE dashboard preview — demo data" width="820">
+
+<sub>Dashboard preview · generated with demo data. It is an interface illustration, not a live-session benchmark.</sub>
+
+</div>
+
+## ⚡ Get started
 
 ```text
 /plugin install token-zombie --marketplace rishavm713-create/token-zombie
 ```
 
-Restart Claude Code, then run `/token-zombie:tz`. Shell and desktop installation instructions are below.
+Restart Claude Code, then run:
 
-## What it is
+```text
+/token-zombie:tz
+```
 
-| Capability | What you get |
+[Full installation guide →](docs/INSTALL.md)
+
+## 🧩 The control layer
+
+<div align="center">
+
+| OBSERVE | DETECT | OPTIMISE | PROTECT | CONTINUE |
+|:---:|:---:|:---:|:---:|:---:|
+| Resource signals | Workflow waste | Context & output | Safe handoffs | Project state |
+| Ledger & cache | Agent patterns | Reversible trims | Checkpoints | Resume |
+
+</div>
+
+| System | Capabilities in the repository |
 |---|---|
-| **OBSERVE** | A local ledger for hook activity, token/cache estimates, agent activity and resource signals. Values are labelled MEASURED, EST or UNKNOWN. |
-| **DETECT** | Evidence-backed advice about repeated reads, large context loads, duplicate or low-value agent work, and rework patterns. |
-| **OPTIMISE** | Output trimming in supported paths, reversible recall, Python AST skeleton compression, and optimisation modes. |
-| **PROTECT** | Compaction checks, safe-point handoffs, checkpoints and recoverable originals. |
-| **CONTINUE** | A compact project state and handoff that helps a fresh chat resume unfinished work. |
+| **Resource accounting** | 5m / 1h cache split, thinking-token estimate, incremental transcript scan, SQLite ledger, usage labels, reports and hook-overhead benchmark |
+| **Agent intelligence** | Agent start/stop/ID lifecycle, ROI flags, duplicate/small/empty/failed/stalled signals, skill-state discovery and rework counts |
+| **Context intelligence** | Large-read nudges, repeated-read advice, output trimming, recall, Python AST skeleton compression, keyword retrieval and Context Vault index |
+| **Continuity & survival** | `STATE.md`, handoffs, checkpoints, resume verification, compaction survival checks, supervisor status and next-session brief |
+| **Control surface** | In-chat toolbar, detail pane, OFF/LITE/FULL/ULTRA modes, dashboard, terminal statusline, local companion, mascot states and CLI |
 
-The guiding rule: **optimise resource use without pretending that fewer tokens automatically means better work.** Quality and real-world savings still need measured A/B evidence.
+## 🖥 See the product
 
-## Current status
+<div align="center">
+<img src="docs/img/dashboard-mobile.png" alt="TOKEN ZOMBIE dashboard mobile preview — demo data" width="360">
+<br><sub>Responsive dashboard · demo data.</sub>
+</div>
 
-- **Built in the repository:** 18-event hook ledger, SQLite ledger, agent lifecycle signals, context vault index, handoffs/checkpoints, output trim and recall, Python AST skeleton compression, shadow-mode advice, dashboard and toolbar components.
-- **Validation pending:** live-host verification for some hook payloads and UI behaviours; real-world A/B trials have not been recorded.
-- **Partial / experimental:** pricing and some cost attribution; some agent intelligence; non-Claude adapters are rules-only and experimental.
-- **Not built yet:** semantic/vector memory, non-Python AST compression, task-level vault index and automatic CANARY-to-ACTIVE promotion.
+<div align="center">
+<img src="docs/img/mascot-states.png" alt="TOKEN ZOMBIE mascot states" width="620">
+<br><sub>Idle · Working · Excited · Alert · Sleep</sub>
+</div>
 
-See the [roadmap](docs/ROADMAP.md), [implementation matrix](docs/IMPLEMENTATION-MATRIX.md), [latest code audit](docs/AUDIT.md), [host verification checklist](docs/HOST-VERIFY.md) and [limitations](docs/LIMITATIONS.md). These documents are the source of truth; this README does not turn planned work into shipped features.
+The in-chat toolbar is implemented, but a verified public capture of the live toolbar is not published yet. [See its documented behaviour](docs/PANEL.md).
 
-## Why it exists
+## 🚦 Implementation status
 
-A single small UI change once consumed about 68% of a five-hour usage window. Long chats repeatedly carried history, screenshots stayed in context, agents duplicated work, and there was no single place to understand where resources were going.
+| <span>IN THE REPOSITORY</span> | <span>VALIDATION REQUIRED</span> | <span>NOT BUILT YET</span> |
+|---|---|---|
+| Hook ledger, SQLite ledger, handoffs, checkpoints, supported output trim + recall, Python AST skeleton, dashboard and toolbar components | Real-host checks for some hook payloads and UI behaviour; real A/B savings trials | Semantic/vector memory, non-Python AST compression, task-level vault index, automatic CANARY → ACTIVE |
 
-TOKEN ZOMBIE grew from that problem: give developers a local view of agent resource use and practical ways to protect the work already done.
+**Important:** implementation and test coverage do not mean every feature has been verified on a live host. Savings are not proven end-to-end: no real with/without A/B trials are recorded yet. Other adapters are experimental rules-file outputs; Claude Code is the supported integration.
 
-It does **not** claim that every warning saves tokens, that every estimate is provider billing data, or that all optimisations preserve quality automatically. The project labels what it knows and documents what it cannot yet prove.
+[Full roadmap](docs/ROADMAP.md) · [Implementation matrix](docs/IMPLEMENTATION-MATRIX.md) · [Audit](docs/AUDIT.md) · [Limitations](docs/LIMITATIONS.md)
 
-## See it
+## 🔐 Privacy & safety
 
-The repository includes dashboard and mascot captures generated with demo data. They demonstrate the interface, not measured production savings.
-
-<p align="center">
-  <img src="docs/img/dashboard-mobile.png" alt="TOKEN ZOMBIE dashboard at phone width — demo data" width="360">
-  <br><sub>Responsive dashboard preview · demo data.</sub>
-</p>
-
-<p align="center">
-  <img src="docs/img/mascot-states.png" alt="TOKEN ZOMBIE mascot states" width="560">
-</p>
-
-The in-chat toolbar is part of the product, but a verified public capture of it is not yet included. See [toolbar details](docs/PANEL.md).
-
-## Roadmap
-
-TOKEN ZOMBIE is being developed in stages. The near-term focus is to close verification gaps and publish honest measurements before expanding the feature surface.
-
-- **Now:** verify real-host behaviour, gather real A/B trials, improve measurement coverage and tighten install/onboarding.
-- **Next:** improve resource/cost attribution and agent-state intelligence; expand context indexing only where evidence justifies it.
-- **Later / planned:** semantic retrieval, broader language-aware compression and deeper task-level orchestration.
-
-The exact status of each item is tracked in the [public roadmap](docs/ROADMAP.md). No planned capability is represented as already shipped.
-
-## Privacy and safety
-
-- Local-first state under `~/.claude/token-zombie/`.
-- No network calls or telemetry from the core hooks.
+- Local state under `~/.claude/token-zombie/`.
+- No network calls or telemetry from core hooks.
 - No model calls inside hooks.
-- Advice is non-blocking; TOKEN ZOMBIE does not silently take over the developer's workflow.
-- Original output can be recovered with `tz recall` where trimming is supported.
-- Local recall files may contain content returned by tools; review local storage before sharing diagnostic files.
+- Advice is non-blocking; the developer stays in control.
+- Supported output trims retain originals for `tz recall`.
+- Local recall may contain tool output; review it before sharing diagnostics.
 
-Read [SECURITY.md](SECURITY.md) and [LIMITATIONS.md](docs/LIMITATIONS.md).
+[Security model](SECURITY.md) · [Metrics definitions](docs/METRICS.md)
 
-## Documentation
+## 📚 Documentation
 
-| Guide | Purpose |
+| Guide | What it covers |
 |---|---|
-| [Installation](docs/INSTALL.md) | Install, configure, verify and uninstall |
-| [Roadmap](docs/ROADMAP.md) | Built, in-progress, planned and deferred capabilities |
-| [Implementation matrix](docs/IMPLEMENTATION-MATRIX.md) | Feature-by-feature status |
-| [Audit](docs/AUDIT.md) | Evidence-based gap audit |
-| [Metrics](docs/METRICS.md) | Metric definitions and labels |
-| [Limitations](docs/LIMITATIONS.md) | Known gaps and unverified behaviour |
-| [Toolbar / panel](docs/PANEL.md) | In-chat interface |
-| [CLI reference](docs/CLI.md) | Commands |
-| [Compatibility](COMPAT.md) | Platform and adapter status |
-| [Security](SECURITY.md) | Privacy and safety model |
-| [Contributing](CONTRIBUTING.md) | Development and contribution guidance |
+| [Installation](docs/INSTALL.md) | Setup, optional statusline, rollback |
+| [Roadmap](docs/ROADMAP.md) | Built, validation, planned and deferred |
+| [Toolbar & panel](docs/PANEL.md) | In-chat control surface |
+| [Metrics](docs/METRICS.md) | Data sources, formulas and limits |
+| [CLI](docs/CLI.md) | Commands |
+| [Compatibility](COMPAT.md) | Supported and experimental integrations |
+| [Contributing](CONTRIBUTING.md) | Development and contributions |
 
 ---
 
