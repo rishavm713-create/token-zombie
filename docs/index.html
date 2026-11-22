@@ -174,6 +174,37 @@ h2{font-size:clamp(38px,5vw,64px);line-height:1;letter-spacing:-.06em}
 .steps li:hover{transform:translateX(6px);border-color:var(--green)}
 .steps li:before{content:"0" counter(s);color:var(--green);font-weight:800;font-size:12px}
 @media(max-width:850px){.mission{grid-template-columns:1fr;gap:26px}}
+/* bigger type, tighter space, mobile */
+.vocab{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.vc{border:1px solid #2c4a33;border-radius:16px;padding:26px;background:linear-gradient(150deg,#142219,#0b130e);transition:transform .3s var(--ease),border-color .3s}
+.vc:hover{transform:translateY(-6px);border-color:var(--green)}
+.vc .vi{color:var(--green);font-weight:900;font-size:13px;letter-spacing:.16em}
+.vc h3{font-size:28px;margin:10px 0 8px;letter-spacing:-.03em}.vc p{font-size:16px;line-height:1.6;color:var(--muted);margin:0}
+body{font-size:17px;line-height:1.65}
+.eyebrow{font-size:13px}.cap-label,.step-no,.stat .small{font-size:12px}
+.section-intro{font-size:18px;max-width:520px}.hero-copy{font-size:20px}
+.cap p{font-size:17px;max-width:none}.cap h3{font-size:28px}.feature-list span{font-size:13px;padding:6px 10px}
+.step b{font-size:19px}.step p{font-size:15px}.stat .big{font-size:38px}
+.show-card h3{font-size:24px}.show-card p,.mascot-row p,.install p,.status p{font-size:16px}.status h3,.mascot-row h3{font-size:22px}
+.doc{font-size:15px}.trustline{font-size:14px}.subfeature b{font-size:15px}.subfeature p{font-size:14px}
+.nav{font-size:14px}.footer{font-size:14px}.btn{font-size:16px;padding:16px 24px}
+.section{padding:68px 0}.section-head{margin-bottom:32px}.cap{min-height:0}.hero{min-height:auto;padding:60px 0 68px}
+@media(max-width:850px){.vocab{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){
+body{font-size:18px}.wrap{width:calc(100% - 32px)}
+.section{padding:48px 0}.section-head{margin-bottom:22px}.hero{padding:32px 0 44px;gap:26px}
+.hero h1{font-size:clamp(52px,16vw,72px);line-height:.98}.hero-copy{font-size:19px}
+.hero-actions{flex-direction:column}.hero-actions .btn{width:100%;justify-content:center;text-align:center;min-height:52px}
+.section h2,.install h2{font-size:clamp(34px,10vw,44px);line-height:1.05}
+.vocab{grid-template-columns:1fr}.vc{padding:22px}.vc h3{font-size:26px}
+.cap{padding:22px}.cap-grid,.show-grid,.doc-grid,.status-grid{grid-template-columns:1fr!important}
+.statstrip{grid-template-columns:repeat(2,1fr)}.stat .big{font-size:34px}
+.workflow{grid-template-columns:1fr}.step{padding:20px}
+.mascot-row{grid-template-columns:1fr;padding:22px}.mascot-row img{max-width:100%}
+.install{padding:24px}.command{font-size:12px}
+.eco-link{padding:16px}.nav a:nth-child(3){display:none}.navcta{white-space:nowrap;padding:8px 12px}.brand{font-size:12px}.nav{gap:14px}
+.footer .rights{font-size:14px}
+}
 </style>
 
 </head>
@@ -209,22 +240,22 @@ h2{font-size:clamp(38px,5vw,64px);line-height:1;letter-spacing:-.06em}
 
 <div class="cap-grid" style="margin-top:26px">
 <article class="cap" data-no="01">
-<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 6-7"/></svg></span><span class="cap-label">OBSERVE / ACCOUNT</span></div>
+<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 6-7"/></svg></span><span class="cap-label">COUNT THE BITES</span></div>
 <h3>Resource Intelligence</h3><p>Understand where context, tokens, cache activity and resource signals are coming from. Separate observed data from estimates.</p>
 <div class="feature-list"><span>5m / 1h cache split</span><span>Thinking-token estimate</span><span>Incremental transcript scan</span><span>SQLite usage ledger</span><span>Ledger / Priced / Mixed / Unpriced</span><span>Model-cost estimates</span><span>Hook overhead benchmark</span><span>Usage &amp; session reports</span></div>
 </article>
 <article class="cap" data-no="02">
-<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 20c0-4 2-6 6-6s6 2 6 6M15 15c3-.5 6 1 6 4"/></svg></span><span class="cap-label">DETECT / UNDERSTAND</span></div>
+<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 20c0-4 2-6 6-6s6 2 6 6M15 15c3-.5 6 1 6 4"/></svg></span><span class="cap-label">HUNT THE ZOMBIES</span></div>
 <h3>Agent &amp; Workflow Intelligence</h3><p>Track the agent lifecycle and surface patterns that may indicate duplicated effort, stalled work or wasted iterations.</p>
 <div class="feature-list"><span>Agent start / stop / ID</span><span>Agent ROI flags</span><span>Duplicate / empty / small agent flags</span><span>Estimated stalled-agent signal</span><span>Retry &amp; repeated-edit counts</span><span>Idle / overlap signals · partial</span><span>Skill state discovery</span><span>Instruction-load intelligence</span></div>
 </article>
 <article class="cap" data-no="03">
-<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h10M4 19h7"/><path d="m17 10 3 2-3 2M14 17l3 2-3 2"/></svg></span><span class="cap-label">OPTIMISE / RETRIEVE</span></div>
+<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h10M4 19h7"/><path d="m17 10 3 2-3 2M14 17l3 2-3 2"/></svg></span><span class="cap-label">INFECTION CONTROL</span></div>
 <h3>Context &amp; Output Optimisation</h3><p>Reduce unnecessary context where supported, keep the original recoverable and validate transformations before relying on them.</p>
 <div class="feature-list"><span>Large-read nudges</span><span>Repeated-read detection</span><span>Output trimming</span><span>Recall original output</span><span>Python AST skeleton</span><span>Shadow-mode trimming</span><span>Keyword recall / FTS5</span><span>Context Vault index</span></div>
 </article>
 <article class="cap" data-no="04">
-<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="cap-label">PROTECT / CONTINUE</span></div>
+<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="cap-label">SURVIVAL MODE</span></div>
 <h3>Workflow Survival &amp; Continuity</h3><p>Preserve the state of unfinished work, verify what changed and make it easier to continue safely in a fresh session.</p>
 <div class="feature-list"><span>Project STATE.md</span><span>Session handoffs</span><span>Checkpoints</span><span>Resume verification</span><span>Compaction survival check</span><span>Safe-point warnings</span><span>Supervisor status bus</span><span>Next-session brief</span><span>Task wrap &amp; recovery</span></div>
 </article>
@@ -242,13 +273,13 @@ h2{font-size:clamp(38px,5vw,64px);line-height:1;letter-spacing:-.06em}
 </section>
 
 <section class="section">
-<div class="section-head"><div><p class="eyebrow">HOW IT WORKS</p><h2>From raw activity<br>to protected progress.</h2></div><p class="section-intro">TOKEN ZOMBIE connects resource observation to practical workflow actions — without silently taking over the session.</p></div>
+<div class="section-head"><div><p class="eyebrow">HOW IT WORKS</p><h2>Hunt the waste.<br>Survive the session.</h2></div><p class="section-intro">TOKEN ZOMBIE connects resource observation to practical workflow actions — without silently taking over the session.</p></div>
 <div class="workflow">
-<div class="step"><span class="step-no">01 / OBSERVE</span><b>Capture signals</b><p>Hooks and local state record activity, usage and context signals.</p></div>
-<div class="step"><span class="step-no">02 / UNDERSTAND</span><b>Build the picture</b><p>Ledger, agent lifecycle, skill and instruction signals add context.</p></div>
-<div class="step"><span class="step-no">03 / DETECT</span><b>Surface waste</b><p>Repeated work, large reads and agent patterns become visible.</p></div>
-<div class="step"><span class="step-no">04 / PROTECT</span><b>Keep work safe</b><p>Shadow trims, recall, checkpoints and compaction checks preserve work.</p></div>
-<div class="step"><span class="step-no">05 / CONTINUE</span><b>Resume with context</b><p>Handoffs and STATE.md help the next chat pick up the task.</p></div>
+<div class="step"><span class="step-no">01 / SCOUT</span><b>Capture signals</b><p>Hooks and local state record activity, usage and context signals.</p></div>
+<div class="step"><span class="step-no">02 / TRACE</span><b>Build the picture</b><p>Ledger, agent lifecycle, skill and instruction signals add context.</p></div>
+<div class="step"><span class="step-no">03 / HUNT</span><b>Hunt the zombies</b><p>Zombie work, repeated reads and agent loops become visible.</p></div>
+<div class="step"><span class="step-no">04 / SURVIVE</span><b>Stop the infection</b><p>Shadow trims, recall, checkpoints and compaction checks preserve work.</p></div>
+<div class="step"><span class="step-no">05 / REVIVE</span><b>Resume with context</b><p>Handoffs and STATE.md help the next chat pick up the task.</p></div>
 </div>
 </section>
 
@@ -316,6 +347,15 @@ h2{font-size:clamp(38px,5vw,64px);line-height:1;letter-spacing:-.06em}
 </div>
 </section>
 
+<section class="section" id="vocab">
+<div class="section-head"><div><p class="eyebrow">THE ZOMBIE VOCABULARY</p><h2>Know your enemy.</h2></div><p class="section-intro">Every long AI session gets infected. These are the four things TOKEN ZOMBIE hunts.</p></div>
+<div class="vocab">
+<div class="vc"><span class="vi">01</span><h3>Zombies</h3><p>Work that burns tokens without moving the task: repeated reads, duplicate calls, stalled agents.</p></div>
+<div class="vc"><span class="vi">02</span><h3>Infection</h3><p>Context that spreads and pollutes: duplicate instructions, bloated rules, overlapping skills.</p></div>
+<div class="vc"><span class="vi">03</span><h3>Survival</h3><p>Warnings and checkpoints before the context runs out, so unfinished work is not lost.</p></div>
+<div class="vc"><span class="vi">04</span><h3>Revival</h3><p>Handoffs and state notes that bring the next chat back to life without starting over.</p></div>
+</div></section>
+
 <section class="section" id="mission">
 <div class="section-head"><div><p class="eyebrow">PHILOSOPHY &amp; MISSION</p><h2>From a bad day<br>to a shared tool.</h2></div><p class="section-intro">TOKEN ZOMBIE is open source on purpose, so access to the solution never becomes another limitation for someone else.</p></div>
 <div class="mission">
@@ -340,7 +380,7 @@ h2{font-size:clamp(38px,5vw,64px);line-height:1;letter-spacing:-.06em}
 </div>
 <script>
 (function(){var d=document,r=d.documentElement;if(!('IntersectionObserver' in window))return;r.classList.add('js');
-var els=d.querySelectorAll('.mission>div,.eco,.section-head,.statstrip,.cap,.workflow,.show-card,.mascot-row,.status,.install,.doc,.hero-copy,.hero-actions,.hero-visual');
+var els=d.querySelectorAll('.vc,.mission>div,.eco,.section-head,.statstrip,.cap,.workflow,.show-card,.mascot-row,.status,.install,.doc,.hero-copy,.hero-actions,.hero-visual');
 els.forEach(function(e,i){e.classList.add('rv');e.style.setProperty('--d',((i%4)*70)+'ms')});
 var io=new IntersectionObserver(function(a){a.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}})},{threshold:.12});
 els.forEach(function(e){io.observe(e)});setTimeout(function(){els.forEach(function(e){e.classList.add('in')})},4000);
