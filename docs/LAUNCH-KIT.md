@@ -58,3 +58,9 @@ Use a direct GitHub repository link in the post or its immediate reply. Do not r
 - [ ] Run and publish the A/B benchmark before making net-savings claims.
 - [ ] Create a tagged release only after the release contents and changelog are checked.
 - [ ] Post once in each relevant community only where self-promotion is allowed; tailor the explanation to that community.
+
+
+## Public tester call
+
+Use GitHub's [Call for testers issue](https://github.com/rishavm713-create/token-zombie/issues/undefined) as the single feedback destination. Invite developers to test one real workflow and report failures; do not buy stars, use fake accounts, mass-DM strangers or post repetitive promotion.
+
