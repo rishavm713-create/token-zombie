@@ -45,7 +45,7 @@ claude plugin install token-zombie --marketplace rishavm713-create/token-zombie
 [Installation, verification and rollback →](docs/INSTALL.md)
 
 <div align="center">
-<img src="docs/img/dashboard.png alt="TOKEN ZOMBIE dashboard preview — generated demo data" width="900">
+<img src="docs/img/dashboard.png" alt="TOKEN ZOMBIE dashboard preview — generated demo data" width="900">
 <br><sub>PRODUCT INTERFACE · Dashboard preview with demo data — not a live session or benchmark.</sub>
 </div>
 
@@ -54,7 +54,7 @@ claude plugin install token-zombie --marketplace rishavm713-create/token-zombie
 ## Why it exists
 
 Long-running agent sessions can accumulate repeated reads, oversized tool output, duplicated agent work and context that is difficult to carry forward. Developers need more than a token total: they need to understand where resources are going, what work is happening and how to preserve progress without sacrificing task quality.
->
+
 TOKEN ZOMBIE is designed around that wider problem:
 
 - **See resource signals:** token activity, cache activity, agent usage and cost signals, with explicit evidence labels.
