@@ -45,7 +45,7 @@ claude plugin install token-zombie --marketplace rishavm713-create/token-zombie
 [Installation, verification and rollback →](docs/INSTALL.md)
 
 <div align="center">
-](docs/img/dashboard.png)
+![Dashboard preview](docs/img/dashboard.png)
 
 <img src="docs/img/dashboard.png" alt="TOKEN ZOMBIE dashboard preview — generated demo data" width="900">
 <br><sub>PRODUCT INTERFACE · Dashboard preview with demo data — not a live session or benchmark.</sub>
@@ -65,6 +65,10 @@ TOKEN ZOMBIE is designed around that wider problem:
 - **Stay in control:** local-first operation, non-blocking advice and no model calls inside core hooks.
 
 The goal is not to maximise a headline savings percentage. It is to make resource use understandable and reduce avoidable work while preserving output quality.
+
+
+> **Observed single-session result:** The project owner reports one real TOKEN ZOMBIE session with **5,000,000 tokens saved**. This is a single-session observation, not a controlled multi-trial benchmark or a guarantee of typical savings. The raw session evidence, token accounting breakdown, task-quality check and TOKEN ZOMBIE overhead are being prepared for publication. See [benchmark evidence status](docs/BENCHMARK-METHOD.md#observed-single-session-result).
+
 
 ## ☣ The control layer
 
@@ -168,12 +172,12 @@ Hooks and local tools feed a shared local state model. The system surfaces evide
 ## 🖥 Product interface
 
 <div align="center">
-](docs/img/dashboard-mobile.png)
+![Mobile dashboard preview](docs/img/dashboard-mobile.png)
 
 <img src="docs/img/dashboard-mobile.png" alt="TOKEN ZOMBIE mobile dashboard preview — demo data" width="330">
 <br><sub>RESPONSIVE DASHBOARD · Demo data</sub>
 <br><br>
-](docs/img/mascot-states.png)
+![Mascot states](docs/img/mascot-states.png)
 
 <img src="docs/img/mascot-states.png" alt="TOKEN ZOMBIE mascot states" width="620">
 <br><sub>MASCOT STATES · Idle / Working / Excited / Alert / Sleep</sub>
