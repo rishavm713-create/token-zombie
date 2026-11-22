@@ -92,6 +92,30 @@ h2{font-size:clamp(32px,4vw,48px);line-height:1.05;letter-spacing:-.05em;margin:
 @media(max-width:850px){.hero{grid-template-columns:1fr;padding-top:50px;gap:34px}.hero-visual{max-width:700px}.section-head{display:block}.section-intro{margin-top:14px}.workflow{grid-template-columns:repeat(2,1fr)}.step{border-bottom:1px solid var(--line)}.subfeatures{grid-template-columns:1fr}.install{grid-template-columns:1fr}.doc-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.wrap{width:min(var(--max),calc(100% - 30px))}.topbar{height:64px}.nav{gap:12px;font-size:11px}.nav a:nth-child(1),.nav a:nth-child(2){display:none}.hero{padding:42px 0 58px;min-height:auto}.hero-copy{font-size:16px}h1{font-size:51px}.floating-tag{right:-5px;bottom:10px}.section{padding:62px 0}.statstrip{grid-template-columns:repeat(2,1fr)}.stat:nth-child(2){border-right:0}.stat:nth-child(-n+2){border-bottom:1px solid var(--line)}.cap-grid,.showcase,.status-grid{grid-template-columns:1fr}.cap{min-height:auto}.workflow{grid-template-columns:1fr}.step{border-right:0}.mascot-row{grid-template-columns:1fr}.mascot-row img{max-width:220px;margin:auto}.install{padding:22px}.install h2{font-size:31px}.footer{display:block}.footer span{display:block;margin-top:8px}}
 
+
+/* offer layer */
+.pains{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.pain{border:1px solid #2c4a33;border-radius:18px;padding:30px;background:linear-gradient(160deg,#142219,#0b130e);position:relative;overflow:hidden}
+.pain:before{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);opacity:.55}
+.pain b{display:block;font-size:13px;letter-spacing:.18em;color:#ff9b8a;font-weight:900;margin-bottom:14px}
+.pain h3{font-size:26px;line-height:1.15;margin:0 0 12px;letter-spacing:-.02em}.pain p{color:var(--muted);font-size:17px;line-height:1.6;margin:0}
+.stack{border:1px solid #3a6a45;border-radius:22px;background:linear-gradient(150deg,#142219,#0a120d);box-shadow:0 30px 80px #0008,0 0 0 1px #83ffa012 inset;overflow:hidden}
+.stackrow{display:grid;grid-template-columns:44px 1fr auto;gap:18px;align-items:center;padding:22px 30px;border-bottom:1px solid var(--line)}
+.stackrow .n{width:34px;height:34px;border-radius:50%;border:1px solid var(--green);color:var(--green);display:grid;place-items:center;font-size:14px;font-weight:800}
+.stackrow h3{margin:0 0 4px;font-size:21px;letter-spacing:-.01em}.stackrow p{margin:0;color:var(--muted);font-size:16px;line-height:1.5}
+.stackrow .tag{font-size:13px;letter-spacing:.14em;font-weight:900;color:var(--green)}
+.stacktotal{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;padding:30px;background:#0d1d12}
+.stacktotal .price{font-size:clamp(40px,6vw,64px);font-weight:900;letter-spacing:-.04em;color:var(--green);line-height:1}
+.stacktotal p{margin:0;color:var(--muted);font-size:17px;max-width:420px;line-height:1.5}
+.guar{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
+.guar div{border:1px solid var(--line);border-radius:14px;padding:22px;background:var(--panel)}
+.guar b{display:block;color:var(--green);font-size:15px;margin-bottom:8px}.guar span{color:var(--muted);font-size:16px;line-height:1.5}
+.faq{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.faq div{border:1px solid var(--line);border-radius:16px;padding:26px;background:var(--panel)}
+.faq h3{margin:0 0 10px;font-size:20px;letter-spacing:-.01em}.faq p{margin:0;color:var(--muted);font-size:17px;line-height:1.6}
+@media(max-width:850px){.pains,.guar,.faq{grid-template-columns:1fr 1fr}.stackrow{grid-template-columns:40px 1fr}.stackrow .tag{display:none}}
+@media(max-width:600px){.pains,.guar,.faq{grid-template-columns:1fr}.stackrow{padding:18px}.stacktotal{padding:22px}}
+@media(max-width:600px){.nav a[href="ROADMAP.md"],.nav a[href="#ecosystem"],.nav a[href="#interface"]{display:none}}
 /* readability */
 .kicker,.eyebrow,.cap-label,.status .status-tag,.command-label{font-size:13px!important}
 .note{font-size:14px!important}.feature-list span{font-size:15px!important}
@@ -218,7 +242,7 @@ body{font-size:18px}.wrap{width:calc(100% - 32px)}
 <div class="wrap">
 <nav class="topbar">
 <a class="brand" href="#"><span class="brandmark"><img src="img/mascot.svg" alt=""></span> TOKEN ZOMBIE</a>
-<div class="nav"><a href="#capabilities">Capabilities</a><a href="#interface">Interface</a><a href="#mission">Mission</a><a href="#ecosystem">Creator</a><a href="ROADMAP.md">Roadmap</a><a href="https://github.com/rishavm713-create/token-zombie" class="navcta">GitHub ↗</a></div>
+<div class="nav"><a href="#capabilities">Features</a><a href="#offer">What you get</a><a href="#interface">Interface</a><a href="#mission">Mission</a><a href="#ecosystem">Creator</a><a href="ROADMAP.md">Roadmap</a><a href="https://github.com/rishavm713-create/token-zombie" class="navcta">GitHub ↗</a></div>
 </nav>
 
 <header class="hero">
@@ -226,7 +250,7 @@ body{font-size:18px}.wrap{width:calc(100% - 32px)}
 <div class="kicker"><span class="pulse"></span> FREE · LOCAL · OPEN SOURCE</div>
 <h1>Make every<br>single token<br><span>count.</span></h1>
 <p class="hero-copy"><strong>Stop Claude Code from wasting tokens.</strong> TOKEN ZOMBIE shows where your tokens go, warns you before a chat runs out, and saves your place so a new chat can continue the work.</p>
-<div class="hero-actions"><a class="btn primary" href="#install">↳ Install TOKEN ZOMBIE</a><a class="btn ghost" href="https://github.com/rishavm713-create/token-zombie">Explore the repository ↗</a></div>
+<div class="hero-actions"><a class="btn primary" href="#install">↳ Install free</a><a class="btn ghost" href="https://github.com/rishavm713-create/token-zombie">Explore the repository ↗</a></div>
 <div class="trustline"><span><b class="check">✓</b> Local-first</span><span><b class="check">✓</b> No telemetry</span><span><b class="check">✓</b> Never blocks you</span><span><b class="check">✓</b> MIT licensed</span></div>
 </div>
 <div class="hero-visual">
@@ -234,6 +258,14 @@ body{font-size:18px}.wrap{width:calc(100% - 32px)}
 </div>
 </header>
 
+<section class="section" id="problem">
+<div class="section-head"><div><p class="eyebrow">THE PROBLEM</p><h2>Long chats quietly<br>burn your limit.</h2></div><p class="section-intro">You hit the weekly limit and cannot tell where it went. Three leaks cause most of it.</p></div>
+<div class="pains">
+<div class="pain"><b>LEAK 01</b><h3>The same file, read again and again</h3><p>Claude re-reads files and re-runs commands it already has. Every repeat is paid for, and every repeat is sent again with each step.</p></div>
+<div class="pain"><b>LEAK 02</b><h3>Helpers that repeat each other</h3><p>Sub-agents duplicate work, stall, or retry the same thing. You pay for effort that never moved the task forward.</p></div>
+<div class="pain"><b>LEAK 03</b><h3>The chat fills up and the work is lost</h3><p>When the context runs out, the thread of the task goes with it. You restart and spend tokens explaining it all again.</p></div>
+</div>
+</section>
 <section class="section" id="capabilities">
 <div class="section-head"><div><p class="eyebrow">WHAT IT DOES</p><h2>More than a token counter.</h2></div><p class="section-intro">Five jobs, one tool: count the waste, catch the zombies, trim the noise, save your work, and show it all in one place.</p></div>
 <div class="statstrip">
@@ -312,9 +344,35 @@ body{font-size:18px}.wrap{width:calc(100% - 32px)}
 
 
 
+<section class="section" id="offer">
+<div class="section-head"><div><p class="eyebrow">WHAT YOU GET</p><h2>All you need to<br>stop the waste.</h2></div><p class="section-intro">One install. Five tools working together. Nothing to configure before it starts helping.</p></div>
+<div class="stack">
+<div class="stackrow"><span class="n">1</span><div><h3>Token usage you can read</h3><p>See where each chat spends, with measured numbers kept apart from estimates.</p></div><span class="tag">INCLUDED</span></div>
+<div class="stackrow"><span class="n">2</span><div><h3>Zombie detection</h3><p>Flags repeated reads and sub-agents that duplicate or stall, so you can stop them early.</p></div><span class="tag">INCLUDED</span></div>
+<div class="stackrow"><span class="n">3</span><div><h3>Output trimming with recall</h3><p>Long tool output is cut down, and the original is always kept so you can get it back.</p></div><span class="tag">INCLUDED</span></div>
+<div class="stackrow"><span class="n">4</span><div><h3>Save-your-place handoffs</h3><p>A short note and checkpoints, so a fresh chat continues the task without re-explaining.</p></div><span class="tag">INCLUDED</span></div>
+<div class="stackrow"><span class="n">5</span><div><h3>Toolbar, dashboard and commands</h3><p>A small bar inside Claude Code and a dashboard, all showing the same numbers.</p></div><span class="tag">INCLUDED</span></div>
+<div class="stacktotal"><div><div class="price">Free. Forever.</div></div><p>Open source under the MIT licence. No account, no subscription, no upsell.</p><a class="btn primary" href="#install">↳ Install free</a></div>
+</div>
+<div class="guar">
+<div><b>It never blocks you</b><span>It advises. It does not stop or rewrite your chat.</span></div>
+<div><b>Nothing leaves your computer</b><span>No telemetry and no network calls in the core.</span></div>
+<div><b>Nothing is lost</b><span>Trimmed output is kept and can be recalled.</span></div>
+<div><b>Easy to undo</b><span>A written rollback guide removes it cleanly.</span></div>
+</div>
+</section>
+<section class="section" id="faq">
+<div class="section-head"><div><p class="eyebrow">QUESTIONS</p><h2>Straight answers.</h2></div><p class="section-intro">What people ask before installing.</p></div>
+<div class="faq">
+<div><h3>How much does it cost?</h3><p>Nothing. It is free and open source, and it stays that way.</p></div>
+<div><h3>Does it send my data anywhere?</h3><p>No. It runs on your computer and the core makes no network or AI calls.</p></div>
+<div><h3>Will it break my chats?</h3><p>No. It gives advice and never blocks. Anything it trims can be recalled.</p></div>
+<div><h3>How much will I save?</h3><p>It depends on how you work. Saving numbers shown are labelled as estimates, and we have not yet run a full before-and-after test. We would rather say that than promise a figure.</p></div>
+</div>
+</section>
 <section class="section" id="install">
 <div class="install">
-<div><p class="eyebrow">GET STARTED / CLAUDE CODE</p><h2>Put your agents<br>on the radar.</h2><p>Install the plugin, restart Claude Code and open the TOKEN ZOMBIE status command. The full guide covers desktop, shell, optional statusline and rollback.</p><a class="btn primary" href="INSTALL.md">Read installation guide ↗</a></div>
+<div><p class="eyebrow">GET STARTED · FREE</p><h2>Stop paying for<br>wasted tokens.</h2><p>One command. Restart Claude Code, run the status command, and you are protected. The full guide covers desktop, shell and rollback.</p><a class="btn primary" href="INSTALL.md">Read installation guide ↗</a></div>
 <div><div class="command-label">PLUGIN INSTALL COMMAND</div><div class="command">/plugin install token-zombie --marketplace rishavm713-create/token-zombie</div><p class="note">Then run <code>/token-zombie:tz</code>.</p></div>
 </div>
 </section>
@@ -366,7 +424,7 @@ body{font-size:18px}.wrap{width:calc(100% - 32px)}
 </div>
 <script>
 (function(){var d=document,r=d.documentElement;if(!('IntersectionObserver' in window))return;r.classList.add('js');
-var els=d.querySelectorAll('.vc,.mission>div,.eco,.section-head,.statstrip,.cap,.workflow,.show-card,.mascot-row,.status,.install,.doc,.hero-copy,.hero-actions,.hero-visual');
+var els=d.querySelectorAll('.pain,.stack,.guar div,.faq div,.vc,.mission>div,.eco,.section-head,.statstrip,.cap,.workflow,.show-card,.mascot-row,.status,.install,.doc,.hero-copy,.hero-actions,.hero-visual');
 els.forEach(function(e,i){e.classList.add('rv');e.style.setProperty('--d',((i%4)*70)+'ms')});
 var io=new IntersectionObserver(function(a){a.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}})},{threshold:.12});
 els.forEach(function(e){io.observe(e)});setTimeout(function(){els.forEach(function(e){e.classList.add('in')})},4000);
