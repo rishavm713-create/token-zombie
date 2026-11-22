@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TOKEN ZOMBIE | Claude Code Token Optimisation & Agent Workflow Control</title>
-<meta name="description" content="Local-first Claude Code token optimisation, context monitoring and AI agent workflow control. Track resource signals, recover tool output and preserve session continuity.">
+<title>TOKEN ZOMBIE | Stop Claude Code Wasting Tokens</title>
+<meta name="description" content="Free tool that stops Claude Code from wasting tokens. Shows where tokens go, warns before a chat runs out, and saves your place. Runs on your computer.">
 <meta name="theme-color" content="#080d0a">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://rishavm713-create.github.io/token-zombie/">
@@ -91,6 +91,11 @@ h2{font-size:clamp(32px,4vw,48px);line-height:1.05;letter-spacing:-.05em;margin:
 .footer{padding:30px 0 50px;border-top:1px solid #ffffff10;display:flex;justify-content:space-between;gap:20px;color:var(--soft);font-size:11px}
 @media(max-width:850px){.hero{grid-template-columns:1fr;padding-top:50px;gap:34px}.hero-visual{max-width:700px}.section-head{display:block}.section-intro{margin-top:14px}.workflow{grid-template-columns:repeat(2,1fr)}.step{border-bottom:1px solid var(--line)}.subfeatures{grid-template-columns:1fr}.install{grid-template-columns:1fr}.doc-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.wrap{width:min(var(--max),calc(100% - 30px))}.topbar{height:64px}.nav{gap:12px;font-size:11px}.nav a:nth-child(1),.nav a:nth-child(2){display:none}.hero{padding:42px 0 58px;min-height:auto}.hero-copy{font-size:16px}h1{font-size:51px}.floating-tag{right:-5px;bottom:10px}.section{padding:62px 0}.statstrip{grid-template-columns:repeat(2,1fr)}.stat:nth-child(2){border-right:0}.stat:nth-child(-n+2){border-bottom:1px solid var(--line)}.cap-grid,.showcase,.status-grid{grid-template-columns:1fr}.cap{min-height:auto}.workflow{grid-template-columns:1fr}.step{border-right:0}.mascot-row{grid-template-columns:1fr}.mascot-row img{max-width:220px;margin:auto}.install{padding:22px}.install h2{font-size:31px}.footer{display:block}.footer span{display:block;margin-top:8px}}
+
+/* readability */
+.kicker,.eyebrow,.cap-label,.status .status-tag,.command-label{font-size:13px!important}
+.note{font-size:14px!important}.feature-list span{font-size:15px!important}
+.step-no,.stat .small{font-size:13px!important}
 </style>
 <style id="premium">
 :root{--ease:cubic-bezier(.2,.7,.2,1)}
@@ -218,11 +223,11 @@ body{font-size:18px}.wrap{width:calc(100% - 32px)}
 
 <header class="hero">
 <div>
-<div class="kicker"><span class="pulse"></span> AI AGENT RESOURCE INTELLIGENCE</div>
+<div class="kicker"><span class="pulse"></span> FREE · LOCAL · OPEN SOURCE</div>
 <h1>Make every<br>single token<br><span>count.</span></h1>
-<p class="hero-copy"><strong>Your AI agents need a control layer.</strong> TOKEN ZOMBIE gives Claude Code visibility into resource use, agent activity, context waste and unfinished work — all from a local-first system.</p>
+<p class="hero-copy"><strong>Stop Claude Code from wasting tokens.</strong> TOKEN ZOMBIE shows where your tokens go, warns you before a chat runs out, and saves your place so a new chat can continue the work.</p>
 <div class="hero-actions"><a class="btn primary" href="#install">↳ Install TOKEN ZOMBIE</a><a class="btn ghost" href="https://github.com/rishavm713-create/token-zombie">Explore the repository ↗</a></div>
-<div class="trustline"><span><b class="check">✓</b> Local-first</span><span><b class="check">✓</b> No telemetry</span><span><b class="check">✓</b> Non-blocking advice</span><span><b class="check">✓</b> MIT licensed</span></div>
+<div class="trustline"><span><b class="check">✓</b> Local-first</span><span><b class="check">✓</b> No telemetry</span><span><b class="check">✓</b> Never blocks you</span><span><b class="check">✓</b> MIT licensed</span></div>
 </div>
 <div class="hero-visual">
 <div class="hero-frame"><div class="windowbar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span style="margin-left:8px">TOKEN ZOMBIE / IN CLAUDE CODE</span></div><img class="hero-shot" src="img/toolbar-live.svg" alt="TOKEN ZOMBIE toolbar in Claude Code with animated mascot"></div>
@@ -230,40 +235,40 @@ body{font-size:18px}.wrap{width:calc(100% - 32px)}
 </header>
 
 <section class="section" id="capabilities">
-<div class="section-head"><div><p class="eyebrow">THE PRODUCT / CAPABILITY MAP</p><h2>Not another token counter.</h2></div><p class="section-intro">Five connected systems work together: account for resources, understand agent behaviour, optimise context, protect work and keep the developer in control.</p></div>
+<div class="section-head"><div><p class="eyebrow">WHAT IT DOES</p><h2>More than a token counter.</h2></div><p class="section-intro">Five jobs, one tool: count the waste, catch the zombies, trim the noise, save your work, and show it all in one place.</p></div>
 <div class="statstrip">
-<div class="stat"><span class="big">18</span><span class="small">Registered hook events</span></div>
-<div class="stat"><span class="big">5</span><span class="small">Resource intelligence pillars</span></div>
-<div class="stat"><span class="big">Local</span><span class="small">Data stays on device</span></div>
-<div class="stat"><span class="big">0</span><span class="small">Core hook model calls</span></div>
+<div class="stat"><span class="big">18</span><span class="small">Events it watches</span></div>
+<div class="stat"><span class="big">5</span><span class="small">Core features</span></div>
+<div class="stat"><span class="big">Local</span><span class="small">Data stays on your computer</span></div>
+<div class="stat"><span class="big">0</span><span class="small">AI calls it makes</span></div>
 </div>
-<p class="note">18 refers to registered hook events in the repository. Feature coverage and live-host verification vary; see the audit. The five pillars are product groupings, not performance claims.</p>
+<p class="note">The 18 is the number of Claude Code events it listens to. The five features are groups, not performance claims.</p>
 
 <div class="cap-grid" style="margin-top:26px">
 <article class="cap" data-no="01">
-<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 6-7"/></svg></span><span class="cap-label">COUNT THE BITES</span></div>
-<h3>Resource Intelligence</h3><p>Understand where context, tokens, cache activity and resource signals are coming from. Separate observed data from estimates.</p>
-<div class="feature-list"><span>5m / 1h cache split</span><span>Thinking-token estimate</span><span>Incremental transcript scan</span><span>SQLite usage ledger</span><span>Ledger / Priced / Mixed / Unpriced</span><span>Model-cost estimates</span><span>Hook overhead benchmark</span><span>Usage &amp; session reports</span></div>
+<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 6-7"/></svg></span><span class="cap-label">COUNT</span></div>
+<h3>See where tokens go</h3><p>Find out what your chats spend, and which numbers are measured and which are only estimates.</p>
+<div class="feature-list"><span>5m / 1h cache split</span><span>Thinking-token estimate</span><span>Incremental transcript scan</span><span>SQLite usage ledger</span></div>
 </article>
 <article class="cap" data-no="02">
-<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 20c0-4 2-6 6-6s6 2 6 6M15 15c3-.5 6 1 6 4"/></svg></span><span class="cap-label">HUNT THE ZOMBIES</span></div>
-<h3>Agent &amp; Workflow Intelligence</h3><p>Track the agent lifecycle and surface patterns that may indicate duplicated effort, stalled work or wasted iterations.</p>
-<div class="feature-list"><span>Agent start / stop / ID</span><span>Agent ROI flags</span><span>Duplicate / empty / small agent flags</span><span>Estimated stalled-agent signal</span><span>Retry &amp; repeated-edit counts</span><span>Idle / overlap signals · partial</span><span>Skill state discovery</span><span>Instruction-load intelligence</span></div>
+<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 20c0-4 2-6 6-6s6 2 6 6M15 15c3-.5 6 1 6 4"/></svg></span><span class="cap-label">HUNT</span></div>
+<h3>Catch wasted work</h3><p>Spot sub-agents that repeat each other, get stuck, or retry the same thing again and again.</p>
+<div class="feature-list"><span>Agent start / stop / ID</span><span>Agent ROI flags</span><span>Duplicate / empty / small agent flags</span><span>Estimated stalled-agent signal</span></div>
 </article>
 <article class="cap" data-no="03">
-<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h10M4 19h7"/><path d="m17 10 3 2-3 2M14 17l3 2-3 2"/></svg></span><span class="cap-label">INFECTION CONTROL</span></div>
-<h3>Context &amp; Output Optimisation</h3><p>Reduce unnecessary context where supported, keep the original recoverable and validate transformations before relying on them.</p>
-<div class="feature-list"><span>Large-read nudges</span><span>Repeated-read detection</span><span>Output trimming</span><span>Recall original output</span><span>Python AST skeleton</span><span>Shadow-mode trimming</span><span>Keyword recall / FTS5</span><span>Context Vault index</span></div>
+<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h10M4 19h7"/><path d="m17 10 3 2-3 2M14 17l3 2-3 2"/></svg></span><span class="cap-label">TRIM</span></div>
+<h3>Trim the noise</h3><p>Cut long tool output down to what matters. The original is kept, so you can always get it back.</p>
+<div class="feature-list"><span>Large-read nudges</span><span>Repeated-read detection</span><span>Output trimming</span><span>Recall original output</span></div>
 </article>
 <article class="cap" data-no="04">
-<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="cap-label">SURVIVAL MODE</span></div>
-<h3>Workflow Survival &amp; Continuity</h3><p>Preserve the state of unfinished work, verify what changed and make it easier to continue safely in a fresh session.</p>
-<div class="feature-list"><span>Project STATE.md</span><span>Session handoffs</span><span>Checkpoints</span><span>Resume verification</span><span>Compaction survival check</span><span>Safe-point warnings</span><span>Supervisor status bus</span><span>Next-session brief</span><span>Task wrap &amp; recovery</span></div>
+<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="cap-label">SAVE</span></div>
+<h3>Never lose your place</h3><p>Save the state of unfinished work, so a fresh chat can continue exactly where you stopped.</p>
+<div class="feature-list"><span>Project STATE.md</span><span>Session handoffs</span><span>Checkpoints</span><span>Resume verification</span></div>
 </article>
 <article class="cap" data-no="05" style="grid-column:1/-1;min-height:0">
-<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 22h8M12 18v4M7 9h4M7 13h7M17 9h.01"/></svg></span><span class="cap-label">CONTROL / VISUALISE</span></div>
-<h3>One Developer Control Surface</h3><p>See the system without navigating a pile of separate tools. The toolbar, pane, dashboard and CLI share a local state model.</p>
-<div class="feature-list"><span>In-chat toolbar</span><span>Agent / skill / token / optimisation metrics</span><span>Expandable detail pane</span><span>OFF / LITE / FULL / ULTRA modes</span><span>Review / Audit / Board actions</span><span>HTML dashboard</span><span>Terminal statusline</span><span>Local companion</span><span>Mascot states</span><span>CLI command suite</span><span>Native overlay · visual check pending</span></div>
+<div class="cap-top"><span class="cap-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 22h8M12 18v4M7 9h4M7 13h7M17 9h.01"/></svg></span><span class="cap-label">SEE</span></div>
+<h3>Everything in one place</h3><p>A small bar in Claude Code, a dashboard and a command line all show the same numbers.</p>
+<div class="feature-list"><span>In-chat toolbar</span><span>Agent / skill / token / optimisation metrics</span><span>Expandable detail pane</span><span>OFF / LITE / FULL / ULTRA modes</span></div>
 </article>
 </div>
 <div class="subfeatures">
@@ -274,7 +279,7 @@ body{font-size:18px}.wrap{width:calc(100% - 32px)}
 </section>
 
 <section class="section">
-<div class="section-head"><div><p class="eyebrow">HOW IT WORKS</p><h2>Hunt the waste.<br>Survive the session.</h2></div><p class="section-intro">TOKEN ZOMBIE connects resource observation to practical workflow actions — without silently taking over the session.</p></div>
+<div class="section-head"><div><p class="eyebrow">HOW IT WORKS</p><h2>Hunt the waste.<br>Survive the session.</h2></div><p class="section-intro">TOKEN ZOMBIE watches quietly, shows you the waste, and helps you act. It never takes over your chat.</p></div>
 <div class="workflow">
 <div class="step"><span class="step-no">01 / SCOUT</span><b>Capture signals</b><p>Hooks and local state record activity, usage and context signals.</p></div>
 <div class="step"><span class="step-no">02 / TRACE</span><b>Build the picture</b><p>Ledger, agent lifecycle, skill and instruction signals add context.</p></div>
@@ -285,47 +290,27 @@ body{font-size:18px}.wrap{width:calc(100% - 32px)}
 </section>
 
 <section class="section" id="interface">
-<div class="section-head"><div><p class="eyebrow">THE CONTROL ROOM</p><h2>See the system.<br>Not just the prompt.</h2></div><p class="section-intro">A compact in-chat surface for quick signals, with a dashboard for deeper inspection. Published captures use demo data and are labelled accordingly.</p></div>
+<div class="section-head"><div><p class="eyebrow">THE CONTROL ROOM</p><h2>See the system.<br>Not just the prompt.</h2></div><p class="section-intro">A small bar inside Claude Code for quick signals, and a dashboard for the details. Screenshots here use demo data.</p></div>
 <div class="showcase">
 <div class="show-card"><img src="img/toolbar-live.svg" alt="TOKEN ZOMBIE toolbar"><h3>In-chat toolbar</h3><p>Agents, skills used, tokens saved (EST) and optimizations, above the prompt. Layout from a real capture; mascot animated.</p></div>
 </div>
-<div class="mascot-row"><img src="img/mascot-states.png" alt="TOKEN ZOMBIE mascot idle, working, excited, alert and sleep states"><div><p class="eyebrow">THE ZOMBIE SIGNAL</p><h3>A visual state for the workflow.</h3><p>The mascot reflects alert, excited, working, sleep or idle states according to the documented priority rules. It represents uncontrolled resource waste — not AI itself.</p><p style="margin-top:12px"><a href="PANEL.md">Explore the toolbar and panel details →</a></p></div></div>
+<div class="mascot-row"><img src="img/mascot-states.png" alt="TOKEN ZOMBIE mascot idle, working, excited, alert and sleep states"><div><p class="eyebrow">THE ZOMBIE SIGNAL</p><h3>A visual state for the workflow.</h3><p>The mascot shows what your session is doing: alert, excited, working, sleeping or idle. It stands for wasted resources, not for AI itself.</p><p style="margin-top:12px"><a href="PANEL.md">Explore the toolbar and panel details →</a></p></div></div>
 </section>
 
 <section class="section">
-<div class="section-head"><div><p class="eyebrow">TRANSPARENT STATUS</p><h2>Built means built.<br>Planned means planned.</h2></div><p class="section-intro">The product is actively evolving. We show implementation status and verification limits instead of dressing roadmap items up as finished features.</p></div>
+<div class="section-head"><div><p class="eyebrow">HONEST STATUS</p><h2>Built means built.<br>Planned means planned.</h2></div><p class="section-intro">Still growing. We show what is built, what still needs checking, and what is only planned.</p></div>
 <div class="status-grid">
-<div class="status"><span class="status-tag built">IN REPOSITORY</span><h3>Implemented capabilities</h3><p>Hook ledger, SQLite ledger, handoffs, checkpoints, output trim and recall, Python AST skeleton, dashboard and toolbar components.</p></div>
-<div class="status"><span class="status-tag verify">VERIFY ON HOST</span><h3>Real-host validation</h3><p>Some hook payloads and UI behaviours need owner-run host verification. Real A/B savings trials are not recorded yet.</p></div>
-<div class="status"><span class="status-tag planned">PLANNED</span><h3>Future capabilities</h3><p>Semantic/vector memory, non-Python AST compression, task-level vault index and automatic CANARY-to-ACTIVE promotion.</p></div>
+<div class="status"><span class="status-tag built">IN REPOSITORY</span><h3>Built</h3><p>Usage tracking, handoffs, checkpoints, output trimming and recall, the dashboard and the toolbar.</p></div>
+<div class="status"><span class="status-tag verify">VERIFY ON HOST</span><h3>Needs real-world checking</h3><p>Some behaviours still need testing on a real Claude Code setup. Real before-and-after savings tests are not done yet.</p></div>
+<div class="status"><span class="status-tag planned">PLANNED</span><h3>Planned</h3><p>Smarter memory search, trimming for more languages than Python, and automatic promotion from trial mode to live.</p></div>
 </div>
-<p class="note">Other adapters are experimental rules-file outputs only; Claude Code is the supported integration. Some accounting, pricing and agent intelligence remain partial. See the audit and limitations before relying on any estimate.</p>
+<p class="note">Only Claude Code is supported. Other tools are experimental. Treat all token-saving numbers as estimates.</p>
 </section>
 
 
-<section class="section" id="capability-detail">
-<div class="section-head"><div><p class="eyebrow">THE FULL FEATURE SET</p><h2>One system.<br>Five jobs.</h2></div><p class="section-intro">The repository contains more than a token counter. Explore the working surfaces and the evidence boundaries behind each capability.</p></div>
-<div class="cap-grid">
-<article class="cap" data-no="01"><div class="cap-top"><span class="cap-icon">◈</span><span class="cap-label">RESOURCE ACCOUNTING</span></div><h3>Know where resources go</h3><p>Usage signals, cache windows, local ledgers, estimates and hook overhead in one accounting layer.</p><div class="feature-list"><span>5m / 1h cache split</span><span>Incremental transcript scan</span><span>SQLite event ledger</span><span>Ledger / Priced / Mixed / Unpriced</span><span>Thinking-token estimate</span><span>Usage reports</span></div></article>
-<article class="cap" data-no="02"><div class="cap-top"><span class="cap-icon">◎</span><span class="cap-label">AGENT INTELLIGENCE</span></div><h3>Understand the swarm</h3><p>Follow agent lifecycles and highlight behaviours that deserve a developer's attention.</p><div class="feature-list"><span>Agent start / stop / ID</span><span>ROI flags</span><span>Duplicate / small / empty signals</span><span>Estimated stall signals</span><span>Retries &amp; repeated edits</span><span>Skill &amp; instruction signals</span></div></article>
-<article class="cap" data-no="03"><div class="cap-top"><span class="cap-icon">⌁</span><span class="cap-label">CONTEXT OPTIMISATION</span></div><h3>Reduce noise. Keep originals.</h3><p>Find repeated reads and trim supported tool output while retaining recoverable originals.</p><div class="feature-list"><span>Large-read nudges</span><span>Repeated-read advice</span><span>Output trimming</span><span>tz recall</span><span>Python AST skeleton</span><span>Shadow mode</span><span>FTS5 / keyword recall</span><span>Context Vault index</span></div></article>
-<article class="cap" data-no="04"><div class="cap-top"><span class="cap-icon">⬡</span><span class="cap-label">WORKFLOW CONTINUITY</span></div><h3>Protect unfinished work</h3><p>Carry project state forward through safe handoffs, checkpoints and resume checks.</p><div class="feature-list"><span>STATE.md</span><span>Session handoffs</span><span>Checkpoints</span><span>Resume verification</span><span>Compaction survival</span><span>Supervisor status</span><span>Next-session brief</span></div></article>
-<article class="cap" data-no="05" style="grid-column:1/-1;min-height:0"><div class="cap-top"><span class="cap-icon">▣</span><span class="cap-label">DEVELOPER CONTROL SURFACE</span></div><h3>See it. Inspect it. Decide.</h3><p>One local state model powers the interface and the command-line workflows.</p><div class="feature-list"><span>In-chat toolbar &amp; pane</span><span>OFF / LITE / FULL / ULTRA</span><span>Dashboard</span><span>Terminal statusline</span><span>Local companion</span><span>Mascot states</span><span>Review / Audit / Board</span><span>CLI command suite</span><span>Native overlay · visual check pending</span></div></article>
-</div>
-</section>
-<section class="section">
-<div class="section-head"><div><p class="eyebrow">VISUAL SYSTEM MAP</p><h2>Signals become<br>developer decisions.</h2></div><p class="section-intro">The layers share local state. Each one contributes context to the next; the developer remains in control of action.</p></div>
-<div class="workflow"><div class="step"><span class="step-no">01</span><b>OBSERVE</b><p>Hooks, usage and local events</p></div><div class="step"><span class="step-no">02</span><b>UNDERSTAND</b><p>Ledger, agents and context</p></div><div class="step"><span class="step-no">03</span><b>DETECT</b><p>Repeated work and risk signals</p></div><div class="step"><span class="step-no">04</span><b>PROTECT</b><p>Recall, checkpoints and safe points</p></div><div class="step"><span class="step-no">05</span><b>CONTINUE</b><p>Handoff and verified resume</p></div></div>
-</section>
-<section class="section">
-<div class="section-head"><div><p class="eyebrow">BUILD / VERIFY / PLAN</p><h2>Honest status.<br>No fake checkmarks.</h2></div><p class="section-intro">Implementation, host verification and future work are deliberately kept separate.</p></div>
-<div class="status-grid">
-<div class="status"><span class="status-tag built">IN REPOSITORY</span><h3>Implemented in code</h3><p>Local SQLite ledger, hook event tracking, handoffs, checkpoints, output trimming and recall, Python AST skeleton, dashboard, toolbar/pane components and CLI.</p></div>
-<div class="status"><span class="status-tag verify">VALIDATION REQUIRED</span><h3>Verify on real host</h3><p>Some hook payloads and interface behaviours require owner-run checks. Model pricing and subagent/MCP attribution remain partial. No real A/B savings trials are recorded.</p></div>
-<div class="status"><span class="status-tag planned">PLANNED</span><h3>Future development</h3><p>Semantic/vector retrieval, AST compression beyond Python, task-level Context Vault indexing and deeper task-aware resource selection.</p></div>
-</div>
-<p class="note">Compatibility beyond Claude Code is experimental rules-file output only. Dashboard image uses demo data; it is not a live session or benchmark.</p>
-</section>
+
+
+
 
 <section class="section" id="install">
 <div class="install">
