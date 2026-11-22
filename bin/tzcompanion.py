@@ -9,7 +9,7 @@ PAGE = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="dark"><title>TOKEN ZOMBIE</title>
 <style>
-:root{color-scheme:dark;--bg:#171717;--panel:#292929;--line:#35ad55;--green:#43b765;--muted:#aaa;--white:#f3f3f3}
+:root{color-scheme:dark;--bg:#050505;--panel:#101010;--line:#303030;--green:#7CFC00;--muted:#A3A3A3;--white:#F5F5F5}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--bg);color:var(--white);font:15px/1.4 Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;padding:24px}
 .shell{max-width:1180px;margin:auto}.top{min-height:112px;border:1.5px solid var(--line);border-radius:22px;background:var(--panel);display:flex;align-items:center;gap:24px;padding:18px 24px;flex-wrap:wrap;box-shadow:0 0 0 1px #35ad5520}
 .brand{display:flex;align-items:center;gap:14px;min-width:220px;flex:1}.zombie{font-size:52px;line-height:1}.wordmark{font-size:24px;font-weight:650;white-space:nowrap;letter-spacing:-.7px}.wordmark b{color:var(--green)}
