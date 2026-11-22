@@ -80,7 +80,7 @@ Current repository documentation says real with/without A/B savings trials have 
 - Say **"surfaces resource signals"**, not "accurately attributes every token to every agent", until attribution is verified.
 - Say **"helps identify avoidable work"**, not "eliminates waste".
 - Say **"supports recoverable output trimming"**, not "lossless compression everywhere".
-- Say **"Claude Code is the supported integration"**; other adapters remain experimental/rules-only as documented in [COMPAT.md](../COMPAT.md).
+- Say **"Claude Code is the supported integration"**; other adapters remain experimental/rules-only as documented in [COMPAT.md](../../COMPAT.md).
 - Do not publish a percentage savings claim until a quality-adjusted benchmark includes TOKEN ZOMBIE's own overhead.
 
 ## Bottom line

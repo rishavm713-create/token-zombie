@@ -91,6 +91,39 @@ def memory_tail(cwd, n=MEM_TAIL):
         return []
 
 
+def chain_id(cwd, task=''):
+    """Stable id linking successive handoffs of one task: reuse the previous state's chain, else new. Returns (chain, seq)."""
+    try:
+        old = json.load(open(task_path(cwd, task)))
+        return old.get('chain') or hashlib.sha1((cwd + task + str(old.get('time'))).encode()).hexdigest()[:8], int(old.get('seq', 0)) + 1
+    except Exception:
+        return hashlib.sha1((cwd + task + str(time.time())).encode()).hexdigest()[:8], 1
+
+
+def import_jsonl(path, n=8):
+    """Facts from a crashed/ended chat log (MEASURED, no model call): last user asks, files edited, last tool errors. Bad/partial lines skipped."""
+    asks, files, errs = [], [], []
+    for ln in open(path, errors='replace'):
+        try:
+            m = json.loads(ln).get('message') or {}
+        except Exception:
+            continue
+        c = m.get('content') if isinstance(m, dict) else None
+        if isinstance(c, str) and c.strip() and m.get('role') == 'user':
+            asks.append(c.strip()[:160])
+        for b in c if isinstance(c, list) else []:
+            if not isinstance(b, dict):
+                continue
+            if b.get('type') == 'text' and m.get('role') == 'user' and b.get('text', '').strip():
+                asks.append(b['text'].strip()[:160])
+            inp = b.get('input') or {}
+            if b.get('type') == 'tool_use' and inp.get('file_path') and b.get('name') in ('Edit', 'Write', 'MultiEdit'):
+                files.append(inp['file_path'])
+            if b.get('type') == 'tool_result' and b.get('is_error'):
+                errs.append(str(b.get('content'))[:120])
+    return {'asks': asks[-3:], 'files': list(dict.fromkeys(files))[-n:], 'errors': errs[-3:]}
+
+
 def handoff(cwd, task='', done=(), left=(), nxt='', test_cmd='', facts=()):
     """Write state + daily note. Returns (md_path, state). Done items count as verified only if the test passed."""
     snap = snapshot(cwd)
@@ -100,14 +133,15 @@ def handoff(cwd, task='', done=(), left=(), nxt='', test_cmd='', facts=()):
         test = {'cmd': test_cmd, 'ok': ok, 'last': last}
     for f in facts:
         remember(cwd, f)
-    state = {'v': 1, 'time': time.strftime('%Y-%m-%d %H:%M'), 'cwd': cwd, 'task': task, 'done': list(done),
+    chain, seq = chain_id(cwd, task)
+    state = {'v': 1, 'chain': chain, 'seq': seq, 'time': time.strftime('%Y-%m-%d %H:%M'), 'cwd': cwd, 'task': task, 'done': list(done),
              'left': list(left), 'next': nxt, 'test': test, **snap}
     tp = task_path(cwd, task)
     os.makedirs(os.path.dirname(tp), exist_ok=True)
     json.dump(state, open(tp + '.tmp', 'w'), indent=1)
     os.replace(tp + '.tmp', tp)
     verified = test['ok'] is True
-    lines = [f"# Handoff {state['time']} (tz): {task or 'task'}",
+    lines = [f"# Handoff {state['time']} (tz): {task or 'task'} [chain {chain} #{seq}]",
              'Status: ' + ('tests pass' if verified else 'tests FAILED' if test['ok'] is False else 'tests not run'),
              f"Done ({'verified by test' if verified else 'UNVERIFIED'}): " + ('; '.join(done) or 'nothing listed'),
              'Left: ' + ('; '.join(left) or 'nothing listed'),
@@ -241,7 +275,7 @@ def confirm(cmd, yes):
 def main(argv):
     import argparse
     ap = argparse.ArgumentParser(prog='tz handoff|resume')
-    ap.add_argument('cmd', choices=['handoff', 'resume', 'task-wrap', 'checkpoint'])
+    ap.add_argument('cmd', choices=['handoff', 'resume', 'task-wrap', 'checkpoint', 'import'])
     ap.add_argument('--cwd', default=os.getcwd())
     ap.add_argument('--task', default='')
     ap.add_argument('--done', action='append', default=[])
@@ -252,6 +286,7 @@ def main(argv):
     ap.add_argument('--summary', default='')
     ap.add_argument('--yes', action='store_true', help='consent to run the --test command')
     ap.add_argument('--force', action='store_true')
+    ap.add_argument('--from', dest='src', default='', help='import: crashed/ended chat .jsonl')
     ap.add_argument('--run-test', action='store_true', help='resume: rerun recorded test')
     a = ap.parse_args(argv)
     cwd = os.path.abspath(a.cwd)
@@ -264,6 +299,14 @@ def main(argv):
         st, msg = wrap(cwd, a.summary, a.remember, a.test, a.force)
         print(msg)
         return 0 if st in ('done', 'done-unverified') else 1
+    if a.cmd == 'import':
+        if not os.path.isfile(a.src):
+            print('tz import: pass --from CHAT.jsonl'); return 2
+        f = import_jsonl(a.src)
+        md, st = handoff(cwd, a.task, done=[], left=['last ask: ' + x for x in f['asks'][-1:]], nxt='review files edited in the crashed chat',
+                         facts=())
+        print(f"imported [MEASURED from log, chain {st['chain']} #{st['seq']}]: files {f['files']}; last errors {f['errors']}; last asks {f['asks']}")
+        return 0
     if a.cmd == 'checkpoint':
         p = checkpoint(cwd)
         print('checkpoint saved' if p else 'no task state; nothing to checkpoint')

@@ -1,6 +1,6 @@
 # Competitive gap analysis (web-researched, 2026-11-23)
 
-Replaces the earlier repo-only version. Sources: `COMPETITIVE-INTELLIGENCE.md` (21 competitors, VERIFIED vs CLAIM) and `FEATURE-PARITY-MATRIX.md`.
+Replaces the earlier repo-only version. Sources: `internal/COMPETITIVE-INTELLIGENCE.md` (21 competitors, VERIFIED vs CLAIM) and `FEATURE-PARITY-MATRIX.md`.
 
 | Pri | Gap | Why it matters | Effort |
 |---|---|---|---|

@@ -7,6 +7,16 @@ import json, os, re, sys, collections
 TEST = re.compile(r'\b(pytest|unittest|npm (run )?test|yarn test|go test|cargo test|make test|bash tests/|jest|vitest)\b')
 
 
+def score(calls, errored, repeated, fail_sig, edits):
+    """Rework score 0-100 (0 = none), a transparent weighted ratio of MEASURED counts, not a quality or saving claim:
+    errored 40%, identical repeats 30%, retry-loop calls 20%, calls spent re-editing files 3+ times 10%."""
+    if not calls:
+        return 0
+    loops = sum(v for v in fail_sig.values() if v >= 3)
+    reedit = sum(v for v in edits.values() if v >= 3)
+    return round(100 * min(1, 0.4 * errored / calls + 0.3 * repeated / calls + 0.2 * loops / calls + 0.1 * reedit / calls))
+
+
 def analyse(path):
     calls, res = {}, {}
     order = []
@@ -47,7 +57,8 @@ def analyse(path):
     return dict(calls=len(order), errored=errors, repeated_calls=sum(v - 1 for v in sig.values() if v > 1),
                 retry_loops=[(k[0], v) for k, v in fail_sig.most_common() if v >= 3][:5],
                 files_edited_3plus=[(os.path.basename(k), v) for k, v in edits.most_common() if v >= 3][:5],
-                test_runs=len(tests), test_fail_then_pass=cycles, basis='MEASURED counts from the chat log')
+                test_runs=len(tests), test_fail_then_pass=cycles, basis='MEASURED counts from the chat log',
+                rework_score=score(len(order), errors, sum(v - 1 for v in sig.values() if v > 1), fail_sig, edits))
 
 
 def main(argv):
@@ -65,6 +76,7 @@ def main(argv):
     print(f"rework signals [MEASURED] {os.path.basename(p)}: {r['calls']} calls, {r['errored']} errored, {r['repeated_calls']} repeated identical calls")
     print(f"  retry loops (same failing call 3+): {r['retry_loops'] or 'none'}")
     print(f"  files edited 3+ times: {r['files_edited_3plus'] or 'none'}")
+    print(f"  rework score {r['rework_score']}/100 (weighted ratio of the counts above; 0 = none; not a quality claim)")
     print(f"  test runs {r['test_runs']}, fail->pass cycles {r['test_fail_then_pass']}")
     print('  these are repeat counts, not proven waste; quality-adjusted savings need an A/B run (tz bench compare).')
     return 0

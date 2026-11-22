@@ -1,4 +1,4 @@
-> Historical tracker from v0.2.1. For the v0.3.0 state see [RELEASE-REPORT.md](RELEASE-REPORT.md).
+> Historical tracker from v0.2.1. For the v0.3.0 state see [internal/RELEASE-REPORT.md](RELEASE-REPORT.md).
 
 # Feature tracker v0.2.1 (BUILT / TESTED / VERIFIED / PARTIAL / BLOCKED)
 VERIFIED = checked against a live Claude Code session. Nothing is VERIFIED yet: tz is not installed.

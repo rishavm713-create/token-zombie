@@ -86,6 +86,54 @@ def _short(p):
     return p.replace('-Users-mac', '~').strip('-')[-24:] or '~'
 
 
+def mcp_cost(path):
+    """{server: {'tools': n, 'chars': c, 'basis': 'MEASURED'|'EST'}}. MEASURED = JSON chars of mcp__ tool schemas in the logged
+    request shape (tokens ~ chars/4, EST); EST = deferred tool NAMES only, 130 tok per tool (schemas not logged)."""
+    out = {}
+    for raw in open(path, encoding='utf-8', errors='ignore'):
+        try:
+            d = json.loads(raw)
+        except Exception:
+            continue
+        if d.get('type') == 'api-request-shape' and not any(v['basis'] == 'MEASURED' for v in out.values()):
+            out = {}
+            for tl in (d.get('shape') or {}).get('tools') or []:
+                n = tl.get('name', '')
+                if n.startswith('mcp__'):
+                    e = out.setdefault(n.split('__')[1], {'tools': 0, 'chars': 0, 'basis': 'MEASURED'})
+                    e['tools'] += 1; e['chars'] += len(json.dumps(tl))
+        a = d.get('attachment') or {}
+        if a.get('type') == 'deferred_tools_delta' and not any(v['basis'] == 'MEASURED' for v in out.values()):
+            for n in a.get('addedNames') or []:
+                if isinstance(n, str) and n.startswith('mcp__'):
+                    e = out.setdefault(n.split('__')[1], {'tools': 0, 'chars': 0, 'basis': 'EST'})
+                    e['tools'] += 1; e['chars'] += 520
+    return out
+
+
+def ci_audit(cwd):
+    """CI-failing startup audit: newest GitHub Actions run of the current branch via `gh` (MEASURED) or UNAVAILABLE. Never blocks."""
+    import subprocess
+    if not (os.path.isdir(os.path.join(cwd, '.github', 'workflows')) and os.path.isdir(os.path.expanduser('~/.config/gh'))):
+        return ci_line(None)
+    try:
+        r = subprocess.run(['gh', 'run', 'list', '--limit', '1', '--json', 'conclusion,name,status,headBranch'], cwd=cwd,
+                           capture_output=True, text=True, timeout=8)
+        runs = json.loads(r.stdout) if r.returncode == 0 else None
+    except Exception:
+        runs = None
+    return ci_line(runs)
+
+
+def ci_line(runs):
+    if not runs:
+        return 'CI: UNAVAILABLE (no gh, no repo, or no runs)'
+    x = runs[0]
+    if x.get('conclusion') == 'failure':
+        return f"CI FAILING [MEASURED]: latest run '{x.get('name')}' on {x.get('headBranch')} failed. Fix or note it before new work (advice only)."
+    return f"CI [MEASURED]: latest run '{x.get('name')}' {x.get('conclusion') or x.get('status')}."
+
+
 def startup(n=12, save=False, compare=False):
     root = os.path.expanduser((os.environ.get('CLAUDE_CONFIG_DIR') or '~/.claude').split(',')[0])
     logs = sorted(glob.glob(os.path.join(root, 'projects', '*', '*.jsonl')), key=os.path.getmtime, reverse=True)[:n]
@@ -144,6 +192,10 @@ def startup(n=12, save=False, compare=False):
         tot = {w: sum(c[1] // 4 for c in comps if c[3] == w) for w in ('platform', 'app/MCP', 'yours')}
         print(f"  TOTALS: platform-managed ~{tot['platform']} EST, app/MCP schemas ~{tot['app/MCP']} EST (changeable only in app/MCP settings), yours ~{tot['yours']} EST (controllable), unknown ~{unknown}, measured {tok}")
         snap.update(parts={c[0]: c[1] // 4 for c in comps}, totals=dict(tot, unknown=unknown, measured=tok))
+        mc = mcp_cost(logs[0]) if logs else {}
+        if mc:
+            print('MCP tool-schema cost per server (' + ', '.join(f"{k} {v['tools']} tools ~{v['chars'] // 4} tok {v['basis']}" for k, v in sorted(mc.items())) + '); MEASURED = schema chars/4 (EST tokens), EST = names x 130 tok')
+        print(ci_audit(os.getcwd()))
         use = _usage_by_project(logs)
         projs = {p for p in use}
         for s in sorted(mcp):
