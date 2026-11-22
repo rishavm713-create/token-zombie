@@ -97,6 +97,8 @@ section{padding:104px 0;position:relative}
 .show{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:stretch}
 .show .card{padding:0;display:flex;flex-direction:column}
 .show .card .cap{padding:26px 30px}.show .card img{background:#0a120d;padding:18px}
+.show .card>img.d{aspect-ratio:4/3;object-fit:cover;object-position:top;width:100%}
+.show .card .mb{flex:1;display:grid;place-items:center;background:#0a120d;padding:24px}.show .card .mb img{padding:0;background:none}
 .show .card h3{font-size:20px}.show .card p{margin-top:8px;font-size:16px}
 
 /* offer */
@@ -212,8 +214,8 @@ section{padding:64px 0}.hero{padding:44px 0 56px}.head{margin-bottom:34px}
 <section id="see"><div class="wrap">
 <div class="head rv"><p class="eyebrow">See it</p><h2>The numbers, right where you work.</h2><p class="lead">A small bar inside Claude Code for quick signals, and a dashboard for the details.</p></div>
 <div class="show">
-<div class="card rv"><img src="img/dashboard.png" alt="TOKEN ZOMBIE dashboard" loading="lazy"><div class="cap"><h3>Dashboard</h3><p>Usage, savings and warnings on one page. Opens on your computer only.</p></div></div>
-<div class="card rv" style="--i:1"><img src="img/mascot-states.png" alt="Zombie mascot states: idle, working, excited, alert, sleep" loading="lazy"><div class="cap"><h3>The zombie tells you the state</h3><p>Idle, working, excited, alert or asleep, so you know at a glance when to act.</p></div></div>
+<div class="card rv"><img class="d" src="img/dashboard.png" alt="TOKEN ZOMBIE dashboard" loading="lazy"><div class="cap"><h3>Dashboard</h3><p>Usage, savings and warnings on one page. Opens on your computer only.</p></div></div>
+<div class="card rv" style="--i:1"><div class="mb"><img src="img/mascot-states.png" alt="Zombie mascot states: idle, working, excited, alert, sleep" loading="lazy"></div><div class="cap"><h3>The zombie tells you the state</h3><p>Idle, working, excited, alert or asleep, so you know at a glance when to act.</p></div></div>
 </div></div></section>
 
 <section id="offer" style="background:#0a110c;border-block:1px solid var(--line)"><div class="wrap">
