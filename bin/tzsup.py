@@ -93,6 +93,14 @@ def tick(transcript, cwd, rl=None):
     lv = tzusage.level(info['ctx_pct'], info['limits'])
     info['level'] = lv
     acts = []
+    try:
+        import tzintegrity
+        if info.get('ctx_pct'):
+            m = tzintegrity.ctx_mark(cwd, info['ctx_pct'])
+            if m:
+                acts.append(f'ctx-mark-{m}')
+    except Exception:
+        pass  # fail open
     prev = _r(os.path.join(sdir(), 'status.json'), {})
     last_ck = prev.get('last_checkpoint', 0)
     if lv in ('APPROACHING LIMIT', 'CRITICAL', 'EXHAUSTED') and time.time() - last_ck >= CKPT_GAP:

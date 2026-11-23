@@ -75,3 +75,21 @@ Not claimed: any savings % beyond MEASURED rows; competitor parity from READMEs.
 - `tz skills updates`: staged skills compared with their local source (hash in manifest): CHANGED / same / source-missing. Local only, no network.
 - Not built: catalog refresh from a remote source and real repo URLs for ~8 entries (none supplied; not fabricated).
 - Test: tests/test_gaps.sh section 14.
+
+## Round 12 — gap map (from source, 2026-11-23) and zero-orphaned-work handoff
+Status key: BUILT = code + test; PARTIAL = exists, incomplete; MISSING = not in repo. No claim here of host-verified or benchmarked.
+| Capability | Status | Where / gap |
+|---|---|---|
+| Handoff save/status/verify/resume + docs files + 70-99% ctx checkpoints + integrity score | BUILT (this round) | bin/tzintegrity.py; ctx_mark wired into tzsup.tick; test sec. 15. Limit: ctx % comes from the transcript estimate or host-reported value; no host adapter exposes an exact one |
+| 5h/7d usage forecast | BUILT for Claude (tzusage.limits: pct, reset, projected full) | only where the host statusline JSON supplies rate_limits |
+| Python AST compression | BUILT (tzcompress.skeleton) | JS/TS: PARTIAL (brace skeleton, no real parser; needs a JS parser dependency, not added) |
+| Startup context audit | BUILT (tzstartup) | verify coverage of AGENTS.md/MCP schemas: PARTIAL |
+| Model routing | BUILT advice + profile (tzroute) | cost/quality trade-off table: PARTIAL |
+| Multi-agent cost attribution | PARTIAL (tzattr 80 lines) | per-agent tokens/cost/rework hierarchy not complete |
+| Other-agent usage adapters | PARTIAL (bin/adapters/* are ~600-byte stubs) | no real usage parsers for Codex/Cursor/Gemini |
+| Pricing | PARTIAL (static PRICE in tzcont, 3 families, list price EST) | no per-model table or update path |
+| Skill registry refresh / verified URLs | PARTIAL | local merge not built; ~8 entries lack repo URLs |
+| Live OTLP | MISSING by design (local JSON only; no network code) | |
+| Proxy, vector memory, auto-routing, HTML/image compression | MISSING by design/optional | Headroom comparison: architecture-level review still to do |
+| Quality-adjusted optimization, policy engine | MISSING | |
+Next build order: JS/TS AST, multi-agent attribution, pricing table, real adapters, catalog refresh, policy engine.

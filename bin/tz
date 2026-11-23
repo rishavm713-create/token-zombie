@@ -18,6 +18,7 @@ HELP = """tz <command> [args]
   task-wrap [--test CMD] [--summary S] [--remember DECISION] [--force]   close task only if test passes; logs DAILY/MASTER
   checkpoint                                     refresh git snapshot of the active task (no commands run)
   import --from CHAT.jsonl [--task T]            handoff from a crashed chat log (chain id kept)
+  handoff save|status|verify|resume|ctx --pct N   durable docs/HANDOFF.md etc, integrity score, context-% checkpoints (70/80/90/95/98, 99 = emergency)
   resume [--run-test]                            verify handoff vs git/tests, print next action
   replay [transcript]                            costliest steps (input-eq) + repeated tool calls
   skills [prompt words]                          skills loaded/parked; relevance advice
@@ -90,6 +91,9 @@ def main(argv):
         if c in ('optimize', 'stats', 'filter', 'classify'):
             import tzopt
             return tzopt.main([c, *rest])
+        if c == 'handoff' and rest[:1] in (['save'], ['status'], ['verify'], ['resume'], ['ctx']):
+            import tzintegrity
+            return tzintegrity.main([rest[0], *rest[1:]])
         if c in ('handoff', 'resume', 'task-wrap', 'checkpoint', 'import'):
             import tzhandoff
             return tzhandoff.main([c, *rest])

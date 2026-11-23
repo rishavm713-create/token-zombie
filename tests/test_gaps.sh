@@ -76,6 +76,20 @@ g2=T+'/sk2'; os.makedirs(g2); open(g2+'/SKILL.md','w').write('v1'); tf.stage(g2)
 open(g2+'/SKILL.md','w').write('v2'); assert tf.updates()==[('sk2','CHANGED')]
 pf=rt.profile('fix a typo in readme'); assert pf['agents']==0 and pf['model']=='haiku', pf
 pf2=rt.profile('design the architecture and refactor the module'); assert pf2['agents']>=1 and 'EST' in pf2['basis']
+# 15 integrity: save/verify/ctx marks
+import subprocess as sp, importlib; ti=importlib.import_module('tzintegrity')
+gd=T+'/ig'; os.makedirs(gd); sp.run('git init -q . && git config user.email a@b && git config user.name n && echo a>a && git add a && git commit -qm i && echo b>b',shell=True,cwd=gd)
+sc,pr=ti.verify(gd); assert sc==0
+ti.save(gd,'t',nxt='do X',done=['f1'],partial=['f2'],tests=['unit ok'],decisions=['use ast'])
+for n in ('HANDOFF.md','DEVELOPMENT-STATE.md','NEXT-SESSION.md','DECISIONS.md','BUILD-LOG.md'): assert os.path.isfile(gd+'/docs/'+n),n
+assert 'PARTIAL' in open(gd+'/docs/DEVELOPMENT-STATE.md').read() and 'b (' in open(gd+'/docs/HANDOFF.md').read()
+sc,pr=ti.verify(gd); assert sc==100,(sc,pr)
+open(gd+'/c','w').write('x'); sc,pr=ti.verify(gd); assert any('missing from handoff' in x for x in pr)
+sp.run('git add a c && git commit -qm n',shell=True,cwd=gd); sc,pr=ti.verify(gd); assert any('stale' in x for x in pr)
+assert ti.ctx_mark(gd,50) is None and ti.ctx_mark(gd,72)==70 and ti.ctx_mark(gd,73) is None and ti.ctx_mark(gd,99)==99
+assert 'EMERGENCY' in open(gd+'/docs/HANDOFF.md').read().split('\n')[0]
+assert ti.ctx_mark(gd,10) is None and ti.ctx_mark(gd,71)==70
+assert sp.run('git status --porcelain',shell=True,cwd=gd,capture_output=True,text=True).stdout.count('b')>=1
 # 5 rework score
 assert r.score(0,0,0,{},{})==0 and 0<r.score(10,5,2,{('B','k'):3},{})<=100
 PY
