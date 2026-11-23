@@ -110,7 +110,7 @@ def signals(transcript, session_id='x'):
     u = totals(transcript)
     reads = _load(os.path.join(STATE, f'reads-{session_id}.json'), {})
     rep = sum(1 for v in reads.values() if isinstance(v, dict) and v.get('n', 1) >= 2)
-    spend = int(u['inp'] + u['cr'] * .1 + u['cw'] * 1.25 + u['out'] * 5)
+    spend = int(u['inp'] + u['cr'] * CR + u['cw'] * CW + u['out'] * 5)
     return {'ctx': (u['last'], 'actual' if u['turns'] else 'unknown'), 'turns': (u['turns'], 'actual'),
             'spend_eq': (spend, 'est' if u['turns'] else 'unknown'), 'repeat_reads': (rep, 'measured'),
             'cache_read': (u['cr'], 'actual')}
@@ -587,9 +587,9 @@ def stay_or_fresh(used, base, steps, prompts, gap, plen, overlap=0.0):
     b, bb = (base, 'measured') if base else (20000, 'est')
     n = max(1, round(steps / max(1, prompts - 1)))  # prompts = task starts incl. this one: steps per earlier task
     expired = gap > cfg('cache_ttl')
-    stay = n * 0.1 * used + (1.25 * used if expired else 0)
-    fresh = 1.25 * (b + PACK) + n * 0.1 * PACK
-    compact = 0.1 * used + 1.25 * (b + SUMMARY) + n * 0.1 * SUMMARY  # summary call reads the cached history once
+    stay = n * CR * used + (CW * used if expired else 0)
+    fresh = CW * (b + PACK) + n * CR * PACK
+    compact = CR * used + CW * (b + SUMMARY) + n * CR * SUMMARY  # summary call reads the cached history once
     if stay <= fresh:
         return ''
     why = f"history {used // 1000}k x ~{n} steps/task, {int(overlap * 100)}% word overlap" + (f", cache expired after {int(gap // 60)} min idle" if expired else '')
@@ -600,14 +600,14 @@ def stay_or_fresh(used, base, steps, prompts, gap, plen, overlap=0.0):
 
 
 # Session Economics [EST, from MEASURED usage]: continue / compact / fresh over the next N user turns; API-equivalent $ only.
-PRICE = {'opus': (5.0, 25.0), 'sonnet': (3.0, 15.0), 'haiku': (1.0, 5.0)}  # USD per Mtok in/out, list price [EST], edit as prices change
+import tzprice
+PRICE = tzprice.PRICES  # USD per Mtok in/out, list price [EST]; single table in tzprice.py (alias)
 SUMMARY = 3000   # tokens: compaction summary a compacted chat restarts from (output once, then history)
 TURNS = (5, 10, 20)
 
 
-def _fam(model):
-    m = (model or '').lower()
-    return next((k for k in PRICE if k in m), 'sonnet')
+_fam = tzprice.family  # alias
+CR, CW, CW1 = tzprice.CACHE['read'], tzprice.CACHE['write_5m'], tzprice.CACHE['write_1h']  # cache multipliers (single table)
 
 
 def _w1h(u):
@@ -638,7 +638,7 @@ def calls(path):
 
 def ieq(c):
     """Input-equivalent tokens of one reply: input 1x, cache read 0.1x, cache write 1.25x (2x for the 1 h TTL part, c[6])."""
-    return c[1] + 0.1 * c[2] + 1.25 * c[3] + (0.75 * c[6] if len(c) > 6 else 0)
+    return c[1] + CR * c[2] + CW * c[3] + ((CW1 - CW) * c[6] if len(c) > 6 else 0)
 
 
 def measure(path):
@@ -658,10 +658,10 @@ def econ(m, gap=0, turns=TURNS):
     the cached share (measured hit rate) at 0.1x, the rest written at 1.25x; a cold start writes its whole start once."""
     from tzlib import cfg
     pin, pout = PRICE[_fam(m['model'])]
-    r = m['hit'] * 0.1 + (1 - m['hit']) * 1.25
+    r = m['hit'] * CR + (1 - m['hit']) * CW
 
     def run(h0, k, cold):
-        return (k * h0 + m['grow'] * k * (k - 1) / 2) * r + (h0 * (1.25 - r) if cold else 0)
+        return (k * h0 + m['grow'] * k * (k - 1) / 2) * r + (h0 * (CW - r) if cold else 0)
     res = {}
     for n in turns:
         k = max(1, round(n * m['steps']))
@@ -680,7 +680,7 @@ def next_call(m, gap=0):
     from tzlib import cfg
     pin, pout = PRICE[_fam(m['model'])]
     cold = gap > cfg('cache_ttl')
-    tok = m['used'] * (1.25 if cold else 0.1)
+    tok = m['used'] * (CW if cold else CR)
     return ('cold' if cold else 'warm'), int(tok), (tok * pin + m['out'] * pout) / 1e6
 
 
@@ -917,7 +917,7 @@ def idle_advice(data, used, gap):
     if used <= IDLE_MIN_USED or gap <= cfg('cache_ttl'):
         return ''
     return (f'TOKEN ZOMBIE: idle {int(gap // 60)} min, the prompt cache likely expired: this message re-writes '
-            f'~{used // 1000}k history at 1.25x (~{int(used * 1.25) // 1000}k input-eq)')
+            f'~{used // 1000}k history at 1.25x (~{int(used * CW) // 1000}k input-eq)')
 
 
 def stall_advice(data):

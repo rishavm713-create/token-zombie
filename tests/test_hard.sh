@@ -57,7 +57,7 @@ import sys;sys.path.insert(0,\"$Z/bin\");import adapters as A
 for n in A.NAMES:
     i=A.info(n);assert set(A.KEYS)<=set(i[\"capabilities\"]) and i[\"status\"] in (\"REAL\",\"RULES-ONLY\") and i[\"note\"]
 assert A.supports(\"claude\",\"hooks\") and not A.supports(\"codex\",\"session_spawn\") and not A.supports(\"cursor\",\"hooks\") and not A.supports(\"antigravity\",\"hooks\")
-assert [n for n in A.NAMES if A.info(n)[\"status\"]==\"REAL\"]==[\"claude\"]"'
+assert [n for n in A.NAMES if A.info(n)[\"status\"]==\"REAL\"]==[\"claude\",\"codex\"]"'
 for n in codex cursor windsurf gemini cline roo antigravity; do tz adapters --rules $n --out "$T/r-$n.md" >/dev/null; done
 ok "rules generated for every non-claude adapter" 'for n in codex cursor windsurf gemini cline roo antigravity; do [ -s "$T/r-$n.md" ] || exit 1; done'
 ok "claude adapter: usage parser works on a transcript" 'python3 -c "

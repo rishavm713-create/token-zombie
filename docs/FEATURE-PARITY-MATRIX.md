@@ -8,7 +8,7 @@ Leaders = competitors whose page states the capability (VERIFIED on their page).
 | 1 | Shell/tool output trimming | BUILT+TESTED (`tzout`, test_out) | RTK, LeanCTX, Context Mode | TZ has fewer filters than RTK (no per-tool filter catalogue) |
 | 2 | Lossless recovery of trimmed text | BUILT+TESTED (spill, `tz recall`) | Headroom, LeanCTX, Token Optimizer | parity |
 | 3 | Shadow / dry-run of savings | BUILT+TESTED (`tz shadow`) | LeanCTX | TZ also stages RECORD→ACTIVE |
-| 4 | Code compression (AST) | PART: Python only (`tzcompress`) | LeanCTX 27 langs, Headroom | JS/TS missing |
+| 4 | Code compression (AST) | BUILT+TESTED: Python + JS/TS (`tzcompress`, test_jsskel) | LeanCTX 27 langs, Headroom | other languages not covered |
 | 5 | Search index over spilled/old output | BUILT+TESTED (FTS5) | Context Mode, Claude-Mem | TZ has no vector search (deliberate) |
 | 6 | Usage + cost from local logs | BUILT+TESTED (`tzusage`, 5m/1h cache split) | ccusage, Usage-Monitor | ccusage covers ~20 agents; TZ real adapter = Claude only |
 | 7 | Burn rate / limit forecast | PART (burn, next-request cost) | Usage-Monitor, ccstatusline | no official 5h/7d % view |
@@ -18,12 +18,12 @@ Leaders = competitors whose page states the capability (VERIFIED on their page).
 | 11 | Subagent lifecycle + ROI flags | BUILT+TESTED | none of the above state it | TZ-only |
 | 12 | Compaction survival check | BUILT+TESTED (`verify_compact`) | Token Optimizer (checkpoint), Context Mode | |
 | 13 | Handoff / resume | BUILT+TESTED (STATE.md, `tz resume`) | the 3 handoff tools | no crashed-session JSONL import, no handoff chain id |
-| 14 | Startup-context audit | PART (`tzstartup`, `tz audit`) | Claude Token Optimizer, Token Optimizer | no CI-failing audit |
+| 14 | Startup-context audit | BUILT+TESTED (`tzstartup`, `tz audit`, CI run status via gh) | Claude Token Optimizer, Token Optimizer | |
 | 15 | Skill/instruction cost intel | BUILT (HOST) (`tzcap`, InstructionsLoaded) | Token Optimizer | |
-| 16 | MCP / tool-schema cost signal | NOT BUILT | Token Optimizer (audits MCP) | P1 gap |
+| 16 | MCP / tool-schema cost signal | BUILT+TESTED (`tz startup` per-server schema cost, `tz attr` per-server calls/tokens) | Token Optimizer (audits MCP) | |
 | 17 | Model/cost routing | PART (`tzroute` advice) | claude-code-router acts, Token Optimizer nudges | TZ advice only (deliberate: no blocking) |
 | 18 | OTLP / team analytics | NOT BUILT | ai-observer, claude-code-otel | out of scope for solo, local-first |
-| 19 | Controlled A/B savings proof | PART: runner `tzab` built and tested, **no real trial run** | Ponytail (self-reported) | P0 gap |
+| 19 | Controlled A/B savings proof | PART: zero-cost replay `tz bench replay` on real logs (MEASURED net 0.58%); paid `tzab` A/B not run | Ponytail (self-reported) | answer quality still unmeasured |
 | 20 | Real-host verification | HOST: 9 new hook events not live until install re-run | n/a | P0 gap |
 | 21 | Persistent semantic/vector memory | NOT BUILT | Claude-Mem, Ruflo | N/A by decision |
 | 22 | Nine-tab UI, RTK clone, auto agent spawning | N/A | n/a | rejected |

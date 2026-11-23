@@ -106,3 +106,31 @@ PACKS = {'video': 'video|caption|shorts|reel|podcast|youtube edit', 'motion': 'm
          'web': 'gsap|clone (a )?site|slides', 'content': 'youtube script|thumbnail|newsletter|seo title', 'linkedin': 'linkedin',
          'social': 'instagram|carousel', 'seo': r'\bseo\b|\bgeo\b', 'book': 'novel|chapter|manuscript|kdp|book cover',
          'jobs': 'job search|cover letter|apply for', 'admin': 'invoice|inbox|meeting notes|expense', 'coding': 'refactor|write tests|tdd|code review|spec'}
+
+
+def dup_hook(name, raw, window=5):
+    """True if this exact hook payload was already handled by `name` in the last `window` s.
+    Claude Code runs a hook twice when TZ is registered both as a plugin and in settings.json; the second copy then exits."""
+    import hashlib, time
+    if os.environ.get('TZ_DEDUPE') == '0':
+        return False
+    d = os.path.expanduser('~/.claude/token-zombie/hookseen')
+    p = os.path.join(d, hashlib.sha1((name + '\0' + raw).encode('utf-8', 'replace')).hexdigest()[:20])
+    try:
+        os.makedirs(d, exist_ok=True)
+        now = time.time()
+        try:
+            fd = os.open(p, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            os.close(fd)
+        except FileExistsError:
+            if now - os.path.getmtime(p) < window:
+                return True
+            os.utime(p, None)
+        if int(now) % 50 == 0:  # occasional sweep
+            for f in os.listdir(d):
+                q = os.path.join(d, f)
+                if now - os.path.getmtime(q) > 600:
+                    os.remove(q)
+    except OSError:
+        return False  # fail open: run the hook
+    return False

@@ -44,7 +44,12 @@ def head(path, n, stop_at_rule):
 
 
 try:
-    d = json.load(sys.stdin)
+    _raw = sys.stdin.read()
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import tzlib as _tzl
+    if _tzl.dup_hook(os.path.basename(__file__), _raw):
+        sys.exit(0)  # same event already handled by the other registered copy
+    d = json.loads(_raw)
     cwd = d.get('cwd') or os.getcwd()
     parts, pk = [], ''
     if d.get('source') == 'compact':  # after compaction: only the continuation note tz-compact.py saved

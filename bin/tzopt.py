@@ -3,6 +3,7 @@
 # task mode + model advice, savings ledger. Advice only: a full read is NEVER blocked here.
 # Tokens are est = chars/4. measured = counted from real bytes/log; est = a guess about what the model would have used.
 import hashlib, json, os, re, sys, time
+import tzprice
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 STATE = os.path.expanduser('~/.claude/token-zombie')
@@ -255,9 +256,10 @@ def stats():
 def _cost(model, u):
     """EST API-equivalent list price: (input-eq tokens, USD). cache_read 0.1x, cache_write 1.25x input price [tzcont.PRICE]."""
     import tzcont
-    pin, pout = tzcont.PRICE[tzcont._fam(model)]
+    import tzprice
+    pin, pout = tzprice.price(model)
     i, cr, cw, o = (u.get(k) or 0 for k in ('input_tokens', 'cache_read_input_tokens', 'cache_creation_input_tokens', 'output_tokens'))
-    ie = i + 0.1 * cr + 1.25 * cw
+    ie = i + tzprice.CACHE['read'] * cr + tzprice.CACHE['write_5m'] * cw
     return ie, (ie * pin + o * pout) / 1e6
 
 
@@ -357,7 +359,7 @@ def fresh_saved(now=None, hours=24, root=None, gap_h=24, big=50000):
             c0 = cs[0][1] + cs[0][2] + cs[0][3]
             n = len([c for c in cs if c[0] >= t0])
             start = tzcont.ieq(cs[0]) - 0.1 * c0 if cs[0][0] >= t0 else 0  # paid once, only if the start is in the window
-            sv = int(0.1 * n * max(0, old - c0) - start)
+            sv = int(tzprice.CACHE['read'] * n * max(0, old - c0) - start)
             if sv:
                 out.append((os.path.basename(proj), old, len([1 for ts, _ in s['pts'] if ts >= t0]), sv))
     return out
@@ -411,7 +413,7 @@ def main(argv):
             per = (u['inp'] + u['cr'] + u['cw']) // u['turns']
             print(f"model calls [actual] {u['turns']}; context re-sent per call avg ~{per // 1000}k [actual], total {(u['inp'] + u['cr'] + u['cw']) // 1000}k")
             # list-price multipliers relative to fresh input (cache read 0.1x, cache write 1.25x, output 5x): shares, not dollars
-            w = dict(input=u['inp'], cache_read=u['cr'] * .1, cache_write=u['cw'] * 1.25, output=u['out'] * 5)
+            w = dict(input=u['inp'], cache_read=u['cr'] * __import__('tzprice').CACHE['read'], cache_write=u['cw'] * __import__('tzprice').CACHE['write_5m'], output=u['out'] * 5)
             tw = sum(w.values()) or 1
             print('  cost share [est, input-equivalent weights]: ' + ', '.join(f'{k} {v * 100 / tw:.0f}%' for k, v in w.items()))
             print(f"  each tool round trip you avoid (batch independent calls in one message) saves ~{per // 1000}k re-sent [est]")

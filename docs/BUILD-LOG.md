@@ -1,0 +1,9 @@
+- 2026-11-23 11:03 [manual] main@5f14e6d: done 1, partial 4, not started 2, uncommitted 1
+- 2026-11-23 11:29 [ctx 80%] main@2c363dd: done 1, partial 4, not started 2, uncommitted 13
+- 2026-11-23 11:30 [ctx 80%] main@2c363dd: done 1, partial 4, not started 2, uncommitted 13
+- 2026-11-23 11:31 [ctx 80%] main@2c363dd: done 1, partial 4, not started 2, uncommitted 14
+- 2026-11-23 15:50 [ctx 90%] main@b060298: done 1, partial 4, not started 2, uncommitted 6
+- 2026-11-23 15:50 [ctx 90%] main@b060298: done 1, partial 4, not started 2, uncommitted 6
+- 2026-11-23 15:54 [ctx 80%] main@b060298: done 1, partial 4, not started 2, uncommitted 22
+- 2026-11-23 15:59 [ctx 80%] main@b060298: done 1, partial 4, not started 2, uncommitted 33
+- 2026-11-23 16:05 [ctx 80%] main@b060298: done 1, partial 4, not started 2, uncommitted 35

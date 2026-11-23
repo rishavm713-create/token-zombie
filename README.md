@@ -5,7 +5,7 @@
 **Stop paying for tokens Claude Code wastes.**
 Free. Runs on your computer. Nothing is sent anywhere.
 
-[![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-83ffa0)](docs/INSTALL.md) [![Local first](https://img.shields.io/badge/local--first-no%20telemetry-83ffa0)](SECURITY.md) [![MIT](https://img.shields.io/badge/license-MIT-83ffa0)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-4c9a1a)](LICENSE) [![macOS](https://img.shields.io/badge/macOS-supported-000000?logo=apple&logoColor=white)](COMPAT.md) [![Linux](https://img.shields.io/badge/Linux-CI-1f6feb?logo=linux&logoColor=white)](COMPAT.md) [![Built on](https://img.shields.io/badge/Built%20on-Claude%20Code-d97757)](docs/INSTALL.md) [![Local first](https://img.shields.io/badge/Local--first-no%20telemetry-83ffa0)](SECURITY.md) [![GitHub Stars](https://img.shields.io/github/stars/rishavm713-create/token-zombie?style=social)](https://github.com/rishavm713-create/token-zombie)
 
 [Website](https://rishavm713-create.github.io/token-zombie/) · [Install guide](docs/INSTALL.md) · [Docs](#docs) · [Discussions](https://github.com/rishavm713-create/token-zombie/discussions)
 
@@ -55,7 +55,7 @@ A small bar inside Claude Code shows quick signals, and a local dashboard shows 
 ## Honest status
 
 - Claude Code is the supported host. Other tools get experimental rules files only.
-- Real before-and-after savings are **not yet measured**, so no savings figure is promised. See [limitations](docs/LIMITATIONS.md) and the [benchmark method](docs/BENCHMARK-METHOD.md).
+- **Measured, for free:** `tz bench replay` replays your own chat logs offline (no model call, no cost). On 1,025 real chats (48,338 replies) TZ's automatic output trims saved **0.58% of input tokens net**, after subtracting the text TZ itself adds. Repeat-search advice adds at most 0.02% more. Answer quality is not measured offline. Run it on your own logs; your number will differ. See [limitations](docs/LIMITATIONS.md) and the [benchmark method](docs/BENCHMARK-METHOD.md).
 - Some hook payloads and UI behaviour still need checks on a live host: [implementation matrix](docs/IMPLEMENTATION-MATRIX.md).
 
 ## Docs

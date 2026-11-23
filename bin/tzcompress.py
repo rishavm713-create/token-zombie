@@ -35,51 +35,167 @@ def skeleton(src):
         return src, False
 
 
-def js_skeleton(src):
-    """(skeleton, ok) for JS/TS by brace matching (no parser): function/method/arrow bodies at top level or directly in a class -> `{ ... }`.
-    Strings, comments and template literals are skipped while matching; imbalance or a lost function/class name FAILS OPEN (original returned)."""
-    import re
-    n, out, last, i, stack = len(src), [], 0, 0, []
-    sig = re.compile(r'(?:\)\s*(?::\s*[^;{}=]+)?|=>)\s*$')
-    ctl = re.compile(r'\b(?:if|for|while|switch|catch|with)\s*\([^{}]*$')
-    names = lambda t: sorted(re.findall(r'\b(?:function|class)\s+([A-Za-z_$][\w$]*)', t))
+class _Bail(Exception):
+    pass
 
-    def skip(j):
-        if src.startswith('//', j):
-            k = src.find('\n', j); return n if k < 0 else k
-        if src.startswith('/*', j):
-            k = src.find('*/', j + 2); return n if k < 0 else k + 2
-        k = j + 1
-        while k < n and src[k] != src[j]:
-            k += 2 if src[k] == '\\' else 1
-        return k + 1
-    skipping = lambda j: src[j] in '"\'`' or src.startswith('//', j) or src.startswith('/*', j)
-    while i < n:
-        if skipping(i):
-            i = skip(i); continue
-        c = src[i]
+
+_RX_PREV = set('(,=:[!&|?{};+-*%<>~^')
+_RX_KW = {'return', 'typeof', 'case', 'delete', 'void', 'throw', 'in', 'of', 'new', 'else', 'do', 'yield', 'await', 'instanceof'}
+
+
+def _js_tok(s, i, pc, pw):
+    """If a string/template/comment/regex starts at s[i], return (end, kind); else None. Raises _Bail on anything unterminated."""
+    n, c = len(s), s[i]
+    if c in '"\'':
+        k = i + 1
+        while k < n and s[k] != c:
+            if s[k] == '\n':
+                raise _Bail
+            k += 2 if s[k] == '\\' else 1
+        if k >= n:
+            raise _Bail
+        return k + 1, 'str'
+    if c == '`':
+        k = i + 1
+        while k < n:
+            if s[k] == '\\':
+                k += 2
+            elif s[k] == '`':
+                return k + 1, 'str'
+            elif s.startswith('${', k):
+                k = _js_bal(s, k + 2)
+            else:
+                k += 1
+        raise _Bail
+    if c == '/':
+        if s.startswith('//', i):
+            k = s.find('\n', i)
+            return (n if k < 0 else k), 'cmt'
+        if s.startswith('/*', i):
+            k = s.find('*/', i + 2)
+            if k < 0:
+                raise _Bail
+            return k + 2, 'cmt'
+        if pc is None or pc in _RX_PREV or pw in _RX_KW:
+            k, cls = i + 1, False
+            while k < n:
+                ch = s[k]
+                if ch == '\n':
+                    raise _Bail
+                if ch == '\\':
+                    k += 2; continue
+                if ch == '[':
+                    cls = True
+                elif ch == ']':
+                    cls = False
+                elif ch == '/' and not cls:
+                    return k + 1, 'str'
+                k += 1
+            raise _Bail
+    return None
+
+
+def _js_bal(s, j):
+    """Index just past the `}` closing a `{` already consumed (j is after it); skips strings/comments/regex/templates."""
+    n, d, pc, pw = len(s), 1, '{', ''
+    while j < n:
+        t = _js_tok(s, j, pc, pw) if s[j] in '"\'`/' else None
+        if t:
+            if t[1] == 'str':
+                pc, pw = 'S', ''
+            j = t[0]; continue
+        c = s[j]
         if c == '{':
-            pre = src[max(last, src.rfind(';', 0, i) + 1, src.rfind('}', 0, i) + 1, src.rfind('{', 0, i) + 1):i]
-            if (not stack or stack[-1] == 'class') and sig.search(pre) and not ctl.search(pre):
-                d, j = 1, i + 1
-                while j < n and d:
-                    if skipping(j):
-                        j = skip(j); continue
-                    d += (src[j] == '{') - (src[j] == '}'); j += 1
-                if d:
-                    return src, False
-                out.append(src[last:i]); out.append('{ ... }'); last = i = j
-                continue
-            stack.append('class' if re.search(r'\b(?:class|interface)\b', pre) else 'other')
+            d += 1
         elif c == '}':
-            if stack:
-                stack.pop()
+            d -= 1
+            if not d:
+                return j + 1
+        if not c.isspace():
+            pw = (pw + c) if (c.isalnum() or c in '_$') and pw else (c if c.isalnum() or c in '_$' else '')
+            pc = c
+        j += 1
+    raise _Bail
+
+
+def _js_ok(s):
+    """True when braces/parens/brackets in code (outside strings, comments, regex) are balanced."""
+    n, i, pc, pw, st = len(s), 0, None, '', []
+    pair = {')': '(', ']': '[', '}': '{'}
+    while i < n:
+        t = _js_tok(s, i, pc, pw) if s[i] in '"\'`/' else None
+        if t:
+            if t[1] == 'str':
+                pc, pw = 'S', ''
+            i = t[0]; continue
+        c = s[i]
+        if c in '([{':
+            st.append(c)
+        elif c in pair:
+            if not st or st.pop() != pair[c]:
+                return False
+        if not c.isspace():
+            pw = (pw + c) if (c.isalnum() or c in '_$') and pw else (c if c.isalnum() or c in '_$' else '')
+            pc = c
         i += 1
-    out.append(src[last:])
-    sk = ''.join(out)
-    if names(sk) != names(src) or stack:
+    return not st
+
+
+def js_skeleton(src):
+    """(skeleton, ok) for JS/TS with a small scanner (no parser, no deps). Skips strings, template literals (nested ${}), comments and regex literals.
+    Bodies of functions, methods (getters/setters/static/TS modifiers/decorators), top-level arrow functions and `export default function` become `{ ... }`;
+    interfaces, types, enums, imports and exports stay intact. Anything unscannable or unbalanced FAILS OPEN (original returned)."""
+    import re
+    sig = re.compile(r'(?:=>|\))\s*$|\)\s*:[^;{}?]*$')
+    exc = re.compile(r'\b(?:interface|enum|namespace|class)\b|^\s*(?:export\s+)?(?:declare\s+)?(?:type|module)\s')
+    ctl = re.compile(r'\s*(?:else\s+)?(?:if|for|while|switch|catch|with)\b')
+    n, out, last, i, stack, par, pre, pc, pw = len(src), [], 0, 0, [], 0, '', None, ''
+    try:
+        while i < n:
+            c = src[i]
+            t = _js_tok(src, i, pc, pw) if c in '"\'`/' else None
+            if t:
+                if t[1] == 'str':
+                    pc, pw, pre = 'S', '', pre + 'S'
+                else:
+                    pre += ' '
+                i = t[0]; continue
+            if c == '{':
+                if not par and (not stack or stack[-1] == 'class') and sig.search(pre) and not exc.search(pre) and not ctl.match(pre):
+                    j = _js_bal(src, i + 1)
+                    out.append(src[last:i]); out.append('{ ... }'); last = i = j
+                    pre, pc, pw = '', '}', ''
+                    continue
+                stack.append('class' if re.search(r'\bclass\b(?!\s*:)', pre) else 'other')
+                if not par:
+                    pre = ''
+            elif c == '}':
+                if not stack:
+                    return src, False
+                stack.pop()
+                if not par:
+                    pre = ''
+            elif c in '([':
+                par += 1; pre += c
+            elif c in ')]':
+                par -= 1; pre += c
+                if par < 0:
+                    return src, False
+            elif c == ';' and not par:
+                pre = ''
+            else:
+                pre += c
+            if not c.isspace():
+                pw = (pw + c) if (c.isalnum() or c in '_$') and pw else (c if c.isalnum() or c in '_$' else '')
+                pc = c
+            i += 1
+        out.append(src[last:])
+        sk = ''.join(out)
+        if stack or par or not _js_ok(sk):
+            return src, False
+        return sk, True
+    except (_Bail, RecursionError):
         return src, False
-    return sk, True
 
 
 def main(argv):

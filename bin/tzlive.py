@@ -100,7 +100,7 @@ def on_event(data, now=None):
         elif ev == 'PreToolUse':
             if tool in AGENT and tid:
                 d0 = ' '.join(str(ti.get('description', '')).lower().split())
-                dup = [a for a in s['agents'].values() if d0 and a.get('status') in ('running', 'starting', 'done')
+                dup = [a for i, a in s['agents'].items() if i != tid and d0 and a.get('status') in ('running', 'starting', 'done')
                        and ' '.join(str(a.get('desc', '')).lower().split()) == d0 and a.get('type') == (ti.get('subagent_type') or 'general')]
                 if dup:  # same type + same description already assigned in this chat (advice only)
                     _bump(s['notes'], 'dup_agent_advised')

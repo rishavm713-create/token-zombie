@@ -1,5 +1,5 @@
 # Compatibility
-**EXPERIMENTAL / rules-only: every non-Claude adapter (Codex, Cursor, Windsurf, Gemini, Cline, Roo, Antigravity).** They only get a generated rules file; no hooks, no statusline, no supervisor. Capabilities are declared and UNVERIFIED. Only Claude Code is real. Claude Code >= 2.1.318 tested; macOS tested; Linux expected via CI; Windows untested.
+**EXPERIMENTAL / rules-only: every non-Claude adapter except Codex usage (Cursor, Windsurf, Gemini, Cline, Roo, Antigravity).** They only get a generated rules file; no hooks, no statusline, no supervisor. Capabilities are declared and UNVERIFIED. Only Claude Code is real; Codex is real for usage reading only (`tz adapters --usage codex`). Claude Code >= 2.1.318 tested; macOS tested; Linux expected via CI; Windows untested.
 
 ## Other agents
 Rules (skills/token-zombie/SKILL.md sections 1-6) are plain text and work anywhere. Hooks/statusline are Claude Code only.

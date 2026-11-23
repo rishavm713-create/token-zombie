@@ -3,9 +3,9 @@
 # honours override (--model or env TZ_MODEL), and logs every decision to ~/.claude/token-zombie/routing.jsonl.
 import json, os, re, sys, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import tzopt
+import tzopt, tzprice
 # EST relative cost per 1M output tokens (USD, list-price ballpark, labelled EST, edit as prices change)
-COST = {'haiku': 1.0, 'sonnet': 3.0, 'opus': 15.0}
+COST = {k: tzprice.PRICES[k][1] for k in ('haiku', 'sonnet', 'opus')}  # output USD/Mtok from tzprice (EST)
 # per-mode work limits (advice): reads before acting, subagents worth starting
 WORK = {'QUICK': 'reads <=2, no subagents', 'STANDARD': 'reads <=5 (grep/line ranges), no subagents',
         'RESEARCH': 'subagent haiku for bulk reading, main reads summaries only', 'ENGINEERING': 'read the touched files first, <=2 subagents (sonnet)',

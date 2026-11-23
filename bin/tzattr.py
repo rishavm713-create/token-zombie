@@ -5,27 +5,87 @@
 import json, os, re, sys, collections
 
 
+def _usage(path):
+    """Sum assistant usage in one transcript, deduped by message id. MEASURED tokens; USD EST at list price (tzcont.PRICE)."""
+    import tzcont
+    r = dict(calls=0, input=0, output=0, cache_read=0, cache_write=0, usd=0.0); seen = set()
+    for ln in open(path, errors='replace'):
+        if '"usage"' not in ln:
+            continue
+        try:
+            m = json.loads(ln).get('message') or {}; u = m.get('usage')
+        except Exception:
+            continue
+        if not isinstance(u, dict) or (m.get('id') and m['id'] in seen):
+            continue
+        seen.add(m.get('id'))
+        g = lambda k: u.get(k) or 0
+        pin, pout = tzcont.PRICE[tzcont._fam(m.get('model'))]
+        r['calls'] += 1; r['input'] += g('input_tokens'); r['output'] += g('output_tokens')
+        r['cache_read'] += g('cache_read_input_tokens'); r['cache_write'] += g('cache_creation_input_tokens')
+        r['usd'] += (g('input_tokens') + 0.1 * g('cache_read_input_tokens') + 1.25 * g('cache_creation_input_tokens')) * pin / 1e6 + g('output_tokens') * pout / 1e6
+    return r
+
+
+def _add(row, u):
+    row['replies'] = row.get('replies', 0) + u['calls']  # model replies inside the transcript; 'calls' stays = launches
+    for k in ('input', 'output', 'cache_read', 'cache_write', 'usd'):
+        row[k] += u[k]
+
+
+def _row():
+    return {'calls': 0, 'result_chars': 0, 'errors': 0, 'invocations': 0, 'models': [], 'input': 0, 'output': 0, 'cache_read': 0, 'cache_write': 0, 'usd': 0.0}
+
+
 def attribute(path):
-    calls, out = {}, collections.defaultdict(lambda: {'calls': 0, 'result_chars': 0, 'errors': 0})
+    """{key: row}. mcp:<server> and subagent:<type> rows count calls/result chars (EST tok chars/4); subagent rows add MEASURED
+    tokens from <log dir>/<session>/subagents/agent-<id>.jsonl; 'main' is the parent session's own usage (MEASURED)."""
+    import glob
+    calls, out = {}, collections.defaultdict(_row)
+    agent_of = {}  # agentId -> subagent key
     for ln in open(path, errors='replace'):
         try:
-            c = (json.loads(ln).get('message') or {}).get('content')
+            d = json.loads(ln); c = (d.get('message') or {}).get('content')
         except Exception:
             continue
         for b in c if isinstance(c, list) else []:
             if not isinstance(b, dict):
                 continue
             if b.get('type') == 'tool_use':
-                n = b.get('name', '')
-                k = 'mcp:' + n.split('__')[1] if n.startswith('mcp__') and n.count('__') >= 2 else 'subagent' if n in ('Task', 'Agent') else None
+                n = b.get('name', ''); i = b.get('input') if isinstance(b.get('input'), dict) else {}
+                sub = n in ('Task', 'Agent')
+                k = 'mcp:' + n.split('__')[1] if n.startswith('mcp__') and n.count('__') >= 2 else 'subagent:' + str(i.get('subagent_type') or 'general-purpose') if sub else None
                 if k:
                     calls[b.get('id')] = k
                     out[k]['calls'] += 1
+                    if sub:
+                        out[k]['invocations'] += 1
+                        if i.get('model') and i['model'] not in out[k]['models']:
+                            out[k]['models'].append(i['model'])
             elif b.get('type') == 'tool_result' and b.get('tool_use_id') in calls:
-                e = out[calls[b['tool_use_id']]]
+                k = calls[b['tool_use_id']]; e = out[k]
                 e['result_chars'] += len(json.dumps(b.get('content')))
                 e['errors'] += bool(b.get('is_error'))
-    return dict(out)
+                if k.startswith('subagent:'):
+                    tr = d.get('toolUseResult'); aid = tr.get('agentId') if isinstance(tr, dict) else None
+                    if not aid:
+                        m = re.search(r'agentId:\s*([\w-]+)', json.dumps(b.get('content')))
+                        aid = m.group(1) if m else None
+                    if aid:
+                        agent_of[aid] = k
+    sdir = os.path.join(os.path.dirname(os.path.abspath(path)), os.path.basename(path).rsplit('.', 1)[0], 'subagents')
+    for f in sorted(glob.glob(os.path.join(sdir, '*.jsonl'))):
+        aid = os.path.basename(f)[:-6].replace('agent-', '', 1)
+        _add(out[agent_of.get(aid, 'subagent:unmatched')], _usage(f))
+    _add(out['main'], _usage(path))
+    out['main']['calls'] = out['main']['replies']  # main row: calls = its own model replies
+    return {k: dict(v, usd=round(v['usd'], 4)) for k, v in out.items()}
+
+
+def totals(r):
+    t = {k: sum(v[k] for v in r.values()) for k in ('calls', 'input', 'output', 'cache_read', 'cache_write', 'result_chars')}
+    t['usd'] = round(sum(v['usd'] for v in r.values()), 4)
+    return t
 
 
 def conflicts(texts):
@@ -65,14 +125,17 @@ def main(argv):
         p = tzusage.find_transcript(os.getcwd())
     if not p or not os.path.isfile(p):
         print('tz attr: no chat log found (UNAVAILABLE)'); return 1
-    r = attribute(p)
+    r = attribute(p); t = totals(r)
     if '--json' in argv:
-        print(json.dumps(r)); return 0
-    print(f'attribution [MEASURED counts/chars; tokens EST chars/4] {os.path.basename(p)}:')
-    for k, v in sorted(r.items(), key=lambda x: -x[1]['result_chars']):
-        print(f"  {k:24} {v['calls']:>4} calls  ~{v['result_chars'] // 4} result tok  {v['errors']} errors")
-    if not r:
-        print('  no MCP or subagent calls in this log')
+        print(json.dumps(dict(rows=r, total=t))); return 0
+    print(f'attribution {os.path.basename(p)}: tokens MEASURED from usage fields (in/out/cache; $ EST list price); result tok EST chars/4')
+    for k, v in sorted(r.items(), key=lambda x: -(x[1]['usd'] or x[1]['result_chars'])):
+        if k == 'main' or k.startswith('subagent:'):
+            m = f"  [{','.join(v['models'])}]" if v['models'] else ''
+            print(f"  {k:30} {v['calls']:>4} calls  in {v['input']} out {v['output']} cache r{v['cache_read']}/w{v['cache_write']} MEASURED  ${v['usd']:.4f}  ~{v['result_chars'] // 4} result tok EST{m}")
+        else:
+            print(f"  {k:30} {v['calls']:>4} calls  ~{v['result_chars'] // 4} result tok EST  {v['errors']} errors")
+    print(f"  {'TOTAL':30} {t['calls']:>4} calls  in {t['input']} out {t['output']} cache r{t['cache_read']}/w{t['cache_write']} MEASURED  ${t['usd']:.4f}  ~{t['result_chars'] // 4} result tok EST")
     return 0
 
 

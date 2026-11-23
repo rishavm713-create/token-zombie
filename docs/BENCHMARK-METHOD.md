@@ -26,3 +26,11 @@ The project owner reports one real TOKEN ZOMBIE session with **5,000,000 tokens 
 - TOKEN ZOMBIE hook / output overhead and net-savings calculation.
 
 Until those details are attached, describe it as an **owner-reported observed single-session result**. Do not call it a controlled A/B result, median saving, or typical performance.
+
+## Zero-cost replay (`tz bench replay`, 2026-11-23)
+Reads every `~/.claude/projects/**/*.jsonl` offline. Per reply it takes the logged token usage (input + 0.1 x cache read + 1.25 x cache write = input-eq).
+- TZ-on chats: trims are MEASURED from TZ's own markers; refetches (`tz recall`, re-reads of a trimmed file) and TZ's injected hook text are counted as cost.
+- TZ-off chats: every tool result runs through the same `tzout.cut` code TZ uses live; overhead and refetch are added at the rates measured in TZ-on chats.
+- A removed block of C chars is carried for every later reply until compaction: C/4 x (1.25 + 0.1 x (k-1)). Cache expiry is ignored, which under-counts savings.
+- Result on this machine: 1,025 chats, net 7.9M input-eq saved = 0.58% (~$40 EST at list price). Repeat-search advice: <= 0.02% (upper bound).
+- Not measured: answer quality and turn count. That needs the paid `tzab` A/B.

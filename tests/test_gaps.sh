@@ -28,7 +28,7 @@ import tzattr as t
 L=[{'message':{'content':[{'type':'tool_use','id':'1','name':'mcp__srv__q','input':{}},{'type':'tool_use','id':'2','name':'Task','input':{}}]}},
    {'message':{'content':[{'type':'tool_result','tool_use_id':'1','content':'x'*400},{'type':'tool_result','tool_use_id':'2','content':'y','is_error':True}]}}]
 open(T+'/a.jsonl','w').write('\n'.join(map(json.dumps,L)))
-r2=t.attribute(T+'/a.jsonl'); assert r2['mcp:srv']['calls']==1 and r2['mcp:srv']['result_chars']>=400 and r2['subagent']['errors']==1, r2
+r2=t.attribute(T+'/a.jsonl'); assert r2['mcp:srv']['calls']==1 and r2['mcp:srv']['result_chars']>=400 and r2['subagent:general-purpose']['errors']==1, r2
 cf=t.conflicts({'A.md':'Always read whole files before editing them.','B.md':'Never read whole files; use line ranges.'}); assert cf and cf[0][:2]==('A.md','B.md'), cf
 assert not t.conflicts({'A.md':'Always run tests.','B.md':'Never commit secrets.'})
 # 7 reconcile, vault-find, overlap, skills-outcome

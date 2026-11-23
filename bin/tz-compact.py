@@ -103,7 +103,12 @@ def git(cwd, *a):
 
 
 try:
-    d = json.load(sys.stdin)
+    _raw = sys.stdin.read()
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import tzlib as _tzl
+    if _tzl.dup_hook(os.path.basename(__file__), _raw):
+        sys.exit(0)  # same event already handled by the other registered copy
+    d = json.loads(_raw)
     if d.get('agent_id') or '/subagents/' in (d.get('transcript_path') or ''):
         sys.exit(0)  # subagent compaction shares the parent session_id: never overwrite the parent's note
     cwd = d.get('cwd') or os.getcwd()

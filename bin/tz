@@ -44,7 +44,11 @@ HELP = """tz <command> [args]
   overlay build|run                             native always-on-top status window (macOS, swiftc from Command Line Tools)
   bench quality TRIALS.json                         tokens per PASSED task, control vs treatment (needs 5+5 trials to count as proof)
   bench results [dir]                           A/B evidence into view
-  attr [LOG]                                         MCP/subagent calls + result size (MEASURED)
+  bench replay [--days N] [--root DIR] [--json]  zero-cost proof: replays your real chat logs offline, net saving after TZ overhead
+  attr [LOG] [--json]                           per MCP server / subagent type / main: calls, tokens, $ (MEASURED tok, EST $)
+  price [MODEL] [--json]                        one pricing table (EST list price; override ~/.claude/token-zombie/prices.json)
+  policy show|check EVENT.json|init             advice-only rules: read/bash caps, dup reads, churn, context %, gates
+  adapters --usage codex [--days N] [--json]    Codex CLI usage from ~/.codex/sessions (MEASURED)
   reconcile | vault-find WORDS | overlap SESSION_DIR | skills-outcome [DIR]   savings check, task retrieval, agent file clashes, skill vs rework
   conflicts FILE...                                  contradictory always/never rules across instruction files
   rework [LOG] [--json]                              repeat/retry/loop counts from a chat log (MEASURED counts)
@@ -104,7 +108,7 @@ def main(argv):
         if c in ('skills', 'capabilities', 'security', 'audit', 'instructions', 'profile'):
             import tzcap
             return tzcap.main([c, *rest])
-        mods = {'learn': 'tzlearn', 'sup': 'tzsup', 'route': 'tzroute', 'adapters': 'tzadapters', 'reg': 'tzreg', 'dash': 'tzdash', 'companion': 'tzcompanion', 'mascot': 'tzmascot', 'hooks': 'tzhooks', 'live': 'tzlive', 'ledger': 'tzdb', 'compress': 'tzcompress', 'rework': 'tzrework', 'attr': 'tzattr', 'reconcile': 'tzmore', 'export': 'tzmore', 'workflow': 'tzmore', 'worktree': 'tzmore', 'find': 'tzmore', 'doctor': 'tzmore', 'vault-find': 'tzmore', 'overlap': 'tzmore', 'skills-outcome': 'tzmore', 'conflicts': 'tzattr', 'preflight': 'tzpreflight', 'recall': 'tzout', 'next': 'tznext', 'state': 'tzcont', 'replay': 'tzcont', 'expensive': 'tzcont', 'waste-audit': 'tzcont', 'ondemand': 'tzondemand', 'systems': 'tzsystems', 'shadow': 'tzout'}
+        mods = {'learn': 'tzlearn', 'sup': 'tzsup', 'route': 'tzroute', 'adapters': 'tzadapters', 'reg': 'tzreg', 'dash': 'tzdash', 'companion': 'tzcompanion', 'mascot': 'tzmascot', 'hooks': 'tzhooks', 'live': 'tzlive', 'ledger': 'tzdb', 'compress': 'tzcompress', 'rework': 'tzrework', 'attr': 'tzattr', 'price': 'tzprice', 'policy': 'tzpolicy', 'reconcile': 'tzmore', 'export': 'tzmore', 'workflow': 'tzmore', 'worktree': 'tzmore', 'find': 'tzmore', 'doctor': 'tzmore', 'vault-find': 'tzmore', 'overlap': 'tzmore', 'skills-outcome': 'tzmore', 'conflicts': 'tzattr', 'preflight': 'tzpreflight', 'recall': 'tzout', 'next': 'tznext', 'state': 'tzcont', 'replay': 'tzcont', 'expensive': 'tzcont', 'waste-audit': 'tzcont', 'ondemand': 'tzondemand', 'systems': 'tzsystems', 'shadow': 'tzout'}
         if c in mods:
             return __import__(mods[c]).main(([c] if mods[c] in ('tzcont', 'tzout', 'tzattr', 'tzmore') else []) + rest)
         if c == 'overlay':  # build/run the native always-on-top window (Command Line Tools swiftc; installs nothing)
@@ -118,6 +122,9 @@ def main(argv):
                 return 0
             print('usage: tz overlay build | run   (run needs a prior build)', file=sys.stderr)
             return 2
+        if c == 'bench' and rest[:1] == ['replay']:
+            import tzreplay
+            return tzreplay.main(rest[1:])
         if c == 'bench':
             import tzbench
             return tzbench.main(rest)

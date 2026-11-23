@@ -89,6 +89,12 @@ def emit(obj):
     CTX[0] += len(hs.get('additionalContext') or '') + len(hs.get('permissionDecisionReason') or '')
 
 
+def _pflush():
+    if LIVE[0]:
+        emit({'hookSpecificOutput': {'hookEventName': 'PreToolUse'}})
+    sys.exit(0)
+
+
 def _tsize():
     try:
         return os.path.getsize(data.get('transcript_path') or '')
@@ -110,7 +116,12 @@ def used_tokens(data):
 
 
 try:
-    data = json.load(sys.stdin)
+    _raw = sys.stdin.read()
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import tzlib as _tzl
+    if _tzl.dup_hook(os.path.basename(__file__), _raw):
+        sys.exit(0)  # same event already handled by the other registered copy
+    data = json.loads(_raw)
     ev = data.get('hook_event_name') or 'UserPromptSubmit'
     try:  # supervisor: full tick only on prompt/compact/stop; tool events just record activity (no heavy imports on every call)
         if ev in ('UserPromptSubmit', 'PreCompact', 'Stop', 'SessionEnd'):
@@ -165,6 +176,14 @@ try:
             _diag('ondemand', ev)
     if ev in ('Stop', 'SessionEnd', 'PreCompact', 'SubagentStop', 'SubagentStart', 'InstructionsLoaded', 'PostCompact') + ('PostToolBatch', 'PreModelSwitch', 'PostModelSwitch', 'WorktreeCreate', 'WorktreeRemove', 'FileChanged'):
         sys.exit(0)
+    if ev == 'PreToolUse':  # policy engine: advice only, fail open, TZ_POLICY=0 disables
+        try:
+            import tzpolicy
+            pa = tzpolicy.hook_advice(data)
+            if pa:
+                LIVE[0] = (LIVE[0] + '\n' + pa).strip()
+        except Exception:
+            _diag('policy', ev)
     if ev == 'PreToolUse' and data.get('tool_name', 'Read') != 'Read':
         if data.get('tool_name') in ('Edit', 'Write', 'MultiEdit', 'NotebookEdit') and advice('next_task'):
             try:  # another live chat claimed this file: warn BEFORE the write (advice only)
@@ -181,7 +200,7 @@ try:
         if (ti.get('limit') or ti.get('offset') or not os.path.isfile(f) or os.path.getsize(f) <= cfg('read_warn')
                 or f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp', '.pdf', '.ipynb'))):
             if not advice('dup_advice'):
-                sys.exit(0)
+                _pflush()
             try:  # same file+range already read and unchanged: advice (default) or, with read_guard=deny, deny once (retry allowed)
                 from tzopt import read_decision, ledger
                 r = read_decision(data)
@@ -189,20 +208,20 @@ try:
                     emit({'hookSpecificOutput': r})
             except Exception:
                 pass
-            sys.exit(0)
+            _pflush()
         if not advice('read_nudge'):
-            sys.exit(0)
+            _pflush()
         state = os.path.expanduser(f"~/.claude/token-zombie/read-{data.get('session_id', 'x')}")
         seen = open(state).read().splitlines() if os.path.exists(state) else []
         if f in seen:
-            sys.exit(0)  # second attempt = Claude decided the whole file is needed: allow
+            _pflush()  # second attempt = Claude decided the whole file is needed: allow
         os.makedirs(os.path.dirname(state), exist_ok=True)
         open(state, 'a').write(f + '\n')
         emit(({'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny',
             'permissionDecisionReason': f'TOKEN ZOMBIE (advice, not a ban): {f} is {os.path.getsize(f) // 1024} KB. '
             'If only part is needed: grep -n, then Read with offset+limit. If the task needs the whole file, '
             'repeat the same Read: it will be allowed.'}}))
-        sys.exit(0)
+        _pflush()
     if ev in ('PostToolUse', 'PostToolUseFailure') and advice('next_task'):  # circuit breaker: same tool/command failing 3x (advice only)
         try:
             import tzcont

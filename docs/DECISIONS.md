@@ -1,0 +1,1 @@
+- 2026-11-23 11:03 no network code; JS AST only if a parser is acceptable
