@@ -42,7 +42,7 @@ P=$(python3 -c "import json;print(json.dumps({'tool_name':'Grep','tool_input':{}
 
 # 3 Grep content + MCP text blocks: head+tail, enum fields untouched
 O=$(printf '%s' "$P" | python3 "$B/tzout.py" hook)
-echo "$O" | python3 -c "import json,sys;o=json.load(sys.stdin)['hookSpecificOutput']['updatedToolOutput'];c=o['content'];assert o['mode']=='content' and 'line 1 secret' in c and 'line 5000 secret' in c and 'middle lines' in c and len(c)<13000" && ok grep-trim || no grep-trim
+echo "$O" | python3 -c "import json,sys;o=json.load(sys.stdin)['hookSpecificOutput']['updatedToolOutput'];c=o['content'];assert o['mode']=='content' and 'line 1 secret' in c and 'line 5000 secret' in c and ('middle lines' in c or 'TOKEN ZOMBIE crushed log' in c) and len(c)<13000" && ok grep-trim || no grep-trim
 M=$(python3 -c "import json;print(json.dumps({'tool_name':'mcp__x__y','tool_input':{},'tool_response':[{'type':'text','text':open('$HOME/big.txt').read()},{'type':'image','data':'zz'}]}))")
 printf '%s' "$M" | python3 "$B/tzout.py" hook | python3 -c "import json,sys;o=json.load(sys.stdin)['hookSpecificOutput']['updatedToolOutput'];assert len(o)==2 and o[1]=={'type':'image','data':'zz'} and len(o[0]['text'])<13000" && ok mcp-trim || no mcp-trim
 

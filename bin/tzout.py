@@ -44,8 +44,19 @@ def cut(text, limit, head_only):
     """Return (kept text, hidden chars) or None if under limit. Cuts on line edges."""
     if len(text) <= limit:
         return None
-    lines = text.split('\n')
     rid = spill(text); _last_rid[0] = rid; _last_rid[1] = len(text)
+    if not head_only:  # content-aware crush first: lossless via recall, keeps structure instead of cutting the middle
+        try:
+            import tzcrush
+            new, kd = tzcrush.crush(text)
+        except Exception:
+            new = None
+        if new is not None:
+            mark = f'\n[TOKEN ZOMBIE crushed {kd}: {len(text) - len(new)} chars removed. Original: tz recall {rid} --grep PATTERN]'
+            if len(new) + len(mark) <= limit:
+                return new + mark, len(text) - len(new) - len(mark)
+            text = new
+    lines = text.split('\n')
     if head_only:  # Read: keep line numbers right, so only a head is kept
         keep, n = [], 0
         for ln in lines:

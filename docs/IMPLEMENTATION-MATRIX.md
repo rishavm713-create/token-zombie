@@ -93,3 +93,9 @@ Status key: BUILT = code + test; PARTIAL = exists, incomplete; MISSING = not in 
 | Proxy, vector memory, auto-routing, HTML/image compression | MISSING by design/optional | Headroom comparison: architecture-level review still to do |
 | Quality-adjusted optimization, policy engine | MISSING | |
 Next build order: JS/TS AST, multi-agent attribution, pricing table, real adapters, catalog refresh, policy engine.
+
+## Round 13 — Headroom parity (see docs/HEADROOM-COMPARISON.md)
+- tzcrush.py: content-aware crush (JSON arrays, unified diffs, repetitive logs) inside tzout.cut before head/tail trim; original spilled first, `tz recall`. Not applied to Read (line numbers).
+- tzlearn.py / `tz learn`: repeated tool failures from logs -> marked block in CLAUDE.local.md, dry run unless --apply.
+- Not built, with reason: proxy (no network code), ML text compressor (model download), MCP server, cache aligner, JS/TS AST (parser dependency), real other-agent adapters.
+- Test: tests/test_gaps.sh section 16.

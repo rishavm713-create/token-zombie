@@ -90,6 +90,18 @@ assert ti.ctx_mark(gd,50) is None and ti.ctx_mark(gd,72)==70 and ti.ctx_mark(gd,
 assert 'EMERGENCY' in open(gd+'/docs/HANDOFF.md').read().split('\n')[0]
 assert ti.ctx_mark(gd,10) is None and ti.ctx_mark(gd,71)==70
 assert sp.run('git status --porcelain',shell=True,cwd=gd,capture_output=True,text=True).stdout.count('b')>=1
+# 16 crush + learn
+import tzcrush as cr, tzlearn as ln
+js=json.dumps([{'id':i,'ok':True} for i in range(50)]+[{'id':99,'error':'boom'}]); n,k=cr.crush(js); assert k=='json' and len(n)<len(js)/2 and 'boom' in n and '"id":0' in n
+lg='\n'.join(f'2026-01-01 12:00:{i:02d} GET /x {i} 200' for i in range(40))+'\nERROR failed'; n,k=cr.crush(lg); assert k=='log' and 'similar lines omitted' in n and '12:00:39 GET /x 39' in n and 'ERROR failed' in n
+df='diff --git a/f b/f\n@@ -1,30 +1,30 @@\n'+'\n'.join(' ctx%d'%i for i in range(10))+'\n-old\n+new\n'+'\n'.join(' c2%d'%i for i in range(10)); n,k=cr.crush(df); assert k=='diff' and '-old' in n and ' ctx0' not in n and ' ctx9' in n
+assert cr.crush('plain words '*5)[0] is None
+import tzout as to; big=json.dumps([{'id':i,'v':'x'*30} for i in range(3000)]); kept,hid=to.cut(big,12000,False); assert 'crushed json' in kept and len(kept)<=12000 and hid>0
+lf=T+'/l.jsonl'; ev=[]
+for i in range(3):
+    ev.append({'message':{'content':[{'type':'tool_use','id':f'a{i}','name':'Bash','input':{'command':'pytest -x'}}]}}); ev.append({'message':{'content':[{'type':'tool_result','tool_use_id':f'a{i}','is_error':True,'content':f'E: no module {i}'}]}})
+open(lf,'w').write('\n'.join(map(json.dumps,ev))); f=ln.mine([lf]); assert f[0][0]==3 and 'pytest' in f[0][2]
+tgt=T+'/cl.md'; open(tgt,'w').write('keep me\n'); ln.apply(tgt,ln.rules(f)); ln.apply(tgt,ln.rules(f)); t=open(tgt).read(); assert t.startswith('keep me') and t.count('TZ-LEARN -->')==2
 # 5 rework score
 assert r.score(0,0,0,{},{})==0 and 0<r.score(10,5,2,{('B','k'):3},{})<=100
 PY
