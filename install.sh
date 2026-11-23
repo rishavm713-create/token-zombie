@@ -29,6 +29,8 @@ except Exception as e:
     die(f'settings.json is not valid JSON ({e}); nothing changed. Fix it or restore a backup first.')
 if not isinstance(s, dict) or not isinstance(s.get('hooks', {}), dict):
     die('settings.json has an unexpected shape (not an object / hooks not an object); nothing changed.')
+# plugin enabled => its hooks/hooks.json already runs every event; settings.json copies would fire each hook twice
+plug = not slo and any(k.startswith('token-zombie@') and v for k, v in (s.get('enabledPlugins') or {}).items())
 try:
     conf = json.load(open(conf_p)) if os.path.exists(conf_p) else {}
     assert isinstance(conf, dict)
@@ -52,7 +54,7 @@ if check:
     sl = 'tz-status.py' in s.get('statusLine', {}).get('command', '')
     print(f"installed events: {', '.join(installed()) or 'none'}; statusline: {'tz' if sl else 'not tz'}")
     sys.exit(0)
-for ev in ([] if slo else list(h)):  # drop only our own commands; keep foreign hooks, even inside the same group
+for ev in ([] if slo and not plug else list(h)):  # drop only our own commands; keep foreign hooks, even inside the same group
     groups = []
     for g in h[ev]:
         g['hooks'] = [x for x in g.get('hooks', []) if not mine(x.get('command', ''))]
@@ -79,7 +81,7 @@ else:
             ('SubagentStop', None, guard), ('SubagentStart', None, guard), ('InstructionsLoaded', None, guard),
             ('PostCompact', None, guard), ('PostToolUseFailure', None, guard),
             ('PostToolBatch', None, guard), ('PreModelSwitch', None, guard), ('PostModelSwitch', None, guard), ('WorktreeCreate', None, guard), ('WorktreeRemove', None, guard), ('FileChanged', None, guard))
-    for ev, m, cmd in (() if slo else plan):
+    for ev, m, cmd in (() if slo or plug else plan):
         g = {'hooks': [{'type': 'command', 'command': cmd, 'timeout': 5}]}
         if m is not None:
             g['matcher'] = m
@@ -88,7 +90,7 @@ else:
     if 'tz-status.py' not in cur:
         conf['prev_statusline'] = cur
     s['statusLine'] = {'type': 'command', 'command': status}
-    msg = 'token-zombie statusline set (hooks come from the plugin).' if slo else 'token-zombie installed: guard + supervisor (prompt/tool/stop/session-end/precompact), pack hints, lean start, compaction note, statusline. Open a new chat to see it.'
+    msg = 'token-zombie statusline set (hooks come from the plugin).' if slo or plug else 'token-zombie installed: guard + supervisor (prompt/tool/stop/session-end/precompact), pack hints, lean start, compaction note, statusline. Open a new chat to see it.'
 if dry:
     import difflib
     print('\n'.join(difflib.unified_diff(before, json.dumps(s, indent=2, sort_keys=True).splitlines(), 'settings.json now', 'settings.json after', lineterm='', n=1)))

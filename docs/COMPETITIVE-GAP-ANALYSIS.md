@@ -7,7 +7,7 @@ Replaces the earlier repo-only version. Sources: `internal/COMPETITIVE-INTELLIGE
 | P0 | Answer-quality A/B not run. Zero-cost replay done 2026-11-23: 1,025 real chats, net 0.58% input saved after TZ overhead | Number is now MEASURED but small; quality effect unknown | `tz bench replay` (free); paid `tzab` for quality |
 | P0 | Live-host verification: re-run `./install.sh`, check toolbar look, 9 hook events | Several features read UNAVAILABLE until then | Owner, ~15 min |
 | P1 | MCP / tool-schema cost signal | Token Optimizer audits MCP; a big hidden cost | Small–medium | DONE |
-| P1 | 30-second demo GIF of the real toolbar | RTK/Ponytail convert on a visual | Small, needs real capture |
+| P1 | Demo GIF | RTK/Ponytail convert on a visual | DONE: docs/img/demo.gif from real tz output (toolbar capture still owner) |
 | P1 | Handoff chain id + import of crashed-session JSONL | REMvisual and vasilispapg do this | Small | DONE |
 | P2 | Official 5h/7d usage view | Usage-Monitor, ccstatusline show it | Medium (host data) | DONE |
 | P2 | JS/TS skeleton compression | LeanCTX 27 langs | Medium | DONE |

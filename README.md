@@ -7,6 +7,8 @@ Free. Runs on your computer. Nothing is sent anywhere.
 
 [![License](https://img.shields.io/badge/License-MIT-4c9a1a)](LICENSE) [![macOS](https://img.shields.io/badge/macOS-supported-000000?logo=apple&logoColor=white)](COMPAT.md) [![Linux](https://img.shields.io/badge/Linux-CI-1f6feb?logo=linux&logoColor=white)](COMPAT.md) [![Built on](https://img.shields.io/badge/Built%20on-Claude%20Code-d97757)](docs/INSTALL.md) [![Local first](https://img.shields.io/badge/Local--first-no%20telemetry-83ffa0)](SECURITY.md) [![GitHub Stars](https://img.shields.io/github/stars/rishavm713-create/token-zombie?style=social)](https://github.com/rishavm713-create/token-zombie)
 
+![TOKEN ZOMBIE demo: status, lossless trim, free replay benchmark](docs/img/demo.gif)
+
 [Website](https://rishavm713-create.github.io/token-zombie/) · [Install guide](docs/INSTALL.md) · [Docs](#docs) · [Discussions](https://github.com/rishavm713-create/token-zombie/discussions)
 
 ![TOKEN ZOMBIE toolbar inside Claude Code](docs/img/toolbar-live.svg)
