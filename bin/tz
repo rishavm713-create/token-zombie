@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 Rishav Mishra, creator of TOKEN ZOMBIE. MIT licence (see LICENSE); third-party credits in NOTICE.
 # tz: one CLI over the token-zombie modules. Shared config/state: ~/.claude/token-zombie/ (config.json, env TZ_<KEY>).
 # Old scripts (tz-guard.py, tz-status.py, tz-start.py, tz-compact.py, tz-vet.sh) are unchanged and still work alone.
 import os, subprocess, sys

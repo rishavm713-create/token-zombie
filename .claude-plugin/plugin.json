@@ -3,7 +3,8 @@
   "version": "2.0.1",
   "description": "Local-first token saver for Claude Code: guard hooks, supervisor, handoffs, checkpoints, optimizer, skill audit. No network, no telemetry.",
   "author": {
-    "name": "TOKEN ZOMBIE contributors"
+    "name": "Rishav Mishra",
+    "url": "https://github.com/rishavm713-create"
   },
   "types": "./types/index.d.ts",
   "license": "MIT"

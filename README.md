@@ -57,10 +57,12 @@ Restart Claude Code, then run `/token-zombie:tz`. Verify and roll back: [install
 | [Benchmark method](docs/BENCHMARK-METHOD.md) | How savings are measured |
 | [Limitations](docs/LIMITATIONS.md) | Known constraints |
 | [Security](SECURITY.md) | Privacy and safety |
-| [Contributing](CONTRIBUTING.md) | First contributions |
+| [Contributing](CONTRIBUTING.md) | First contributions | | [Brand policy](BRANDING.md) | Creator, copyright, forks, name use |
 
 ## Creator
 
-Built by [Rishav Mishra](https://rishavm713-create.github.io/), because the problem was real. Open source so the fix is not another limitation for someone else. Also see [EditSutra](https://editsutra.github.io/).
+**Created by [Rishav Mishra](https://rishavm713-create.github.io/).** Built by Rishav Mishra. TOKEN ZOMBIE started with a simple idea: make AI coding agents more efficient, reduce wasted context and help developers build better software. The project is developed as a local-first engineering efficiency layer for Claude Code.
 
-MIT licence · © 2026 Rishav Mishra
+Also see [EditSutra](https://editsutra.github.io/).
+
+Copyright © 2026 Rishav Mishra. Code: [MIT licence](LICENSE); third-party credits: [NOTICE](NOTICE). Name, logo and forks: [BRANDING.md](BRANDING.md).

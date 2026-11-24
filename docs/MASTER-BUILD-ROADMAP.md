@@ -146,7 +146,7 @@ Rule: reuse code only from permissive licences with notice kept; otherwise learn
 | Competitor audit and 13-item build list (BUILD-LIST) | 3 of 13 built (diffcheck, impact, safe); rest open, see G |
 | Claude Mods spec A-G, phases 1-6 | One mod built and validated; not live-tested; pause/approve/retry and agent spawning blocked by host |
 | TZ 3.0 Product Factory vision (12 sections) | Phase 0 audit, phase 1 workers, phase 2 gate built. Phases 3-8 (spec, modules, factory, UI, deploy, acceptance product) NOT built |
-| Open-core strategy | Archived (docs/archive/OPEN-CORE-DECISION.md): out of current scope. No paid product planned |
+| Open-core strategy | docs/OPEN-CORE-DECISION.md + BRANDING.md section 6: TZ Core free/MIT here; TZ Studio a possible future product in a separate repo, no work on it now |
 | Master Product Vision / Engineering Mandate (17 sections, 3 modes) | Audit done (FACTORY-AUDIT). Only the parts in A-D above are built; the product-builder modes are not |
 | Two repos, one website, one brand structure | Decision recorded only. Repo 2 and website changes not started, by decision |
 | Original EditSutra-style acceptance product | NOT built |
