@@ -83,3 +83,5 @@ Built by [Rishav Mishra](https://rishavm713-create.github.io/). Built because th
 MIT licence. © 2026 Rishav Mishra.
 
 `tz map [dir]` prints a compact file-to-definitions map (Aider's repo-map idea) so a chat reads one page instead of many files. `tz xcheck` compares tz token totals with ccusage if you have it installed (it never downloads anything).
+
+`tz agent "<task>" [--test CMD] [--worktree] [--files a,b] [--budget TOK]` (also `tz code --run`) runs the coding pipeline for real: one host call per phase (plan, build), your test command, up to 2 debug rounds, a token budget, one ledger event and checkpoint per phase, and file ownership so two tasks never edit one file. Pushing, `rm -rf` and `sudo` are denied. Idea from mini-SWE-agent (MIT); the loop here is our own. Tested only against a fake host so far, not a live Claude run.

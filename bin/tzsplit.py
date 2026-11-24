@@ -154,6 +154,9 @@ def main(argv):
             print(f"lock '{k}' shared by tasks {v}: tz lock acquire {k}  ... tz lock release {k}")
         print('rule: ' + r['rule'] + '\nTZ starts nothing; open one session per line yourself.')
         return 0
+    if c == 'code' and '--run' in a:  # executes the pipeline: tz code --run [--test CMD] [--worktree] <task>
+        import tzagent
+        return tzagent.main([x for x in a if x != '--run'])
     if c == 'code':
         rows = code_pipeline(' '.join(a))
         if js:
