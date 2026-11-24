@@ -28,4 +28,5 @@ ck "tz2: safe allows force-with-lease and echo text" 'python3 "$R/bin/tz" safe "
 ck "tz2: impact finds a referencing file" 'python3 "$R/bin/tz" impact tzops | grep -q "bin/tz"'
 ck "tz2: run lists 10 stages, dry by default" '[ "$(python3 "$R/bin/tz" run "x" | grep -c "^ *[0-9]")" = 10 ]'
 ck "tz2: guard hook denies git reset --hard, passes ls" 'echo "{\"hook_event_name\":\"PreToolUse\",\"tool_name\":\"Bash\",\"tool_input\":{\"command\":\"git reset --hard\"},\"session_id\":\"t1\",\"cwd\":\"/tmp\"}" | python3 "$R/bin/tz-guard.py" | grep -q deny && ! (echo "{\"hook_event_name\":\"PreToolUse\",\"tool_name\":\"Bash\",\"tool_input\":{\"command\":\"ls\"},\"session_id\":\"t1\",\"cwd\":\"/tmp\"}" | python3 "$R/bin/tz-guard.py" | grep -q deny)'
+ck "tz2: scaffold writes a SaaS skeleton whose own tests pass (0 tokens)" 'D=$(mktemp -d); python3 "$R/bin/tz" scaffold "track invoices" --dir $D/x --fields client,amount >/dev/null && cd $D/x && python3 -W ignore -m unittest -q 2>&1 | grep -q "^OK"'
 echo "pass $P fail $F"; [ $F = 0 ]

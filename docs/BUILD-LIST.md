@@ -46,3 +46,4 @@ Not copied: claude-squad (AGPL), 100-agent swarms, vector DB, cloud proxy.
 Total ~7 h of build; items 1-9 ~5 h.
 
 ## Built 2026-11-24 (tz 2.0 front door): `tz safe` (destructive-command rules, cc-safety-net approach, MIT, rewritten), `tz impact`, `tz diffcheck` (karpathy-skills scope idea, MIT, rewritten), `tz run` (10 stages, dry by default; `--go` runs tz agent with budget and worktree). Not wired: safe into the tz-guard hook (opt-in later), task deps (tz next already has deps).
+Built 2026-11-24: `tz scaffold "<idea>"` (0 tokens, templates, stdlib): signup/login, one CRUD resource, sqlite, passing tests. Next: HTML UI template, payments stub, deploy files, more templates (Node, Next.js) as reusable repos under licence.

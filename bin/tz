@@ -67,6 +67,7 @@ HELP = """tz <command> [args]
   safe "CMD"                                     block destructive shell commands (reset --hard, rm -r /, force push)
   impact FILE|SYMBOL                             what references it: files and tests that may break
   diffcheck [--files a,b]                        diff vs task scope: strays, debug leftovers, huge diffs
+  scaffold "IDEA" [--dir D] [--fields a,b]       working SaaS skeleton from templates, 0 tokens, stdlib only
   run "TASK" [--go] [--test CMD]                 one front door: understand to remember, optimized stages
   stack idea|design|web|off                      turn on the skill packs an idea-to-product build needs
   features [--md]                                the 69-feature board: DONE / PARTIAL / MISSING, new ones highlighted
@@ -154,6 +155,9 @@ def main(argv):
         if c in ('reuse', 'gaps', 'missing', 'contract', 'api', 'dbschema', 'coord', 'stack'):
             import tzbuild
             return tzbuild.main([c] + rest)
+        if c == 'scaffold':
+            import tzscaffold
+            return tzscaffold.main(rest)
         if c in ('safe', 'impact', 'diffcheck', 'run'):
             import tzops
             return tzops.main([c] + rest)
