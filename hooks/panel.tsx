@@ -1,5 +1,6 @@
 import { atom, read, update } from 'claude-code'
 import type { Register } from 'claude-code'
+import { registerTools, startTools } from './tools'
 
 import type { Act, Bar, Files, Note, Stats } from '../types'
 
@@ -227,7 +228,9 @@ async function mascot($: any, vs: string) {
 }
 
 export const register: Register = on => {
+  registerTools(on)
   on('session.start', async ($, e, next) => {
+    await startTools($)
     try {
       await $.command.register({ name: 'tz', description: 'Open the TOKEN ZOMBIE pane' })
       $.clock.every(5000, () => void poll($))

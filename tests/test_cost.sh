@@ -36,4 +36,7 @@ ok "python3 $R/bin/tz xcheck --json '$T/cc2.json' | grep -q 'cacheWrite.*over 1%
 ok "python3 $R/bin/tz attr '$T/.claude/projects/q/sess1.jsonl' | grep -q 'no price known for mystery-9'" unpriced-model-labelled
 ok "python3 -c \"import sys;sys.path.insert(0,'$R/bin');import tzprice as p;assert p.known('claude-sonnet-5-5') and not p.known('mystery-9')\"" price-known
 ok "python3 -c \"import sys,json,os,time;sys.path.insert(0,'$R/bin');import tzlib;d='$T/ag';os.makedirs(d);n=time.time();json.dump({'running':1,'ts':n-50},open(d+'/agents-a.json','w'));json.dump({'running':3,'ts':n},open(d+'/agents-b.json','w'));assert tzlib.agents_snapshot(d)['running']==3;json.dump({'running':9,'ts':n-5},open(d+'/agents-a.json','w'));assert tzlib.agents_snapshot(d)['running']==3 or True;assert tzlib.agents_snapshot(d+'/none')=={}\"" agents-per-session
+mkdir -p "$T/.claude/token-zombie"; echo '{"seen":{"prompt.submit":3},"ts":1}' > "$T/.claude/token-zombie/hookproof-abc123.json"
+ok "python3 $R/bin/tz hooks proof | grep -q 'prompt.submit x3'" hooks-proof
+ok "claude plugin validate $R 2>&1 | grep -q 'Validation passed'" mod-validates
 echo "pass $P fail $F"; [ $F = 0 ]

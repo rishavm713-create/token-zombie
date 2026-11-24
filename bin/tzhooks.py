@@ -77,14 +77,31 @@ def live(home=None):
     return agg
 
 
+def proof():
+    """Events the mod really received in live chats (hookproof-<session>.json, written by hooks/tools.ts). [MEASURED]; none = the mod has not run in a live chat yet."""
+    import glob
+    fs = sorted(glob.glob(os.path.join(os.path.expanduser('~/.claude/token-zombie'), 'hookproof-*.json')), key=os.path.getmtime)[-5:]
+    if not fs:
+        print('hook proof: no live-chat record yet (the mod writes it on the first prompt in a chat with this plugin loaded)'); return 0
+    for f in fs:
+        try:
+            d = json.load(open(f))
+            print(os.path.basename(f)[10:-5][:12], ', '.join('%s x%d' % kv for kv in sorted(d.get('seen', {}).items())))
+        except Exception:
+            continue
+    return 0
+
+
 def main(argv):
     import argparse
     ap = argparse.ArgumentParser(prog='tz hooks')
-    ap.add_argument('cmd', choices=['bench', 'live'])
+    ap.add_argument('cmd', choices=['bench', 'live', 'proof'])
     ap.add_argument('--mb', type=float, default=20)
     ap.add_argument('--n', type=int, default=7)
     ap.add_argument('--json', action='store_true')
     a = ap.parse_args(argv)
+    if a.cmd == 'proof':
+        return proof()
     r = bench(a.mb, a.n) if a.cmd == 'bench' else live()
     if a.json:
         print(json.dumps(r, indent=1)); return 0
