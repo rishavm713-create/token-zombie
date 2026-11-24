@@ -44,7 +44,8 @@ def metrics(bus, now=None):
     import time
     from tzlib import skills_off
     now = now or time.time()
-    ag = _j('agents.json', {})
+    from tzlib import agents_snapshot
+    ag = agents_snapshot(S())
     fresh = isinstance(ag.get('ts'), (int, float)) and now - ag['ts'] <= 180 and isinstance(ag.get('running'), int)
     agents = (ag['running'], 'MEASURED', 'subagents running (Mods agent.list)') if fresh else ('—', 'UNKNOWN', 'needs the in-chat panel loaded')
     sk = os.path.expanduser('~/.claude/skills')

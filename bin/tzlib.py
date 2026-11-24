@@ -134,3 +134,19 @@ def dup_hook(name, raw, window=5):
     except OSError:
         return False  # fail open: run the hook
     return False
+
+
+def agents_snapshot(state_dir):
+    """Per-session agent snapshots (agents-<session>.json, one writer each, so sessions never overwrite each other).
+    Returns the newest one; falls back to the old shared agents.json. {} if none."""
+    import glob, json, os
+    best, bt = {}, -1
+    for f in glob.glob(os.path.join(state_dir, 'agents-*.json')) + [os.path.join(state_dir, 'agents.json')]:
+        try:
+            v = json.load(open(f))
+            t = v.get('ts') if isinstance(v, dict) else None
+            if isinstance(t, (int, float)) and t > bt:
+                best, bt = v, t
+        except Exception:
+            continue
+    return best

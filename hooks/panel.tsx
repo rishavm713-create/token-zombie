@@ -59,7 +59,8 @@ async function writeAgents($: any, d: string, now: number): Promise<number | nul
     if (String(running) === lastAgents && now - lastAgentsAt < 60) return running
     lastAgents = String(running)
     lastAgentsAt = now
-    await $.fs.write(`${d}/agents.json`, JSON.stringify({ running, total: list.length, ts: Math.round(now), src: 'mods agent.list' }))
+    const sid = String(await $.session.id()).replace(/[^A-Za-z0-9-]/g, '').slice(0, 64) || 'x'
+    await $.fs.write(`${d}/agents-${sid}.json`, JSON.stringify({ running, total: list.length, ts: Math.round(now), src: 'mods agent.list' }))
     return running
   } catch {
     return null /* host without agent.list: dashboard shows UNKNOWN */

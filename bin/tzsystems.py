@@ -23,7 +23,7 @@ def build(sid=None, now=None):
         k[1] += e.get('tok', 0)
     ov = sum(v[1] for k, v in kt.items() if k.startswith('overhead'))
     sv = sum(v[1] for k, v in kt.items() if not k.startswith('overhead'))
-    fr, st, ag = _j('fresh.json', {}), _j('status.json', {}), _j('agents.json', {})
+    fr, st, ag = _j('fresh.json', {}), _j('status.json', {}), __import__('tzlib').agents_snapshot(STATE)
     ec = _j('econ.json', {}).get('now')
     caps = collections.Counter()
     try:
@@ -58,7 +58,7 @@ def build(sid=None, now=None):
                        action='tz capabilities'),
         'agents': S(happening=f"{ag.get('running', '?')} running of {ag.get('total', '?')}", did='reads host agent list; per-agent cost vs outcome (tz live roi)',
                     impact=(f"{len(roi)} agents ~${sum(x['usd'] or 0 for x in roi):.2f} EST, flagged {sum(1 for x in roi if x['flags'])}" if roi else 'UNKNOWN: no agent cost this session'),
-                    evidence=f"agents.json ({ag.get('src', 'none')})", status='MEASURED snapshot; agents tracked by exact agent_id via SubagentStart/Stop',
+                    evidence=f"agents-<session>.json ({ag.get('src', 'none')})", status='MEASURED snapshot; agents tracked by exact agent_id via SubagentStart/Stop',
                     action='tz live agents'),
         'survival': S(happening=f"ctx {st.get('ctx_pct', '?')}%, level {st.get('level', '?')}, risk {st.get('risk', '?')}",
                       did='warns, compares stay/compact/fresh by projected cost; checks the compaction summary against the continuation note',

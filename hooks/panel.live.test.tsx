@@ -54,7 +54,7 @@ test('bar numbers follow agent.list, skills invoked this session and ledger.json
   expect(await val(/^SKILLS USED$/)).toBe('1')
   expect(await val(/^TOKENS SAVED$/)).toBe('100')
   expect(await val(/^OPTIMIZATIONS$/)).toBe('1')
-  expect(JSON.parse(w.writes['/h/.claude/token-zombie/agents.json']!).running).toBe(1)
+  expect(JSON.parse(w.writes['/h/.claude/token-zombie/agents-s1.json']!).running).toBe(1)
 
   // sources change; the next poll picks them up
   w.agents = 4
@@ -65,7 +65,7 @@ test('bar numbers follow agent.list, skills invoked this session and ledger.json
   expect(await val(/^SKILLS USED$/)).toBe('3')
   expect(await val(/^TOKENS SAVED$/)).toBe('300')
   expect(await val(/^OPTIMIZATIONS$/)).toBe('3')
-  expect(JSON.parse(w.writes['/h/.claude/token-zombie/agents.json']!).running).toBe(4)
+  expect(JSON.parse(w.writes['/h/.claude/token-zombie/agents-s1.json']!).running).toBe(4)
   await ui.unmount()
 })
 
