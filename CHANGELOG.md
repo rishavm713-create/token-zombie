@@ -1,5 +1,5 @@
 # Changelog
-## v2.0.0 (2026-11-24, local commit, not tagged or pushed until the release checks pass)
+## v2.0.0 (2026-11-24)
 Built and tested (tests/run_all.sh; counts in docs/MASTER-BUILD-ROADMAP.md section 10):
 - Workers: `tz worker` registry (cli/http/offline), `tz hw`; worker timeout kills the whole process group (test_killgroup).
 - Agent: `tz agent` pipeline with `--gate` (diff/ownership/safe/secrets/tests-ran/API drift (Python)/regression link/lint-type-audit detect), bounded repair, killed-run `--resume`, `--rollback` (restores only files the failed run changed).
