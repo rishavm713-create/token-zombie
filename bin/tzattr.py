@@ -5,6 +5,9 @@
 import json, os, re, sys, collections
 
 
+UNPRICED = set()  # model names with no price family: their $ uses the sonnet price and is labelled so
+
+
 def _usage(path):
     """Sum assistant usage in one transcript, deduped by message id. MEASURED tokens; USD EST at list price (tzcont.PRICE)."""
     import tzcont
@@ -21,6 +24,8 @@ def _usage(path):
         seen.add(m.get('id'))
         g = lambda k: u.get(k) or 0
         pin, pout = tzcont.PRICE[tzcont._fam(m.get('model'))]
+        if not tzcont.tzprice.known(m.get('model')):
+            UNPRICED.add(str(m.get('model')))
         r['calls'] += 1; r['input'] += g('input_tokens'); r['output'] += g('output_tokens')
         r['cache_read'] += g('cache_read_input_tokens'); r['cache_write'] += g('cache_creation_input_tokens')
         r['usd'] += (g('input_tokens') + 0.1 * g('cache_read_input_tokens') + 1.25 * g('cache_creation_input_tokens')) * pin / 1e6 + g('output_tokens') * pout / 1e6
@@ -136,6 +141,8 @@ def main(argv):
         else:
             print(f"  {k:30} {v['calls']:>4} calls  ~{v['result_chars'] // 4} result tok EST  {v['errors']} errors")
     print(f"  {'TOTAL':30} {t['calls']:>4} calls  in {t['input']} out {t['output']} cache r{t['cache_read']}/w{t['cache_write']} MEASURED  ${t['usd']:.4f}  ~{t['result_chars'] // 4} result tok EST")
+    if UNPRICED:
+        print('  note: no price known for %s; counted at the sonnet price, so those $ are a guess (add them to ~/.claude/token-zombie/prices.json)' % ', '.join(sorted(UNPRICED)))
     return 0
 
 

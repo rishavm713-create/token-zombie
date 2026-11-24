@@ -40,6 +40,12 @@ def family(model_id):
     return next((k for k in PRICES if k in m), DEFAULT)
 
 
+def known(model_id):
+    """False when no price family matches: callers must say 'priced as sonnet [EST]' instead of showing the number as fact."""
+    m = (model_id or '').lower()
+    return any(k in m for k in PRICES)
+
+
 def price(model_id):
     return PRICES[family(model_id)]
 

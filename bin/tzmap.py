@@ -34,10 +34,13 @@ def build(root, limit=40):
 
 
 def xcheck(argv):
+    """Same session, same token categories: tz (chat log) vs ccusage. A gap is shown per category, never one blended total."""
     from tzusage import totals, find_transcript
-    t = totals(find_transcript(os.getcwd()))
-    mine = t['inp'] + t['out'] + t['cr'] + t['cw']
-    print('tz   : %d tokens in the newest chat of this folder (MEASURED from the chat log)' % mine)
+    path = find_transcript(os.getcwd())
+    sid = os.path.basename(path or '')[:-6]
+    t = totals(path)
+    mine = dict(input=t['inp'], output=t['out'], cacheRead=t['cr'], cacheWrite=t['cw'])
+    print('tz       session %s: ' % (sid or '?') + ', '.join('%s %d' % kv for kv in mine.items()) + ' (MEASURED from the chat log)')
     raw = None
     if '--json' in argv:
         raw = json.load(open(argv[argv.index('--json') + 1]))
@@ -47,9 +50,21 @@ def xcheck(argv):
         print('ccusage not installed. Cross-check: npm i -g ccusage, then tz xcheck (or tz xcheck --json file). Nothing was downloaded.')
         return 0
     rows = raw.get('sessions', raw) if isinstance(raw, dict) else raw
-    tot = sum(int(r.get('totalTokens') or 0) for r in rows if isinstance(r, dict))
-    print('ccusage: %d tokens over %d sessions (all chats, so only compare per session id)' % (tot, len(rows)))
-    return 0
+    row = next((r for r in rows if isinstance(r, dict) and sid and sid in str(r.get('sessionId') or r.get('session') or '')), None)
+    if not row:
+        print('ccusage has no row for session %s: cannot compare (no blended total shown on purpose).' % sid)
+        return 1
+    theirs = dict(input=row.get('inputTokens'), output=row.get('outputTokens'), cacheRead=row.get('cacheReadTokens'), cacheWrite=row.get('cacheCreationTokens'))
+    bad = 0
+    for k, v in mine.items():
+        o = theirs[k]
+        if o is None:
+            print('  %-10s tz %d vs ccusage UNKNOWN (field missing)' % (k, v)); continue
+        d = v - int(o)
+        bad += abs(d) > max(1, 0.01 * max(v, int(o)))
+        print('  %-10s tz %d vs ccusage %d  diff %+d%s' % (k, v, int(o), d, '' if abs(d) <= max(1, 0.01 * max(v, int(o))) else '  <- over 1%: check duplicate-message handling or a live chat still writing'))
+    print('MATCH within 1%' if not bad else '%d categories differ' % bad)
+    return 0 if not bad else 1
 
 
 def main(argv):

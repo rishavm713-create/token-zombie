@@ -27,4 +27,12 @@ python3 "$R/bin/tz" noise --apply | grep -q 'nothing to add'; ok "[ $? = 0 ]" no
 mkdir -p "$T/m"; printf 'def alpha():\n  pass\nclass Beta: pass\n' > "$T/m/a.py"
 ok "python3 $R/bin/tz map '$T/m' 2>/dev/null | grep -q 'a.py: alpha class Beta'" repo-map
 ok "python3 $R/bin/tz xcheck | grep -q 'ccusage'" xcheck
+mkdir -p "$T/.claude/projects/q"; rm -f "$T"/.claude/projects/*/*.jsonl
+echo '{"type":"assistant","message":{"id":"a1","model":"mystery-9","usage":{"input_tokens":100,"output_tokens":50,"cache_read_input_tokens":1000,"cache_creation_input_tokens":200}}}' > "$T/.claude/projects/q/sess1.jsonl"
+echo '{"sessions":[{"sessionId":"sess1","inputTokens":100,"outputTokens":50,"cacheReadTokens":1000,"cacheCreationTokens":200}]}' > "$T/cc.json"
+echo '{"sessions":[{"sessionId":"sess1","inputTokens":100,"outputTokens":50,"cacheReadTokens":1000,"cacheCreationTokens":999}]}' > "$T/cc2.json"
+ok "python3 $R/bin/tz xcheck --json '$T/cc.json' | grep -q 'MATCH within 1%'" xcheck-same-session-match
+ok "python3 $R/bin/tz xcheck --json '$T/cc2.json' | grep -q 'cacheWrite.*over 1%'" xcheck-per-category-diff
+ok "python3 $R/bin/tz attr '$T/.claude/projects/q/sess1.jsonl' | grep -q 'no price known for mystery-9'" unpriced-model-labelled
+ok "python3 -c \"import sys;sys.path.insert(0,'$R/bin');import tzprice as p;assert p.known('claude-sonnet-5-5') and not p.known('mystery-9')\"" price-known
 echo "pass $P fail $F"; [ $F = 0 ]
