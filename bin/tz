@@ -69,6 +69,8 @@ HELP = """tz <command> [args]
   diffcheck [--files a,b]                        diff vs task scope: strays, debug leftovers, huge diffs
   scaffold "IDEA" [--dir D] [--fields a,b]       working SaaS skeleton from templates, 0 tokens, stdlib only
   run "TASK" [--go] [--test CMD]                 one front door: understand to remember, optimized stages
+  worker detect|list|add|test|run|rm             provider-independent workers: claude, codex, gemini, aider, opencode, local HTTP model
+  hw                                             this machine's memory and which local model size fits (estimate)
   stack idea|design|web|off                      turn on the skill packs an idea-to-product build needs
   features [--md]                                the 69-feature board: DONE / PARTIAL / MISSING, new ones highlighted
   bench harbor [--dataset D] [--n N] [--run]     Harbor/Terminal-Bench control vs treatment commands (prints; --run executes)
@@ -158,6 +160,9 @@ def main(argv):
         if c == 'scaffold':
             import tzscaffold
             return tzscaffold.main(rest)
+        if c in ('worker', 'hw'):
+            import tzworkers
+            return tzworkers.main([c] + rest)
         if c in ('safe', 'impact', 'diffcheck', 'run'):
             import tzops
             return tzops.main([c] + rest)

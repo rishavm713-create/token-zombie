@@ -29,4 +29,20 @@ ck "tz2: impact finds a referencing file" 'python3 "$R/bin/tz" impact tzops | gr
 ck "tz2: run lists 10 stages, dry by default" '[ "$(python3 "$R/bin/tz" run "x" | grep -c "^ *[0-9]")" = 10 ]'
 ck "tz2: guard hook denies git reset --hard, passes ls" 'echo "{\"hook_event_name\":\"PreToolUse\",\"tool_name\":\"Bash\",\"tool_input\":{\"command\":\"git reset --hard\"},\"session_id\":\"t1\",\"cwd\":\"/tmp\"}" | python3 "$R/bin/tz-guard.py" | grep -q deny && ! (echo "{\"hook_event_name\":\"PreToolUse\",\"tool_name\":\"Bash\",\"tool_input\":{\"command\":\"ls\"},\"session_id\":\"t1\",\"cwd\":\"/tmp\"}" | python3 "$R/bin/tz-guard.py" | grep -q deny)'
 ck "tz2: scaffold writes a SaaS skeleton whose own tests pass (0 tokens)" 'D=$(mktemp -d); python3 "$R/bin/tz" scaffold "track invoices" --dir $D/x --fields client,amount >/dev/null && cd $D/x && python3 -W ignore -m unittest -q 2>&1 | grep -q "^OK"'
+ck "tz3: hw prints memory and a tier" 'python3 "$R/bin/tz" hw | grep -q "ESTIMATE"'
+ck "tz3: cli worker add, test, run (no shell, prompt passed as one arg)" 'export TZ_WORKERS_DIR=$(mktemp -d); python3 "$R/bin/tz" worker add echo1 --kind cli --cmd "python3 -c \"import sys;print(sys.argv[1])\" {prompt}" >/dev/null && [ "$(python3 "$R/bin/tz" worker run echo1 "a; b c")" = "a; b c" ] && python3 "$R/bin/tz" worker test echo1 | grep -q "^OK"'
+ck "tz3: http worker talks OpenAI-style to a local server" 'export TZ_WORKERS_DIR=$(mktemp -d); python3 - "$R" <<PY
+import http.server, threading, json, subprocess, sys
+class H(http.server.BaseHTTPRequestHandler):
+    def do_POST(s):
+        s.rfile.read(int(s.headers["Content-Length"])); b=json.dumps({"choices":[{"message":{"content":"OK from fake"}}]}).encode()
+        s.send_response(200); s.send_header("Content-Length",str(len(b))); s.end_headers(); s.wfile.write(b)
+    def log_message(*a): pass
+v=http.server.HTTPServer(("127.0.0.1",0),H); threading.Thread(target=v.serve_forever,daemon=True).start()
+tz=[sys.executable, sys.argv[1]+"/bin/tz"]
+subprocess.run(tz+["worker","add","loc","--kind","http","--url","http://127.0.0.1:%d/v1"%v.server_port],check=True,capture_output=True)
+o=subprocess.run(tz+["worker","run","loc","hi"],capture_output=True,text=True).stdout
+sys.exit(0 if "OK from fake" in o else 1)
+PY'
+ck "tz3: unknown worker fails cleanly" 'export TZ_WORKERS_DIR=$(mktemp -d); ! python3 "$R/bin/tz" worker run nope hi 2>/dev/null'
 echo "pass $P fail $F"; [ $F = 0 ]
