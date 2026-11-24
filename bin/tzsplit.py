@@ -55,6 +55,8 @@ SYS = re.compile(r'<(system-reminder|task-notification|pasted_content|[a-z-]*eve
 def detect(prompt):
     """Independent tasks in one prompt: numbered/bulleted lines or 'also/then ...' clauses. [] when fewer than 2 (heuristic, advice only)."""
     prompt = SYS.sub(' ', prompt or '')
+    if len(prompt) > 1500:  # long pasted text is a document, not a task list
+        return []
     items = [re.sub(r'^\s*(\d+[.)]|[-*])\s*', '', l).strip() for l in (prompt or '').splitlines() if re.match(r'^\s*(\d+[.)]|[-*])\s+\S', l)]
     if len(items) < 2:
         items = [x.strip() for x in re.split(r'\b(?:also|and then|then)\b|;', prompt or '', flags=re.I) if len(x.split()) >= 4]

@@ -53,6 +53,7 @@ HELP = """tz <command> [args]
   mascot                                        zombie state line
   overlay build|run                             native always-on-top status window (macOS, swiftc from Command Line Tools)
   bench quality TRIALS.json                         tokens per PASSED task, control vs treatment (needs 5+5 trials to count as proof)
+  bench harbor [--dataset D] [--n N] [--run]     Harbor/Terminal-Bench control vs treatment commands (prints; --run executes)
   bench results [dir]                           A/B evidence into view
   bench replay [--days N] [--root DIR] [--json]  zero-cost proof: replays your real chat logs offline, net saving after TZ overhead
   attr [LOG] [--json]                           per MCP server / subagent type / main: calls, tokens, $ (MEASURED tok, EST $)
@@ -132,6 +133,9 @@ def main(argv):
                 return 0
             print('usage: tz overlay build | run   (run needs a prior build)', file=sys.stderr)
             return 2
+        if c == 'bench' and rest[:1] == ['harbor']:
+            import tzharbor
+            return tzharbor.main(rest[1:])
         if c == 'bench' and rest[:1] == ['replay']:
             import tzreplay
             return tzreplay.main(rest[1:])

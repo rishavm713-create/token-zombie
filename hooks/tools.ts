@@ -13,7 +13,7 @@ const TOOLS: Record<string, { desc: string; argv: (i: any) => string[] | null; p
   tz_delegate: { desc: 'Split independent tasks: one session each, model pick, worktree command, locks (plan only).', props: { tasks: { type: 'array', items: { type: 'string' } } },
     argv: i => (Array.isArray(i.tasks) && i.tasks.length ? ['split', ...i.tasks.map(String)] : null) },
   tz_recover: { desc: 'Read the saved handoff and git state; print the next action.', argv: () => ['resume'] },
-  tz_verify: { desc: 'Check the saved handoff against git and report an integrity score.', argv: () => ['handoff', 'verify'] },
+  tz_verify: { desc: 'Check the saved handoff against git and run the project tests; reports score and PASS/FAIL.', argv: () => ['handoff', 'verify', '--run-test'] },
   tz_ship: { desc: 'Delivery readiness: handoff age, files edited since, staleness (read-only; does not push or deploy).', argv: () => ['handoff', 'status'] },
   tz_status: { desc: 'Context size, token burn and warn state for this chat.', argv: () => ['status'] },
 }

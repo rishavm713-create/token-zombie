@@ -103,6 +103,18 @@ Nothing was committed or pushed by tz.
     return s
 
 
+def detect_test(cwd):
+    """Project test command from the files present, or ''."""
+    j = lambda *x: os.path.join(cwd, *x)
+    if os.path.isfile(j('tests', 'run_all.sh')):
+        return 'bash tests/run_all.sh'
+    if os.path.isfile(j('package.json')) and '"test"' in open(j('package.json')).read():
+        return 'npm test'
+    if os.path.isdir(j('tests')) or os.path.isfile(j('pytest.ini')):
+        return 'python3 -m pytest -q'
+    return ''
+
+
 def verify(cwd):
     """(score 0-100, problems). Compares saved handoff with git and with itself. Read-only."""
     s = _load(cwd)
@@ -183,6 +195,7 @@ def main(argv):
     ap.add_argument('--objective', default='')
     ap.add_argument('--phase', default='')
     ap.add_argument('--reason', default='manual')
+    ap.add_argument('--run-test', action='store_true', help='verify: also run the project test command (auto-detected)')
     ap.add_argument('--pct', type=float, default=None, help='ctx: host-reported context percent')
     for k in LISTS:
         ap.add_argument('--' + k, action='append', default=[])
@@ -195,7 +208,17 @@ def main(argv):
     if a.cmd == 'status':
         print(status(cwd)); return 0
     if a.cmd == 'verify':
-        sc, pr = verify(cwd); print(f'resume-readiness {sc}/100'); [print('  - ' + p) for p in pr]; return 0 if sc >= 80 else 1
+        sc, pr = verify(cwd); print(f'resume-readiness {sc}/100'); [print('  - ' + p) for p in pr]
+        ok = sc >= 80
+        if a.run_test:
+            cmd = detect_test(cwd)
+            if cmd:
+                import tzhandoff
+                t_ok, last = tzhandoff.run_test(cwd, cmd, 600); ok = ok and t_ok
+                print(f"tests {'PASS' if t_ok else 'FAIL'} ({cmd}): {last}")
+            else:
+                print('tests: no test command found (UNVERIFIED)')
+        return 0 if ok else 1
     if a.cmd == 'ctx':
         m = ctx_mark(cwd, a.pct); print(f'context mark {m}% handled' if m else 'no new mark'); return 0
     t, d = H.resume(cwd); print(t)
