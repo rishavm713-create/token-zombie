@@ -179,12 +179,12 @@ section{padding:64px 0}.hero{padding:44px 0 56px}.head{margin-bottom:34px}
 
 <nav class="nav"><div class="wrap">
 <a class="brand" href="#top"><img src="img/mascot.svg" alt="">TOKEN ZOMBIE</a>
-<div class="links"><a href="#how">How it works</a><a href="#offer">What you get</a><a href="#faq">FAQ</a><a href="#maker">Creator</a><a class="gh" href="https://github.com/rishavm713-create/token-zombie">GitHub ↗</a></div>
+<div class="links"><a href="#how">How it works</a><a href="#new">New in 2.0</a><a href="#offer">What you get</a><a href="#faq">FAQ</a><a href="#maker">Creator</a><a class="gh" href="https://github.com/rishavm713-create/token-zombie">GitHub ↗</a></div>
 </div></nav>
 
 <header class="hero" id="top"><div class="wrap">
 <div>
-<div class="pill rv"><span class="dot"></span>FREE · LOCAL · OPEN SOURCE</div>
+<div class="pill rv"><span class="dot"></span>v2.0 · FREE · LOCAL · OPEN SOURCE</div>
 <h1 class="rv" style="--i:1">Stop paying for tokens<span>Claude Code wastes.</span></h1>
 <p class="lead rv" style="--i:2">TOKEN ZOMBIE finds the repeated reads, looping sub-agents and runaway chats that eat your usage limit. It warns you early and saves your place, so a fresh chat picks up exactly where you stopped.</p>
 <div class="cta rv" style="--i:3"><a class="btn primary" href="https://github.com/rishavm713-create/token-zombie">Install free</a><a class="btn" href="https://github.com/rishavm713-create/token-zombie">View on GitHub</a></div>
@@ -215,6 +215,19 @@ section{padding:64px 0}.hero{padding:44px 0 56px}.head{margin-bottom:34px}
 <div class="card rv" style="--i:1"><span class="num">02 · CONTAIN</span><h3>Stop the infection</h3><p>Trims noisy tool output. The original is kept and can be recalled.</p></div>
 <div class="card rv" style="--i:2"><span class="num">03 · WARN</span><h3>Survive the session</h3><p>Warns you before the chat runs out, while there is still time to save the work.</p></div>
 <div class="card rv" style="--i:3"><span class="num">04 · REVIVE</span><h3>Pick up where you stopped</h3><p>A short handoff note lets a fresh chat continue without re-explaining.</p></div>
+</div></div></section>
+
+<section id="new"><div class="wrap">
+<div class="head rv"><p class="eyebrow">New in 2.0</p><h2>Less rework. Safer changes.</h2><p class="lead">Every card below is built and covered by the test suite (1032 checks pass). Real-session token savings are not yet measured with a paid A/B run.</p></div>
+<div class="grid g4">
+<div class="card rv"><span class="num">TOKENS</span><h3>No double reads</h3><p>A file Claude already read comes back as a short stub. Big JSON keeps only the outliers; colour codes are stripped.</p></div>
+<div class="card rv" style="--i:1"><span class="num">MEMORY</span><h3>Tasks in order</h3><p>Tasks can wait on other tasks; <code>tz next</code> picks the one that is ready. Failed or stalled runs are flagged.</p></div>
+<div class="card rv" style="--i:2"><span class="num">REPO</span><h3>Right files first</h3><p><code>tz rank</code> ranks the files that matter (idea from aider's repo map). <code>tz sym</code> and <code>tz exists</code> find code before it is rewritten.</p></div>
+<div class="card rv" style="--i:3"><span class="num">PARALLEL</span><h3>Separate desks</h3><p><code>tz worktree</code> gives each task its own copy and file ownership, so parallel sessions do not clash.</p></div>
+<div class="card rv"><span class="num">SAFETY</span><h3>Danger blocker</h3><p>Destructive Bash commands are blocked before they run (rules adapted from cc-safety-net, MIT).</p></div>
+<div class="card rv" style="--i:1"><span class="num">VERIFY</span><h3>Independent checks</h3><p>The gate detects and runs tests, lint, type and audit tools, and catches API drift. "Done" needs proof.</p></div>
+<div class="card rv" style="--i:2"><span class="num">RECOVER</span><h3>Undo and resume</h3><p><code>tz agent --rollback</code> restores only the files a failed run changed. Interrupted runs resume from a checkpoint.</p></div>
+<div class="card rv" style="--i:3"><span class="num">OPEN SOURCE</span><h3>Reused, credited</h3><p>Permissively licensed code is reused with attribution in NOTICE. <a href="https://github.com/rishavm713-create/token-zombie/releases/tag/v2.0.0">Release notes</a></p></div>
 </div></div></section>
 
 <section id="see"><div class="wrap">
