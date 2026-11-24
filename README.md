@@ -28,7 +28,8 @@ It advises and never blocks. Everything stays on your computer. No telemetry, no
 In Claude Code:
 
 ```
-/plugin install token-zombie --marketplace rishavm713-create/token-zombie
+claude plugin marketplace add rishavm713-create/token-zombie
+claude plugin install token-zombie@token-zombie
 ```
 
 Restart Claude Code, then run:
@@ -37,7 +38,7 @@ Restart Claude Code, then run:
 /token-zombie:tz
 ```
 
-Shell form: `claude plugin install token-zombie --marketplace rishavm713-create/token-zombie`
+Tested: install, upgrade and uninstall with a local-path marketplace in a throwaway config dir. Not yet tested: GitHub-hosted marketplace, MCP tools and skills/commands loading in a live `claude -p` session.
 
 Verification and a clean rollback are in the [install guide](docs/INSTALL.md).
 

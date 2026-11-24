@@ -188,7 +188,7 @@ section{padding:64px 0}.hero{padding:44px 0 56px}.head{margin-bottom:34px}
 <h1 class="rv" style="--i:1">Stop paying for tokens<span>Claude Code wastes.</span></h1>
 <p class="lead rv" style="--i:2">TOKEN ZOMBIE finds the repeated reads, looping sub-agents and runaway chats that eat your usage limit. It warns you early and saves your place, so a fresh chat picks up exactly where you stopped.</p>
 <div class="cta rv" style="--i:3"><a class="btn primary" href="https://github.com/rishavm713-create/token-zombie">Install free</a><a class="btn" href="https://github.com/rishavm713-create/token-zombie">View on GitHub</a></div>
-<div class="trust rv" style="--i:4"><span><b>✓</b>No telemetry</span><span><b>✓</b>Never blocks your chat</span><span><b>✓</b>MIT licence</span></div>
+<div class="trust rv" style="--i:4"><span><b>✓</b>No telemetry</span><span><b>✓</b>Blocks only destructive shell commands</span><span><b>✓</b>MIT licence</span></div>
 </div>
 <div class="frame rv" style="--i:3"><div class="bar"><i></i><i></i><i></i><span style="margin-left:8px">CLAUDE CODE</span></div><img class="shot" src="img/toolbar-live.svg" alt="TOKEN ZOMBIE toolbar inside Claude Code"></div>
 </div></header>
@@ -235,7 +235,7 @@ section{padding:64px 0}.hero{padding:44px 0 56px}.head{margin-bottom:34px}
 <div class="total"><div class="price">Free. Forever.</div><p>Open source under the MIT licence. No account, no subscription, no upsell.</p><a class="btn primary" href="https://github.com/rishavm713-create/token-zombie">Install free</a></div>
 </div>
 <div class="grid g4 guar">
-<div class="card rv"><h3>Never blocks you</h3><p>It advises. It does not stop or rewrite your chat.</p></div>
+<div class="card rv"><h3>Blocks only the dangerous</h3><p>It advises. It denies destructive shell commands such as <code>rm -rf /</code> or <code>git reset --hard</code> (turn off with <code>TZ_SAFE=0</code>) and condenses long tool output; originals stay recallable.</p></div>
 <div class="card rv" style="--i:1"><h3>Stays on your computer</h3><p>No telemetry and no network calls in the core.</p></div>
 <div class="card rv" style="--i:2"><h3>Nothing is lost</h3><p>Trimmed output is kept and can be recalled.</p></div>
 <div class="card rv" style="--i:3"><h3>Easy to undo</h3><p>A written <a href="https://github.com/rishavm713-create/token-zombie#install">rollback guide</a> removes it cleanly.</p></div>
@@ -246,14 +246,14 @@ section{padding:64px 0}.hero{padding:44px 0 56px}.head{margin-bottom:34px}
 <div class="grid g2 faq">
 <div class="card rv"><h3>How much does it cost?</h3><p>Nothing. It is free and open source, and it stays that way.</p></div>
 <div class="card rv" style="--i:1"><h3>Does it send my data anywhere?</h3><p>No. It runs on your computer. The core makes no network or AI calls.</p></div>
-<div class="card rv"><h3>Will it break my chats?</h3><p>No. It gives advice and never blocks. Anything it trims can be recalled.</p></div>
+<div class="card rv"><h3>Will it break my chats?</h3><p>It mostly advises. It denies destructive shell commands (<code>TZ_SAFE=0</code> disables) and condenses long tool output; anything trimmed can be recalled.</p></div>
 <div class="card rv" style="--i:1"><h3>How much will I save?</h3><p>It depends on how you work. Every saving shown is labelled <em>measured</em> or <em>estimate</em>. We have not yet run a full before-and-after test, so we do not promise a figure. See the <a href="LIMITATIONS.md">limits</a>.</p></div>
 </div></div></section>
 
 <section id="install" style="padding-top:0"><div class="wrap">
 <div class="install rv">
-<div><p class="eyebrow">Get started · free</p><h2>Stop paying for wasted tokens.</h2><p class="lead">One command. Restart Claude Code, run the status command, and you are covered.</p></div>
-<div><div class="cmd"><small>PLUGIN INSTALL</small><span id="cmd">/plugin install token-zombie --marketplace rishavm713-create/token-zombie</span></div><a class="btn primary copy" href="https://github.com/rishavm713-create/token-zombie">Get it on GitHub</a><p class="step2">Then run <code>/token-zombie:tz</code>. <a href="https://github.com/rishavm713-create/token-zombie#install">Full guide</a></p></div>
+<div><p class="eyebrow">Get started · free</p><h2>Stop paying for wasted tokens.</h2><p class="lead">Two commands. Restart Claude Code, run the status command, and you are covered.</p></div>
+<div><div class="cmd"><small>PLUGIN INSTALL</small><span id="cmd">claude plugin marketplace add rishavm713-create/token-zombie &amp;&amp; claude plugin install token-zombie@token-zombie</span></div><a class="btn primary copy" href="https://github.com/rishavm713-create/token-zombie">Get it on GitHub</a><p class="step2">Then run <code>/token-zombie:tz</code>. <a href="https://github.com/rishavm713-create/token-zombie#install">Full guide</a></p></div>
 </div></div></section>
 
 <section id="maker" style="background:#0a110c;border-top:1px solid var(--line)"><div class="wrap">
