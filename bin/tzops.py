@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-# tz safe|impact|diffcheck|run. Destructive-command rules follow the approach of cc-safety-net (MIT, J Liew); diff scope check follows
+# tz safe|impact|diffcheck|run. Destructive-command rule catalogue (ids/reasons/examples in RULES below) is adapted from cc-safety-net
+# src/core/rules/destructive.ts, Copyright (c) 2026 J Liew, MIT licence (see NOTICE), rewritten as regexes; diff scope check follows
 # the karpathy-skills idea of "every changed line traces to the task" (MIT, Joseph Kim). Rules rewritten here, no code copied.
 import os, re, subprocess, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -19,6 +20,20 @@ RULES = [
     (r'\bchmod\s+-R\s+(777|000)', 'recursive chmod 777/000'),
     (r'(curl|wget)[^|]*\|\s*(sudo\s+)?(ba|z)?sh', 'pipes a download into a shell'),
     (r'\bDROP\s+(TABLE|DATABASE)\b|\bTRUNCATE\s+TABLE\b', 'drops data'),
+    # adapted from cc-safety-net (MIT, J Liew; see NOTICE): git.reset-merge, git.rm-force, git.push-delete/mirror, git.checkout/switch force, git.restore-worktree,
+    # git.reflog-delete, git.worktree-remove-force, find.exec-rm-recursive-force, rsync.delete, shred.target, disk.erase, redirect.block-device
+    (r'\bgit\s+reset\s+--merge', 'git reset --merge drops uncommitted work'),
+    (r'\bgit\s+rm\s+-\w*[rR]\w*f|\bgit\s+rm\s+-\w*f\w*[rR]', 'git rm -rf removes tracked files from the working tree'),
+    (r'\bgit\s+push\b.*(--delete\b|--mirror\b|\s:\S)', 'push that deletes remote refs'),
+    (r'\bgit\s+(checkout|switch)\s+(-\w*f\w*|--force|--discard-changes)\b', 'forced checkout/switch discards local changes'),
+    (r'\bgit\s+restore\s+(?!.*--staged\b)(?!-)\S', 'git restore discards unstaged changes'),
+    (r'\bgit\s+reflog\s+(expire|delete)\b', 'reflog expire/delete removes recovery points'),
+    (r'\bgit\s+worktree\s+remove\s+.*(--force|-f)\b', 'forced worktree removal'),
+    (r'\bfind\b.*-exec\s+rm\s+-\w*[rR]', 'find -exec rm -r removes files in bulk'),
+    (r'\brsync\b.*--delete', 'rsync --delete removes destination files'),
+    (r'\bshred\b', 'shred destroys file contents'),
+    (r'\b(diskutil\s+(erase|partition|apfs\s+delete)\w*|wipefs\s+-[ao]|sgdisk\b|parted\b.*(mklabel|rm|mkpart))', 'erases or repartitions a disk'),
+    (r'>\s*/dev/(sd|nvme|disk|rdisk|hd)\w*', 'redirects output onto a disk device'),
 ]
 
 

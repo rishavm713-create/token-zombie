@@ -6,10 +6,10 @@ pre() { python3 -c 'import json,sys;print(json.dumps({"session_id":"s","cwd":sys
 ok "hooks.json PreToolUse matcher includes Bash" 'python3 -c "import json,sys;g=json.load(open(sys.argv[1]))[\"hooks\"][\"PreToolUse\"];assert any(\"Bash\" in x.get(\"matcher\",\"\").split(\"|\") for x in g)" "$Z/hooks/hooks.json"'
 HOME="$H" bash "$Z/install.sh" >/dev/null
 ok "install.sh PreToolUse matcher includes Bash" 'python3 -c "import json,sys;g=json.load(open(sys.argv[1]))[\"hooks\"][\"PreToolUse\"];assert any(\"Bash\" in x.get(\"matcher\",\"\").split(\"|\") for x in g)" "$H/.claude/settings.json"'
-for c in "rm -rf /" 'rm -rf $HOME/' "bash -c 'rm -rf /'" "sudo rm -rf /usr" "cat ~/.ssh/id_rsa" "git reset --hard" "git push --force origin main"; do
+for c in "rm -rf /" 'rm -rf $HOME/' "bash -c 'rm -rf /'" "sudo rm -rf /usr" "cat ~/.ssh/id_rsa" "git reset --hard" "git push --force origin main" "git reset --merge" "git rm -rf ." "git push --delete origin x" "git checkout -f" "git restore src/a.ts" "find . -exec rm -rf {} +" "rsync -a --delete a b" "shred -u x"; do
   ok "denies: $c" '[[ "$(pre "$c")" == *"\"permissionDecision\": \"deny\""* ]]'
 done
-for c in "ls" "rm -rf node_modules" "rm -rf ./build" "git push --force-with-lease" "echo 'rm -rf /'"; do
+for c in "ls" "rm -rf node_modules" "rm -rf ./build" "git push --force-with-lease" "echo 'rm -rf /'" "git restore --staged a" "git switch -c new" "git push origin main"; do
   ok "allows: $c" '[[ "$(pre "$c")" != *deny* ]]'
 done
 ok "TZ_SAFE=0 disables" '[[ "$(TZ_SAFE=0 pre "rm -rf /")" != *deny* ]]'

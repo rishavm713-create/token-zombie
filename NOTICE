@@ -1,0 +1,11 @@
+TOKEN ZOMBIE third-party notices
+
+cc-safety-net (https://github.com/kenryu42/cc-safety-net), MIT licence
+Copyright (c) 2026 J Liew
+Used in: bin/tzops.py (RULES: destructive-command catalogue adapted from src/core/rules/destructive.ts, rewritten as regexes; no code run or vendored).
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+aider (https://github.com/Aider-AI/aider), Apache License 2.0
+Copyright 2023-2025 Paul Gauthier and Aider contributors
+Used in: bin/tzrank.py (definition/reference graph weighting and ranking adapted from aider/repomap.py RepoMap.get_ranked_tags; networkx PageRank replaced by a pure-Python power iteration; tags from tz map instead of tree-sitter). Licence: https://www.apache.org/licenses/LICENSE-2.0
