@@ -18,6 +18,13 @@ DEFAULT = {'rules': {
     'gate': {'id': 'gate', 'enabled': True,
         'threshold': r'\b(git\s+push|git\s+commit|npm\s+publish|npm\s+install|pip\s+install|brew\s+install|yarn\s+publish|twine\s+upload|gh\s+release|docker\s+push|vercel\s+--prod|deploy|purchase|checkout|stripe)\b',
         'message': 'This looks like publish/commit/push/install/paid work: needs owner approval first.'},
+    'fake_green': {'id': 'fake_green', 'enabled': True,
+        'threshold': r'(\.skip\(|@pytest\.mark\.skip|@unittest\.skip|\bxfail\b|\bxit\(|\bxdescribe\(|\bt\.Skip\(|#\[ignore\])',
+        'message': 'Edit to {path} disables or skips a test: fix the cause instead; a skipped test is a fake green.'},
+    'prefix_edit': {'id': 'prefix_edit', 'enabled': True,
+        'message': '{path} is part of the cached prompt prefix: editing it mid-chat makes the next turn re-write the whole cache. Batch such edits, or do them between tasks.'},
+    'spawn_cap': {'id': 'spawn_cap', 'enabled': True, 'threshold': 6,
+        'message': '{n} subagents started this session (each re-sends its report): batch the work or do it here.'},
 }}
 _cache = {}
 WARN = []
@@ -126,6 +133,19 @@ def evaluate(event, state=None, pol=None):
         n = (state.get('edits') or {}).get(f, 0) + 1
         if n > int(r.get('threshold', 5)):
             add(r, 'warn', path=f, n=n)
+    r = _r(pol, 'fake_green')
+    if r and tool in ('Edit', 'Write', 'MultiEdit') and re.search(r'(^|/)(tests?/|test_[^/]*$|[^/]*(_test|\.test|\.spec)\.\w+$)', f):
+        try:
+            if re.search(str(r.get('threshold')), str(ti.get('new_string') or ti.get('content') or '')):
+                add(r, 'warn', path=f)
+        except re.error:
+            pass
+    r = _r(pol, 'prefix_edit')
+    if r and tool in ('Edit', 'Write', 'MultiEdit') and re.search(r'(^|/)(CLAUDE\.md|settings(\.local)?\.json|SKILL\.md|\.mcp\.json)$', f):
+        add(r, 'info', path=f)
+    r = _r(pol, 'spawn_cap')
+    if r and tool in ('Agent', 'Task') and (state.get('spawns', 0) + 1) > int(r.get('threshold', 6)):
+        add(r, 'warn', n=state.get('spawns', 0) + 1)
     cmd = ti.get('command') or ''
     if tool == 'Bash' and cmd:
         r = _r(pol, 'bash_output_cap')
@@ -159,6 +179,8 @@ def update(event, state):
         state.setdefault('reads', {})[f] = state.get('reads', {}).get(f, 0) + 1
     elif f and tool in ('Edit', 'Write', 'MultiEdit', 'NotebookEdit'):
         state.setdefault('edits', {})[f] = state.get('edits', {}).get(f, 0) + 1
+    if tool in ('Agent', 'Task'):
+        state['spawns'] = state.get('spawns', 0) + 1
     pct = event.get('context_pct')
     if isinstance(pct, (int, float)):
         hit = [t for t in sorted((_r(load(), 'context_pct') or {}).get('threshold') or []) if pct >= t]
@@ -177,7 +199,7 @@ def hook_advice(data):
         return ''
     try:
         tool = data.get('tool_name') or ''
-        if tool not in ('Read', 'Edit', 'Write', 'MultiEdit', 'NotebookEdit', 'Bash'):
+        if tool not in ('Read', 'Edit', 'Write', 'MultiEdit', 'NotebookEdit', 'Bash', 'Agent', 'Task'):
             return ''
         sp = _spath(data.get('session_id'))
         st = {}
