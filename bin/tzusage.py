@@ -10,7 +10,7 @@ SPAN = {'five_hour': ('5h', 18000), 'seven_day': ('7d', 604800)}
 
 def totals(path):
     """Sum real usage from a chat log: dict in/out/cache_read/cache_write/last_ctx/turns + first/last timestamps + ctx points."""
-    t = dict(inp=0, out=0, cr=0, cw=0, last=0, turns=0, t0=None, t1=None, pts=[], w5=0, w1h=0, think=0)
+    t = dict(inp=0, out=0, cr=0, cw=0, last=0, turns=0, t0=None, t1=None, pts=[], ents=[], w5=0, w1h=0, think=0)
     seen = set()
     if not path or not os.path.isfile(path):
         return t
@@ -45,7 +45,52 @@ def totals(path):
                 t['t0'] = t['t0'] or ts
                 t['t1'] = ts
                 t['pts'].append((ts, t['last']))
+                t['ents'].append((ts, i + o + cr + cw))
     return t
+
+
+def usable(ctx, win):
+    """(usable window, pct) the ccstatusline way [est]: Claude Code auto-compacts near 80% of the window, so % of that is
+    what is really left. CLAUDE_AUTOCOMPACT_PCT_OVERRIDE can only lower the 80. Rebuilt from ccstatusline (MIT) behaviour."""
+    frac = 0.8
+    try:
+        o = float(os.environ.get('CLAUDE_AUTOCOMPACT_PCT_OVERRIDE', ''))
+        if 0 < o / 100 < frac:
+            frac = o / 100
+    except ValueError:
+        pass
+    u = int(win * frac)
+    return u, (min(100.0, round(ctx * 100.0 / u, 1)) if u else 0.0)
+
+
+def hit_rate(cr, cw):
+    """Cache hit rate [actual counts] = cache reads / (reads + writes); None when there is no cache traffic."""
+    return round(cr * 100.0 / (cr + cw), 1) if (cr + cw) else None
+
+
+def blocks(ents, now=None, hours=5):
+    """5-hour billing blocks rebuilt from ccusage (MIT) behaviour [est: the provider's real window may differ].
+    ents = [(epoch, tokens)]. A block starts at the first entry floored to the hour and ends +hours; a new block starts when
+    an entry falls after the end or more than `hours` after the previous entry (a gap block is put between)."""
+    H = hours * 3600
+    out = []
+    for ts, tok in sorted(ents):
+        b = out[-1] if out and not out[-1]['gap'] else None
+        if b is None or ts - b['start'] > H or ts - b['last'] > H:
+            if b is not None and ts - b['last'] > H:
+                out.append(dict(start=b['last'], end=ts, gap=True, tokens=0, first=b['last'], last=b['last']))
+            st = ts - ts % 3600
+            b = dict(start=st, end=st + H, gap=False, tokens=0, first=ts, last=ts)
+            out.append(b)
+        b['tokens'] += tok
+        b['last'] = ts
+    now = now or dt.datetime.now().timestamp()
+    for b in out:
+        b['active'] = (not b['gap']) and now - b['last'] < H and now < b['end']
+        mins = (b['last'] - b['first']) / 60.0
+        b['burn'] = b['tokens'] / mins if mins > 0 else 0.0
+        b['projected'] = int(b['tokens'] + b['burn'] * max(0.0, (b['end'] - now) / 60.0)) if b['active'] else b['tokens']
+    return out
 
 
 def acct_state(models):
@@ -191,16 +236,25 @@ def report(path, rl=None, now=None):
         L.append('usage [actual]: no token usage found in the chat log' if path else 'usage: no chat log found (pass --transcript)')
     else:
         L.append(f"context [actual] {t['last'] // 1000}k tokens = {pct}% of {win // 1000}k window [est: window size is a setting, ctx_window]")
+        uw, up = usable(t['last'], win)
+        L.append(f"usable context [est] {up}% of {uw // 1000}k (auto-compact point ~80% of window)")
+        hr = hit_rate(t['cr'], t['cw'])
+        if hr is not None:
+            L.append(f"cache hit [actual] {hr}% = cache_read / (cache_read + cache_write)")
         L.append(f"tokens [actual] input {t['inp']} output {t['out']} cache_read {t['cr']} cache_write {t['cw']} ({t['turns']} replies)")
         L.append(f"burn [est] ~{int(rate)} ctx tokens/min, window full in ~{int(mins)} min" if rate else 'burn [est]: not enough timed replies to forecast')
     for l in lims:
         L.append(f"{l['name']} [actual] {l['pct']}%" + (f" resets {l['reset']}" if l['reset'] else '') + (f", at this pace full ~{l['full']} [est]" if l['full'] else ''))
     if not lims:
+        act = [b for b in blocks(t['ents'], now) if b['active']]
+        if act:
+            b = act[-1]
+            L.append(f"5h block [est from this log only] {b['tokens'] // 1000}k tokens since {dt.datetime.fromtimestamp(b['start']).strftime('%H:%M')}, ~{int(b['burn'])}/min, projected {b['projected'] // 1000}k by {dt.datetime.fromtimestamp(b['end']).strftime('%H:%M')}")
         L.append('5h/7d: not provided by this Claude Code build or login; not shown (never guessed)')
     lv = level(pct, lims)
     L.append(f'level: {lv}' + (f' - {LEVEL_ACT[lv]}' if LEVEL_ACT[lv] else ''))
     L.append(f'state: {st.upper()}' + (' - write handoff, continue in a fresh chat' if st != 'ok' else ''))
-    return '\n'.join(L), dict(state=st, ctx_pct=pct, rate=rate, mins=mins, limits=lims, totals={k: v for k, v in t.items() if k != 'pts'})
+    return '\n'.join(L), dict(state=st, ctx_pct=pct, rate=rate, mins=mins, limits=lims, totals={k: v for k, v in t.items() if k not in ('pts', 'ents')})
 
 
 def main(argv):

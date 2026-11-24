@@ -181,6 +181,9 @@ def main(argv):
         if c == 'bench' and rest[:1] == ['harbor']:
             import tzharbor
             return tzharbor.main(rest[1:])
+        if c == 'bench' and rest[:1] == ['matrix']:
+            import tzmatrix
+            return tzmatrix.main(rest[1:])
         if c == 'bench' and rest[:1] == ['replay']:
             import tzreplay
             return tzreplay.main(rest[1:])
