@@ -18,7 +18,7 @@ def sh(args, cwd):
 def changed(cwd):
     """(tracked changed files, untracked files, added lines of both)."""
     tracked = sh(['git', 'diff', '--name-only', 'HEAD'], cwd).split()
-    untracked = sh(['git', 'ls-files', '--others', '--exclude-standard'], cwd).split()
+    untracked = [f for f in sh(['git', 'ls-files', '--others', '--exclude-standard'], cwd).split() if not re.search(r'(^|/)(__pycache__|node_modules|\.pytest_cache)/|\.pyc$', f)]
     added = [l[1:] for l in sh(['git', 'diff', '-U0', 'HEAD'], cwd).splitlines() if l.startswith('+') and not l.startswith('+++')]
     for f in untracked:
         try:

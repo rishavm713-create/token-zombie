@@ -78,7 +78,7 @@ def call_claude(prompt, model, cwd, turns, timeout=1800):
 def call(prompt, model, cwd, turns, worker=None, timeout=1800, edits=False):
     """One worker call through the registry. Returns (text, tokens, error, measured).
     'claude' (default, unless TZ_WORKER or `tz worker default` says otherwise) keeps the original host path with MEASURED usage.
-    cli workers edit files themselves; http workers return text, so for edit phases a unified diff is requested and applied with git apply;
+    cli workers edit files themselves; http workers return text, so for edit phases whole-file blocks are requested and written inside the project;
     the offline worker has no model and only reports that. Tokens for non-claude workers are EST (chars/4)."""
     import tzworkers
     w = worker or os.environ.get('TZ_WORKER') or tzworkers.default()
@@ -90,10 +90,10 @@ def call(prompt, model, cwd, turns, worker=None, timeout=1800, edits=False):
         return '', 0, 'offline worker has no model: this phase needs a worker (tz worker default NAME)', False
     if w not in reg:
         return '', 0, 'unknown worker %s (tz worker list)' % w, False
-    ask = prompt + ('\nReply ONLY with a unified diff in git apply format.' if edits and reg[w]['kind'] == 'http' else '')
+    ask = prompt + ('\nReply ONLY with the complete new content of every file you change, each as a line `FILE: relative/path` followed by a fenced code block. No explanation.' if edits and reg[w]['kind'] == 'http' else '')
     text, err = tzworkers.invoke(w, ask, cwd, timeout)
     if not err and edits and reg[w]['kind'] == 'http':
-        err = tzworkers.apply_patch(text, cwd)
+        err = tzworkers.apply_files(text, cwd)
     return text, (len(ask) + len(text)) // 4, err, False
 
 
@@ -130,7 +130,7 @@ def run(task, cwd, test=None, budget=400000, turns=20, worktree=False, dry=False
         measured[0] = measured[0] and m
         spent += tok
         st = 'error' if err else 'ok'
-        rows.append(dict(phase=ph, model=r['model'], worker=worker or os.environ.get('TZ_WORKER') or 'default', tokens=tok, ms=int((time.time() - t0) * 1000), status=st, note=(err or text)[:200]))
+        rows.append(dict(phase=ph, model=r['model'] if (worker or os.environ.get('TZ_WORKER') or 'claude') == 'claude' else '-', worker=worker or os.environ.get('TZ_WORKER') or 'default', tokens=tok, ms=int((time.time() - t0) * 1000), status=st, note=(err or text)[:200]))
         ledger(run=rid, phase=ph, model=r['model'], tokens=tok, status=st)
         checkpoint(rid, rows)
         return st

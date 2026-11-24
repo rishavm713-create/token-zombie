@@ -16,7 +16,7 @@ Size: ~10k lines Python in bin/ (63 files), 44 test scripts, hooks (tsx/ts), ski
 | UI/visual | none for generated apps (overlay/panel are TZ's own UI) | missing |
 | Research | tzsimilar + reuse licence audit; no web/doc reader, no feature-matrix | partial |
 
-Suite status (2026-11-24, run still in progress when written): test_upgrade 20/20 incl. TZ Safe guard (block `git reset --hard`, allow `ls`). Failures seen so far, all in test_e2e/test_hard under load average ~25: tick 634 ms (limit 400), statusline 469 ms (250), tool-event hook 328 ms (200), and "SIGKILLed runner leaves partial count" (not a timing check, NOT yet investigated or rerun alone). Thresholds unchanged. Earlier quiet-machine run: 938 pass, 3 timing failures.
+Suite status (2026-11-24, full run finished): TOTAL 947 pass, 4 fail, all under load average 25-147 from other sessions. test_e2e tick 634 ms (limit 400); test_hard statusline 469 ms (250); tool-event hook 328 ms (200); "SIGKILLed runner leaves partial count": root cause is the test's 1.5 s sleep before kill -9 (runner not yet written under load), passes standalone twice. One more flake, "restart on same port works", appeared once under load and is unexplained. Thresholds unchanged; a quiet-machine rerun is still owed. test_upgrade 27/27 (phases 1 and 2 added). Phases 1 (tzworkers) and 2 (tzgate) of the roadmap below are now built; see docs/MASTER-BUILD-ROADMAP.md.
 
 ## 2. Duplicates / debt (do not rewrite, just note)
 - Routing exists twice in spirit: tzroute (advice) and tzsplit (model per task). Keep both; workers.json becomes the one registry later.

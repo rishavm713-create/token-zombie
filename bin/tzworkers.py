@@ -7,7 +7,7 @@ import json, os, platform, shlex, shutil, subprocess, sys, urllib.request
 STATE = os.environ.get('TZ_WORKERS_DIR') or os.path.expanduser('~/.claude/token-zombie')
 # Known CLIs and how to call them non-interactively. Flags are the documented headless forms; verify with `tz worker test`.
 KNOWN = {
-    'claude': 'claude -p {prompt}', 'codex': 'codex exec {prompt}', 'gemini': 'gemini -p {prompt}',
+    'claude': 'claude -p {prompt}', 'codex': 'codex exec --sandbox workspace-write {prompt}', 'gemini': 'gemini -p {prompt}',
     'opencode': 'opencode run {prompt}', 'aider': 'aider --yes --message {prompt}',
 }
 # Tier table from docs/OPEN-CORE-DECISION.md section 4 (ESTIMATES, not measured on this machine).
@@ -67,15 +67,23 @@ def default():
     return load().get('_default', {}).get('name', 'claude')
 
 
-def apply_patch(text, cwd):
-    """http workers return text: apply a unified diff (optionally in a code fence) with git apply. Returns error or None."""
+def apply_files(text, cwd):
+    """http workers return text. Small models cannot write valid diffs, so edits come back as whole files:
+    'FILE: path' then a fenced block with the full new content. Paths must stay inside cwd. Returns error or None."""
     import re
-    m = re.search(r'```(?:diff|patch)?\n(.*?)```', text, re.S)
-    diff = (m.group(1) if m else text).strip() + '\n'
-    if not diff.startswith(('diff ', '--- ')):
-        return 'worker reply is not a unified diff'
-    r = subprocess.run(['git', 'apply', '--whitespace=nowarn', '-'], input=diff, cwd=cwd, capture_output=True, text=True)
-    return None if r.returncode == 0 else 'git apply failed: ' + r.stderr[-200:]
+    blocks = re.findall(r'FILE:\s*(\S+)\s*\n```[^\n]*\n(.*?)```', text, re.S)
+    if not blocks:
+        return 'worker reply has no FILE: blocks'
+    root = os.path.realpath(cwd)
+    for rel, body in blocks:
+        dst = os.path.realpath(os.path.join(root, rel))
+        if not dst.startswith(root + os.sep):
+            return 'refused path outside the project: ' + rel
+    for rel, body in blocks:
+        dst = os.path.join(root, rel)
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        open(dst, 'w').write(body)
+    return None
 
 
 def hw():
