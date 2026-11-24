@@ -53,6 +53,19 @@ HELP = """tz <command> [args]
   mascot                                        zombie state line
   overlay build|run                             native always-on-top status window (macOS, swiftc from Command Line Tools)
   bench quality TRIALS.json                         tokens per PASSED task, control vs treatment (needs 5+5 trials to count as proof)
+  pr [--base B]                                  commit message + PR body from the real diff (read-only; never commits or pushes)
+  progress                                       project completion % from task files
+  standards [dir]                                detected coding conventions (indent, quotes, test/lint tools)
+  tokens [--days N] [--json]                     every token in every chat log by model and day, per category (MEASURED)
+  reuse [REPO..]                                 licence audit: REUSE (MIT/Apache, credit) | CHECK | STUDY-only (no licence)
+  gaps [dir]                                     stubs, TODOs, unresolved local imports
+  missing [dir]                                  features promised in README/docs but not found in code
+  contract [dir]                                 frontend fetch calls with no backend route
+  api [dir] [--openapi]                          route list or OpenAPI skeleton
+  dbschema [dir]                                 tables, columns, foreign keys without index
+  coord post|list|claim|done                     shared note board between sessions
+  stack idea|design|web|off                      turn on the skill packs an idea-to-product build needs
+  features [--md]                                the 69-feature board: DONE / PARTIAL / MISSING, new ones highlighted
   bench harbor [--dataset D] [--n N] [--run]     Harbor/Terminal-Bench control vs treatment commands (prints; --run executes)
   bench results [dir]                           A/B evidence into view
   bench replay [--days N] [--root DIR] [--json]  zero-cost proof: replays your real chat logs offline, net saving after TZ overhead
@@ -133,6 +146,13 @@ def main(argv):
                 return 0
             print('usage: tz overlay build | run   (run needs a prior build)', file=sys.stderr)
             return 2
+        mods2 = {'pr': 'tzpr', 'progress': 'tzprogress', 'standards': 'tzstandards', 'features': 'tzfeatures', 'tokens': 'tztokens'}
+        if c in ('reuse', 'gaps', 'missing', 'contract', 'api', 'dbschema', 'coord', 'stack'):
+            import tzbuild
+            return tzbuild.main([c] + rest)
+        if c in mods2:
+            import importlib
+            return importlib.import_module(mods2[c]).main(rest)
         if c == 'bench' and rest[:1] == ['harbor']:
             import tzharbor
             return tzharbor.main(rest[1:])

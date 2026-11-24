@@ -1,0 +1,485 @@
+[
+[
+"1",
+"Understand",
+"Understand the codebase",
+"D",
+"map"
+],
+[
+"2",
+"Understand",
+"Map files, folders, dependencies",
+"P",
+"map"
+],
+[
+"3",
+"Understand",
+"Remember conversations and decisions",
+"D",
+"handoff"
+],
+[
+"4",
+"Understand",
+"Retrieve project knowledge automatically",
+"P",
+"find"
+],
+[
+"5",
+"Understand",
+"Remember unfinished tasks",
+"D",
+"next"
+],
+[
+"6",
+"Understand",
+"Understand existing coding standards",
+"D",
+"standards*"
+],
+[
+"7",
+"Understand",
+"Avoid rediscovering what is known",
+"P",
+"state"
+],
+[
+"8",
+"Save",
+"Compress terminal output",
+"D",
+"filter"
+],
+[
+"9",
+"Save",
+"Remove irrelevant tool-result info",
+"D",
+"noise"
+],
+[
+"10",
+"Save",
+"Detect repeated commands and outputs",
+"D",
+"optimize"
+],
+[
+"11",
+"Save",
+"Keep important errors and warnings",
+"D",
+"filter"
+],
+[
+"12",
+"Save",
+"Store big outputs, retrieve on demand",
+"D",
+"recall"
+],
+[
+"13",
+"Save",
+"Track every token (all logs, by model/day/category)",
+"D",
+"tokens*"
+],
+[
+"14",
+"Save",
+"Track actual and estimated cost",
+"D",
+"price"
+],
+[
+"15",
+"Save",
+"Recommend cheaper models",
+"D",
+"route"
+],
+[
+"16",
+"Save",
+"Measure whether savings are real",
+"P",
+"bench"
+],
+[
+"17",
+"Execute",
+"Understand large tasks",
+"D",
+"code"
+],
+[
+"18",
+"Execute",
+"Break tasks into smaller ones",
+"D",
+"split"
+],
+[
+"19",
+"Execute",
+"Step-by-step plans",
+"D",
+"code"
+],
+[
+"20",
+"Execute",
+"Find parallel tasks",
+"D",
+"split"
+],
+[
+"21",
+"Execute",
+"Assign work to coding agents",
+"P",
+"agent"
+],
+[
+"22",
+"Execute",
+"Monitor agents",
+"P",
+"live"
+],
+[
+"23",
+"Execute",
+"Detect duplicated work",
+"P",
+"agent"
+],
+[
+"24",
+"Execute",
+"Collect agent results",
+"P",
+"agent"
+],
+[
+"25",
+"Execute",
+"Coordinate agents with each other",
+"P",
+"coord*"
+],
+[
+"26",
+"Execute",
+"Recover interrupted tasks",
+"D",
+"resume"
+],
+[
+"27",
+"Build",
+"Help build complete apps",
+"P",
+"agent"
+],
+[
+"28",
+"Build",
+"Coordinate frontend and backend",
+"D",
+"contract*"
+],
+[
+"29",
+"Build",
+"Build APIs and integrations",
+"D",
+"api*"
+],
+[
+"30",
+"Build",
+"Database architecture",
+"D",
+"dbschema*"
+],
+[
+"31",
+"Build",
+"Consistency across files",
+"P",
+"standards*"
+],
+[
+"32",
+"Build",
+"Follow project architecture",
+"P",
+"standards*"
+],
+[
+"33",
+"Build",
+"Find missing implementation pieces",
+"D",
+"gaps*"
+],
+[
+"34",
+"Build",
+"Continue across sessions",
+"D",
+"handoff"
+],
+[
+"35",
+"Test",
+"Run relevant tests",
+"D",
+"resume"
+],
+[
+"36",
+"Test",
+"Detect bugs and failures",
+"P",
+"rework"
+],
+[
+"37",
+"Test",
+"Inspect code changes",
+"D",
+"pr*"
+],
+[
+"38",
+"Test",
+"Find missing features",
+"D",
+"missing*"
+],
+[
+"39",
+"Test",
+"Check security risks",
+"P",
+"security"
+],
+[
+"40",
+"Test",
+"Help fix errors",
+"D",
+"agent"
+],
+[
+"41",
+"Test",
+"Re-run failed tests",
+"D",
+"agent"
+],
+[
+"42",
+"Test",
+"Verify fixes worked",
+"D",
+"resume"
+],
+[
+"43",
+"Test",
+"Block false completion claims",
+"D",
+"task-wrap"
+],
+[
+"44",
+"Keep",
+"Auto checkpoints",
+"D",
+"checkpoint"
+],
+[
+"45",
+"Keep",
+"Preserve decisions",
+"D",
+"handoff"
+],
+[
+"46",
+"Keep",
+"Save unfinished work",
+"D",
+"handoff"
+],
+[
+"47",
+"Keep",
+"Recover earlier task states",
+"D",
+"import"
+],
+[
+"48",
+"Keep",
+"Detailed handoffs",
+"D",
+"handoff"
+],
+[
+"49",
+"Keep",
+"Continue after interruptions",
+"D",
+"resume"
+],
+[
+"50",
+"Keep",
+"Prevent repetition",
+"D",
+"replay"
+],
+[
+"51",
+"Workflow",
+"Prepare Git commits",
+"D",
+"pr*"
+],
+[
+"52",
+"Workflow",
+"Create and manage branches",
+"P",
+"worktree"
+],
+[
+"53",
+"Workflow",
+"Prepare pull requests",
+"D",
+"pr*"
+],
+[
+"54",
+"Workflow",
+"Implementation reports",
+"P",
+"report"
+],
+[
+"55",
+"Workflow",
+"Track outstanding tasks",
+"D",
+"next"
+],
+[
+"56",
+"Workflow",
+"Prepare projects for delivery",
+"P",
+"pr*"
+],
+[
+"57",
+"Workflow",
+"Approval for sensitive operations",
+"D",
+"policy"
+],
+[
+"58",
+"Workflow",
+"Verify before declaring complete",
+"D",
+"resume"
+],
+[
+"59",
+"Control",
+"Show active agents",
+"P",
+"live"
+],
+[
+"60",
+"Control",
+"Show current tasks",
+"D",
+"next"
+],
+[
+"61",
+"Control",
+"Show token use",
+"D",
+"status"
+],
+[
+"62",
+"Control",
+"Show cost and savings",
+"D",
+"stats"
+],
+[
+"63",
+"Control",
+"Show optimization activity",
+"D",
+"shadow"
+],
+[
+"64",
+"Control",
+"Show test results",
+"P",
+"next"
+],
+[
+"65",
+"Control",
+"Show checkpoint status",
+"D",
+"checkpoint"
+],
+[
+"66",
+"Control",
+"Show outstanding work",
+"D",
+"next"
+],
+[
+"67",
+"Control",
+"Show completion progress",
+"D",
+"progress*"
+],
+[
+"68",
+"Meta",
+"Live status board of all 69 (this list)",
+"D",
+"features*"
+],
+[
+"69",
+"Meta",
+"Test that fails if a DONE row has no real command",
+"D",
+"features*"
+]
+]

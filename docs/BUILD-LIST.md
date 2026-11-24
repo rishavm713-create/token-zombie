@@ -23,3 +23,24 @@ Source: the shared chat is one ChatGPT answer plus the pasted "Claude Mods" spec
 - Spawning and coordinating agents from a mod: no safe API in this build.
 - Hook `tool.run` event: does not exist; tools are served via `tool.call`.
 - Zero context loss: not promised; measured via resume-readiness score.
+
+## Competitor-derived items (ChatGPT audit, 2026-11-24)
+Rule: reuse code only from MIT/Apache repos (credit + keep licence); CHECK/STUDY repos are read for public behaviour and rebuilt clean-room; no decompiling. Licences checked with `tz reuse`.
+
+| # | Item | Source (licence) | Approach | Est. |
+|---|------|------------------|----------|------|
+| 1 | `tz diff-review`: did the diff stay inside the task | karpathy-skills (MIT) | reuse idea + prompts, credit | 30 min |
+| 2 | `tz impact FILE`: callers, imports, what may break | aider (Apache), codebase-index (MIT) | reuse approach; ast for py, regex for js/ts | 60 min |
+| 3 | Task dependencies in `tz next` | beads (MIT) | reuse model | 30 min |
+| 4 | Staged team flow plan>prd>exec>verify>fix in `tz agent` | oh-my-claudecode (MIT), mini-swe-agent (MIT) | reuse flow | 45 min |
+| 5 | Instruction-file organizer (core vs archive) | claude-token-optimizer (MIT) | reuse approach | 25 min |
+| 6 | Destructive-command guard hook | cc-safety-net (MIT) | reuse rules, credit | 30 min |
+| 7 | Skill install/update registry | vercel-labs/skills (MIT) | reuse | 30 min |
+| 8 | Reversible compression + cache-aware notes | headroom (Apache) | reuse ideas | 40 min |
+| 9 | RTK filter coverage gap audit | rtk (Apache CLI; proxy BUSL: excluded) | compare, add missing filters | 40 min |
+| 10 | Bounded output + retrieval | context-mode (Elastic 2.0) | CLEAN-ROOM only, no code copied | 30 min |
+| 11 | Symbol navigation | serena (custom licence) | CHECK licence first; else clean-room | 45 min |
+| 12 | Tokens per PASSED task | code-compression-bench, harbor | needs owner login for the live run | 30 min |
+| 13 | Spec-to-tasks | OpenSpec (MIT) | reuse format | 30 min |
+Not copied: claude-squad (AGPL), 100-agent swarms, vector DB, cloud proxy.
+Total ~7 h of build; items 1-9 ~5 h.
