@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tz rollback: a failed run's changes are undone; passing run keeps changes; pre-existing dirty files and untouched files are safe
 cd "$(dirname "$0")/.." || exit 1
-R=$PWD; T=$(mktemp -d); export HOME="$T" TZ_DEDUPE=0; P=0; F=0
+R=$PWD; T=$(mktemp -d); export HOME="$T" TZ_DEDUPE=0 GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t; P=0; F=0
 ok(){ if eval "$1"; then echo "ok $2"; P=$((P+1)); else echo "FAIL $2"; F=$((F+1)); fi; }
 cat > "$T/fake" <<'PY'
 #!/usr/bin/env python3

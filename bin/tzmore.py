@@ -9,16 +9,20 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 
 def reconcile(ledger, db):
-    """(ledger_tok, vault_tok, status). Only ledger rows from the vault's first row onward are compared (the vault may start later than the ledger). Tolerance 10%."""
+    """(ledger_tok, vault_tok, status). Compared only over the window both cover: the ledger is capped and may start later than the vault, or the vault later than the ledger. Tolerance 10%."""
+    lt = [x['t'] for x in ledger if isinstance(x, dict) and isinstance(x.get('t'), (int, float))]
+    lt0 = min(lt) if lt else 0
     try:
         c = sqlite3.connect(db)
-        v, t0 = c.execute('SELECT COALESCE(SUM(orig-shown),0), MIN(t) FROM vault').fetchone()
+        t0 = c.execute('SELECT MIN(t) FROM vault').fetchone()[0]
+        start = max(t0 or 0, lt0)
+        v = c.execute('SELECT COALESCE(SUM(orig-shown),0) FROM vault WHERE t >= ?', (start - 5,)).fetchone()[0]
         c.close(); v = (v or 0) // 4
     except Exception:
         return 0, None, 'UNAVAILABLE (no vault db)'
     led = sum(x['tok'] for x in ledger if isinstance(x, dict) and isinstance(x.get('tok'), (int, float))
               and x.get('basis') == 'measured' and x.get('kind') == 'output-trim'  # rtk rows are RTK's own savings; overhead rows are costs
-              and (t0 is None or not isinstance(x.get('t'), (int, float)) or x['t'] >= t0 - 5))
+              and (not isinstance(x.get('t'), (int, float)) or x['t'] >= start - 5))
     if not led and not v:
         return led, v, 'EMPTY'
     return led, v, 'AGREE' if abs(led - v) <= 0.1 * max(led, v) else 'MISMATCH'

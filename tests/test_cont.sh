@@ -6,6 +6,10 @@ export HOME="$T/home"; P="$T/proj"; S="$HOME/.claude/token-zombie"; pass=0; fail
 mkdir -p "$S" "$P/bin" "$P/handoffs"
 ok() { if eval "$2"; then pass=$((pass+1)); else fail=$((fail+1)); echo "FAIL: $1"; fi; }
 tz() { python3 "$Z/bin/tz" "$@"; }
+# portable (GNU+BSD) time helpers: iso_ago SECONDS, age_file FILE SECONDS, mtime_age FILE
+iso_ago() { python3 -c "import sys,time;print(time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime(time.time()-int(sys.argv[1]))))" "$1"; }
+age_file() { python3 -c "import os,sys,time;t=time.time()-int(sys.argv[2]);os.utime(sys.argv[1],(t,t))" "$1" "$2"; }
+mtime_age() { python3 -c "import os,sys,time;print(int(time.time()-os.stat(sys.argv[1]).st_mtime))" "$1"; }
 G="git -C $P -c user.email=t@t -c user.name=t"
 printf '# Demo\n\nShip the demo app fast.\n' > "$P/README.md"; echo x > "$P/bin/a.py"
 $G init -q . && $G add . && $G commit -qm init
@@ -128,7 +132,7 @@ echo "[{\"t\":$(date +%s),\"kind\":\"rtk\",\"tok\":50,\"basis\":\"measured\"},{\
 o=$(tz stats); ok "24h: used from logs, dedup, old rows out, main/agent split" '[[ $o == *"LAST 24H"*"210 tok in 2 model calls"* && $o == *"main  opus: 1 calls, 105"* && $o == *"agent haiku: 1 calls, 105"* ]]'
 ok "24h: ledger window only, overhead apart" '[[ $o == *"saved [measured] 50 [est] 0 | TZ overhead [measured] 3"* ]]'
 # fresh-chat counterfactual: new chat after a big one in the same project, EST label, never in measured
-R2="$HOME/.claude/projects/q"; mkdir -p "$R2"; t1=$(date -u -v-30M +%Y-%m-%dT%H:%M:%SZ); t2=$(date -u -v-20M +%Y-%m-%dT%H:%M:%SZ)
+R2="$HOME/.claude/projects/q"; mkdir -p "$R2"; t1=$(iso_ago 1800); t2=$(iso_ago 1200)
 c() { echo "{\"timestamp\":\"$1\",\"message\":{\"id\":\"$2\",\"usage\":{\"input_tokens\":0,\"cache_read_input_tokens\":$3,\"output_tokens\":1}}}"; }
 c "$t1" o1 100000 > "$R2/old.jsonl"; { c "$t2" n1 20000; c "$now" n2 30000; } > "$R2/new.jsonl"
 o=$(tz stats); ok "fresh.json for the panel" 'python3 -c "import json;d=json.load(open(\"$S/fresh.json\"));assert d[\"tok\"]==16000 and d[\"n\"]==1 and \"EST\" in d[\"basis\"]"'
@@ -137,7 +141,7 @@ ok "24h: history kept per day" '[[ $o == *"history (per day"*"0k/50"* ]] && [ -s
 
 # 8 Session Economics: continue/compact/fresh over 5/10/20 turns from measured usage; econ.json; projected vs actual
 cd "$T"; R3="$HOME/.claude/projects/$(echo "$T/econ" | sed 's/[^a-zA-Z0-9]/-/g')"; mkdir -p "$R3" "$T/econ"
-ts() { date -u -v-"$1"M +%Y-%m-%dT%H:%M:%SZ; }
+ts() { iso_ago $(( $1 * 60 )); }
 um() { echo "{\"type\":\"user\",\"timestamp\":\"$1\",\"message\":{\"role\":\"user\",\"content\":\"$2\"}}"; }
 ar() { echo "{\"timestamp\":\"$1\",\"message\":{\"id\":\"$2\",\"model\":\"claude-sonnet-5-5\",\"usage\":{\"input_tokens\":100,\"cache_read_input_tokens\":$3,\"cache_creation_input_tokens\":$4,\"output_tokens\":500}}}"; }
 { um "$(ts 50)" "build the thing please"; ar "$(ts 50)" e1 0 19900; ar "$(ts 49)" e1 0 19900; ar "$(ts 48)" e2 19900 40000
@@ -180,9 +184,9 @@ o=$(py "
 print(c.idle_advice({},50000,100)=='', c.idle_advice({},10000,9999)=='', c.idle_advice({},50000,9999))")
 ok "idle: only past ttl and 20k history, with cost line" '[[ $o == "True True TOKEN ZOMBIE: idle "*"min, the prompt cache likely expired"*"~50k history at 1.25x (~62k input-eq)" ]]'
 mkdir -p "$HOME/.claude/projects/pp/SS1/subagents"; A="$HOME/.claude/projects/pp/SS1/subagents/agent-z.jsonl"
-echo '{"message":{"stop_reason":"tool_use"}}' > "$A"; touch -t $(date -v-20M +%Y%m%d%H%M) "$A"
+echo '{"message":{"stop_reason":"tool_use"}}' > "$A"; age_file "$A" 1200
 o=$(py "print(c.stall_advice(dict(session_id='SS1')))"); ok "stall: silent mid-work subagent flagged" '[[ $o == *"subagent may be stalled (agent-z silent"* ]]'
-echo '{"message":{"stop_reason":"end_turn"}}' > "$A"; touch -t $(date -v-20M +%Y%m%d%H%M) "$A"
+echo '{"message":{"stop_reason":"end_turn"}}' > "$A"; age_file "$A" 1200
 o=$(py "print(c.stall_advice(dict(session_id='SS1')))"); ok "stall: finished subagent not flagged" '[ -z "$o" ]'
 mkdir -p "$HOME/.claude/skills-off/vidx"; echo x > "$HOME/.claude/skills-off/vidx/a"
 o=$(py "
@@ -194,11 +198,11 @@ ok "cleanup: pack turned on this chat listed once" '[ "$o" = "$(printf "TOKEN ZO
 # 10 Stop refreshes fresh.json (TOKENS SAVED fresh-chat part) when older than 5 min
 rm -f "$S/fresh.json"; echo '{"hook_event_name":"Stop","session_id":"fs","cwd":"/x"}' | python3 "$Z/bin/tz-guard.py" >/dev/null
 ok "Stop writes fresh.json when missing" '[ -s "$S/fresh.json" ]'
-touch -t 202001010000 "$S/fresh.json"; echo '{"hook_event_name":"Stop","session_id":"fs","cwd":"/x"}' | python3 "$Z/bin/tz-guard.py" >/dev/null
-ok "Stop refreshes a stale fresh.json" '[ $(( $(date +%s) - $(stat -f %m "$S/fresh.json") )) -lt 60 ]'
+age_file "$S/fresh.json" 86400; echo '{"hook_event_name":"Stop","session_id":"fs","cwd":"/x"}' | python3 "$Z/bin/tz-guard.py" >/dev/null
+ok "Stop refreshes a stale fresh.json" '[ $(mtime_age "$S/fresh.json") -lt 60 ]'
 
 # 11 fresh-chat linking by the folder a chat worked in (not where it was opened), within 24 h
-R4="$HOME/.claude/projects"; mkdir -p "$R4/-a" "$R4/-b"; t1=$(date -u -v-20H +%Y-%m-%dT%H:%M:%SZ)
+R4="$HOME/.claude/projects"; mkdir -p "$R4/-a" "$R4/-b"; t1=$(iso_ago 72000)
 w() { echo "{\"cwd\":\"$4\",\"timestamp\":\"$1\",\"message\":{\"id\":\"$2\",\"usage\":{\"input_tokens\":0,\"cache_read_input_tokens\":$3,\"output_tokens\":1}}}"; }
 w "$t1" w1 120000 /work/proj > "$R4/-a/old.jsonl"; { w "$now" w2 20000 "$HOME"; w "$now" w3 30000 /work/proj; } > "$R4/-b/new.jsonl"
 o=$(python3 -c "import sys;sys.path.insert(0,'$Z/bin');import tzopt;print([x for x in tzopt.fresh_saved() if x[0]=='proj'])")

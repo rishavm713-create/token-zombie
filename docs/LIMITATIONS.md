@@ -32,3 +32,5 @@
 - `tz skills` invocation counts come from local chat logs (last 30 days, ~7 s scan); skills run via hooks (caveman SessionStart) are not counted as invoked.
 - tz-vet LOW tier: a HIGH pattern found only under tests/fixtures/bench/eval/examples/docs/CI or on a code comment line is LOW.
   .md/.txt/.mdc lines are never downgraded. LOW still needs a human glance; it is a noise cut, not a proof of safety.
+
+- `tz agent` / `tz code --run`: the pipeline is covered by the test suite with a simulated host; its first live Claude run comes with EditSutra.

@@ -5,7 +5,7 @@ claude plugin marketplace add rishavm713-create/token-zombie
 claude plugin install token-zombie@token-zombie
 ```
 Restart Claude Code. If you used the old `install.sh`, run `bash install.sh --uninstall` first (hooks would fire twice).
-Proven 2026-11-24: plugin 2.0.0 enabled in the real ~/.claude; a real `claude -p` session fired the TZ hooks (prompt.submit, session.end). Not proven yet: installing from the GitHub-hosted marketplace (local-folder marketplace proven).
+Proven 2026-11-24: plugin 2.0.0 enabled in the real ~/.claude; a real `claude -p` session fired the TZ hooks (prompt.submit, session.end). Also proven 2026-11-24: `claude plugin marketplace add rishavm713-create/token-zombie` then `claude plugin install token-zombie@token-zombie` in a clean config dir gives 2.0.0, enabled.
 ## Upgrade
 `claude plugin marketplace update token-zombie`, then `claude plugin update token-zombie@token-zombie`; restart. Rollback: `claude plugin uninstall token-zombie@token-zombie`.
 ## Daily commands (put `alias tz='python3 <plugin dir>/bin/tz'` in ~/.zshrc)

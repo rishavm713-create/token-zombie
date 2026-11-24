@@ -38,6 +38,8 @@ c.execute("INSERT INTO vault VALUES('v1','s',1,'Bash','pytest tests/foo',4400,40
 assert mo.reconcile([{'tok':1000,'basis':'measured','kind':'output-trim'}],db)[2]=='AGREE'
 assert mo.reconcile([{'tok':5000,'basis':'measured','kind':'output-trim'}],db)[2]=='MISMATCH'
 assert mo.reconcile([],T+'/none.db')[2].startswith('UNAVAILABLE')
+c=sqlite3.connect(db); c.execute("INSERT INTO vault VALUES('v0','s',1,'Bash','old',40000,0)"); c.execute("UPDATE vault SET t=100 WHERE id='v1'"); c.commit(); c.close()
+assert mo.reconcile([{'t':100,'tok':1000,'basis':'measured','kind':'output-trim'}],db)[2]=='AGREE'  # vault rows older than the ledger are left out
 assert mo.vault_find(db,['pytest'])[0][0]=='v1' and not mo.vault_find(db,['zzzz'])
 for n in ('agent-a','agent-b'):
     open(T+f'/{n}.jsonl','w').write(json.dumps({'message':{'content':[{'type':'tool_use','id':'1','name':'Edit','input':{'file_path':'/x.py'}}]}})+'\n')

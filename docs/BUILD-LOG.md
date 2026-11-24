@@ -16,3 +16,6 @@
 - 2026-11-24 15:01 [ctx 80%] main@1f2e066: done 1, partial 4, not started 2, uncommitted 6
 - 2026-11-24 15:10 [ctx 80%] main@e975397: done 1, partial 4, not started 2, uncommitted 10
 - 2026-11-24 15:17 [ctx 70%] main@e975397: done 1, partial 4, not started 2, uncommitted 14
+- 2026-11-24 21:57 [ctx 70%] main@eb49a6c: done 1, partial 4, not started 2, uncommitted 1
+- 2026-11-24 22:31 [ctx 70%] main@eb49a6c: done 1, partial 4, not started 2, uncommitted 10
+- 2026-11-24 22:33 [ctx 80%] main@5b36bd6: done 1, partial 4, not started 2, uncommitted 14
