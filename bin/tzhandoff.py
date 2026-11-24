@@ -83,10 +83,27 @@ def newest_task(cwd):
     return max(fs, key=os.path.getmtime) if fs else None
 
 
+# tail_lines: copied from planning-with-files scripts/inject-plan.py (MIT, Copyright (c) 2026 Ahmad Adi); see NOTICE.
+def tail_lines(data, n):
+    """`tail -N`: the last N lines; a final partial line counts as one."""
+    if not data:
+        return b""
+    body = data[:-1] if data.endswith(b"\n") else data
+    parts = body.split(b"\n")
+    kept = parts[-n:] if n < len(parts) else parts
+    out = b"\n".join(kept)
+    if data.endswith(b"\n"):
+        out += b"\n"
+    return out
+
+
 def memory_tail(cwd, n=MEM_TAIL):
     p = os.path.join(hdir(cwd), 'MASTER.md')
     try:
-        return [l for l in open(p, encoding='utf-8', errors='ignore').read().splitlines() if l.startswith('- ')][-n:]
+        with open(p, 'rb') as f:  # bound the work: only the last ~64 KB of a long memory file is ever decoded
+            f.seek(0, 2); sz = f.tell(); f.seek(max(0, sz - 65536)); raw = f.read()
+        txt = tail_lines(raw, 400).decode('utf-8', 'ignore')
+        return [l for l in txt.splitlines() if l.startswith('- ')][-n:]
     except OSError:
         return []
 

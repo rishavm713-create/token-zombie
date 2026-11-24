@@ -9,3 +9,20 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 aider (https://github.com/Aider-AI/aider), Apache License 2.0
 Copyright 2023-2025 Paul Gauthier and Aider contributors
 Used in: bin/tzrank.py (definition/reference graph weighting and ranking adapted from aider/repomap.py RepoMap.get_ranked_tags; networkx PageRank replaced by a pure-Python power iteration; tags from tz map instead of tree-sitter). Licence: https://www.apache.org/licenses/LICENSE-2.0
+
+planning-with-files (https://github.com/OthmanAdi/planning-with-files), MIT licence
+Copyright (c) 2026 Ahmad Adi
+Used in: bin/tzhandoff.py tail_lines (function copied verbatim from scripts/inject-plan.py; used to bound reading of MASTER.md). MIT permission notice as above applies.
+
+Headroom (https://github.com/headroomlabs-ai/headroom), Apache License 2.0
+Used in: bin/tzcrush.py (outlier retention for JSON arrays: idea from the SmartCrusher; its implementation is Rust-backed, so TZ's code is independent pure Python, no source copied). Licence: https://www.apache.org/licenses/LICENSE-2.0
+
+lean-ctx (https://github.com/yvgude/lean-ctx), Apache License 2.0
+Used in: bin/tzout.py _reread (unchanged re-read stub: idea; source is Rust, TZ code independent, no source copied).
+
+RTK (https://github.com/rtk-ai/rtk), Apache License 2.0 (CLI/oss edition; the BUSL-1.1 engine crate is NOT used)
+Used in: bin/tzcrush.py clean (strip ANSI / progress redraws / blank runs: idea only, no source copied).
+
+beads (https://github.com/gastownhall/beads), MIT licence
+Copyright (c) 2025 Beads Contributors
+Used in: bin/tzsup.py ready()/blocked_by (dependency-edge + ready-query idea; source is Go, TZ code independent, no source copied).
