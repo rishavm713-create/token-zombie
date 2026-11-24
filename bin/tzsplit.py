@@ -48,8 +48,13 @@ def lock(op, name, ttl=1800):
     return 2, 'usage: tz lock acquire|release|status NAME [--ttl S]'
 
 
+# system text (reminders, notifications, code fences) is data, never a task list
+SYS = re.compile(r'<(system-reminder|task-notification|pasted_content|[a-z-]*event)\b[^>]*>.*?</\1>|&lt;system-reminder>.*?(?=\n\n|$)|```.*?```', re.S | re.I)
+
+
 def detect(prompt):
     """Independent tasks in one prompt: numbered/bulleted lines or 'also/then ...' clauses. [] when fewer than 2 (heuristic, advice only)."""
+    prompt = SYS.sub(' ', prompt or '')
     items = [re.sub(r'^\s*(\d+[.)]|[-*])\s*', '', l).strip() for l in (prompt or '').splitlines() if re.match(r'^\s*(\d+[.)]|[-*])\s+\S', l)]
     if len(items) < 2:
         items = [x.strip() for x in re.split(r'\b(?:also|and then|then)\b|;', prompt or '', flags=re.I) if len(x.split()) >= 4]
@@ -66,14 +71,24 @@ CODE = [('plan', 'sonnet', ['planning-and-task-breakdown', 'grill-me'], 'goal + 
         ('ship', 'sonnet', ['git-workflow-and-versioning', 'pr'], 'commit/push only after owner OK; handoff note last')]
 
 
+AGENT = {'plan': 'Plan (read-only architect; Explore on haiku first to locate code)', 'build': 'main chat (general-purpose agent only for independent files)',
+         'debug': 'main chat', 'test': 'verifier', 'review': 'reviewer', 'simplify': 'main chat', 'ship': 'main chat'}
+
+
 def code_pipeline(task=''):
     """Coding workflow with the best installed skill per phase. Advice only: names skills, never turns a pack on or runs anything."""
     roots = [os.path.expanduser(r) for r in ('~/.claude/skills', '~/.claude/skills-off/coding', '~/.claude/skills-off/devmisc')]
     have = lambda n: next((r for r in roots if os.path.isdir(os.path.join(r, n))), None)
     out = []
+    hard = False
+    if task:
+        import tzroute
+        hard = tzroute.complexity(task) >= 5
     for ph, model, skills, rule in CODE:
+        if hard and ph in ('plan', 'review', 'debug'):
+            model = 'opus'  # hard task: the decisions that cost most when wrong get the strongest model
         found = [(n, 'on' if have(n) == roots[0] else 'pack coding') for n in skills if have(n)]
-        out.append(dict(phase=ph, model=model, skill=found[0][0] if found else None, state=found[0][1] if found else None, rule=rule))
+        out.append(dict(phase=ph, model=model, agent=AGENT[ph], skill=found[0][0] if found else None, state=found[0][1] if found else None, rule=rule))
     return out
 
 
@@ -82,7 +97,8 @@ def plan(tasks):
     out = []
     for i, t in enumerate(tasks, 1):
         r = tzroute.route(t)
-        out.append(dict(n=i, task=t, model=r['model'], mode=r['mode'], worktree=tzmore.worktree_cmd(t),
+        ag = {'RESEARCH': 'Explore (haiku)', 'AUDIT': 'reviewer', 'ENGINEERING': 'main chat; Plan/verifier/reviewer per tz code'}.get(r['mode'], 'main chat')
+        out.append(dict(n=i, task=t, model=r['model'], mode=r['mode'], agent=ag, worktree=tzmore.worktree_cmd(t),
                         lock=sorted({m.lower() for m in SHARED.findall(t)}) or None))
     shared = {}
     for x in out:
@@ -143,7 +159,7 @@ def main(argv):
         if js:
             print(json.dumps(rows, indent=1)); return 0
         for r in rows:
-            print(f"{r['phase']:8} [{r['model']}] " + (f"/{r['skill']} ({r['state']})" if r['skill'] else '(no skill, follow the rule)') + f"  {r['rule']}")
+            print(f"{r['phase']:8} [{r['model']}] agent: {r['agent']} | " + (f"/{r['skill']} ({r['state']})" if r['skill'] else '(no skill, follow the rule)') + f"  {r['rule']}")
         print('one task per session; build first, test once; pack on only when a phase needs it: ~/.claude/skillpack on coding, off when done.')
         return 0
     if c == 'hsize':

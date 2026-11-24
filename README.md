@@ -55,6 +55,8 @@ A small bar inside Claude Code shows quick signals, and a local dashboard shows 
 ![Dashboard](docs/img/dashboard.png)
 
 **Workflow defaults:** `tz code [task]` (coding pipeline: plan, build all first, debug, test once, review, simplify, ship, each with a model and the best installed coding skill; the prompt hook points engineering prompts at it), `tz split "task A" "task B"` (one session per task, model pick, worktree, build-first-then-one-live-test), `tz lock acquire|release NAME` (serialise shared live tests), `tz hsize` (handoff size check), `tz similar QUERY` (read-only GitHub search for similar tools). Policy advice also flags test-skipping edits (fake green) and more than 6 subagents per session (ideas from karanb192/claude-code-hooks). The prompt hook now suggests `tz split` when one prompt holds 2+ independent tasks. Advice and local lock files only; tz starts nothing.
+**Cost control:** `tz costly` ranks the tool outputs that cost the most in your recent chats (MEASURED) and makes the policy hook warn before the same command runs again; `tz noise` lists Read-deny rules for node_modules, lockfiles and build output (dry run, `--apply` writes with a `.bak`); past 70% of the window (or the limit) the Stop hint includes the exact `/compact keep ...` line from the saved handoff; subagents started without a model get a haiku/read-here hint; `tz code` and `tz split` also name the agent per phase and use opus for plan/debug only on hard tasks.
+
 
 ## Honest status
 

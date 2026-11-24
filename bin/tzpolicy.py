@@ -25,6 +25,10 @@ DEFAULT = {'rules': {
         'message': '{path} is part of the cached prompt prefix: editing it mid-chat makes the next turn re-write the whole cache. Batch such edits, or do them between tasks.'},
     'spawn_cap': {'id': 'spawn_cap', 'enabled': True, 'threshold': 6,
         'message': '{n} subagents started this session (each re-sends its report): batch the work or do it here.'},
+    'costly_kind': {'id': 'costly_kind', 'enabled': True,
+        'message': '`{k}` output averaged ~{avg} tokens in your recent chats (MEASURED): cap it (| head -40, --stat, rtk) unless you need all of it.'},
+    'agent_model': {'id': 'agent_model', 'enabled': True, 'reads': 3,
+        'message': 'Subagent without a model: bulk reading/search goes on model "haiku" (Explore). If the job is {reads} reads or fewer, read them here instead of spawning.'},
 }}
 _cache = {}
 WARN = []
@@ -146,6 +150,18 @@ def evaluate(event, state=None, pol=None):
     r = _r(pol, 'spawn_cap')
     if r and tool in ('Agent', 'Task') and (state.get('spawns', 0) + 1) > int(r.get('threshold', 6)):
         add(r, 'warn', n=state.get('spawns', 0) + 1)
+    r = _r(pol, 'agent_model')
+    if r and tool in ('Agent', 'Task') and not ti.get('model') and not str(ti.get('subagent_type', '')).startswith(('codex', 'claude-code')):
+        add(r, 'info', reads=int(r.get('reads', 3)))
+    r = _r(pol, 'costly_kind')
+    if r and tool == 'Bash' and ti.get('command') and not re.search(r'\||--stat|--oneline|\brtk\b|-n\s*\d|--max-count', ti['command']):
+        try:
+            import tzcost
+            hot = json.load(open(os.path.join(tzcost.STATE, 'costly.json'))).get(tzcost.kind('Bash', ti))
+        except Exception:
+            hot = None
+        if hot:
+            add(r, 'info', k=tzcost.kind('Bash', ti), avg=hot.get('avg_tok'))
     cmd = ti.get('command') or ''
     if tool == 'Bash' and cmd:
         r = _r(pol, 'bash_output_cap')

@@ -1,7 +1,7 @@
-# HANDOFF (authoritative, 2026-11-24 15:01, reason: ctx 80%)
+# HANDOFF (authoritative, 2026-11-24 15:17, reason: ctx 70%)
 Objective: TZ: complete capability plan
 Phase: build, then test
-Git: main@1f2e066 (1f2e066 Policy: fake-green, subagent spawn cap, prefix-edit cache advice (ideas from similar repos)); 6 uncommitted, 0 staged
+Git: main@e975397 (e975397 tz code: coding pipeline with model and best installed skill per phase; prompt hint for engineering tasks); 14 uncommitted, 0 staged
 ## Done
 - handoff integrity layer
 ## Partial (NOT complete)
@@ -13,12 +13,20 @@ Git: main@1f2e066 (1f2e066 Policy: fake-green, subagent spawn cap, prefix-edit c
 - policy engine
 - quality-adjusted optimization
 ## Uncommitted files
-- README.md (810712ad1f:4871)
-- bin/tz (571f462120:12356)
-- bin/tz-guard.py (392fc847fa:19859)
-- bin/tzsplit.py (b8ebd5ed42:8525)
-- skills/token-zombie/SKILL.md (f34a5024c6:8484)
-- tests/test_split.sh (d39f1ba158:2441)
+- README.md (e27ca7f204:5449)
+- bin/tz (bc409b80c7:12650)
+- bin/tzcont.py (1d4335d80c:45946)
+- bin/tzpolicy.py (fae244b3d8:11461)
+- bin/tzsplit.py (ad4bfc752f:9552)
+- docs/BUILD-LOG.md (9a1c623d85:1555)
+- docs/DEVELOPMENT-STATE.md (1de48b5193:316)
+- docs/HANDOFF.md (5128b17d79:1201)
+- docs/NEXT-SESSION.md (ec952b03c2:410)
+- skills/token-zombie/SKILL.md (710cc13d56:8804)
+- tests/run_all.sh (ccefa36026:1073)
+- tests/test_split.sh (cdab1d10c0:2975)
+- bin/tzcost.py (8ed368f29f:4734)
+- tests/test_cost.sh (51078d0d71:2469)
 ## Blockers / unresolved
 - none
 ## Errors and findings

@@ -750,10 +750,35 @@ def econ_track(path, m, e, now):
     return L
 
 
+def compact_line(cwd):
+    """The exact /compact line, built from the saved handoff (objective, done, next, decisions). '' when no handoff exists."""
+    try:
+        import tzintegrity
+        st = tzintegrity._load(cwd)
+    except Exception:
+        return ''
+    if not st:
+        return ''
+    cut = lambda x, n: ' '.join(str(x).split())[:n]
+    bits = []
+    if st.get('objective'):
+        bits.append('task: ' + cut(st['objective'], 120))
+    if st.get('done'):
+        bits.append('done: ' + '; '.join(cut(x, 60) for x in st['done'][-3:]))
+    if st.get('next'):
+        bits.append('next: ' + cut(st['next'], 120))
+    if st.get('decisions'):
+        bits.append('decisions: ' + '; '.join(cut(x, 60) for x in st['decisions'][-3:]))
+    if not bits:
+        return ''
+    return '/compact keep ' + ' | '.join(bits) + ' | drop file dumps, logs, old reads'
+
+
 def compact_hint(data, used):
-    """Stop: a turn closed past the limit -> tell the user to run /compact, once per 25k step. '' otherwise."""
+    """Stop: context past 70% of the window (the handoff is already checkpointed there) or past the limit -> give the exact /compact line,
+    once per 25k step. Advice only. '' otherwise."""
     from tzlib import cfg
-    if used < cfg('limit'):
+    if used < min(cfg('limit'), int(0.7 * cfg('ctx_window'))):
         return ''
     step = used // 25000
 
@@ -764,8 +789,10 @@ def compact_hint(data, used):
         return True
     if not _churn_rw(data.get('session_id', 'x'), chk):
         return ''
+    line = compact_line(data.get('cwd') or os.getcwd())
     return (f'TOKEN ZOMBIE: chat is {used // 1000}k tokens. If this task is done, run /compact now '
-            '(the note keeps only done, left and next), then send the next task.')
+            '(the note keeps only done, left and next), then send the next task.'
+            + (f'\nPaste this: {line}' if line else '\nNo handoff yet: run tz handoff save --next "<next step>" first, then /compact.'))
 
 
 # Loop detection, claim board, idle-cache and cleanup advice (advice only, never blocks).
