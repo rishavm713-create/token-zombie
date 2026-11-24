@@ -76,7 +76,7 @@ if mode == '--uninstall':
         s.pop('hooks', None)
     msg = 'token-zombie removed (old chat-size-guard not restored; use the settings backup if you want it)'
 else:
-    plan = (('UserPromptSubmit', None, guard), ('PostToolUse', '', guard), ('PreToolUse', 'Read|Grep|Glob|WebSearch|WebFetch|Agent|Task|Edit|Write|MultiEdit|NotebookEdit', guard), ('SessionStart', None, start),
+    plan = (('UserPromptSubmit', None, guard), ('PostToolUse', '', guard), ('PreToolUse', 'Bash|Read|Grep|Glob|WebSearch|WebFetch|Agent|Task|Edit|Write|MultiEdit|NotebookEdit', guard), ('SessionStart', None, start),
             ('PreCompact', None, guard), ('PreCompact', None, compact), ('Stop', None, guard), ('SessionEnd', None, guard),
             ('SubagentStop', None, guard), ('SubagentStart', None, guard), ('InstructionsLoaded', None, guard),
             ('PostCompact', None, guard), ('PostToolUseFailure', None, guard),
