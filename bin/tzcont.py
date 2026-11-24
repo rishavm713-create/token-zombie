@@ -25,6 +25,24 @@ def _lines(p, n=None):
     return L if n is None else L[:n]
 
 
+def cache_ttl(path=None):
+    """Prompt-cache life in seconds. Explicit TZ_CACHE_TTL / config cache_ttl wins; else measured from the chat log: any
+    cache write made with the 1 h TTL (usage.cache_creation.ephemeral_1h_input_tokens > 0, last 200 usage lines) => 3600,
+    else 300. A fixed 300 s called a warm 1 h cache 'expired' after 5 min idle (false advice)."""
+    from tzlib import cfg, _conf, feature
+    if os.environ.get('TZ_CACHE_TTL') or _conf.get('cache_ttl') or not feature('cache_ttl_auto'):
+        return cfg('cache_ttl')
+    try:
+        L = [l for l in _lines(path or '') if '"usage"' in l][-200:]
+    except Exception:
+        L = []
+    for l in reversed(L):
+        m = re.search(r'"ephemeral_1h_input_tokens"\s*:\s*(\d+)', l)
+        if m and int(m.group(1)) > 0:
+            return 3600
+    return cfg('cache_ttl')
+
+
 def master(cwd):
     from tzhandoff import memory_tail
     from tzlib import cfg
@@ -539,7 +557,8 @@ def churn_prompt(data, used):
         gap = time.time() - st['t'] if st.get('t') else 0
         st['t'] = time.time()
         st.setdefault('off0', _packs_off())  # skill packs parked at this chat's first prompt
-        idle = idle_advice(data, used, gap)  # t is reset here, so each idle gap speaks once
+        ttl = cache_ttl(data.get('transcript_path'))
+        idle = idle_advice(data, used, gap, ttl)  # t is reset here, so each idle gap speaks once
         w = set(re.findall(r'[a-z0-9_./-]{4,}', prompt))
         old = set(st.get('words', []))
         ov = len(w & old) / len(w) if w and old else 1.0  # share of this prompt's words already used in this chat
@@ -548,7 +567,7 @@ def churn_prompt(data, used):
         tasks = st.get('tasks', 0)  # task starts so far: first prompt + long prompts that share few words with the chat
         if not old or (len(prompt) >= 12 and ov * 100 < cfg('fresh_overlap')):
             st['tasks'] = tasks + 1
-        return sig, stay_or_fresh(used, _base(data), st.get('steps', 0), tasks + 1, gap, len(prompt), ov), idle
+        return sig, stay_or_fresh(used, _base(data), st.get('steps', 0), tasks + 1, gap, len(prompt), ov, ttl), idle
     sig, fresh, idle = _churn_rw(data.get('session_id', 'x'), judge)
     out = [idle] if idle else []
     stall = stall_advice(data)
@@ -574,7 +593,7 @@ def _base(data):
         return None
 
 
-def stay_or_fresh(used, base, steps, prompts, gap, plen, overlap=0.0):
+def stay_or_fresh(used, base, steps, prompts, gap, plen, overlap=0.0, ttl=None):
     """Context-dependent, no fixed size: cost of staying vs a fresh chat for the NEXT task, in input-token equivalents.
     stay  = history re-sent every step at cache-read 0.1x (or re-written at 1.25x once if the cache expired while idle).
     fresh = startup written once at 1.25x + the task pack. Steps per task = this chat's own steps / prompts.
@@ -586,7 +605,7 @@ def stay_or_fresh(used, base, steps, prompts, gap, plen, overlap=0.0):
         return ''
     b, bb = (base, 'measured') if base else (20000, 'est')
     n = max(1, round(steps / max(1, prompts - 1)))  # prompts = task starts incl. this one: steps per earlier task
-    expired = gap > cfg('cache_ttl')
+    expired = gap > (ttl or cfg('cache_ttl'))
     stay = n * CR * used + (CW * used if expired else 0)
     fresh = CW * (b + PACK) + n * CR * PACK
     compact = CR * used + CW * (b + SUMMARY) + n * CR * SUMMARY  # summary call reads the cached history once
@@ -650,7 +669,7 @@ def measure(path):
     tot = sum(ctx) or 1
     return dict(used=ctx[-1], base=ctx[0], steps=len(cs) / max(1, len(_user_texts(path))), grow=max(0, (ctx[-1] - ctx[0]) / (len(cs) - 1)),
                 hit=sum(c[2] for c in cs) / tot, out=sum(c[4] for c in cs) / len(cs), model=next((c[5] for c in reversed(cs) if c[5]), ''),
-                t=cs[-1][0], n=len(cs))
+                t=cs[-1][0], n=len(cs), ttl=cache_ttl(path))
 
 
 def econ(m, gap=0, turns=TURNS):
@@ -666,7 +685,7 @@ def econ(m, gap=0, turns=TURNS):
     for n in turns:
         k = max(1, round(n * m['steps']))
         o = k * m['out']
-        tok = {'continue': run(m['used'], k, gap > cfg('cache_ttl')),
+        tok = {'continue': run(m['used'], k, gap > (m.get('ttl') or cfg('cache_ttl'))),
                'compact': m['used'] * r + run(m['base'] + SUMMARY, k, True),
                'fresh': run(m['base'] + PACK, k, True)}
         res[n] = {x: (int(v), (v * pin + (o + (SUMMARY if x == 'compact' else 0)) * pout) / 1e6) for x, v in tok.items()}
@@ -679,7 +698,7 @@ def next_call(m, gap=0):
     Returns (state, input-eq tokens, $ incl. one average reply)."""
     from tzlib import cfg
     pin, pout = PRICE[_fam(m['model'])]
-    cold = gap > cfg('cache_ttl')
+    cold = gap > (m.get('ttl') or cfg('cache_ttl'))
     tok = m['used'] * (CW if cold else CR)
     return ('cold' if cold else 'warm'), int(tok), (tok * pin + m['out'] * pout) / 1e6
 
@@ -938,10 +957,10 @@ def release_claims(sid):
     _claims_rw(rel)
 
 
-def idle_advice(data, used, gap):
+def idle_advice(data, used, gap, ttl=None):
     """UserPromptSubmit: idle past cache_ttl with a big history -> the prompt cache expired; once per gap. gap = seconds idle."""
     from tzlib import cfg
-    if used <= IDLE_MIN_USED or gap <= cfg('cache_ttl'):
+    if used <= IDLE_MIN_USED or gap <= (ttl or cfg('cache_ttl')):
         return ''
     return (f'TOKEN ZOMBIE: idle {int(gap // 60)} min, the prompt cache likely expired: this message re-writes '
             f'~{used // 1000}k history at 1.25x (~{int(used * CW) // 1000}k input-eq)')

@@ -216,8 +216,17 @@ def read_decision(data):
             c.setdefault(key, {})['den'] = 1
             _save(p, c)
             ledger('dup-read-denied', os.path.getsize(f), 'measured', s, 'Read denied (unchanged re-read): ' + f)
+            sk = ''
+            try:
+                from tzlib import feature
+                if feature('dup_skeleton'):
+                    from tzcompress import outline
+                    o = outline(f)
+                    sk = f' Outline (read only the part you need with offset+limit):\n{o}' if o else ''
+            except Exception:
+                sk = ''
             return {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny', 'permissionDecisionReason':
-                    adv + ' Denied once to save tokens; repeat the same Read if you truly need it again.'}
+                    adv + ' Denied once to save tokens; repeat the same Read if you truly need it again.' + sk}
         return {'hookEventName': 'PreToolUse', 'additionalContext': adv}
     except Exception:
         return None

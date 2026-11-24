@@ -35,6 +35,25 @@ def advice(name):
     return name in PROFILES[mode()]['advice']
 
 
+# v2.1 feature registry (one place): name -> default. env TZ_FEAT_<NAME>=0/1 beats config.json "features" beats this.
+# mode "off" turns every feature off. Hook-side features only; commands (tz toolprune, tz mem, ...) always work on demand.
+FEATURES = {'cache_ttl_auto': 1,  # measured 1 h vs 5 min prompt-cache life (tzcont.cache_ttl)
+            'dup_skeleton': 1,    # read_guard=deny: the deny carries the file skeleton instead of nothing
+            'safety_net': 1,      # parsed destructive-command / secret-path checks (tzsafety) inside the policy engine
+            'stuck_detect': 1,    # repeated identical tool call/output loops (tzcont circuit breaker)
+            'plan_reinject': 0}   # re-inject capped plan head after compaction (opt-in: adds context)
+
+
+def feature(name):
+    if mode() == 'off':
+        return False
+    e = os.environ.get(f'TZ_FEAT_{name.upper()}')
+    if e is not None:
+        return e.strip() not in ('0', '', 'off', 'false')
+    f = _conf.get('features') if isinstance(_conf.get('features'), dict) else {}
+    return bool(f.get(name, FEATURES.get(name, 0)))
+
+
 def cfg(key):
     return int(os.environ.get(f'TZ_{key.upper()}') or _conf.get(key) or PROFILES[mode()].get(key) or DEFAULTS[key])
 
