@@ -69,7 +69,8 @@ HELP = """tz <command> [args]
   diffcheck [--files a,b]                        diff vs task scope: strays, debug leftovers, huge diffs
   scaffold "IDEA" [--dir D] [--fields a,b]       working SaaS skeleton from templates, 0 tokens, stdlib only
   run "TASK" [--go] [--test CMD]                 one front door: understand to remember, optimized stages
-  worker detect|list|add|test|run|rm             provider-independent workers: claude, codex, gemini, aider, opencode, local HTTP model
+  gate [--test CMD] [--build CMD] [--files a,b]   independent verify of a change: diff, ownership, safe, secrets, tests; status ladder
+  worker detect|list|default|add|test|run|rm             provider-independent workers: claude, codex, gemini, aider, opencode, local HTTP model
   hw                                             this machine's memory and which local model size fits (estimate)
   stack idea|design|web|off                      turn on the skill packs an idea-to-product build needs
   features [--md]                                the 69-feature board: DONE / PARTIAL / MISSING, new ones highlighted
@@ -160,6 +161,9 @@ def main(argv):
         if c == 'scaffold':
             import tzscaffold
             return tzscaffold.main(rest)
+        if c == 'gate':
+            import tzgate
+            return tzgate.main(rest)
         if c in ('worker', 'hw'):
             import tzworkers
             return tzworkers.main([c] + rest)

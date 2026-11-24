@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# `tz agent "<task>" [--test CMD] [--worktree] [--files a,b] [--budget TOK] [--turns N] [--worker NAME] [--timeout S] [--dry]`: runs the tz code pipeline for real.
+# `tz agent "<task>" [--test CMD] [--worktree] [--files a,b] [--budget TOK] [--turns N] [--worker NAME] [--timeout S] [--gate [--build CMD]] [--dry]`: runs the tz code pipeline for real.
 # Minimal loop in the spirit of mini-SWE-agent (MIT): one `claude -p` call per phase, small step cap, token budget, stop on failed test.
 # Every phase is one ledger event (tz.db) and one checkpoint file. Permissions: edits only inside the work dir, no push/rm -rf/sudo.
 # CLAUDE_BIN overrides the host binary (tests use tests/fake/claude.py). Fail-open: a ledger error never stops the run.
@@ -110,7 +110,7 @@ def checkpoint(run, rows):
     json.dump(rows, open(os.path.join(d, run + '.json'), 'w'))
 
 
-def run(task, cwd, test=None, budget=400000, turns=20, worktree=False, dry=False, worker=None, timeout=1800):
+def run(task, cwd, test=None, budget=400000, turns=20, worktree=False, dry=False, worker=None, timeout=1800, gate=False, allow=None, build=None):
     import tzsplit
     pipe = {r['phase']: r for r in tzsplit.code_pipeline(task) if r['phase'] in PHASES}
     rid = '%s-%d' % (slug(task)[:20], int(time.time()))
@@ -147,6 +147,17 @@ def run(task, cwd, test=None, budget=400000, turns=20, worktree=False, dry=False
                 break
             if attempt == 2 or phase('debug', 'The check `%s` failed:\n%s' % (test, (p.stdout + p.stderr)[-1500:])) != 'ok':
                 break
+    if gate and not dry:  # independent verification; a worker saying "completed" is not evidence. Max MAX_REPAIRS repair rounds.
+        import tzgate
+        for rnd in range(tzgate.MAX_REPAIRS + 1):
+            st, res = tzgate.gate(task, cwd, test, build, allow, rid)
+            rows.append(dict(phase='gate', status='pass' if st in ('TESTED', 'IMPLEMENTED') else 'fail', note='%s: %s' % (st, '; '.join('%s %s' % (r['check'], r['detail'][:60]) for r in res if not r['ok']))[:300]))
+            ledger(run=rid, phase='gate', status=rows[-1]['status'])
+            checkpoint(rid, rows)
+            if rows[-1]['status'] == 'pass' or rnd == tzgate.MAX_REPAIRS:
+                break
+            if phase('debug', tzgate.repair_prompt(task, res)) != 'ok':
+                break
     return rid, rows, spent, measured[0]
 
 
@@ -158,18 +169,18 @@ def main(argv):
     for i, a in enumerate(argv):
         if skip:
             skip = False
-        elif a in ('--test', '--budget', '--turns', '--files', '--worker', '--timeout'):
+        elif a in ('--test', '--budget', '--turns', '--files', '--worker', '--timeout', '--build'):
             skip = True
         elif not a.startswith('--'):
             words.append(a)
     task = ' '.join(words)
     if not task:
-        print('usage: tz agent "<task>" [--test CMD] [--worktree] [--files a,b] [--budget TOK] [--turns N] [--dry]', file=sys.stderr); return 2
+        print('usage: tz agent "<task>" [--test CMD] [--worktree] [--files a,b] [--budget TOK] [--turns N] [--worker NAME] [--gate] [--dry]', file=sys.stderr); return 2
     if op('--files'):  # file ownership: refuse when another task already owns one of these files
         clash = claim(task, op('--files').split(','))
         if clash:
             print('refused: owned by another task: ' + ', '.join(clash), file=sys.stderr); return 3
-    rid, rows, spent, meas = run(task, os.getcwd(), op('--test'), int(op('--budget', 400000)), int(op('--turns', 20)), '--worktree' in argv, '--dry' in argv, op('--worker'), int(op('--timeout', 1800)))
+    rid, rows, spent, meas = run(task, os.getcwd(), op('--test'), int(op('--budget', 400000)), int(op('--turns', 20)), '--worktree' in argv, '--dry' in argv, op('--worker'), int(op('--timeout', 1800)), '--gate' in argv, op('--files').split(',') if op('--files') else None, op('--build'))
     for r in rows:
         print('%-6s %-7s %s%s' % (r['phase'], r.get('model', ''), r['status'], '  %s tok' % r['tokens'] if 'tokens' in r else ''))
     print('run %s: %d tokens (%s)' % (rid, spent, 'MEASURED from host usage' if meas else 'EST chars/4: this worker reports no usage'))
