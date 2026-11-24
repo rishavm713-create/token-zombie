@@ -24,4 +24,7 @@ o=$(PYTHONPATH="$Z/tests/fake/ts" tz compress f.ts); ok "tree-sitter (stub) path
 ok "stub tree-sitter really used" '[[ $(cd "$Z/bin" && PYTHONPATH="$Z/tests/fake/ts" python3 -c "import tzcompress as t; print(t.ts_skeleton(\"function a() { 1 }\"))") == *True* ]]'
 printf 'function a(x) { return x; } // @@\n' > g.ts
 o=$(PYTHONPATH="$Z/tests/fake/ts" tz compress g.ts); ok "tree-sitter parse error falls back" '[[ $o == *"{ ... }"* ]]'
+printf 'from cfg import parse_config\ny = parse_config(2)\n' > src/more.py
+o=$(tz rank --n 3); ok "rank: most-referenced def first" '[[ $(echo "$o" | head -1) == *"src/cfg.py: parse_config"* ]]'
+o=$(tz rank --focus src/user.ts); ok "rank: focus file excluded, still ranks" '[[ $o != *user.ts* && $o == *parse_config* ]]'
 cd /; rm -rf "$T"; echo "repo_intel: pass $pass fail $fail"; [ $fail -eq 0 ]
