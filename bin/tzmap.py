@@ -22,6 +22,59 @@ def defs(path):
     return [m.group(1) for m in re.finditer(r'^(?:function\s+)?(\w+)\(\)\s*\{', s, re.M)] if path.endswith('.sh') else []
 
 
+def _files(root):
+    for dp, dn, fn in os.walk(root):
+        dn[:] = sorted(d for d in dn if d not in SKIP and not d.startswith('.'))
+        for f in sorted(fn):
+            yield os.path.join(dp, f)
+
+
+def sym(root, name):
+    """(defs, refs): file:line where name is defined (py/js/ts/sh), and files that mention it as a word elsewhere."""
+    d = re.compile(r'^\s*(?:export\s+)?(?:default\s+)?(?:async\s+)?(?:def|class|function\*?|const|let|var|interface|type|enum)\s+%s\b|^\s*%s\s*\(\)\s*\{' % (re.escape(name), re.escape(name)))
+    w = re.compile(r'\b%s\b' % re.escape(name))
+    defs_, refs = [], []
+    for p in _files(root):
+        if not p.endswith(('.py', '.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs', '.sh')) and not open_is_script(p):
+            continue
+        try:
+            lines = open(p, encoding='utf-8', errors='ignore').read().splitlines()
+        except Exception:
+            continue
+        r = os.path.relpath(p, root); hit = False
+        for i, l in enumerate(lines, 1):
+            if d.search(l):
+                defs_.append(f'{r}:{i}')
+            elif w.search(l):
+                hit = True
+        if hit:
+            refs.append(r)
+    return defs_, refs
+
+
+def open_is_script(p):
+    try:
+        return open(p, 'rb').read(2) == b'#!'
+    except Exception:
+        return False
+
+
+def _parts(name):
+    return {x.lower() for x in re.findall(r'[A-Z]?[a-z0-9]+|[A-Z]+(?![a-z])', name) if len(x) > 2}
+
+
+def exists(root, words, n=15):
+    """Existing definitions whose name parts overlap the words, best first: look here before building something new."""
+    q = {w.lower() for w in words if len(w) > 2}
+    out = []
+    for p in _files(root):
+        for dname in defs(p):
+            nm = dname.split()[-1]; k = len(q & _parts(nm))
+            if k:
+                out.append((-k, os.path.relpath(p, root), dname))
+    return [(f, dn) for _, f, dn in sorted(out)[:n]]
+
+
 def build(root, limit=40):
     out = []
     for dp, dn, fn in os.walk(root):
@@ -70,6 +123,18 @@ def xcheck(argv):
 def main(argv):
     if argv and argv[0] == 'map':
         argv = argv[1:]
+    if argv and argv[0] == 'sym' and len(argv) > 1:
+        ds, rs = sym(os.getcwd(), argv[1])
+        print('defined: ' + (', '.join(ds) or 'nowhere found'))
+        print('used in %d file(s): %s' % (len(rs), ', '.join(rs[:30]) or '-'))
+        print('changing it may touch those files; tests among them: ' + (', '.join(r for r in rs if re.search(r'test|spec', r)) or 'none'))
+        return 0
+    if argv and argv[0] == 'exists':
+        r = exists(os.getcwd(), argv[1:])
+        for f, dn in r:
+            print(f'  {f}: {dn}')
+        print(f'{len(r)} existing definition(s) match; reuse before building' if r else 'nothing similar found (word match on names only)')
+        return 0
     if argv and argv[0] == 'xcheck':
         return xcheck(argv[1:])
     root = os.path.abspath(argv[0] if argv else '.')

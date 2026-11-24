@@ -34,13 +34,30 @@ def save(cwd, t):
     os.replace(p + '.tmp', p)
 
 
-def add(cwd, tid, title='', deps=(), gate='', goal='', files=(), nxt='', model=''):
+def _words(s):
+    return set(re.findall(r'[a-z0-9]+', s.lower()))
+
+
+def near_dup(ts, title, cut=0.6):
+    """(id, status) of an existing task whose title shares >= cut of its words (Jaccard) with title, else None."""
+    w = _words(title)
+    for k, v in ts.items():
+        o = _words(v.get('title', ''))
+        if min(len(w), len(o)) >= 3 and len(w & o) / len(w | o) >= cut:  # short titles ('Build A'/'Build B') are not compared
+            return k, v['status']
+    return None
+
+
+def add(cwd, tid, title='', deps=(), gate='', goal='', files=(), nxt='', model='', force=False):
     ts = load(cwd)
     if tid in ts:
         return None, f'duplicate: {tid} exists ({ts[tid]["status"]}); not overwritten'
     dup = [k for k, v in ts.items() if title and v.get('title', '').lower() == title.lower()]
     if dup:
         return None, f'duplicate title of {dup[0]}'
+    nd = None if force else near_dup(ts, title)
+    if nd:
+        return None, f'duplicate work? {nd[0]} ({nd[1]}) has a near-identical title; add --force if it is really new'
     bad = [d for d in deps if d not in ts]
     if bad or gate and gate not in GATES or tid in deps:
         return None, f'bad deps {bad} or gate {gate!r}'
@@ -230,7 +247,7 @@ def main(argv):
     ap.add_argument('--title', default=''); ap.add_argument('--goal', default=''); ap.add_argument('--dep', action='append', default=[])
     ap.add_argument('--gate', default=''); ap.add_argument('--file', action='append', default=[]); ap.add_argument('--next', dest='nxt', default='')
     ap.add_argument('--model', default=''); ap.add_argument('--test', default=''); ap.add_argument('--yes', action='store_true')
-    ap.add_argument('--approved', action='store_true'); ap.add_argument('--transcript', default='')
+    ap.add_argument('--approved', action='store_true'); ap.add_argument('--force', action='store_true'); ap.add_argument('--transcript', default='')
     a = ap.parse_args(argv)
     cwd = os.path.abspath(a.cwd)
     if a.sub == 'list':
@@ -250,7 +267,7 @@ def main(argv):
     if not a.id:
         print('id required', file=sys.stderr); return 2
     if a.sub == 'add':
-        t, msg = add(cwd, a.id, a.title, a.dep, a.gate, a.goal, a.file, a.nxt, a.model); print(msg); return 0 if t else 1
+        t, msg = add(cwd, a.id, a.title, a.dep, a.gate, a.goal, a.file, a.nxt, a.model, a.force); print(msg); return 0 if t else 1
     if a.sub == 'start':
         ok, msg = start(cwd, a.id, a.approved); print(msg); return 0 if ok else 3
     if a.sub == 'done':

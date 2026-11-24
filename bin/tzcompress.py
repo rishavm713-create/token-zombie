@@ -141,6 +141,36 @@ def _js_ok(s):
     return not st
 
 
+TS_FUNCS = {'function_declaration', 'generator_function_declaration', 'method_definition', 'arrow_function', 'function_expression', 'function'}
+
+
+def ts_skeleton(src, tsx=False):
+    """(skeleton, ok) via tree-sitter when `tree_sitter` + `tree_sitter_typescript` are installed (OPTIONAL dep); None when absent
+    or the parse has errors, so the caller falls back to the scanner. Function/method/arrow bodies become `{ ... }`."""
+    try:
+        import tree_sitter, tree_sitter_typescript as tst
+        lang = tree_sitter.Language(tst.language_tsx() if tsx else tst.language_typescript())
+        b = src.encode('utf-8')
+        root = tree_sitter.Parser(lang).parse(b).root_node
+    except Exception:
+        return None
+    if root.has_error:
+        return None
+    cuts, todo = [], [root]
+    while todo:
+        nd = todo.pop()
+        body = nd.child_by_field_name('body') if nd.type in TS_FUNCS else None
+        if body is not None and body.type == 'statement_block':
+            cuts.append((body.start_byte, body.end_byte))
+        else:
+            todo.extend(nd.children)
+    out, last = [], 0
+    for a, z in sorted(cuts):
+        out.append(b[last:a]); out.append(b'{ ... }'); last = z
+    out.append(b[last:])
+    return b''.join(out).decode('utf-8'), True
+
+
 def js_skeleton(src):
     """(skeleton, ok) for JS/TS with a small scanner (no parser, no deps). Skips strings, template literals (nested ${}), comments and regex literals.
     Bodies of functions, methods (getters/setters/static/TS modifiers/decorators), top-level arrow functions and `export default function` become `{ ... }`;
@@ -203,7 +233,7 @@ def main(argv):
     if not argv or not os.path.isfile(argv[0]) or not argv[0].endswith(('.py',) + JS):
         print('usage: tz compress FILE.py|.js|.ts  (other types NOT YET SUPPORTED)'); return 2
     src = open(argv[0], encoding='utf-8', errors='replace').read()
-    sk, ok = js_skeleton(src) if argv[0].endswith(JS) else skeleton(src)
+    sk, ok = (ts_skeleton(src, argv[0].endswith(('.tsx', '.jsx'))) or js_skeleton(src)) if argv[0].endswith(JS) else skeleton(src)
     if not ok:
         print(f'[TOKEN ZOMBIE: could not validate a skeleton, original kept] ({len(src):,} chars)'); return 1
     import tzout
