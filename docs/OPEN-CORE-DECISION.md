@@ -5,7 +5,7 @@ Owner machine: Apple M3, 16 GB unified, 148 GB free, llama-server installed, Oll
 ## 1. Recommendation (short)
 1. **TZ Core stays MIT, fully offline-capable**: CLI, offline engine (scaffold, modules, gates), repo intelligence, token tracking, TZ Safe, worker adapters (claude, codex, gemini, opencode, aider, local), checkpoint/recovery, local MCP server, `tz hw` hardware advisor. Nothing already shipped gets paywalled.
 2. **TZ Studio is a separate, closed-source product** in its own repo that depends on Core only through stable CLI/JSON/MCP contracts. Paid value = visual builder, workflow-automation designer, hosted execution, collaboration, managed connectors, governance.
-3. **TZ Cloud/Enterprise = Studio's hosted and self-hosted tiers** (SSO, RBAC, audit, private deployment, support). Not a third codebase.
+3. **There are exactly two products: TZ Core (free, MIT) and TZ Studio (paid, proprietary).** No third product, tier or Enterprise offering. Hosting, teams and governance features, if built, are part of Studio.
 4. **Claude/Codex/etc. are optional workers.** Core must pass its full test suite with no worker installed.
 5. **No rewrite.** Only additions: worker registry, gate, spec, modules (see FACTORY-AUDIT.md phases 1-3). Studio waits until Core phases 1-5 are proven.
 
@@ -51,20 +51,20 @@ Hardware matrix (weights memory = params x bits/8; add KV cache and ~1.5-2 GB ru
 Plan: `tz hw` reads RAM/chip/free disk, picks a tier from this table, and prints which local worker fits. It must say "estimate" until we measure with `llama-bench` on the owner machine. Never promise frontier ability from small models.
 
 ## 5. Open-core boundary (exact)
-| Capability | Core (MIT, free) | Studio (paid) | Enterprise/Cloud |
-|---|---|---|---|
-| CLI, offline engine, scaffold, module library | yes | uses it | |
-| Worker adapters + registry + router, local model support | yes | | |
-| Gate (tests, lint, secrets, deps, diffcheck, safe), status ladder | yes | | |
-| Checkpoint, rollback, ledger, token tracking, reports | yes | | |
-| Agent-facing MCP/CLI contract | yes | | |
-| Single-user workflow engine (JSON, run from CLI) | yes (basic) | | |
-| Visual product builder, live preview, approvals UI | | yes | |
-| Visual workflow designer + NL-to-workflow editor, versioning, run history UI | | yes | |
-| Managed connectors (Gmail, Slack, CRM, billing) with maintained auth | | yes | |
-| Hosted execution, preview URLs, one-click deploy | | yes | yes |
-| Team workspaces, comments, shared checkpoints | | yes | |
-| SSO/SAML, RBAC, org policy, audit log export, private deploy, SLA | | | yes |
+| Capability | Core (MIT, free) | Studio (paid) |
+|---|---|---|
+| CLI, offline engine, scaffold, module library | yes | uses it |
+| Worker adapters + registry + router, local model support | yes | |
+| Gate (tests, lint, secrets, deps, diffcheck, safe), status ladder | yes | |
+| Checkpoint, rollback, ledger, token tracking, reports | yes | |
+| Agent-facing MCP/CLI contract | yes | |
+| Single-user workflow engine (JSON, run from CLI) | yes (basic) | |
+| Visual product builder, live preview, approvals UI | | yes |
+| Visual workflow designer + NL-to-workflow editor, versioning, run history UI | | yes |
+| Managed connectors (Gmail, Slack, CRM, billing) with maintained auth | | yes |
+| Hosted execution, preview URLs, one-click deploy | | yes |
+| Team workspaces, comments, shared checkpoints | | yes |
+| Later Studio team features: SSO/SAML, RBAC, audit log export, private deploy | | yes (later) |
 Test of the boundary: a solo developer with no money can build, test and ship real software with Core alone; Studio saves time and adds team/hosted conveniences. Core never gets crippled to push Studio.
 
 ## 6. Architecture
@@ -75,7 +75,7 @@ Automation engine: workflow = JSON graph (trigger, condition, action, branch, lo
 ## 7. Security and governance
 - Secrets only from env/secret store, never in specs or logs; secret scan in gate.
 - Workers run with file allowlist, budget, no push/rm -rf/sudo (already in tzagent); TZ Safe guard on live hook.
-- Hosted: container sandbox per job, network egress policy, per-tenant keys, audit log. Enterprise: SSO, RBAC, retention, on-prem. SOC2 etc.: UNKNOWN effort, not claimed.
+- Hosted: container sandbox per job, network egress policy, per-tenant keys, audit log. Studio team features (SSO, RBAC, retention) are later scope. SOC2 etc.: UNKNOWN effort, not claimed.
 - Financial or outbound-message actions always require explicit human approval.
 
 ## 8. Revenue models (evaluate, then pick two)
@@ -83,7 +83,7 @@ Automation engine: workflow = JSON graph (trigger, condition, action, branch, lo
 |---|---|---|
 | Studio individual/pro subscription | good for founders/devs | needs a visible quality gap vs free Core |
 | Agency plan (seats, white-label, client workspaces) | best fit with an agency angle | support load |
-| Business/Enterprise (private deploy, SSO, audit, SLA) | highest price | long sales cycle |
+| Studio team/business plan (private deploy, SSO, audit) | higher price, still Studio | long sales cycle |
 | Managed cloud execution (usage-based) | optional, margin on compute | must stay optional; BYO model/infra always allowed |
 | Services (build/automation setup) | fastest first revenue | does not scale; keep as bridge |
 Price points: UNKNOWN until user interviews; do not publish numbers yet. Recommended start: services plus Studio beta for agencies, then subscriptions.

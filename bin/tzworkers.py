@@ -43,6 +43,8 @@ def detect():
 def invoke(name, prompt, cwd=None, timeout=900):
     """Run one worker. Returns (text, error). cli: argv list, never a shell; http: OpenAI-compatible chat call."""
     w = load().get(name)
+    if name == 'claude' and not w:
+        w = {'kind': 'cli', 'cmd': KNOWN['claude']}
     if not w:
         return '', 'unknown worker %s' % name
     try:
@@ -58,6 +60,22 @@ def invoke(name, prompt, cwd=None, timeout=900):
         return d['choices'][0]['message']['content'], None
     except Exception as e:
         return '', '%s: %s' % (type(e).__name__, e)
+
+
+def default():
+    """Default worker name: workers.json key '_default' (tz worker default NAME), else claude."""
+    return load().get('_default', {}).get('name', 'claude')
+
+
+def apply_patch(text, cwd):
+    """http workers return text: apply a unified diff (optionally in a code fence) with git apply. Returns error or None."""
+    import re
+    m = re.search(r'```(?:diff|patch)?\n(.*?)```', text, re.S)
+    diff = (m.group(1) if m else text).strip() + '\n'
+    if not diff.startswith(('diff ', '--- ')):
+        return 'worker reply is not a unified diff'
+    r = subprocess.run(['git', 'apply', '--whitespace=nowarn', '-'], input=diff, cwd=cwd, capture_output=True, text=True)
+    return None if r.returncode == 0 else 'git apply failed: ' + r.stderr[-200:]
 
 
 def hw():
@@ -98,6 +116,8 @@ def main(argv):
     if sub == 'list':
         print('%-10s %-8s %s' % ('offline', 'builtin', 'deterministic tz tools, 0 tokens'))
         for n, v in w.items():
+            if n == '_default':
+                continue
             print('%-10s %-8s %s' % (n, v['kind'], v.get('cmd') or v.get('url')))
         return 0
     if sub == 'add' and rest:
@@ -114,6 +134,12 @@ def main(argv):
         else:
             print('kind must be cli or http', file=sys.stderr); return 2
         save(w); print('added %s' % n); return 0
+    if sub == 'default':
+        if rest:
+            if rest[0] != 'claude' and rest[0] != 'offline' and rest[0] not in w:
+                print('unknown worker %s' % rest[0], file=sys.stderr); return 2
+            w['_default'] = {'name': rest[0]}; save(w)
+        print(default()); return 0
     if sub == 'rm' and rest:
         w.pop(rest[0], None); save(w); return 0
     if sub in ('test', 'run') and rest:
@@ -123,7 +149,7 @@ def main(argv):
         if err:
             print(err, file=sys.stderr)
         return 1 if err or not txt else 0
-    print('usage: tz worker detect|list|add NAME --kind cli|http ...|rm NAME|test NAME|run NAME "prompt"   |   tz hw', file=sys.stderr)
+    print('usage: tz worker detect|list|default [NAME]|add NAME --kind cli|http ...|rm NAME|test NAME|run NAME "prompt"   |   tz hw', file=sys.stderr)
     return 2
 
 

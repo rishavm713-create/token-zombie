@@ -45,4 +45,5 @@ o=subprocess.run(tz+["worker","run","loc","hi"],capture_output=True,text=True).s
 sys.exit(0 if "OK from fake" in o else 1)
 PY'
 ck "tz3: unknown worker fails cleanly" 'export TZ_WORKERS_DIR=$(mktemp -d); ! python3 "$R/bin/tz" worker run nope hi 2>/dev/null'
+ck "tz3: tzagent runs through a cli worker (EST tokens) and offline fails cleanly" 'd=$(mktemp -d); cd $d; git init -q; export TZ_WORKERS_DIR=$d/w TZ_DEDUPE=0; python3 $R/bin/tzworkers.py worker add echo --kind cli --cmd "python3 -c \"print(1)\" {prompt}" >/dev/null; python3 $R/bin/tzagent.py "make a file" --worker echo 2>&1 | grep -q "EST chars/4" && python3 $R/bin/tzagent.py "x" --worker offline 2>&1 | grep -q "error"'
 echo "pass $P fail $F"; [ $F = 0 ]

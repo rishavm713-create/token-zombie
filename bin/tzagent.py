@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# `tz agent "<task>" [--test CMD] [--worktree] [--files a,b] [--budget TOK] [--turns N] [--dry]`: runs the tz code pipeline for real.
+# `tz agent "<task>" [--test CMD] [--worktree] [--files a,b] [--budget TOK] [--turns N] [--worker NAME] [--timeout S] [--dry]`: runs the tz code pipeline for real.
 # Minimal loop in the spirit of mini-SWE-agent (MIT): one `claude -p` call per phase, small step cap, token budget, stop on failed test.
 # Every phase is one ledger event (tz.db) and one checkpoint file. Permissions: edits only inside the work dir, no push/rm -rf/sudo.
 # CLAUDE_BIN overrides the host binary (tests use tests/fake/claude.py). Fail-open: a ledger error never stops the run.
@@ -51,12 +51,12 @@ def make_worktree(task, cwd):
     return p
 
 
-def call(prompt, model, cwd, turns):
+def call_claude(prompt, model, cwd, turns, timeout=1800):
     """One host call. Returns (text, tokens, error). Tokens = sum of usage in the stream (MEASURED when the host reports it)."""
     cmd = [os.environ.get('CLAUDE_BIN', 'claude'), '-p', prompt, '--model', model, '--output-format', 'stream-json', '--verbose',
            '--max-turns', str(turns), '--permission-mode', 'acceptEdits', '--allowedTools', ','.join(ALLOW), '--disallowedTools', ','.join(DENY)]
     try:
-        r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=1800)
+        r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout)
     except Exception as e:
         return '', 0, str(e)
     tok, text = 0, ''
@@ -75,6 +75,28 @@ def call(prompt, model, cwd, turns):
     return text, tok, None if r.returncode == 0 else 'host exit %d' % r.returncode
 
 
+def call(prompt, model, cwd, turns, worker=None, timeout=1800, edits=False):
+    """One worker call through the registry. Returns (text, tokens, error, measured).
+    'claude' (default, unless TZ_WORKER or `tz worker default` says otherwise) keeps the original host path with MEASURED usage.
+    cli workers edit files themselves; http workers return text, so for edit phases a unified diff is requested and applied with git apply;
+    the offline worker has no model and only reports that. Tokens for non-claude workers are EST (chars/4)."""
+    import tzworkers
+    w = worker or os.environ.get('TZ_WORKER') or tzworkers.default()
+    if w == 'claude':
+        t, k, e = call_claude(prompt, model, cwd, turns, timeout)
+        return t, k, e, True
+    reg = tzworkers.load()
+    if w == 'offline':
+        return '', 0, 'offline worker has no model: this phase needs a worker (tz worker default NAME)', False
+    if w not in reg:
+        return '', 0, 'unknown worker %s (tz worker list)' % w, False
+    ask = prompt + ('\nReply ONLY with a unified diff in git apply format.' if edits and reg[w]['kind'] == 'http' else '')
+    text, err = tzworkers.invoke(w, ask, cwd, timeout)
+    if not err and edits and reg[w]['kind'] == 'http':
+        err = tzworkers.apply_patch(text, cwd)
+    return text, (len(ask) + len(text)) // 4, err, False
+
+
 def ledger(**k):
     try:
         import tzdb
@@ -88,13 +110,13 @@ def checkpoint(run, rows):
     json.dump(rows, open(os.path.join(d, run + '.json'), 'w'))
 
 
-def run(task, cwd, test=None, budget=400000, turns=20, worktree=False, dry=False):
+def run(task, cwd, test=None, budget=400000, turns=20, worktree=False, dry=False, worker=None, timeout=1800):
     import tzsplit
     pipe = {r['phase']: r for r in tzsplit.code_pipeline(task) if r['phase'] in PHASES}
     rid = '%s-%d' % (slug(task)[:20], int(time.time()))
     if worktree and not dry:
         cwd = make_worktree(task, cwd)
-    rows, spent = [], 0
+    rows, spent, measured = [], 0, [True]
     def phase(ph, extra=''):
         nonlocal spent
         r = pipe[ph]
@@ -104,16 +126,17 @@ def run(task, cwd, test=None, budget=400000, turns=20, worktree=False, dry=False
             rows.append(dict(phase=ph, status='budget')); return 'budget'
         sk = ' Use the %s skill if available.' % r['skill'] if r['skill'] else ''
         t0 = time.time()
-        text, tok, err = call('Task: %s\nPhase: %s. %s%s %s' % (task, ph, r['rule'], sk, extra), r['model'], cwd, turns)
+        text, tok, err, m = call('Task: %s\nPhase: %s. %s%s %s' % (task, ph, r['rule'], sk, extra), r['model'], cwd, turns, worker, timeout, ph in ('build', 'debug'))
+        measured[0] = measured[0] and m
         spent += tok
         st = 'error' if err else 'ok'
-        rows.append(dict(phase=ph, model=r['model'], tokens=tok, ms=int((time.time() - t0) * 1000), status=st, note=(err or text)[:200]))
+        rows.append(dict(phase=ph, model=r['model'], worker=worker or os.environ.get('TZ_WORKER') or 'default', tokens=tok, ms=int((time.time() - t0) * 1000), status=st, note=(err or text)[:200]))
         ledger(run=rid, phase=ph, model=r['model'], tokens=tok, status=st)
         checkpoint(rid, rows)
         return st
     for ph in ('plan', 'build'):
         if phase(ph) != 'ok' and not dry:
-            return rid, rows, spent
+            return rid, rows, spent, measured[0]
     if test:
         for attempt in range(3):  # test, then at most 2 debug rounds; a failed run feeds its tail to debug
             p = subprocess.run(test, shell=True, cwd=cwd, capture_output=True, text=True)
@@ -124,7 +147,7 @@ def run(task, cwd, test=None, budget=400000, turns=20, worktree=False, dry=False
                 break
             if attempt == 2 or phase('debug', 'The check `%s` failed:\n%s' % (test, (p.stdout + p.stderr)[-1500:])) != 'ok':
                 break
-    return rid, rows, spent
+    return rid, rows, spent, measured[0]
 
 
 def main(argv):
@@ -135,7 +158,7 @@ def main(argv):
     for i, a in enumerate(argv):
         if skip:
             skip = False
-        elif a in ('--test', '--budget', '--turns', '--files'):
+        elif a in ('--test', '--budget', '--turns', '--files', '--worker', '--timeout'):
             skip = True
         elif not a.startswith('--'):
             words.append(a)
@@ -146,10 +169,10 @@ def main(argv):
         clash = claim(task, op('--files').split(','))
         if clash:
             print('refused: owned by another task: ' + ', '.join(clash), file=sys.stderr); return 3
-    rid, rows, spent = run(task, os.getcwd(), op('--test'), int(op('--budget', 400000)), int(op('--turns', 20)), '--worktree' in argv, '--dry' in argv)
+    rid, rows, spent, meas = run(task, os.getcwd(), op('--test'), int(op('--budget', 400000)), int(op('--turns', 20)), '--worktree' in argv, '--dry' in argv, op('--worker'), int(op('--timeout', 1800)))
     for r in rows:
         print('%-6s %-7s %s%s' % (r['phase'], r.get('model', ''), r['status'], '  %s tok' % r['tokens'] if 'tokens' in r else ''))
-    print('run %s: %d tokens (MEASURED from host usage)' % (rid, spent))
+    print('run %s: %d tokens (%s)' % (rid, spent, 'MEASURED from host usage' if meas else 'EST chars/4: this worker reports no usage'))
     return 0 if rows and rows[-1]['status'] in ('ok', 'pass', 'dry') else 1
 
 
