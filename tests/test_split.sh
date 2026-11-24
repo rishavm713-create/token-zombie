@@ -16,4 +16,5 @@ ok "echo '{\"hook_event_name\":\"SubagentStart\",\"session_id\":\"s\",\"cwd\":\"
 seq 40 > "$T/p/handoffs/2026-11-21.md"
 ok "echo '{\"hook_event_name\":\"SessionStart\",\"session_id\":\"s\",\"cwd\":\"$T/p\"}' | python3 bin/tz-start.py | grep -q 'oversized'" start-hsize
 ok "python3 -c \"import sys;sys.path.insert(0,'bin');import tzpolicy as t;e=lambda **k:[a['id'] for a in t.evaluate(k,{'spawns':6},t.DEFAULT)];assert 'fake_green' in e(tool_name='Edit',tool_input={'file_path':'a/test_x.py','new_string':'@pytest.mark.skip'});assert 'fake_green' not in e(tool_name='Edit',tool_input={'file_path':'a/x.py','new_string':'@pytest.mark.skip'});assert 'spawn_cap' in e(tool_name='Agent',tool_input={});assert 'prefix_edit' in e(tool_name='Edit',tool_input={'file_path':'/p/CLAUDE.md','new_string':'x'})\"" policy-fakegreen-spawn
+ok "python3 bin/tz code fix the login bug --json | python3 -c \"import json,sys;r=json.load(sys.stdin);sys.exit(0 if [x['phase'] for x in r][:3]==['plan','build','debug'] and len(r)==7 else 1)\"" code-pipeline
 echo "pass $P fail $F"; [ $F = 0 ]

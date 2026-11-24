@@ -56,6 +56,27 @@ def detect(prompt):
     return items if len(items) >= 2 else []
 
 
+# coding pipeline: phase -> (model, [skills in preference order], one-line rule). Skills come from the `coding` pack; tz only names those that exist.
+CODE = [('plan', 'sonnet', ['planning-and-task-breakdown', 'grill-me'], 'goal + acceptance check in 2 lines, smallest plan, owner approves'),
+        ('build', 'sonnet', ['incremental-implementation', 'karpathy-guidelines'], 'smallest complete change, reuse code, syntax check only; whole batch first'),
+        ('debug', 'sonnet', ['debugging-and-error-recovery', 'diagnosing-bugs'], 'only when a check fails: reproduce, root cause, fix once'),
+        ('test', 'sonnet', ['test-driven-development', 'doubt-driven-development'], 'one real test per new logic, then ONE full run (background if >2 min)'),
+        ('review', 'sonnet', ['code-review-and-quality', 'security-and-hardening'], 'read the diff only; owner picks findings to fix'),
+        ('simplify', 'haiku', ['code-simplification', 'simplify-codebase'], 'remove what is not needed; no new features'),
+        ('ship', 'sonnet', ['git-workflow-and-versioning', 'pr'], 'commit/push only after owner OK; handoff note last')]
+
+
+def code_pipeline(task=''):
+    """Coding workflow with the best installed skill per phase. Advice only: names skills, never turns a pack on or runs anything."""
+    roots = [os.path.expanduser(r) for r in ('~/.claude/skills', '~/.claude/skills-off/coding', '~/.claude/skills-off/devmisc')]
+    have = lambda n: next((r for r in roots if os.path.isdir(os.path.join(r, n))), None)
+    out = []
+    for ph, model, skills, rule in CODE:
+        found = [(n, 'on' if have(n) == roots[0] else 'pack coding') for n in skills if have(n)]
+        out.append(dict(phase=ph, model=model, skill=found[0][0] if found else None, state=found[0][1] if found else None, rule=rule))
+    return out
+
+
 def plan(tasks):
     import tzroute, tzmore
     out = []
@@ -116,6 +137,14 @@ def main(argv):
         for k, v in r['lock_needed'].items():
             print(f"lock '{k}' shared by tasks {v}: tz lock acquire {k}  ... tz lock release {k}")
         print('rule: ' + r['rule'] + '\nTZ starts nothing; open one session per line yourself.')
+        return 0
+    if c == 'code':
+        rows = code_pipeline(' '.join(a))
+        if js:
+            print(json.dumps(rows, indent=1)); return 0
+        for r in rows:
+            print(f"{r['phase']:8} [{r['model']}] " + (f"/{r['skill']} ({r['state']})" if r['skill'] else '(no skill, follow the rule)') + f"  {r['rule']}")
+        print('one task per session; build first, test once; pack on only when a phase needs it: ~/.claude/skillpack on coding, off when done.')
         return 0
     if c == 'hsize':
         r = hsize(os.path.abspath(a[0] if a else '.'))

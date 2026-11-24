@@ -346,6 +346,12 @@ try:
                             'Plan: tz split ' + ' '.join('"' + t[:60].replace('"', "'") + '"' for t in ts[:4]))
             except Exception:
                 _diag('split', ev)
+            try:  # engineering prompt: point at the coding pipeline once (advice)
+                import tzopt
+                if advice('pack_hints') and tzopt.classify(data.get('prompt') or '')[0] == 'ENGINEERING':
+                    hint = (hint + ' ' if hint else '') + 'TOKEN ZOMBIE (suggestion): coding task: follow tz code (plan, build all first, test once, review the diff, simplify, ship after owner OK; best skill per phase).'
+            except Exception:
+                _diag('code', ev)
             if hint:
                 emit(({'hookSpecificOutput': {'hookEventName': ev, 'additionalContext': hint}}))
             sys.exit(0)

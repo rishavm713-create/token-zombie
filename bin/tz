@@ -22,6 +22,7 @@ HELP = """tz <command> [args]
   learn [--apply] [--target F]                   mine repeated tool failures from chat logs; dry run unless --apply
   split "task A" "task B"                       one session per task: model pick, worktree cmd, locks, build-first rule
   similar [QUERY]                                read-only GitHub search for similar tools (ideas; vet before use)
+  code [TASK]                                    coding pipeline: plan, build, debug, test, review, simplify, ship with model + best installed skill per phase
   lock acquire|release|status NAME [--ttl S]     lock for a shared resource (live test/device/port)
   hsize [DIR]                                    handoff size check (daily <=30 lines, top block <=15, weekly merge)
   resume [--run-test]                            verify handoff vs git/tests, print next action
@@ -112,7 +113,7 @@ def main(argv):
         if c in ('skills', 'capabilities', 'security', 'audit', 'instructions', 'profile'):
             import tzcap
             return tzcap.main([c, *rest])
-        mods = {'learn': 'tzlearn', 'sup': 'tzsup', 'route': 'tzroute', 'adapters': 'tzadapters', 'reg': 'tzreg', 'dash': 'tzdash', 'companion': 'tzcompanion', 'mascot': 'tzmascot', 'hooks': 'tzhooks', 'live': 'tzlive', 'ledger': 'tzdb', 'compress': 'tzcompress', 'rework': 'tzrework', 'attr': 'tzattr', 'price': 'tzprice', 'policy': 'tzpolicy', 'reconcile': 'tzmore', 'export': 'tzmore', 'workflow': 'tzmore', 'worktree': 'tzmore', 'find': 'tzmore', 'doctor': 'tzmore', 'split': 'tzsplit', 'similar': 'tzsimilar', 'lock': 'tzsplit', 'hsize': 'tzsplit', 'vault-find': 'tzmore', 'overlap': 'tzmore', 'skills-outcome': 'tzmore', 'conflicts': 'tzattr', 'preflight': 'tzpreflight', 'recall': 'tzout', 'next': 'tznext', 'state': 'tzcont', 'replay': 'tzcont', 'expensive': 'tzcont', 'waste-audit': 'tzcont', 'ondemand': 'tzondemand', 'systems': 'tzsystems', 'shadow': 'tzout'}
+        mods = {'learn': 'tzlearn', 'sup': 'tzsup', 'route': 'tzroute', 'adapters': 'tzadapters', 'reg': 'tzreg', 'dash': 'tzdash', 'companion': 'tzcompanion', 'mascot': 'tzmascot', 'hooks': 'tzhooks', 'live': 'tzlive', 'ledger': 'tzdb', 'compress': 'tzcompress', 'rework': 'tzrework', 'attr': 'tzattr', 'price': 'tzprice', 'policy': 'tzpolicy', 'reconcile': 'tzmore', 'export': 'tzmore', 'workflow': 'tzmore', 'worktree': 'tzmore', 'find': 'tzmore', 'doctor': 'tzmore', 'split': 'tzsplit', 'code': 'tzsplit', 'similar': 'tzsimilar', 'lock': 'tzsplit', 'hsize': 'tzsplit', 'vault-find': 'tzmore', 'overlap': 'tzmore', 'skills-outcome': 'tzmore', 'conflicts': 'tzattr', 'preflight': 'tzpreflight', 'recall': 'tzout', 'next': 'tznext', 'state': 'tzcont', 'replay': 'tzcont', 'expensive': 'tzcont', 'waste-audit': 'tzcont', 'ondemand': 'tzondemand', 'systems': 'tzsystems', 'shadow': 'tzout'}
         if c in mods:
             return __import__(mods[c]).main(([c] if mods[c] in ('tzcont', 'tzout', 'tzattr', 'tzmore', 'tzsplit') else []) + rest)
         if c == 'overlay':  # build/run the native always-on-top window (Command Line Tools swiftc; installs nothing)

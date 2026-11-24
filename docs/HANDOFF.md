@@ -1,7 +1,7 @@
-# HANDOFF (authoritative, 2026-11-24 14:57, reason: ctx 80%)
+# HANDOFF (authoritative, 2026-11-24 15:01, reason: ctx 80%)
 Objective: TZ: complete capability plan
 Phase: build, then test
-Git: main@22354dc (22354dc Subagent report cap hint, handoff-size warning at session start, split hint proposes session cards); 3 uncommitted, 0 staged
+Git: main@1f2e066 (1f2e066 Policy: fake-green, subagent spawn cap, prefix-edit cache advice (ideas from similar repos)); 6 uncommitted, 0 staged
 ## Done
 - handoff integrity layer
 ## Partial (NOT complete)
@@ -13,9 +13,12 @@ Git: main@22354dc (22354dc Subagent report cap hint, handoff-size warning at ses
 - policy engine
 - quality-adjusted optimization
 ## Uncommitted files
-- README.md (e2ac90d366:4665)
-- bin/tzpolicy.py (642cd50b59:9887)
-- tests/test_split.sh (a3d7c8dc61:2130)
+- README.md (810712ad1f:4871)
+- bin/tz (571f462120:12356)
+- bin/tz-guard.py (392fc847fa:19859)
+- bin/tzsplit.py (b8ebd5ed42:8525)
+- skills/token-zombie/SKILL.md (f34a5024c6:8484)
+- tests/test_split.sh (d39f1ba158:2441)
 ## Blockers / unresolved
 - none
 ## Errors and findings
