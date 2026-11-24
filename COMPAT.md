@@ -1,4 +1,6 @@
 # Compatibility
+**Platforms:** macOS, Linux and Windows (Git Bash; Python 3.8+ found as python3, python or py -3 via `bin/tzpy`). CI runs on ubuntu-latest, macos-latest and windows-latest. Claude Code integration verified 2026-11-24 (hooks fire in a live `claude -p` session, slash commands run, MCP tz_* tools load, GitHub-marketplace install).
+
 **EXPERIMENTAL / rules-only: every non-Claude adapter except Codex usage (Cursor, Windsurf, Gemini, Cline, Roo, Antigravity).** They only get a generated rules file; no hooks, no statusline, no supervisor. Capabilities are declared and UNVERIFIED. Only Claude Code is real; Codex is real for usage reading only (`tz adapters --usage codex`). Claude Code >= 2.1.318 tested; macOS tested; Linux expected via CI; Windows untested.
 
 ## Other agents

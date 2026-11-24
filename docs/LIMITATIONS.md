@@ -1,4 +1,5 @@
 # Limitations (honest list)
+- Platforms/verification (2026-11-24): macOS, Linux and Windows (Git Bash via bin/tzpy, Python 3.8+); CI on ubuntu/macos/windows-latest. Verified against real Claude Code: hooks fire in a live `claude -p` session, slash commands run, MCP tz_* tools load, GitHub-marketplace install works. Not verified: untested Windows edge cases beyond CI, JS/TS API-drift, real lint/type/audit tools.
 - Savings are NOT yet measured end-to-end. `tz stats` counts only events tz recorded (filter runs, flagged duplicate reads); flagged reads are [est]. No with/without benchmark exists. All TZ advice text (every hook line) is counted as overhead [measured chars/4].
 - 5h/7d and resets: shown only when Claude Code passes rate_limits to the statusline; otherwise "not provided". $ figures (`tz stats` 24h, Session Economics, `tz live agents`) are EST: tokens x list price per model (tzcont.PRICE, edit as prices change), API-equivalent, not your plan quota.
 - ctx_window (default 200k) is a setting, not read from the provider: context % is [est].
@@ -14,14 +15,14 @@
 - The supervisor cannot force the host to open a fresh session: `tz sup next-session` prints the command; `--yes` launches a headless `claude -p` only on your say-so.
 - Adapters: only claude is REAL. The other 7 generate rules files and declare unverified capabilities.
 - Overlay: built with Command Line Tools swiftc, selftest + process-alive tested; the on-screen look was not visually verified.
-- Registry never fetches URLs. A/B experiment not run (isolated login 401); needs your approval and a cost estimate.
+- Registry never fetches URLs. Optional `tz ab` experiment not run; it is opt-in and nothing depends on it. Free path: `tz bench replay` / `tz stats`.
 - Not built: real A/B results. Subagent cost and $ are EST (see above). RTK: each Bash call's rtk delta goes into the ledger as a measured entry (rtk's own measurement, not TZ's).
-- Windows: TOKENS SAVED counts today since local midnight across all chats; `tz stats` LAST 24H is rolling; history.json keeps one snapshot per day.
+- Time windows: TOKENS SAVED counts today since local midnight across all chats; `tz stats` LAST 24H is rolling; history.json keeps one snapshot per day.
 - Fresh-chat saving (in TOKENS SAVED, split as [EST input-eq]): per call 0.1 x (old chat's last context - new chat's startup context), minus the new chat's measured startup write; can be negative. All inputs measured; the only assumption is the same calls in the old chat with a warm cache. Each old chat links to one new chat. Against /compact the saving is smaller. Chats are linked within 24 h when they worked in the same project folder (most frequent logged cwd other than home), wherever they were opened.
 - Session Economics (continue/compact/fresh over 5/10/20 turns) is a model from this chat's measured usage; projected vs actual is printed once replies exist.
 - Loop, stalled-subagent, idle-cache, same-file (claims.json) and cleanup lines are advice only. Subagent stall is a heuristic (no host signal for "still running").
 - Output trim (bin/tzout.py): live-verified on claude 2.1.318 for Read, Glob and Grep content only (headless Haiku probe, isolated config).
-  WebFetch and MCP trims are unit-tested only; the WebFetch field name `result` is assumed. Live check needs a paid run: NOT done.
+  WebFetch and MCP trims are unit-tested only; the WebFetch field name `result` is assumed. Live check (optional, uses your own Claude Code usage): NOT done.
   The host ignores a replacement that breaks the tool's output shape (the model then gets the original output, nothing breaks).
   Read keeps only the head (>20k chars) so line numbers stay right; the model must Read with offset for the rest.
   The full text is stored in ~/.claude/token-zombie/recall (dir 0700, files 0600, last 200 kept) and can hold secrets that were in the output.

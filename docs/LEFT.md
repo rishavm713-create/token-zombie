@@ -17,7 +17,7 @@ Order = priority. Gated items need the owner's yes first.
 11. [x] **Tests.** (2026-11-22: panel tests run with `claude plugin test .`, bun cannot resolve the host modules; e2e polls 5 s) Make `hooks/panel.test.tsx` runnable (react missing for bun). Fix the flaky `test_e2e.sh` `sleep 1` (poll up to 5 s).
 
 ## Gated (ask the owner first)
-12. [skip] (owner 2026-11-22: skip) Real paid A/B run (`tzab.py`). Needs a cost estimate and a yes.
+12. [skip] (owner 2026-11-22: skip) Optional opt-in A/B run (`tzab.py`, spends your own Claude Code usage). Free path: `tz bench replay`.
 13. Real 5-hour reset (`rate_limits.resets_at`, Claude's "resets X" message). Owner said skip for now.
 14. Public GitHub repo, release package, website, public install. Needs a publish yes.
 

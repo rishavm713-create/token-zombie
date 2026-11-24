@@ -1,4 +1,11 @@
 # Changelog
+## v2.0.1 (2026-11-24)
+- Windows supported via `bin/tzpy` (Git Bash; Python 3.8+ via python3/python/py -3); CI runs on ubuntu-latest, macos-latest and windows-latest.
+- Verified 2026-11-24 against real Claude Code: hooks fire in a live `claude -p` session, slash commands run, MCP tz_* tools load, install from the GitHub-hosted marketplace works.
+- Docs: open-core/TZ Studio plan archived to docs/archive/ (out of current scope); `tz ab` and `tz preflight --smoke` described as optional, opt-in (spend your own Claude Code usage); free benchmark path is `tz bench replay` / `tz stats`. Savings stay labelled MEASURED / EST / UNKNOWN.
+- Tree-sitter: tested with the real `tree_sitter` + `tree_sitter_typescript` packages on 40 EditSutra JS/TS files (all parsed; skeletons 14% of original vs 60% with the built-in scanner). Optional dep; without it the scanner is used. The suite's real-package test runs when `TZ_TS_PYTHON` points at a Python that has it, else prints SKIP.
+- `tests/run_all.sh` prints SKIP lines and a skip total; skips are never counted as passes.
+- EditSutra acceptance: see docs/EDITSUTRA-ACCEPTANCE.md.
 ## v2.0.0 (2026-11-24)
 Built and tested (tests/run_all.sh; counts in docs/MASTER-BUILD-ROADMAP.md section 10):
 - Workers: `tz worker` registry (cli/http/offline), `tz hw`; worker timeout kills the whole process group (test_killgroup).

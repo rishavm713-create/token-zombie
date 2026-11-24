@@ -33,4 +33,4 @@ Reads every `~/.claude/projects/**/*.jsonl` offline. Per reply it takes the logg
 - TZ-off chats: every tool result runs through the same `tzout.cut` code TZ uses live; overhead and refetch are added at the rates measured in TZ-on chats.
 - A removed block of C chars is carried for every later reply until compaction: C/4 x (1.25 + 0.1 x (k-1)). Cache expiry is ignored, which under-counts savings.
 - Result on this machine: 1,025 chats, net 7.9M input-eq saved = 0.58% (~$40 EST at list price). Repeat-search advice: <= 0.02% (upper bound).
-- Not measured: answer quality and turn count. That needs the paid `tzab` A/B.
+- Not measured: answer quality and turn count. That needs the optional opt-in `tz ab` A/B (spends your own Claude Code usage).

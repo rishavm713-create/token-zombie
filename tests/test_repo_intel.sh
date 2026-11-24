@@ -25,6 +25,10 @@ ok "stub tree-sitter really used" '[[ $(cd "$Z/bin" && PYTHONPATH="$Z/tests/fake
 printf 'function a(x) { return x; } // @@\n' > g.ts
 o=$(PYTHONPATH="$Z/tests/fake/ts" tz compress g.ts); ok "tree-sitter parse error falls back" '[[ $o == *"{ ... }"* ]]'
 printf 'from cfg import parse_config\ny = parse_config(2)\n' > src/more.py
+TP="${TZ_TS_PYTHON:-python3}"
+if "$TP" -c "import tree_sitter, tree_sitter_typescript" 2>/dev/null; then
+  ok "REAL tree-sitter package cuts TS bodies" '[[ $(cd "$Z/bin" && "$TP" -c "import tzcompress as t; r=t.ts_skeleton(\"export function a(x: number): number { const y = 2; return x + y }\"); print(r)") == *"{ ... }"*True* ]]'
+else echo "SKIP: real tree-sitter not installed (set TZ_TS_PYTHON to a python that has tree_sitter + tree_sitter_typescript)"; fi
 o=$(tz rank --n 3); ok "rank: most-referenced def first" '[[ $(echo "$o" | head -1) == *"src/cfg.py: parse_config"* ]]'
 o=$(tz rank --focus src/user.ts); ok "rank: focus file excluded, still ranks" '[[ $o != *user.ts* && $o == *parse_config* ]]'
 cd /; rm -rf "$T"; echo "repo_intel: pass $pass fail $fail"; [ $fail -eq 0 ]

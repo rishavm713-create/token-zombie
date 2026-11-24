@@ -4,7 +4,7 @@
 claude plugin marketplace add rishavm713-create/token-zombie
 claude plugin install token-zombie@token-zombie
 ```
-Tested with a local-path marketplace; the GitHub-hosted route is untested.
+Both a local-path marketplace and the GitHub-hosted marketplace install were proven 2026-11-24.
 Desktop app: + next to the prompt box > Plugins > Add marketplace `rishavm713-create/token-zombie` > Add plugin.
 Optional statusline (also feeds the panel cost row): `bash <plugin dir>/install.sh --statusline-only`.
 Uninstall: `/plugin uninstall token-zombie`.

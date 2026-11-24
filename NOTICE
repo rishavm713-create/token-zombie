@@ -26,3 +26,6 @@ Used in: bin/tzcrush.py clean (strip ANSI / progress redraws / blank runs: idea 
 beads (https://github.com/gastownhall/beads), MIT licence
 Copyright (c) 2025 Beads Contributors
 Used in: bin/tzsup.py ready()/blocked_by (dependency-edge + ready-query idea; source is Go, TZ code independent, no source copied).
+
+karpathy-skills (Joseph Kim), MIT licence
+Used in: bin/tzops.py diffcheck (idea only: every changed line traces to the task; rules rewritten, no code copied).

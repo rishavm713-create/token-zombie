@@ -42,12 +42,12 @@ Savings proven so far: **none**. The only paid A/B (2026-11-21) is INVALID: 5-11
 Bare python start: ~16 ms. These are hook-time numbers, not token savings.
 
 ## Roadmap (ranked by net saving vs effort; done = in dev repo, not installed live)
-1. DONE preflight: offline + validate + paid smoke. NEXT: owner approves `tz preflight --smoke --yes` (<=250k tokens, haiku).
+1. DONE preflight: offline + validate + paid smoke. `tz preflight --smoke --yes` is optional and opt-in (spends your own Claude Code usage, <=250k tokens, haiku); nothing depends on it.
 2. DONE invoked-skill tracking + five skill states; Mod SKILLS USED.
 3. DONE agent lifecycle ledger + stale background-agent note.
 4. DONE hook baseline + fast path. NEXT: one-week live `tz live` sample after install.
 5. DONE conservative Grep/Glob/Web dedupe (advice only).
-6. Valid OFF-vs-ON A/B rerun after smoke PASS (owner approval; caps 1.5M/session, 5M total).
+6. Valid OFF-vs-ON A/B rerun after smoke PASS (optional, opt-in; caps 1.5M/session, 5M total).
 7. DONE in dev repo (wired in tz-guard, not installed live) competitor #1: bin/tzout.py `trim()` cuts Read (head only, >20k chars), Grep content / WebFetch result / MCP text
    (head+tail, >12k chars), same output shape; full text in ~/.claude/token-zombie/recall/<id>.txt, `tzout.py recall <id> --grep|--lines`.
    Ledger 'out-trim' (measured chars). Off: config out_trim false or TZ_OUT=0. tests/test_out.sh 17/0. LIVE Haiku probe: Read + Grep

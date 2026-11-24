@@ -152,7 +152,7 @@ Toolbar above the prompt (desktop Mod `hooks/panel.tsx`), dashboard (`tz dash`) 
 
 Measure tokens before and after, repeated context avoided, reads avoided, model and agent overhead, handoff and startup cost, optimizations run, task quality and time.
 - **BUILT:** `tz bench` (synthetic, MEASURED vs EST), `tz stats`, the ledger, the A/B runner (`tzab.py`) and preflight (`tz preflight`).
-- **NOT BUILT:** a real paid A/B result (blocked: isolated login 401; needs owner approval and a cost estimate). Until then, website claims stay unproven.
+- **NOT BUILT:** a real A/B result (optional `tz ab`, opt-in, spends your own Claude Code usage). Until then, website claims stay unproven.
 
 ## 11. Security, privacy, control
 

@@ -10,9 +10,9 @@ MUST HAVE, all built and covered by tests/run_all.sh:
 - Safety/verification: destructive-command rules, secrets scan, `--gate`, tests-ran check.
 - Recovery: `tz agent --rollback`, process-group kill on worker timeout.
 - Critical tests pass (timing flakes under load are not chased).
-CAN WAIT: TZ Studio/paid tiers, JS/TS API-drift, tree-sitter real package, real lint/type/audit tools, new workers, dashboards, extra OSS integrations.
-POST-BUILD VALIDATION: paid A/B benchmarks, Premiere, real `claude -p` plugin-active run, GitHub-hosted marketplace install, push/tag.
-Scope: TZ Core only (free, MIT, offline-first). TZ Studio is a separate paid product in a separate repo and is NOT started. There is no Enterprise product or tier. No existing Core feature moves behind a paywall. Studio consumes Core only through CLI, JSON and MCP.
+CAN WAIT: JS/TS API-drift, tree-sitter real package, real lint/type/audit tools, new workers, dashboards, extra OSS integrations.
+POST-BUILD VALIDATION: optional opt-in `tz ab` benchmark (spends your own Claude Code usage; free path is `tz bench replay`/`tz stats`), Premiere. Real `claude -p` plugin-active run and GitHub-hosted marketplace install were verified 2026-11-24.
+Scope: TZ Core only (free, MIT, offline-first). No paid product, tier or service is planned (the old open-core plan is archived in docs/archive/).
 
 Classes: **1** complete and verified, **2** implemented not verified, **3** partial, **4** not implemented, **5** blocked externally, **6** obsolete or rejected.
 Status below comes from running or reading the code in this repo on 2026-11-24, not from older docs. Where a doc and the code disagree, the code wins and the doc is listed in section 6 to be fixed.
@@ -22,16 +22,16 @@ Status below comes from running or reading the code in this repo on 2026-11-24, 
 |---|---|
 | This repo (`bin/`, `tests/`, `hooks/`, `docs/`, git log 135+ commits) | Yes |
 | GitHub issues and PRs of rishavm713-create/token-zombie (`gh`) | Yes: 2 open issues (calls for testers), 0 PRs. No code backlog is hidden there |
-| Docs: BUILD-LIST, FACTORY-AUDIT, OPEN-CORE-DECISION, MODS-REPORT, LIMITATIONS, LEFT, ROADMAP, VISION | Read in this and earlier stretches of this session |
+| Docs: BUILD-LIST, FACTORY-AUDIT, archived open-core note, MODS-REPORT, LIMITATIONS, LEFT, ROADMAP, VISION | Read in this and earlier stretches of this session |
 | ChatGPT responses pasted into this session (list in section 5) | Yes, only the text that was pasted here |
 | ChatGPT chats from before this session, and the two ChatGPT share links | **NOT accessible**: BUILD-LIST records link 6b056444 content only as copied earlier; link 6b056307 holds only a question. Nothing beyond what was pasted can be claimed |
 | Third-party repos | Licence field re-read from the GitHub API today (section 4). Code was read earlier only for karpathy-skills, cc-safety-net and beads (scratch clones). The rest were NOT re-opened |
 | Claude Code host behaviour (panel pause/approve, live mod tools) | Not testable from a subprocess; see class 5 |
 
 ## 2. Backlog by item
-Columns: id, requirement and source, class, where, what remains, how tested, acceptance, priority. All items are Core unless marked Studio.
+Columns: id, requirement and source, class, where, what remains, how tested, acceptance, priority. All items are Core.
 
-### A. Workers, orchestration, safety, verification (the Studio prerequisites)
+### A. Workers, orchestration, safety, verification (core workers and safety)
 | id | Requirement (source) | Class | Files | Remains | Tested by | Acceptance | Pri |
 |---|---|---|---|---|---|---|---|
 | A1 | Provider-independent worker registry: offline, local HTTP, CLI workers (FACTORY-AUDIT phase 1; user mandate) | 1 for registry, cli and offline; http verified against a REAL llama-server (Qwen3-4B Q4) and a fake server | `bin/tzworkers.py` | Flags of codex/gemini/opencode/aider templates are from memory: only `claude` and `codex` are installed here and `claude` ran; others unverified | test_upgrade (cli, http fake, unknown worker); live `worker test local` returned OK on the real server | `tz worker add/test/run` works for each kind | done |
@@ -146,7 +146,7 @@ Rule: reuse code only from permissive licences with notice kept; otherwise learn
 | Competitor audit and 13-item build list (BUILD-LIST) | 3 of 13 built (diffcheck, impact, safe); rest open, see G |
 | Claude Mods spec A-G, phases 1-6 | One mod built and validated; not live-tested; pause/approve/retry and agent spawning blocked by host |
 | TZ 3.0 Product Factory vision (12 sections) | Phase 0 audit, phase 1 workers, phase 2 gate built. Phases 3-8 (spec, modules, factory, UI, deploy, acceptance product) NOT built |
-| Open-core strategy | Written as OPEN-CORE-DECISION.md, now two products (Core, Studio), Enterprise removed. No Studio code and no second repo, by decision |
+| Open-core strategy | Archived (docs/archive/OPEN-CORE-DECISION.md): out of current scope. No paid product planned |
 | Master Product Vision / Engineering Mandate (17 sections, 3 modes) | Audit done (FACTORY-AUDIT). Only the parts in A-D above are built; the product-builder modes are not |
 | Two repos, one website, one brand structure | Decision recorded only. Repo 2 and website changes not started, by decision |
 | Original EditSutra-style acceptance product | NOT built |
@@ -163,7 +163,7 @@ VERIFIED (tests pass): killed-run resume (`tz agent --resume ID|last`, SIGKILL t
 IMPLEMENTED, only stub-tested: lint/type/audit detection (ruff/flake8, mypy/pyright, pip-audit, npm lint/tsc/audit). No real tools installed here; offline/missing = skipped, never passed.
 LIMITS: regression check is a static link (test mentions module), not proof of exercise; resume reruns test/gate loops with a fresh budget; API check is Python only (JS/TS not covered).
 UNTESTED: live Claude Code session validation; local models other than Qwen3-4B on llama-server; codex/gemini/others (deferred).
-REMAINING: A9 parallel worktrees, A10 task deps in tz next, B5 tree-sitter map, benchmarks (need credentials), doc fixes, install/upgrade validation beyond this Mac, JS/TS API check.
+REMAINING: A9 parallel worktrees, A10 task deps in tz next, B5 tree-sitter map, optional `tz ab` benchmark (opt-in, uses your own Claude Code usage), doc fixes, install/upgrade validation beyond this Mac, JS/TS API check.
 Re-verified 2026-11-24 (final rerun): test_agent 8/0, test_upgrade 27/0, full suite `tests/run_all.sh` TOTAL pass 978, fail 0. No failures in tzlive/tzsup/tzmore/install.sh files.
 COMPLETED: workers registry, gate (diff/ownership/safe/secrets/tests/build/checkpoint), API drift, tests-ran, regression link, lint/type/audit detect, killed-run resume, acceptance runs (local/claude/codex).
 18-capability audit:
@@ -173,7 +173,7 @@ COMPLETED: workers registry, gate (diff/ownership/safe/secrets/tests/build/check
 | 1,3,4,7,9,10,17,18 | implemented, unverified | stub-tested or no live session; 7 needs live Claude Code validation |
 | 8 | partial | one local model (Qwen3-4B, llama-server) |
 | 15 | partial | no parallel worktree coordination (A9) |
-| benchmarks vs baseline | blocked | needs credentials |
+| benchmarks vs baseline | optional | free path: `tz bench replay` / `tz stats`; `tz ab` is opt-in |
 | missing / duplicated / unnecessary | none found | |
 
 ## 9. TZ 2.0 reconcile (owner scope: handoffs/2026-11-24-tz2-final-instruction.md), dependency order
@@ -186,7 +186,7 @@ Owners: core=tz-core-finish, wt=tz2-worktrees, inst=tz-install-temp, gaps=tz-gap
 6. Live Claude Code integration E + install/upgrade (inst): partial, other session.
 7. Cost/benchmarks G + OSS review (gaps): partial, other session; orchestration rows reviewed in docs/OPEN-SOURCE-INTEGRATION-LEDGER.md (core).
 8. EditSutra acceptance (es): not started here.
-Section 6 items (Studio, factory, second repo, website) are not built.
+Section 6 items (factory, second repo, website) are not built.
 
 ## 10. Suite after rollback + process-group kill (2026-11-24, concurrent sessions editing)
 Full run: TOTAL pass 1001, fail 15 under load. Rerun alone: test_bench 17/0, test_sup 41/0, test_e2e 16/0 (load flakes). Still failing, none in my files: test_tz "limit warning at 110k growth" and test_hard "hook at 97% => CRITICAL" (context-limit hooks), test_repo "README install line matches manifests" (install session), test_vet "repo self-scan: no HIGH" (tests/test_safe_hook.sh, written by another session, contains dangerous-command literals). New tests pass: test_rollback 4/0, test_killgroup 3/0, test_agent 8/0.

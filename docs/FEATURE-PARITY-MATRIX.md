@@ -23,7 +23,7 @@ Leaders = competitors whose page states the capability (VERIFIED on their page).
 | 16 | MCP / tool-schema cost signal | BUILT+TESTED (`tz startup` per-server schema cost, `tz attr` per-server calls/tokens) | Token Optimizer (audits MCP) | |
 | 17 | Model/cost routing | PART (`tzroute` advice) | claude-code-router acts, Token Optimizer nudges | TZ advice only (deliberate: no blocking) |
 | 18 | OTLP / team analytics | NOT BUILT | ai-observer, claude-code-otel | out of scope for solo, local-first |
-| 19 | Controlled A/B savings proof | PART: zero-cost replay `tz bench replay` on real logs (MEASURED net 0.58%); paid `tzab` A/B not run | Ponytail (self-reported) | answer quality still unmeasured |
+| 19 | Controlled A/B savings proof | PART: zero-cost replay `tz bench replay` on real logs (MEASURED net 0.58%); optional opt-in `tzab` A/B not run | Ponytail (self-reported) | answer quality still unmeasured |
 | 20 | Real-host verification | HOST: 9 new hook events not live until install re-run | n/a | P0 gap |
 | 21 | Persistent semantic/vector memory | NOT BUILT | Claude-Mem, Ruflo | N/A by decision |
 | 22 | Nine-tab UI, RTK clone, auto agent spawning | N/A | n/a | rejected |

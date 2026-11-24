@@ -30,7 +30,7 @@ KNOWN = {
     'claude': 'claude -p {prompt}', 'codex': 'codex exec --sandbox workspace-write {prompt}', 'gemini': 'gemini -p {prompt}',
     'opencode': 'opencode run {prompt}', 'aider': 'aider --yes --message {prompt}',
 }
-# Tier table from docs/OPEN-CORE-DECISION.md section 4 (ESTIMATES, not measured on this machine).
+# Tier table from docs/archive/OPEN-CORE-DECISION.md section 4 (ESTIMATES, not measured on this machine).
 TIERS = [(8, '1.5-4B dense, 4-bit: classification and tiny edits only'),
          (16, '7-14B dense, 4-bit, 8-16k context: drafts, single-file edits, review'),
          (24, '30B-A3B MoE at Q3-Q4, short context: slow local agent'),

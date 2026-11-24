@@ -1,3 +1,5 @@
+Archived 2026-11-24: out of current scope.
+
 # TZ Core / TZ Studio: open-core decision (2026-11-24)
 Status: DECISION PROPOSAL. Nothing here is built. Benchmark figures are third-party snapshots from web search on 2026-11-24, not re-run by us. UNKNOWN means not found.
 Owner machine: Apple M3, 16 GB unified, 148 GB free, llama-server installed, Ollama not installed. Repo licence today: MIT (c) Rishav Mishra.

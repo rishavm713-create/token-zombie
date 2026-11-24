@@ -22,5 +22,5 @@ VERIFIED = checked against a live Claude Code session. Nothing is VERIFIED yet: 
 | Registry | TESTED | local dirs only, no network |
 | Benchmark synthetic + compare | TESTED | |
 | A/B runner caps + interrupted recovery | TESTED | stub claude |
-| Real A/B experiment | BLOCKED | login 401 in the isolated A/B config dir; needs approval |
+| Real A/B experiment (`tz ab`, optional, opt-in) | NOT RUN | nothing depends on it; free path is `tz bench replay` / `tz stats` |
 | Live end-to-end in real Claude Code | BLOCKED | needs install approval |
