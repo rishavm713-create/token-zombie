@@ -1,4 +1,17 @@
 # TZ Core master build roadmap (2026-11-24)
+
+## MUST HAVE (blocks 2.0.0) / CAN WAIT (post-EditSutra)
+MUST HAVE, all built and covered by tests/run_all.sh:
+- Installs and runs: plugin marketplace install (local path proven in temp dir), `tz` CLI, hooks.
+- Claude Code really uses it: hooks/guards/statusline; real-session proof is post-build validation.
+- Token/context: re-read stub, filters, ANSI strip, JSON outlier keep, `tz stats` measured vs estimated.
+- Continuity: `tz handoff`/`resume`/`checkpoint`, supervisor detectors, `tz agent --resume`.
+- Repo intelligence: `tz map`/`sym`/`exists`/`rank`, worktrees with file ownership.
+- Safety/verification: destructive-command rules, secrets scan, `--gate`, tests-ran check.
+- Recovery: `tz agent --rollback`, process-group kill on worker timeout.
+- Critical tests pass (timing flakes under load are not chased).
+CAN WAIT: TZ Studio/paid tiers, JS/TS API-drift, tree-sitter real package, real lint/type/audit tools, new workers, dashboards, extra OSS integrations.
+POST-BUILD VALIDATION: paid A/B benchmarks, Premiere, real `claude -p` plugin-active run, GitHub-hosted marketplace install, push/tag.
 Scope: TZ Core only (free, MIT, offline-first). TZ Studio is a separate paid product in a separate repo and is NOT started. There is no Enterprise product or tier. No existing Core feature moves behind a paywall. Studio consumes Core only through CLI, JSON and MCP.
 
 Classes: **1** complete and verified, **2** implemented not verified, **3** partial, **4** not implemented, **5** blocked externally, **6** obsolete or rejected.

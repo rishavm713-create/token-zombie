@@ -4,7 +4,7 @@
 Z="$(cd "$(dirname "$0")/.." && pwd)"; T="$(mktemp -d)"; H="$T/home"; pass=0; fail=0
 mkdir -p "$H/.claude/skills-off/video/cut" "$H/.claude/skills" && touch "$H/.claude/skillpack"
 ok() { if eval "$2"; then pass=$((pass+1)); else fail=$((fail+1)); echo "FAIL: $1"; fi; }
-g() { HOME="$H" python3 "$Z/bin/tz-guard.py"; }
+g() { TZ_DEDUPE=0 HOME="$H" python3 "$Z/bin/tz-guard.py"; }
 head -c 60000 /dev/zero | tr '\0' a > "$T/big.txt"; echo small > "$T/small.txt"
 
 # 1. big Read: nudge once, then allowed; ranges and small files untouched
@@ -107,7 +107,7 @@ cat > "$T/c.jsonl" <<'J'
 {"type":"assistant","message":{"content":[{"type":"tool_use","id":"p2","name":"mcp__ccd_turn__update_plan","input":{"advance":true}}]}}
 {"type":"assistant","message":{"content":[{"type":"tool_use","id":"b2","name":"Bash","input":{"command":"ls"}}]}}
 J
-echo "{\"hook_event_name\":\"PreCompact\",\"session_id\":\"c1\",\"trigger\":\"auto\",\"cwd\":\"$T/repo\",\"transcript_path\":\"$T/c.jsonl\"}" | HOME="$H" python3 "$Z/bin/tz-compact.py"
+echo "{\"hook_event_name\":\"PreCompact\",\"session_id\":\"c1\",\"trigger\":\"auto\",\"cwd\":\"$T/repo\",\"transcript_path\":\"$T/c.jsonl\"}" | TZ_DEDUPE=0 HOME="$H" python3 "$Z/bin/tz-compact.py"
 n="$H/.claude/token-zombie/compact-c1.md"
 ok "compact note: changed file, failed test, next step" 'grep -q "a.py" "$n" && grep -q "FAILED: pass 3, fail 1" "$n" && grep -q "Next step: wire hook" "$n"'
 ok "compact note small (<= 1500 chars)" '[ $(wc -c < "$n") -le 1500 ]'
@@ -117,18 +117,18 @@ cat > "$T/c2.jsonl" <<'J'
 {"type":"assistant","message":{"content":[{"type":"tool_use","id":"p2","name":"mcp__ccd_turn__update_plan","input":{"done":[1],"start":3}}]}}
 {"type":"user","message":{"content":"<system-reminder>x</system-reminder>"}}
 J
-echo "{\"session_id\":\"c2\",\"trigger\":\"auto\",\"cwd\":\"$T/repo\",\"transcript_path\":\"$T/c2.jsonl\"}" | HOME="$H" python3 "$Z/bin/tz-compact.py"
+echo "{\"session_id\":\"c2\",\"trigger\":\"auto\",\"cwd\":\"$T/repo\",\"transcript_path\":\"$T/c2.jsonl\"}" | TZ_DEDUPE=0 HOME="$H" python3 "$Z/bin/tz-compact.py"
 n2="$H/.claude/token-zombie/compact-c2.md"
 ok "compact note: done/start honoured, owner ask kept, injected turns skipped" 'grep -q "Next step: old three" "$n2" && grep -q "Owner last asked: build the old thing" "$n2"'
 echo '{"type":"assistant","message":{"content":[{"type":"tool_use","id":"w1","name":"mcp__ccd_turn__wrap_up","input":{"recap":"r"}}]}}' >> "$T/c2.jsonl"
 echo '{"type":"user","message":{"content":[{"type":"text","text":"now do the new thing"}]}}' >> "$T/c2.jsonl"
-echo "{\"session_id\":\"c2\",\"trigger\":\"auto\",\"cwd\":\"$T/repo\",\"transcript_path\":\"$T/c2.jsonl\"}" | HOME="$H" python3 "$Z/bin/tz-compact.py"
+echo "{\"session_id\":\"c2\",\"trigger\":\"auto\",\"cwd\":\"$T/repo\",\"transcript_path\":\"$T/c2.jsonl\"}" | TZ_DEDUPE=0 HOME="$H" python3 "$Z/bin/tz-compact.py"
 ok "compact note: wrap_up closes the old list (no stale step), new ask shown" 'grep -q "Next step: all listed steps done" "$n2" && grep -q "Owner last asked: now do the new thing" "$n2"'
 o=$(echo "{\"source\":\"compact\",\"session_id\":\"c1\",\"cwd\":\"$T/p1\"}" | HOME="$H" python3 "$Z/bin/tz-start.py")
 ok "after compact: note injected, HANDOFF not repeated" '[[ $o == *"wire hook"* && $o != *top2* ]]'
 o=$(echo "{\"source\":\"compact\",\"session_id\":\"none\",\"cwd\":\"$T/p1\"}" | HOME="$H" python3 "$Z/bin/tz-start.py")
 ok "after compact without note: no continuation, only lean rules" '[[ -z "$o" || ( $o == *"lean rules"* && $o != *continuation* ) ]]'
-echo "{\"hook_event_name\":\"PreCompact\",\"session_id\":\"c2\",\"cwd\":\"$T\",\"transcript_path\":\"$T/none.jsonl\"}" | HOME="$H" python3 "$Z/bin/tz-compact.py"
+echo "{\"hook_event_name\":\"PreCompact\",\"session_id\":\"c2\",\"cwd\":\"$T\",\"transcript_path\":\"$T/none.jsonl\"}" | TZ_DEDUPE=0 HOME="$H" python3 "$Z/bin/tz-compact.py"
 ok "compact without git/log: still writes, says none" 'grep -q "none in recent log" "$H/.claude/token-zombie/compact-c2.md"'
 
 # 10. statusline reset times (epoch or ISO), absent = nothing invented
@@ -160,7 +160,7 @@ printf 'safe\xe2\x80\x8btext\n' > "$T/v6/a.md"
 bash "$Z/bin/tz-vet.sh" "$T/v6" > /dev/null; r=$?; ok "vet: zero-width char HIGH" '[ $r = 1 ]'
 rm "$T/v6/a.md"; { printf 'var a=1;%.0s' $(seq 1 600); echo 'eval(at''ob("x"))'; } > "$T/v6/lib.min.js"
 bash "$Z/bin/tz-vet.sh" "$T/v6" > "$T/o6"; r=$?; ok "vet: .min.js not HIGH, flagged unreadable" '[ $r = 0 ] && grep -q minified "$T/o6"'
-echo "{\"session_id\":\"c1\",\"agent_id\":\"a1\",\"cwd\":\"$T\"}" | HOME="$H" python3 "$Z/bin/tz-compact.py"
+echo "{\"session_id\":\"c1\",\"agent_id\":\"a1\",\"cwd\":\"$T\"}" | TZ_DEDUPE=0 HOME="$H" python3 "$Z/bin/tz-compact.py"
 ok "subagent compaction does not overwrite parent note" 'grep -q "wire hook" "$H/.claude/token-zombie/compact-c1.md"'
 
 # 11. --startup audit: fake logs/skills, advice only

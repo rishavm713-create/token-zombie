@@ -26,8 +26,8 @@ ok "README install line matches manifests" 'python3 - <<PY
 import json,re
 p=json.load(open(".claude-plugin/plugin.json")); m=json.load(open(".claude-plugin/marketplace.json")); r=open("README.md").read()
 assert p["name"]==m["name"]==m["plugins"][0]["name"]
-assert "/plugin install %s --marketplace rishavm713-create/%s" % (p["name"],m["name"]) in r
-assert "claude plugin install %s --marketplace rishavm713-create/%s" % (p["name"],m["name"]) in r
+assert "claude plugin marketplace add rishavm713-create/%s" % m["name"] in r
+assert "claude plugin install %s@%s" % (p["name"],m["name"]) in r
 PY'
 ok "plugin.json license MIT" 'python3 -c "import json;assert json.load(open(\".claude-plugin/plugin.json\"))[\"license\"]==\"MIT\""'
 ok "README images exist" 'python3 - <<PY

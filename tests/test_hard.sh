@@ -4,7 +4,7 @@ Z="$(cd "$(dirname "$0")/.." && pwd)"; T="$(mktemp -d)"; H="$T/home"; pass=0; fa
 ok() { if eval "$2"; then pass=$((pass+1)); else fail=$((fail+1)); echo "FAIL: $1"; fi; }
 tz() { HOME="$H" PATH="$T/bin:$PATH" python3 "$Z/bin/tz" "$@"; }
 ST="$H/.claude/token-zombie"; BUS="$ST/status.json"
-hook() { echo "{\"hook_event_name\":\"$1\",\"session_id\":\"s1\",\"transcript_path\":\"$T/c.jsonl\",\"cwd\":\"$T/proj\",\"prompt\":\"hi\"$2}" | HOME="$H" python3 "$Z/bin/tz-guard.py"; }
+hook() { echo "{\"hook_event_name\":\"$1\",\"session_id\":\"s1\",\"transcript_path\":\"$T/c.jsonl\",\"cwd\":\"$T/proj\",\"prompt\":\"hi\"$2}" | TZ_DEDUPE=0 HOME="$H" python3 "$Z/bin/tz-guard.py"; }
 mkc() { python3 - "$T/c.jsonl" "$1" <<'PY'
 import json,sys
 open(sys.argv[1],'w').write(json.dumps({"message":{"id":"a","usage":{"input_tokens":int(sys.argv[2]),"output_tokens":5}}})+'\n')

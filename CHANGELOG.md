@@ -1,4 +1,12 @@
 # Changelog
+## v2.0.0 (2026-11-24, local commit, not tagged or pushed until the release checks pass)
+Built and tested (tests/run_all.sh; counts in docs/MASTER-BUILD-ROADMAP.md section 10):
+- Workers: `tz worker` registry (cli/http/offline), `tz hw`; worker timeout kills the whole process group (test_killgroup).
+- Agent: `tz agent` pipeline with `--gate` (diff/ownership/safe/secrets/tests-ran/API drift (Python)/regression link/lint-type-audit detect), bounded repair, killed-run `--resume`, `--rollback` (restores only files the failed run changed).
+- Repo intelligence: `tz sym`, `tz exists`, `tz rank` (aider repomap idea, Apache-2.0, in NOTICE), `tz map`, `tz worktree` with file ownership, task dependencies in `tz next`.
+- Token/context: re-read stub, ANSI strip, JSON outlier keep, handoff tail (planning-with-files, MIT, in NOTICE), destructive-command rules (cc-safety-net, MIT, in NOTICE).
+- Supervisor detectors (queued/failed/abandoned/stalled), install via plugin marketplace proven with a local-path marketplace in a temp config dir.
+Untested: real `claude -p` session with the plugin active, MCP tools/skills/commands loading from an installed plugin, GitHub-hosted marketplace install, JS/TS API-drift check, lint/type/audit with real tools, tree-sitter with the real package, paid A/B benchmarks.
 ## v0.1 (2026-11-20, release candidate, not installed/published)
 Added: bin/tz CLI; tzhandoff (handoff/resume/memory); tzusage (context, tokens, burn, 5h/7d, warn states); tzopt (dup reads, log analysis, filter, classify, ledger); tzcap (inventory, overlaps, advice, GREEN/YELLOW/RED); installer --dry-run and --restore; tests run_all.sh (164 checks); docs.
 Changed: tzlib gets `ctx_window` setting; tz-guard adds dup-read advice (additionalContext only) to its Read hook.
