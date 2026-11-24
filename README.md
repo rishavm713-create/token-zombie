@@ -46,8 +46,6 @@ Restart Claude Code, then run `/token-zombie:tz`. Verify and roll back: [install
 | **Warn** | Signals early in a small bar inside Claude Code. |
 | **Revive** | Saves a handoff so the next chat picks up instantly. |
 
-![Dashboard](docs/img/dashboard.png)
-
 ## Docs
 
 | Guide | Purpose |
