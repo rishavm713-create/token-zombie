@@ -11,6 +11,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     defaults:
       run:
         shell: bash
@@ -22,4 +23,10 @@ jobs:
       - name: python3 alias (Windows ships python only; TZ itself uses bin/tzpy)
         if: runner.os == 'Windows'
         run: d="$(dirname "$(command -v python)")"; [ -e "$d/python3.exe" ] || cp "$d/python.exe" "$d/python3.exe"; python3 --version
+      - name: fake-HOME support for tests (Windows Python reads USERPROFILE, tests set HOME to a temp dir)
+        if: runner.os == 'Windows'
+        run: |
+          sp="$(python -c 'import sysconfig;print(sysconfig.get_paths()["purelib"])')"
+          echo "import os; h=os.environ.get('HOME'); h and os.environ.__setitem__('USERPROFILE', h)" > "$sp/tz_test_home.pth"
+          python -I -c "import os;print('USERPROFILE follows HOME:', os.environ.get('USERPROFILE'))"
       - run: bash tests/run_all.sh
