@@ -151,4 +151,14 @@ IMPLEMENTED, only stub-tested: lint/type/audit detection (ruff/flake8, mypy/pyri
 LIMITS: regression check is a static link (test mentions module), not proof of exercise; resume reruns test/gate loops with a fresh budget; API check is Python only (JS/TS not covered).
 UNTESTED: live Claude Code session validation; local models other than Qwen3-4B on llama-server; codex/gemini/others (deferred).
 REMAINING: A9 parallel worktrees, A10 task deps in tz next, B5 tree-sitter map, benchmarks (need credentials), doc fixes, install/upgrade validation beyond this Mac, JS/TS API check.
-18-capability audit (short): verified: 5,6,11,12,13,14,2,16; implemented-unverified: 1,3,4,7,9,10,17,18; partial: 8 (one local model), 15 (no parallel coordination); missing: none; blocked: benchmarks vs baseline (credentials). Claude-Code-in-live-session validation owed for 7.
+Re-verified 2026-11-24 (final rerun): test_agent 8/0, test_upgrade 27/0, full suite `tests/run_all.sh` TOTAL pass 978, fail 0. No failures in tzlive/tzsup/tzmore/install.sh files.
+COMPLETED: workers registry, gate (diff/ownership/safe/secrets/tests/build/checkpoint), API drift, tests-ran, regression link, lint/type/audit detect, killed-run resume, acceptance runs (local/claude/codex).
+18-capability audit:
+| # | Status | Note |
+|---|---|---|
+| 2,5,6,11,12,13,14,16 | verified | tests pass |
+| 1,3,4,7,9,10,17,18 | implemented, unverified | stub-tested or no live session; 7 needs live Claude Code validation |
+| 8 | partial | one local model (Qwen3-4B, llama-server) |
+| 15 | partial | no parallel worktree coordination (A9) |
+| benchmarks vs baseline | blocked | needs credentials |
+| missing / duplicated / unnecessary | none found | |
