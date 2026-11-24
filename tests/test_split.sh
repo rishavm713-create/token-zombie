@@ -12,4 +12,7 @@ mkdir -p "$T/p/handoffs"; seq 40 > "$T/p/handoffs/2026-11-20.md"
 ok "! python3 bin/tz hsize $T/p >/dev/null" hsize-over
 seq 5 > "$T/p/handoffs/2026-11-20.md"; ok "python3 bin/tz hsize $T/p >/dev/null" hsize-ok
 ok "python3 -c \"import sys;sys.path.insert(0,'bin');import tzsplit as t;assert len(t.detect('1. fix login bug now\n2. add export feature too'))==2 and t.detect('fix the typo')==[]\"" detect-multi
+ok "echo '{\"hook_event_name\":\"SubagentStart\",\"session_id\":\"s\",\"cwd\":\"/tmp\"}' | python3 bin/tz-guard.py | grep -q '300 words'" subagent-cap
+seq 40 > "$T/p/handoffs/2026-11-21.md"
+ok "echo '{\"hook_event_name\":\"SessionStart\",\"session_id\":\"s\",\"cwd\":\"$T/p\"}' | python3 bin/tz-start.py | grep -q 'oversized'" start-hsize
 echo "pass $P fail $F"; [ $F = 0 ]

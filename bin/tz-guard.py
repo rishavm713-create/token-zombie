@@ -174,6 +174,9 @@ try:
             tzcont.release_claims(data.get('session_id', ''))
         except Exception:
             _diag('ondemand', ev)
+    if ev == 'SubagentStart' and advice('pack_hints'):  # subagent report is re-sent every later call: cap it (advice, fail open)
+        emit({'hookSpecificOutput': {'hookEventName': ev, 'additionalContext': 'TOKEN ZOMBIE: final report <= 300 words: verdict, evidence as file:line paths, no pasted file contents or history.'}})
+        sys.exit(0)
     if ev in ('Stop', 'SessionEnd', 'PreCompact', 'SubagentStop', 'SubagentStart', 'InstructionsLoaded', 'PostCompact') + ('PostToolBatch', 'PreModelSwitch', 'PostModelSwitch', 'WorktreeCreate', 'WorktreeRemove', 'FileChanged'):
         sys.exit(0)
     if ev == 'PreToolUse':  # policy engine: advice only, fail open, TZ_POLICY=0 disables
@@ -339,7 +342,7 @@ try:
                 ts = tzsplit.detect(data.get('prompt')) if advice('pack_hints') else []
                 if ts:
                     hint = (hint + ' ' if hint else '') + (f'TOKEN ZOMBIE (suggestion): {len(ts)} independent tasks in this prompt. One task per session: '
-                            'start each in its own session (cheapest fitting model, own worktree, shared live tests behind tz lock), build everything first, test once at the end. '
+                            'propose each as its own session card (start_session, own_initiative, cheapest fitting model, own worktree; the owner clicks to start, or says to do it here), shared live tests behind tz lock, build everything first, test once at the end. '
                             'Plan: tz split ' + ' '.join('"' + t[:60].replace('"', "'") + '"' for t in ts[:4]))
             except Exception:
                 _diag('split', ev)

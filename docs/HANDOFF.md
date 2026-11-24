@@ -1,7 +1,7 @@
-# HANDOFF (authoritative, 2026-11-24 14:49, reason: ctx 80%)
+# HANDOFF (authoritative, 2026-11-24 14:54, reason: ctx 80%)
 Objective: TZ: complete capability plan
 Phase: build, then test
-Git: main@57522c4 (57522c4 v0.5.0: demo GIF, installer skips settings hooks when plugin is enabled); 12 uncommitted, 0 staged
+Git: main@c34ad26 (c34ad26 tz split/lock/hsize/similar: one session per task, shared-resource lock, handoff size check, GitHub similar-tool search); 3 uncommitted, 0 staged
 ## Done
 - handoff integrity layer
 ## Partial (NOT complete)
@@ -13,18 +13,9 @@ Git: main@57522c4 (57522c4 v0.5.0: demo GIF, installer skips settings hooks when
 - policy engine
 - quality-adjusted optimization
 ## Uncommitted files
-- README.md (cd8b9deff5:4527)
-- bin/tz (1a6f4833d6:12178)
-- bin/tz-guard.py (76c904005f:18919)
-- docs/BUILD-LOG.md (25b43a150a:1098)
-- docs/DEVELOPMENT-STATE.md (3ffce0c814:316)
-- docs/HANDOFF.md (de94f6b33c:1180)
-- docs/NEXT-SESSION.md (6c184ea18a:410)
-- skills/token-zombie/SKILL.md (be94f5d2ae:8414)
-- tests/run_all.sh (0cc4d38272:1063)
-- bin/tzsimilar.py (1eb9bef212:1665)
-- bin/tzsplit.py (1ceb7e8fab:6231)
-- tests/test_split.sh (d8ca316574:1336)
+- bin/tz-guard.py (f9edd10992:19356)
+- bin/tz-start.py (91cb3b8c1d:5518)
+- tests/test_split.sh (44e3f486da:1675)
 ## Blockers / unresolved
 - none
 ## Errors and findings

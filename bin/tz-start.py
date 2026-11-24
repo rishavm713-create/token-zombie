@@ -74,6 +74,14 @@ try:
         pk = tznext.pack(cwd)
     except Exception:
         pass
+    try:  # oversized handoff notes: one line, advice only
+        import tzsplit
+        hs = tzsplit.hsize(cwd) if os.path.isdir(os.path.join(cwd, 'handoffs')) else {}
+        if hs.get('over_30') or hs.get('master_top_over_15') or hs.get('merge_due'):
+            parts.append(f"TOKEN ZOMBIE: handoff notes oversized ({len(hs.get('over_30', []))} daily >30 lines"
+                         + (', merge due' if hs.get('merge_due') else '') + '); run tz hsize, trim or merge when the task ends.')
+    except Exception:
+        pass
     L = lean()
     if parts or pk or L:
         txt = (('TOKEN ZOMBIE start context. Use this; do not read the full HANDOFF.md unless the step needs a detail.\n'
