@@ -8,11 +8,17 @@ def run_pg(argv, cwd=None, timeout=900):
     """subprocess.run in its own process group; on timeout the WHOLE group is killed, so grandchildren (test runners, servers) do not leak.
     Idea from mini-swe-agent environments/local.py (MIT, SWE-agent authors), reimplemented in stdlib."""
     import signal
-    p = subprocess.Popen(argv, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True)
+    win = os.name == 'nt'
+    kw = {'creationflags': subprocess.CREATE_NEW_PROCESS_GROUP} if win else {'start_new_session': True}
+    p = subprocess.Popen(argv, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, **kw)
     try:
         out, err = p.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
-        try: os.killpg(p.pid, signal.SIGKILL)
+        try:
+            if win:  # Windows has no process groups to signal: taskkill /T kills the whole tree
+                subprocess.run(['taskkill', '/T', '/F', '/PID', str(p.pid)], capture_output=True)
+            else:
+                os.killpg(p.pid, signal.SIGKILL)
         except OSError: pass
         p.communicate()
         raise

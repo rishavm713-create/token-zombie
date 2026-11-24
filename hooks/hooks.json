@@ -8,7 +8,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
             "timeout": 5
           }
         ]
@@ -20,7 +20,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
             "timeout": 5
           }
         ]
@@ -32,7 +32,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
             "timeout": 5
           }
         ]
@@ -43,7 +43,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/bin/tz-start.py\"",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-start.py\"",
             "timeout": 5
           }
         ]
@@ -54,7 +54,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
             "timeout": 5
           }
         ]
@@ -63,7 +63,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/bin/tz-compact.py\"",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-compact.py\"",
             "timeout": 5
           }
         ]
@@ -74,7 +74,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
             "timeout": 5
           }
         ]
@@ -85,7 +85,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
             "timeout": 5
           }
         ]
@@ -96,7 +96,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
             "timeout": 5
           }
         ]
@@ -107,7 +107,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
             "timeout": 5
           }
         ]
@@ -118,7 +118,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
             "timeout": 5
           }
         ]
@@ -129,7 +129,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
             "timeout": 5
           }
         ]
@@ -140,7 +140,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
             "timeout": 5
           }
         ]
@@ -151,7 +151,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
             "timeout": 5
           }
         ]
@@ -162,7 +162,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
             "timeout": 5
           }
         ]
@@ -173,7 +173,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
             "timeout": 5
           }
         ]
@@ -184,7 +184,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
             "timeout": 5
           }
         ]
@@ -195,7 +195,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
             "timeout": 5
           }
         ]
@@ -206,7 +206,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
             "timeout": 5
           }
         ]

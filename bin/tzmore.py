@@ -160,11 +160,11 @@ def _slug(task):
 
 def _own(state, fn):
     """Run fn(map) under an exclusive lock on worktrees.json; saves the map fn leaves behind."""
-    import fcntl
+    from tzlive import xlock
     os.makedirs(state, exist_ok=True)
     p = os.path.join(state, 'worktrees.json')
     with open(p + '.lock', 'w') as lk:
-        fcntl.flock(lk, fcntl.LOCK_EX)
+        xlock(lk)
         try:
             m = json.load(open(p))
         except Exception:

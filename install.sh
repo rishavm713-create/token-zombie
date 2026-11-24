@@ -10,11 +10,11 @@ if [ "${1:-}" = --restore ]; then
   # newest backup that does NOT already contain token-zombie hooks (a backup made by a repeated install holds them)
   B=""; for f in $(ls -t "$SET".bak-tz-* 2>/dev/null); do grep -q 'token-zombie/bin' "$f" || { B="$f"; break; }; done
   [ -n "$B" ] || { echo "no pre-install backup found next to $SET"; exit 1; }
-  python3 -c "import json,sys;json.load(open(sys.argv[1]))" "$B" 2>/dev/null || { echo "backup $B is not valid JSON; not restoring"; exit 1; }
+  sh "$DIR/bin/tzpy" -c "import json,sys;json.load(open(sys.argv[1]))" "$B" 2>/dev/null || { echo "backup $B is not valid JSON; not restoring"; exit 1; }
   { [ ! -f "$SET" ] || cp "$SET" "$SET.before-restore"; } && cp "$B" "$SET" && echo "restored $B (previous state kept as $SET.before-restore)"; exit 0
 fi
 MODE="${1:-}"
-python3 - "$SET" "$DIR" "$MODE" <<'PY'
+sh "$DIR/bin/tzpy" - "$SET" "$DIR" "$MODE" <<'PY'
 import json, os, shutil, sys, time
 path, d, mode = sys.argv[1], sys.argv[2], sys.argv[3]
 conf_p = os.path.expanduser('~/.claude/token-zombie/config.json')
@@ -41,7 +41,7 @@ for ev, gs in h.items():
     if not isinstance(gs, list) or not all(isinstance(g, dict) and isinstance(g.get('hooks', []), list) for g in gs):
         die(f'hooks.{ev} has an unexpected shape; nothing changed.')
 before = json.dumps(s, indent=2, sort_keys=True).splitlines()
-guard, start, status, compact = (f'python3 "{d}/bin/{n}"' for n in ('tz-guard.py', 'tz-start.py', 'tz-status.py', 'tz-compact.py'))
+guard, start, status, compact = (f'sh "{d}/bin/tzpy" "{d}/bin/{n}"' for n in ('tz-guard.py', 'tz-start.py', 'tz-status.py', 'tz-compact.py'))
 EVENTS = ('UserPromptSubmit', 'PostToolUse', 'PreToolUse', 'SessionStart', 'PreCompact', 'Stop', 'SessionEnd', 'SubagentStop', 'SubagentStart', 'InstructionsLoaded', 'PostCompact', 'PostToolUseFailure', 'PostToolBatch', 'PreModelSwitch', 'PostModelSwitch', 'WorktreeCreate', 'WorktreeRemove', 'FileChanged')
 mine = lambda c: 'token-zombie/bin/' in c or 'chat-size-guard.py' in c
 

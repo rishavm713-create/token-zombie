@@ -27,7 +27,7 @@ assert ev==ins,(ev,ins)
 for e,gs in h[\"hooks\"].items():
   for g in gs:
     for x in g[\"hooks\"]:
-      m=re.fullmatch(r\"python3 \\\"\\\${CLAUDE_PLUGIN_ROOT}/bin/([\w.-]+)\\\"\",x[\"command\"]); assert m,x
+      m=re.fullmatch(r\"sh \\\"\\\${CLAUDE_PLUGIN_ROOT}/bin/tzpy\\\" \\\"\\\${CLAUDE_PLUGIN_ROOT}/bin/([\w.-]+)\\\"\",x[\"command\"]); assert m,x
       assert os.path.isfile(z+\"/bin/\"+m.group(1)) and x[\"timeout\"]==5
 " "$Z"'
 ok "hook plan matches install.sh (matchers, scripts)" 'py "
@@ -38,7 +38,7 @@ want=re.findall(r\"\(\x27(\w+)\x27, (None|\x27\x27|\x27[\w|]+\x27), (\w+)\)\",pl
 nm={\"guard\":\"tz-guard.py\",\"start\":\"tz-start.py\",\"compact\":\"tz-compact.py\"}
 got=[]
 for e,gs in h.items():
-  for g in gs: got.append((e,g.get(\"matcher\"),re.search(r\"bin/([\w.-]+)\",g[\"hooks\"][0][\"command\"]).group(1)))
+  for g in gs: got.append((e,g.get(\"matcher\"),re.findall(r\"bin/([\w.-]+)\",g[\"hooks\"][0][\"command\"])[-1]))
 exp=sorted((e,None if m==\"None\" else m.strip(chr(39)),nm[s]) for e,m,s in want)
 assert sorted(got,key=str)==sorted(exp,key=str),(got,exp)
 " "$Z"'
@@ -60,6 +60,7 @@ i --uninstall >/dev/null
 ok "uninstall removes it and restores previous statusline" '! grep -q tz-status "$S2" && grep -q "echo prev" "$S2"'
 # validator
 ok "Mod mode sounds match bin/tzsfx.py (regen: python3 bin/tzsfx.py)" 'python3 "$Z/bin/tzsfx.py" "$T/sfx" && diff -r "$T/sfx" "$Z/sounds" >/dev/null && grep -q "sounds/mode-" "$Z/hooks/panel.tsx"'
+ok "tzpy: Windows branch finds a working Python and caches it" 'T=$(mktemp -d); [ "$(OS=Windows_NT TEMP=$T sh "$Z/bin/tzpy" -c "print(6*7)" </dev/null)" = 42 ] && [ -s "$T/tz-python" ]'
 if command -v claude >/dev/null; then
   HOME="$H" claude plugin validate "$Z" >"$T/v.out" 2>&1; rc=$?; ok "claude plugin validate exits 0" '[ $rc = 0 ]'
 else echo "SKIP: claude not installed"; fi

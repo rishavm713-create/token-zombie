@@ -5,7 +5,7 @@ description: Token-saving rules for Claude Code. Use when a chat is big, a task 
 
 # Token Zombie
 
-An optimization layer, not a cage. Defaults below are advice: override any of them when the task needs it, and say why in one line. Never trade correctness, verified progress or needed context for tokens. Thresholds live in `~/.claude/token-zombie/config.json` (keys: limit, hard, read_warn, plan_warn, plan_stop, mode). CLI: `python3 "${CLAUDE_PLUGIN_ROOT}/bin/tz" help`.
+An optimization layer, not a cage. Defaults below are advice: override any of them when the task needs it, and say why in one line. Never trade correctness, verified progress or needed context for tokens. Thresholds live in `~/.claude/token-zombie/config.json` (keys: limit, hard, read_warn, plan_warn, plan_stop, mode). CLI: `python3 "${CLAUDE_PLUGIN_ROOT}/bin/tz" help` (Windows: `python` or `py -3`).
 
 ## 1. Task limit, not number limit
 - One task per chat. A task = one thing the owner can check as done.

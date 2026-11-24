@@ -1,13 +1,30 @@
 #!/usr/bin/env python3
 # Live session ledger, written by the guard on every hook event: hook time, skill states, agent lifecycle, conservative
 # tool-call dedupe. File: ~/.claude/token-zombie/live-<session>.json (flock-guarded: parallel tool hooks must not lose updates).
-# Dependency-light on purpose (json/os/time/fcntl only): it runs on every tool call.
+# Dependency-light on purpose (json/os/time/fcntl|msvcrt only): it runs on every tool call.
 # Skill states (never mixed): installed = SKILL.md on disk (active + parked + plugin cache); enabled = metadata loads each chat
 # (active dir + enabled plugins); discovered = TZ suggested it this session; loaded = body entered the chat (invoked or /slash);
 # invoked = the model called the Skill tool. Agents: starting -> running (background) -> done | failed; MEASURED from hooks only.
 # Dedupe is ADVICE ONLY, never a deny: only Grep/Glob (read-only, file-state keyed: any possibly-mutating tool invalidates) and
 # WebSearch/WebFetch (same input within 30 min). Bash and every other tool are never deduped (side effects). Compaction clears it all.
-import fcntl, json, os, time
+import json, os, time
+try:
+    import fcntl
+except ImportError:  # Windows
+    fcntl = None
+
+
+def xlock(f):
+    """Exclusive lock on open file f until it is closed: flock on macOS/Linux, msvcrt byte lock on Windows."""
+    if fcntl:
+        return fcntl.flock(f, fcntl.LOCK_EX)
+    import msvcrt
+    for _ in range(200):  # ~10 s; LK_NBLCK fails at once when held, so we poll
+        try:
+            f.seek(0)
+            return msvcrt.locking(f.fileno(), msvcrt.LK_NBLCK, 1)
+        except OSError:
+            time.sleep(0.05)
 
 SAFE_FS = ('Grep', 'Glob')
 SAFE_WEB = ('WebSearch', 'WebFetch')
@@ -44,7 +61,7 @@ def edit(session, fn):
     """Locked read-modify-write; fn(state) returns a value. Never raises past the caller's try."""
     p = path(session)
     with open(p + '.lock', 'w') as lk:
-        fcntl.flock(lk, fcntl.LOCK_EX)
+        xlock(lk)
         s = _load(p)
         r = fn(s)
         tmp = f'{p}.{os.getpid()}.tmp'
