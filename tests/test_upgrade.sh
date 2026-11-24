@@ -23,4 +23,8 @@ ck "tz pr is read-only" 'cd "$R" && h=$(git rev-parse HEAD) && python3 bin/tz pr
 ck "tz2: reuse/gaps/api/dbschema/contract/coord/stack exist" 'for c in reuse gaps missing contract api dbschema coord stack; do python3 "$R/bin/tz" help | grep -q "$c" || exit 1; done'
 ck "tz2: reuse refuses unlicensed (STUDY) logic" 'python3 -c "import sys;sys.path.insert(0,\"$R/bin\");import tzbuild as t;assert t.verdict(\"none\")[0]==\"STUDY\" and t.verdict(\"mit\")[0]==\"REUSE\" and t.verdict(\"gpl-3.0\")[0]==\"CHECK\""'
 ck "tz2: api finds a flask route" 'd=$(mktemp -d); printf "@app.get(\"/a\")\ndef a(): pass\n" > $d/x.py; python3 "$R/bin/tz" api $d | grep -q "/a"'
+ck "tz2: safe blocks reset --hard, allows ls" '! python3 "$R/bin/tz" safe "git reset --hard" >/dev/null && python3 "$R/bin/tz" safe "ls -la" | grep -q ok'
+ck "tz2: safe allows force-with-lease and echo text" 'python3 "$R/bin/tz" safe "git push --force-with-lease" | grep -q ok && python3 "$R/bin/tz" safe "echo rm -rf /" | grep -q ok'
+ck "tz2: impact finds a referencing file" 'python3 "$R/bin/tz" impact tzops | grep -q "bin/tz"'
+ck "tz2: run lists 10 stages, dry by default" '[ "$(python3 "$R/bin/tz" run "x" | grep -c "^ *[0-9]")" = 10 ]'
 echo "pass $P fail $F"; [ $F = 0 ]

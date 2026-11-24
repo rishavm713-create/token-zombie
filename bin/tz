@@ -64,6 +64,10 @@ HELP = """tz <command> [args]
   api [dir] [--openapi]                          route list or OpenAPI skeleton
   dbschema [dir]                                 tables, columns, foreign keys without index
   coord post|list|claim|done                     shared note board between sessions
+  safe "CMD"                                     block destructive shell commands (reset --hard, rm -r /, force push)
+  impact FILE|SYMBOL                             what references it: files and tests that may break
+  diffcheck [--files a,b]                        diff vs task scope: strays, debug leftovers, huge diffs
+  run "TASK" [--go] [--test CMD]                 one front door: understand to remember, optimized stages
   stack idea|design|web|off                      turn on the skill packs an idea-to-product build needs
   features [--md]                                the 69-feature board: DONE / PARTIAL / MISSING, new ones highlighted
   bench harbor [--dataset D] [--n N] [--run]     Harbor/Terminal-Bench control vs treatment commands (prints; --run executes)
@@ -150,6 +154,9 @@ def main(argv):
         if c in ('reuse', 'gaps', 'missing', 'contract', 'api', 'dbschema', 'coord', 'stack'):
             import tzbuild
             return tzbuild.main([c] + rest)
+        if c in ('safe', 'impact', 'diffcheck', 'run'):
+            import tzops
+            return tzops.main([c] + rest)
         if c in mods2:
             import importlib
             return importlib.import_module(mods2[c]).main(rest)
