@@ -14,5 +14,5 @@ Verified against this build's plugin-authoring types and `claude plugin validate
 | Agent orchestration | NOT implemented: the mods API here has no safe way to spawn and coordinate; `tz agent` runs the pipeline via `claude -p` (tested only against a fake host) | `tzagent` |
 | Panel controls | checkpoint, verify, ship? buttons built (run the tz command, show output); pause/approve/retry NOT implemented | `panel.tsx` |
 | Hook proof | `tz hooks proof` lists which events fired | `tzhooks` |
-Measured savings: replay net 0.56% (offline). No end-to-end or quality claim: the A/B benchmark has not run (needs two logged-in config dirs).
+Measured savings: replay net 0.58% (offline). No end-to-end or quality claim: the A/B benchmark has not run (needs two logged-in config dirs).
 Remaining: live-session verification, panel controls, A/B benchmark, status registry.
