@@ -6,7 +6,7 @@
 import json, os, re, subprocess, sys, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 STATE = os.path.expanduser('~/.claude/token-zombie')
-DENY = ['Bash(git push:*)', 'Bash(rm -rf:*)', 'Bash(sudo:*)', 'Bash(curl:*|sh)']
+DENY = ['Bash(git push:*)', 'Bash(rm -rf:*)', 'Bash(sudo:*)']
 ALLOW = ['Read', 'Edit', 'Write', 'Glob', 'Grep', 'Bash(git:*)', 'Bash(python3:*)', 'Bash(npm:*)', 'Bash(bash:*)', 'Bash(rg:*)']
 PHASES = ('plan', 'build', 'test', 'debug')
 
