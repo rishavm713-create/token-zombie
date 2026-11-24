@@ -334,6 +334,15 @@ try:
                             + ' ; it is turned off again when this chat ends.')
             except Exception:
                 _diag('ondemand', ev)
+            try:  # several independent tasks in one prompt: one session per task, build first, test last
+                import tzsplit
+                ts = tzsplit.detect(data.get('prompt')) if advice('pack_hints') else []
+                if ts:
+                    hint = (hint + ' ' if hint else '') + (f'TOKEN ZOMBIE (suggestion): {len(ts)} independent tasks in this prompt. One task per session: '
+                            'start each in its own session (cheapest fitting model, own worktree, shared live tests behind tz lock), build everything first, test once at the end. '
+                            'Plan: tz split ' + ' '.join('"' + t[:60].replace('"', "'") + '"' for t in ts[:4]))
+            except Exception:
+                _diag('split', ev)
             if hint:
                 emit(({'hookSpecificOutput': {'hookEventName': ev, 'additionalContext': hint}}))
             sys.exit(0)

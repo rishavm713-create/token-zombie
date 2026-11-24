@@ -26,6 +26,8 @@ An optimization layer, not a cage. Defaults below are advice: override any of th
 - Take back the result (verdict + evidence paths), not its history. Stop it when done (`TaskStop`); no duplicate or idle background agents.
 - No web search unless the task needs outside or current facts. Never repeat a search. Details: references/routing.md, references/orchestration.md.
 
+- Several independent tasks: `tz split "A" "B"` = one session per task, cheapest fitting model, own worktree; shared resources (live test, device, port) behind `tz lock acquire|release NAME`. Build the whole batch first (syntax checks only), then one live test at the end. `tz similar QUERY` finds comparable GitHub tools (ideas only, vet first). `tz hsize` flags daily notes over 30 lines / weekly merge due.
+
 ## 4. Skills and plugins: off until needed
 - Guard suggests packs from prompt words: a hint, not an order. Turn a pack on (`~/.claude/skillpack on <pack>`) only if the task needs it and installed skills do not cover it; `off` when done; one line saying which. Owner can turn any pack on/off by hand.
 - Pick by task type (coding, research, security, docs, testing): installed skills first (`tz skills <task words>`), then `find-skills` (`npx skills find <need>`), then GitHub (section 6). Vet before use, ask before install, never "just in case"; skip any that overlaps an installed one.

@@ -54,6 +54,8 @@ A small bar inside Claude Code shows quick signals, and a local dashboard shows 
 
 ![Dashboard](docs/img/dashboard.png)
 
+**Workflow defaults:** `tz split "task A" "task B"` (one session per task, model pick, worktree, build-first-then-one-live-test), `tz lock acquire|release NAME` (serialise shared live tests), `tz hsize` (handoff size check), `tz similar QUERY` (read-only GitHub search for similar tools). The prompt hook now suggests `tz split` when one prompt holds 2+ independent tasks. Advice and local lock files only; tz starts nothing.
+
 ## Honest status
 
 - Claude Code is the supported host. Other tools get experimental rules files only.

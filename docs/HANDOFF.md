@@ -1,7 +1,7 @@
-# HANDOFF (authoritative, 2026-11-23 16:11, reason: ctx 80%)
+# HANDOFF (authoritative, 2026-11-24 14:49, reason: ctx 80%)
 Objective: TZ: complete capability plan
 Phase: build, then test
-Git: main@e63aad1 (e63aad1 Zero-cost replay benchmark, pricing table, policy rules, hook dedupe, Codex usage); 5 uncommitted, 0 staged
+Git: main@57522c4 (57522c4 v0.5.0: demo GIF, installer skips settings hooks when plugin is enabled); 12 uncommitted, 0 staged
 ## Done
 - handoff integrity layer
 ## Partial (NOT complete)
@@ -13,11 +13,18 @@ Git: main@e63aad1 (e63aad1 Zero-cost replay benchmark, pricing table, policy rul
 - policy engine
 - quality-adjusted optimization
 ## Uncommitted files
-- .claude-plugin/plugin.json (8b47562f28:322)
-- README.md (33481fbc14:4100)
-- docs/COMPETITIVE-GAP-ANALYSIS.md (90fa0a7d45:1808)
-- install.sh (bafc7055be:7467)
-- docs/img/demo.gif (a8ac63f70e:173018)
+- README.md (cd8b9deff5:4527)
+- bin/tz (1a6f4833d6:12178)
+- bin/tz-guard.py (76c904005f:18919)
+- docs/BUILD-LOG.md (25b43a150a:1098)
+- docs/DEVELOPMENT-STATE.md (3ffce0c814:316)
+- docs/HANDOFF.md (de94f6b33c:1180)
+- docs/NEXT-SESSION.md (6c184ea18a:410)
+- skills/token-zombie/SKILL.md (be94f5d2ae:8414)
+- tests/run_all.sh (0cc4d38272:1063)
+- bin/tzsimilar.py (1eb9bef212:1665)
+- bin/tzsplit.py (1ceb7e8fab:6231)
+- tests/test_split.sh (d8ca316574:1336)
 ## Blockers / unresolved
 - none
 ## Errors and findings
