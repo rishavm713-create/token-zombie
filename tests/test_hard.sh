@@ -73,7 +73,8 @@ ok "status endpoint valid JSON on corrupt/missing bus" 'rm -f "$BUS"; curl -s -H
 ok "unknown path => 404 (with token)" '[ "$(c "http://127.0.0.1:$P/etc/passwd?token=$TOK")" = 404 ]'
 ok "response headers: nosniff + CSP + no-store" 'h=$(curl -si "http://127.0.0.1:$P/?token=$TOK"); [[ $h == *nosniff* && $h == *Content-Security-Policy* && $h == *no-store* ]]'
 ok "no listener on non-loopback" '! lsof -nP -iTCP:$P -sTCP:LISTEN | grep -qE "\*:$P|0\.0\.0\.0:$P"'
-kill $CP; wait $CP 2>/dev/null; HOME="$H" python3 "$Z/bin/tz" companion --port $P >/dev/null 2>&1 & CP=$!; sleep 1
+kill $CP; wait $CP 2>/dev/null; HOME="$H" python3 "$Z/bin/tz" companion --port $P >/dev/null 2>&1 & CP=$!
+for _ in $(seq 100); do [ "$(c "http://127.0.0.1:$P/?token=$TOK")" = 200 ] && break; sleep 0.2; done  # wait for readiness, not a fixed sleep
 ok "restart on same port works" '[ "$(c "http://127.0.0.1:$P/?token=$TOK")" = 200 ]'
 kill $CP; wait $CP 2>/dev/null
 ok "bad --port rejected" '! tz companion --port abc >/dev/null 2>&1 && ! tz companion --port 80 >/dev/null 2>&1'
@@ -100,7 +101,7 @@ for i in range(200):
 PY
 chmod +x "$T/claude"; echo p >"$T/p.txt"; mkdir -p "$T/w"
 ab() { TZ_AB_CLAUDE="$T/claude" python3 "$Z/bin/tzab.py" --name "$1" --cwd "$T/w" --config "$T/cfg" --prompt-file "$T/p.txt" --evidence "$T/ev" "${@:2}"; }
-ab K1 >/dev/null 2>&1 & KP=$!; sleep 1.5; kill -9 $KP; sleep 0.3; pkill -f "$T/claude" 2>/dev/null
+ab K1 >/dev/null 2>&1 & KP=$!; for _ in $(seq 150); do [ -s "$T/ev/K1.partial.json" ] && break; sleep 0.1; done; kill -9 $KP; sleep 0.3; pkill -f "$T/claude" 2>/dev/null
 ok "SIGKILLed runner leaves partial count" '[ -s "$T/ev/K1.partial.json" ] && [ ! -f "$T/ev/K1.result.json" ]'
 ok "orphan partial counts toward aggregate (no cap bypass)" 'python3 -c "import sys;sys.path.insert(0,\"$Z/bin\");import tzab;assert tzab.agg_used(\"$T/ev\")>=1000"'
 o=$(ab K2 --agg-cap 1500 2>&1); ok "second run limited by orphan spend (cap-aggregate or refused)" '[[ $o == *cap-aggregate* || $o == *refused* ]]'

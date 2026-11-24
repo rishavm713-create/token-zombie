@@ -143,3 +143,12 @@ FACTORY-AUDIT "Suite status" and phase table (phases 1-2 now done); BUILD-LIST k
 
 ## 7. Order of work from here (Core only)
 1. Quiet-machine rerun of the full suite and the four timing tests (F1-F4). 2. Resume for killed agent runs (A6). 3. Gate auto-detect lint/type/audit (A7). 4. Parallel worktree coordination (A9) and task deps (A10). 5. Tree-sitter symbol map with regex fallback (B5). 6. Benchmarks with Harbor/Terminal-Bench when credentials exist (B7). 7. spec/modules/factory (D3-D5). Studio, second repo and website redesign only after 1-4 are class 1.
+
+## 8. Milestone 2 status (2026-11-24): reliability + gate hardening + resume
+Full suite on this Mac after the changes: TOTAL pass 978, fail 0 (before them, quiet machine: 953/1; the 1 was a private-key literal in tzgate, fixed). test_gate2 24/0, test_agent 8/0, test_upgrade 27/0. Timing flakes fixed by readiness polling, thresholds unchanged.
+VERIFIED (tests pass): killed-run resume (`tz agent --resume ID|last`, SIGKILL test); Python public-API drift detection (bin/tzapi.py; add(a,b)->add(*args) with passing tests is caught); tests-actually-ran check; syntax check; regression-link check.
+IMPLEMENTED, only stub-tested: lint/type/audit detection (ruff/flake8, mypy/pyright, pip-audit, npm lint/tsc/audit). No real tools installed here; offline/missing = skipped, never passed.
+LIMITS: regression check is a static link (test mentions module), not proof of exercise; resume reruns test/gate loops with a fresh budget; API check is Python only (JS/TS not covered).
+UNTESTED: live Claude Code session validation; local models other than Qwen3-4B on llama-server; codex/gemini/others (deferred).
+REMAINING: A9 parallel worktrees, A10 task deps in tz next, B5 tree-sitter map, benchmarks (need credentials), doc fixes, install/upgrade validation beyond this Mac, JS/TS API check.
+18-capability audit (short): verified: 5,6,11,12,13,14,2,16; implemented-unverified: 1,3,4,7,9,10,17,18; partial: 8 (one local model), 15 (no parallel coordination); missing: none; blocked: benchmarks vs baseline (credentials). Claude-Code-in-live-session validation owed for 7.
