@@ -440,6 +440,11 @@ export const register: Register = on => {
             }),
           )}
         </Box>
+        <Box>
+          {btn('act-checkpoint', 'checkpoint', async () => { await run('checkpoint', tz('checkpoint'), 4) })}
+          {btn('act-verify', 'verify', async () => { await run('verify', tz('handoff', 'verify'), 6) })}
+          {btn('act-ship', 'ship?', async () => { await run('ship', tz('handoff', 'status'), 6) })}
+        </Box>
         {row('tokens', `in ${k(t.inp)}  out ${k(t.out)}  cache ${k(t.cr)}`, 'tok')}
         {row('model', t.model || 'n/a', 'model')}
         {row('agent', `${dur(t.ms)} / ${t.turns} turns, ${t.spawns} subagents`, 'agent')}
