@@ -97,11 +97,16 @@ def trim(d):
             f = r.get('file') if r.get('type') == 'text' else None
             if not isinstance(f, dict) or not isinstance(f.get('content'), str):
                 return None, 0
-            c = cut(f['content'], READ_MAX, True)
-            if not c:
-                return None, 0
-            f['content'], saved = c
-            _mark_trimmed(d.get('session_id', 'x'), fp)
+            stub = _reread(d.get('session_id', 'x'), fp, f['content'])
+            if stub:  # unchanged re-read: idea from lean-ctx (Apache-2.0), independent code
+                saved = len(f['content']) - len(stub); f['content'] = stub
+            else:
+                c = cut(f['content'], READ_MAX, True)
+                if not c:
+                    return None, 0
+                f['content'], saved = c
+            if not stub:
+                _mark_trimmed(d.get('session_id', 'x'), fp)
         elif tool == 'Grep' and isinstance(r, dict) and isinstance(r.get('content'), str):
             c = cut(r['content'], OTHER_MAX, False)
             if not c:
@@ -151,6 +156,24 @@ def trim(d):
         return {'hookEventName': 'PostToolUse', 'updatedToolOutput': r}, saved
     except Exception:
         return None, 0
+
+
+def _reread(session, fp, content):
+    """Stub text if this session already got these exact bytes of fp in full (untrimmed) and no compaction since; else '' and remember."""
+    if len(content) < 2000:
+        return ''
+    p = os.path.join(STATE, f'seen-{session}.json')
+    h = hashlib.sha1(content.encode('utf-8', 'replace')).hexdigest()
+    try:
+        seen = json.load(open(p))
+    except Exception:
+        seen = {}
+    if seen.get(fp) == h:
+        return f'[TOKEN ZOMBIE: {fp} is unchanged since you read it earlier in this chat ({len(content)} chars); that result is still above. Re-read with offset/limit for a part, or Grep.]'
+    if len(content) <= READ_MAX:  # only a full, untrimmed result counts as "already in context"
+        seen[fp] = h
+        json.dump(seen, open(p + '.tmp', 'w')); os.replace(p + '.tmp', p)
+    return ''
 
 
 def _mark_trimmed(session, fp):

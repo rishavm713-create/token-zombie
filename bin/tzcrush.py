@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # Content-aware crushing for big tool output: detect JSON / unified diff / repetitive log, shrink structurally.
 # Always paired with tzout.spill (original kept; `tz recall ID`). Pure stdlib. Idea of a content router seen in Headroom (Apache-2.0); independent code.
-import json, re
+import json, re, statistics
+# Ideas adapted (independent code): Headroom (Apache-2.0) SmartCrusher outlier retention; RTK (Apache-2.0) strip-ANSI / collapse-blank stages.
+_ANSI = re.compile(r'\x1b\[[0-9;?]*[ -/]*[@-~]')
 
 _NUM = re.compile(r'0x[0-9a-fA-F]+|\d+')
 _ERR = re.compile(r'error|fail|exception|fatal|denied|timeout|traceback|panic', re.I)
@@ -19,13 +21,30 @@ def kind(text):
     return 'log' if text.count('\n') > 20 else 'text'
 
 
+def _outliers(x):
+    """Indexes of dict items whose numeric field is a >=3-sigma outlier (kept even when the middle is omitted)."""
+    if len(x) < 8 or not all(isinstance(i, dict) for i in x):
+        return set()
+    keep = set()
+    for k in {k for i in x for k in i}:
+        v = [(n, i[k]) for n, i in enumerate(x) if isinstance(i.get(k), (int, float)) and not isinstance(i.get(k), bool)]
+        if len(v) < 8:
+            continue
+        sd = statistics.pstdev(a for _, a in v)
+        if sd:
+            m = statistics.fmean(a for _, a in v)
+            keep |= {n for n, a in v if abs(a - m) >= 3 * sd}
+    return keep
+
+
 def _json(text):
     d = json.loads(text)
     omitted = [0]
 
     def walk(x):
         if isinstance(x, list) and len(x) > 8:
-            keep = [i for i in range(len(x)) if i < 3 or i == len(x) - 1 or _ERR.search(json.dumps(x[i])[:2000])]
+            out_i = _outliers(x)
+            keep = [i for i in range(len(x)) if i < 3 or i == len(x) - 1 or i in out_i or _ERR.search(json.dumps(x[i])[:2000])]
             omitted[0] += len(x) - len(keep)
             out = [walk(x[i]) for i in keep]
             keys = sorted({k for i in x if isinstance(i, dict) for k in i})[:12]
@@ -64,9 +83,18 @@ def _log(text):
     return '\n'.join(out)
 
 
+def clean(text):
+    """Lossless-ish noise stage: ANSI codes, carriage-return progress redraws (keep last), runs of blank lines."""
+    t = _ANSI.sub('', text)
+    if '\r' in t:
+        t = '\n'.join(l.rsplit('\r', 1)[-1] if '\r' in l and l.rsplit('\r', 1)[-1].strip() else l.replace('\r', '') for l in t.split('\n'))
+    return re.sub(r'\n{3,}', '\n\n', t)
+
+
 def crush(text):
     """(new_text, kind) or (None, kind) when it did not shrink by >=10%. Caller must spill the original first."""
     k = kind(text)
+    text = clean(text) if k in ('log', 'text') else text
     try:
         new = {'json': _json, 'diff': _diff, 'log': _log}.get(k, lambda t: t)(text)
     except Exception:

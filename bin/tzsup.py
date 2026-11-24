@@ -59,7 +59,7 @@ def tasks():
               lambda v: isinstance(v, dict) and isinstance(v.get('tasks'), list) and all(isinstance(t, dict) and 'status' in t for t in v['tasks']))
 
 
-def task_set(tid, project='', status='open', session=''):
+def task_set(tid, project='', status='open', session='', blocked_by=()):
     if status not in ('open', 'done', 'blocked'):
         raise SystemExit('status must be open|done|blocked')
     d = tasks()
@@ -68,6 +68,8 @@ def task_set(tid, project='', status='open', session=''):
         t = dict(id=tid, project=project, status=status, sessions=[])
         d['tasks'].append(t)
     t['status'] = status
+    if blocked_by:  # dependency edges, idea from beads (MIT, gastownhall/beads); native JSON, no Dolt
+        t['blocked_by'] = sorted(set(t.get('blocked_by', [])) | set(blocked_by))
     if project:
         t['project'] = project
     if session and session not in t['sessions']:
@@ -75,6 +77,12 @@ def task_set(tid, project='', status='open', session=''):
     t['updated'] = time.strftime('%Y-%m-%d %H:%M')
     _w(os.path.join(sdir(), 'tasks.json'), d)
     return t
+
+
+def ready(d=None):
+    """open tasks whose blocked_by ids are all done (beads-style ready query)."""
+    ts = (d or tasks())['tasks']; done = {t['id'] for t in ts if t['status'] == 'done'}
+    return [t for t in ts if t['status'] == 'open' and all(b in done for b in t.get('blocked_by', []))]
 
 
 def risk(info):
@@ -114,6 +122,13 @@ def tick(transcript, cwd, rl=None):
              rate=int(info['rate'] or 0), last_checkpoint=last_ck, risk=risk(dict(info, level=lv)), actions=acts, open_tasks=len(open_t),
              limits=info['limits'], tokens=info['totals'],
              task_just_done=bool(prev.get('open_tasks', 0) > len(open_t)), tick_ms=0, label={'ctx_pct': 'actual/est', 'mins': 'est', 'activity': 'MEASURED from hook events, else UNKNOWN'})
+    try:  # agent/stall detectors from the newest live ledger (fail open)
+        import tzlive
+        sid = tzlive.latest_session()
+        if sid:
+            s['gaps'] = tzlive.detect(tzlive._load(tzlive.path(sid)))
+    except Exception:
+        pass
     s['activity'], s['activity_src'] = tzbus.activity()
     s['mascot'] = mascot_state(s)
     s['emoji'] = EMOJI[s['mascot']]
@@ -155,7 +170,11 @@ def main(argv):
         if not a.args:
             print(json.dumps(tasks(), indent=1))
             return 0
-        print(json.dumps(task_set(a.args[0], cwd, a.args[1] if len(a.args) > 1 else 'open'), indent=1))
+        if a.args[0] == 'ready':
+            print(json.dumps([t['id'] for t in ready()]))
+            return 0
+        bb = [x[3:] for x in a.args[2:] if x.startswith('by:')]  # tz sup task <id> open by:<other-id>
+        print(json.dumps(task_set(a.args[0], cwd, a.args[1] if len(a.args) > 1 else 'open', blocked_by=bb), indent=1))
         return 0
     if a.cmd in ('start', 'tick'):
         rl = json.loads(a.rate_limits) if a.rate_limits else None

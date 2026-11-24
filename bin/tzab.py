@@ -108,8 +108,30 @@ def run_session(name, cwd, cfg, prompt, evidence, model='sonnet', cap=SESSION_CA
     return res
 
 
+def plan(argv):
+    """Free dry run of a paid A/B: trial matrix + worst-case token bill (runs nothing, no model call). The owner OKs the cost before any tzab run."""
+    import argparse
+    ap = argparse.ArgumentParser(prog='tzab plan')
+    ap.add_argument('--tasks', type=int, default=1); ap.add_argument('--trials', type=int, default=5)
+    ap.add_argument('--cap', type=int, default=SESSION_CAP); ap.add_argument('--agg-cap', type=int, default=AGG_CAP)
+    ap.add_argument('--usd-per-mtok', type=float, default=None, help='your blended $/1M tokens (EST; none given = tokens only)')
+    a = ap.parse_args(argv)
+    runs = a.tasks * a.trials * 2  # control + treatment, alternating order
+    worst = min(runs * a.cap, a.agg_cap)
+    order = [('control' if (i % 2 == 0) else 'tz') for i in range(a.trials * 2)]
+    r = dict(sessions=runs, arms=['control (no tz)', 'treatment (tz, separate CLAUDE_CONFIG_DIR)'], order_per_task=order, per_session_cap=a.cap,
+             aggregate_cap=a.agg_cap, worst_case_tokens=worst, label='worst case = hard caps, NOT a prediction; real use is usually far below',
+             worst_case_usd=round(worst / 1e6 * a.usd_per_mtok, 2) if a.usd_per_mtok else None,
+             runs_enough=runs >= 10 * a.tasks, needs_owner_ok=True,
+             next='tz bench quality TRIALS.json after the runs (verdict PROVEN needs 5+ trials per arm, no pass-rate drop)')
+    print(json.dumps(r, indent=1))
+    return 0
+
+
 def main(argv):
     import argparse
+    if argv[:1] == ['plan']:
+        return plan(argv[1:])
     ap = argparse.ArgumentParser(prog='tzab')
     ap.add_argument('--name', required=True); ap.add_argument('--cwd', required=True); ap.add_argument('--config', required=True)
     ap.add_argument('--prompt-file', required=True); ap.add_argument('--evidence', required=True)

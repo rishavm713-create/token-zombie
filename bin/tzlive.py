@@ -14,6 +14,7 @@ SAFE_WEB = ('WebSearch', 'WebFetch')
 READ_ONLY = SAFE_FS + SAFE_WEB + ('Read', 'Skill', 'TodoWrite', 'ToolSearch', 'TaskOutput', 'TaskList', 'TaskGet', 'ListMcpResourcesTool')
 AGENT = ('Agent', 'Task')
 WEB_TTL, AGENT_OLD = 1800, 3600
+QUEUE_OLD, STALL, REPEAT_N = 300, 600, 4
 
 
 def sdir():
@@ -71,12 +72,14 @@ def on_event(data, now=None):
 
     def fn(s):
         adv = ''
+        s['last_t'] = int(now)  # real signal for stall detection
         if ev == 'PreCompact':  # summary drops earlier tool results: nothing may be called "already in the chat" any more
             s['calls'] = {}; s['gen'] += 1; s['dedupe']['compactions'] += 1
-            try:
-                os.remove(os.path.join(sdir(), f"reads-{data.get('session_id', 'x')}.json"))
-            except OSError:
-                pass
+            for pre in ('reads', 'seen'):  # after compaction nothing may be called "already in the chat"
+                try:
+                    os.remove(os.path.join(sdir(), f"{pre}-{data.get('session_id', 'x')}.json"))
+                except OSError:
+                    pass
         elif ev == 'UserPromptSubmit':
             p = (data.get('prompt') or '').strip()
             if p.startswith('/'):
@@ -126,6 +129,8 @@ def on_event(data, now=None):
                 a['status'] = 'failed' if err else ('running' if a.get('bg') else 'done')
                 if a['status'] != 'running':
                     a['t1'] = int(now)
+            rk = key(data); rp = s.get('rep') or {}
+            s['rep'] = dict(k=rk, n=rp.get('n', 0) + 1 if rp.get('k') == rk else 1)  # consecutive identical calls
             if tool in SAFE_FS + SAFE_WEB:
                 s['calls'][key(data)] = dict(gen=s['gen'], t=int(now))
             elif tool not in READ_ONLY:  # Bash, Edit, Write, agents, MCP...: may change files -> every fs-keyed result is stale
@@ -175,6 +180,33 @@ def on_event(data, now=None):
                 _bump(s['notes'], 'unmatched_subagent_stops')
         return adv
     return edit(data.get('session_id', 'x'), fn)
+
+
+def detect(s, now=None):
+    """Gap detectors from real ledger signals only (agent status/t0/t1, last_t, repeat counter). Fail-open: {} on bad input."""
+    try:
+        now = now or time.time()
+        ag = s.get('agents') or {}
+        c = {}
+        for a in ag.values():
+            _bump(c, a.get('status', '?'))
+        queued = [a for a in ag.values() if a.get('status') == 'starting']
+        stuck_q = [a for a in queued if now - a.get('t0', now) > QUEUE_OLD]
+        live = [a for a in ag.values() if a.get('status') in ('running', 'starting')]
+        abandoned = [a for a in ag.values() if a.get('status') == 'interrupted'
+                     or (a.get('status') == 'running' and now - a.get('t0', now) > AGENT_OLD)]
+        lt = s.get('last_t')
+        idle = int(now - lt) if lt else None
+        rp = s.get('rep') or {}
+        stalled = []
+        if live and idle is not None and idle > STALL:
+            stalled.append(f'{len(live)} agent(s) live, no hook event for {idle // 60} min')
+        if rp.get('n', 0) >= REPEAT_N:
+            stalled.append(f"same tool call repeated {rp['n']}x in a row")
+        return dict(counts=c, queued=len(queued), stuck_queued=len(stuck_q), failed=c.get('failed', 0), abandoned=len(abandoned),
+                    stalled=stalled, idle_s=idle)
+    except Exception:
+        return {}
 
 
 def agent_costs(sid, home=None):
@@ -297,12 +329,16 @@ def latest_session():
 def main(argv):
     import argparse
     ap = argparse.ArgumentParser(prog='tz live')
-    ap.add_argument('cmd', nargs='?', default='show', choices=['show', 'skills', 'agents', 'roi'])
+    ap.add_argument('cmd', nargs='?', default='show', choices=['show', 'skills', 'agents', 'roi', 'gaps'])
     ap.add_argument('--session')
     ap.add_argument('--json', action='store_true')
     a = ap.parse_args(argv)
     sid = a.session or latest_session()
     s = _load(path(sid)) if sid else blank()
+    if a.cmd == 'gaps':
+        d = detect(s)
+        print(json.dumps(d) if a.json else f"gaps {sid or 'none'} [MEASURED from hooks]: queued {d.get('queued')} (stuck {d.get('stuck_queued')}), failed {d.get('failed')}, abandoned {d.get('abandoned')}, stalled: {'; '.join(d.get('stalled') or []) or 'no'}")
+        return 0
     if a.cmd == 'roi':
         r = roi(sid, s)
         if a.json:
