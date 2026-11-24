@@ -9,6 +9,20 @@ SESSION_CAP, AGG_CAP = 1_500_000, 5_000_000
 LEAKY_PREFIXES = ('ANTHROPIC_', 'CLAUDE')  # host/provider env: tokens, gateway URL, desktop session ids
 
 
+
+def _launcher(prog):
+    """Windows: find claude.cmd/.exe via PATHEXT; run a Python shebang script (fake/test claude) with this Python."""
+    if os.name != 'nt':
+        return [prog]
+    import shutil
+    p = shutil.which(prog) or prog
+    try:
+        with open(p, 'rb') as f:
+            if b'python' in f.readline():
+                return [sys.executable, p]
+    except OSError:
+        pass
+    return [p]
 def usage_total(u):
     return sum((u.get(k) or 0) for k in ('input_tokens', 'output_tokens', 'cache_read_input_tokens', 'cache_creation_input_tokens'))
 
@@ -59,7 +73,7 @@ def run_session(name, cwd, cfg, prompt, evidence, model='sonnet', cap=SESSION_CA
     perms = ['--permission-mode', 'acceptEdits', '--allowedTools', 'Bash(python3:*)', 'Bash(python:*)', 'Bash(pytest:*)', 'Bash(git diff:*)', 'Bash(git status:*)', 'Bash(ls:*)']
     if allowed is not None:  # smoke S2-S4: only the scenario's own tool is pre-approved (no Bash)
         perms = ['--permission-mode', 'acceptEdits', '--allowedTools', *allowed]
-    cmd = [claude, '-p', prompt, '--model', model, '--output-format', 'stream-json', '--verbose', *perms, *extra]
+    cmd = [*_launcher(claude), '-p', prompt, '--model', model, '--output-format', 'stream-json', '--verbose', *perms, *extra]
     pr = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     import threading
     wall = threading.Timer(int(os.environ.get('TZ_AB_WALL_SECONDS') or 3600), pr.kill)  # silent hang cannot run forever
