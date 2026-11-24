@@ -162,3 +162,18 @@ COMPLETED: workers registry, gate (diff/ownership/safe/secrets/tests/build/check
 | 15 | partial | no parallel worktree coordination (A9) |
 | benchmarks vs baseline | blocked | needs credentials |
 | missing / duplicated / unnecessary | none found | |
+
+## 9. TZ 2.0 reconcile (owner scope: handoffs/2026-11-24-tz2-final-instruction.md), dependency order
+Owners: core=tz-core-finish, wt=tz2-worktrees, inst=tz-install-temp, gaps=tz-gaps-p1, es=es-live-checks. Status: done / verified / partial / missing.
+1. Suite reliability (core): verified, 978/0 plus rollback/killgroup tests (see section 10 for the latest count).
+2. Worker registry (core): verified (tzworkers, acceptance runs); run_pg process-group timeout added, tested.
+3. Killed-run recovery (core): verified (resume, SIGKILL test); rollback of a failed run (core): verified, `tz agent --rollback`.
+4. Verify gate F (core): verified for diff/ownership/safe/secrets/tests/API(py)/regression-link; lint/type/audit partial (stub-tested only); honest report in gate output.
+5. Repo intelligence C + task deps (wt): partial, other session. JS/TS API check: missing (core, deferred).
+6. Live Claude Code integration E + install/upgrade (inst): partial, other session.
+7. Cost/benchmarks G + OSS review (gaps): partial, other session; orchestration rows reviewed in docs/OPEN-SOURCE-INTEGRATION-LEDGER.md (core).
+8. EditSutra acceptance (es): not started here.
+Section 6 items (Studio, factory, second repo, website) are not built.
+
+## 10. Suite after rollback + process-group kill (2026-11-24, concurrent sessions editing)
+Full run: TOTAL pass 1001, fail 15 under load. Rerun alone: test_bench 17/0, test_sup 41/0, test_e2e 16/0 (load flakes). Still failing, none in my files: test_tz "limit warning at 110k growth" and test_hard "hook at 97% => CRITICAL" (context-limit hooks), test_repo "README install line matches manifests" (install session), test_vet "repo self-scan: no HIGH" (tests/test_safe_hook.sh, written by another session, contains dangerous-command literals). New tests pass: test_rollback 4/0, test_killgroup 3/0, test_agent 8/0.

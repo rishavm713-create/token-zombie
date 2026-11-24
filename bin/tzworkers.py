@@ -4,6 +4,20 @@
 # e.g. llama-server or Ollama on localhost), offline (no model, deterministic tz tools only).
 # Registry: ~/.claude/token-zombie/workers.json. Nothing is called unless you run/test it. Stdlib only.
 import json, os, platform, shlex, shutil, subprocess, sys, urllib.request
+def run_pg(argv, cwd=None, timeout=900):
+    """subprocess.run in its own process group; on timeout the WHOLE group is killed, so grandchildren (test runners, servers) do not leak.
+    Idea from mini-swe-agent environments/local.py (MIT, SWE-agent authors), reimplemented in stdlib."""
+    import signal
+    p = subprocess.Popen(argv, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True)
+    try:
+        out, err = p.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        try: os.killpg(p.pid, signal.SIGKILL)
+        except OSError: pass
+        p.communicate()
+        raise
+    return subprocess.CompletedProcess(argv, p.returncode, out, err)
+
 STATE = os.environ.get('TZ_WORKERS_DIR') or os.path.expanduser('~/.claude/token-zombie')
 # Known CLIs and how to call them non-interactively. Flags are the documented headless forms; verify with `tz worker test`.
 KNOWN = {
@@ -52,7 +66,7 @@ def invoke(name, prompt, cwd=None, timeout=900):
             return '', 'offline worker runs tz tools only, no model'
         if w['kind'] == 'cli':
             argv = [a.replace('{prompt}', prompt) for a in shlex.split(w['cmd'])]
-            r = subprocess.run(argv, cwd=cwd, capture_output=True, text=True, timeout=timeout)
+            r = run_pg(argv, cwd, timeout)
             return r.stdout.strip(), None if r.returncode == 0 else 'exit %d: %s' % (r.returncode, r.stderr[-200:])
         body = json.dumps({'model': w.get('model', ''), 'messages': [{'role': 'user', 'content': prompt}]}).encode()
         req = urllib.request.Request(w['url'].rstrip('/') + '/chat/completions', body, {'Content-Type': 'application/json'})
