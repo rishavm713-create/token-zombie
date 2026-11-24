@@ -5,7 +5,7 @@
 # | --statusline-only (sets only statusLine; for the plugin install, whose hooks come from hooks/hooks.json)
 # Test hook: TZ_INSTALL_CRASH=1 kills the installer right before the final replace (simulates power loss).
 DIR="$(cd "$(dirname "$0")" && pwd)"
-SET="$HOME/.claude/settings.json"
+SET="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/settings.json"  # honour an isolated config dir (state under ~/.claude/token-zombie is separate)
 if [ "${1:-}" = --restore ]; then
   # newest backup that does NOT already contain token-zombie hooks (a backup made by a repeated install holds them)
   B=""; for f in $(ls -t "$SET".bak-tz-* 2>/dev/null); do grep -q 'token-zombie/bin' "$f" || { B="$f"; break; }; done
