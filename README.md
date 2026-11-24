@@ -81,3 +81,5 @@ A small bar inside Claude Code shows quick signals, and a local dashboard shows 
 Built by [Rishav Mishra](https://rishavm713-create.github.io/). Built because the problem was real, and open source so the fix is not another limitation for someone else. Also see [EditSutra](https://editsutra.github.io/).
 
 MIT licence. © 2026 Rishav Mishra.
+
+`tz map [dir]` prints a compact file-to-definitions map (Aider's repo-map idea) so a chat reads one page instead of many files. `tz xcheck` compares tz token totals with ccusage if you have it installed (it never downloads anything).

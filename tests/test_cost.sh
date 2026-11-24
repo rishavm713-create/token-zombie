@@ -24,4 +24,7 @@ ok "[ ! -e '$T/pr/.claude/settings.json' ]" noise-dry-run
 python3 "$R/bin/tz" noise --apply >/dev/null
 ok "grep -q 'node_modules' '$T/pr/.claude/settings.json'" noise-apply
 python3 "$R/bin/tz" noise --apply | grep -q 'nothing to add'; ok "[ $? = 0 ]" noise-idempotent
+mkdir -p "$T/m"; printf 'def alpha():\n  pass\nclass Beta: pass\n' > "$T/m/a.py"
+ok "python3 $R/bin/tz map '$T/m' 2>/dev/null | grep -q 'a.py: alpha class Beta'" repo-map
+ok "python3 $R/bin/tz xcheck | grep -q 'ccusage'" xcheck
 echo "pass $P fail $F"; [ $F = 0 ]
