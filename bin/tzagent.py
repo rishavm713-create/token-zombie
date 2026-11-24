@@ -65,7 +65,10 @@ def call(prompt, model, cwd, turns):
             d = json.loads(ln)
         except Exception:
             continue
-        u = (d.get('message') or {}).get('usage') or {}
+        if not isinstance(d, dict):
+            continue
+        m = d.get('message')
+        u = (m.get('usage') if isinstance(m, dict) else None) or {}
         tok += sum(u.get(k) or 0 for k in ('input_tokens', 'output_tokens', 'cache_creation_input_tokens'))
         if d.get('type') == 'result':
             text = str(d.get('result') or '')
