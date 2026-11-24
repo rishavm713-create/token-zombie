@@ -27,4 +27,5 @@ ck "tz2: safe blocks reset --hard, allows ls" '! python3 "$R/bin/tz" safe "git r
 ck "tz2: safe allows force-with-lease and echo text" 'python3 "$R/bin/tz" safe "git push --force-with-lease" | grep -q ok && python3 "$R/bin/tz" safe "echo rm -rf /" | grep -q ok'
 ck "tz2: impact finds a referencing file" 'python3 "$R/bin/tz" impact tzops | grep -q "bin/tz"'
 ck "tz2: run lists 10 stages, dry by default" '[ "$(python3 "$R/bin/tz" run "x" | grep -c "^ *[0-9]")" = 10 ]'
+ck "tz2: guard hook denies git reset --hard, passes ls" 'echo "{\"hook_event_name\":\"PreToolUse\",\"tool_name\":\"Bash\",\"tool_input\":{\"command\":\"git reset --hard\"},\"session_id\":\"t1\",\"cwd\":\"/tmp\"}" | python3 "$R/bin/tz-guard.py" | grep -q deny && ! (echo "{\"hook_event_name\":\"PreToolUse\",\"tool_name\":\"Bash\",\"tool_input\":{\"command\":\"ls\"},\"session_id\":\"t1\",\"cwd\":\"/tmp\"}" | python3 "$R/bin/tz-guard.py" | grep -q deny)'
 echo "pass $P fail $F"; [ $F = 0 ]

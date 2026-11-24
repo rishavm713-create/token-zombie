@@ -188,6 +188,17 @@ try:
         except Exception:
             _diag('policy', ev)
     if ev == 'PreToolUse' and data.get('tool_name', 'Read') != 'Read':
+        if data.get('tool_name') == 'Bash' and os.environ.get('TZ_SAFE') != '0':  # destructive-command guard (tz safe); TZ_SAFE=0 turns it off
+            try:
+                import tzops
+                ok, why = tzops.safe((data.get('tool_input') or {}).get('command') or '')
+            except Exception:
+                ok, why = True, ''
+                _diag('safe', ev)
+            if not ok:
+                emit({'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny',
+                      'permissionDecisionReason': 'TOKEN ZOMBIE safe: blocked (%s). Ask the owner, or run it with TZ_SAFE=0.' % why}})
+                _pflush()
         if data.get('tool_name') in ('Edit', 'Write', 'MultiEdit', 'NotebookEdit') and advice('next_task'):
             try:  # another live chat claimed this file: warn BEFORE the write (advice only)
                 import tzcont
