@@ -64,7 +64,16 @@ FEATURES = {'cache_ttl_auto': 1,  # measured 1 h vs 5 min prompt-cache life (tzc
             'plan_advice': 1,     # big vague task: plan first
             'instr_advice': 1,    # oversized or duplicate always-loaded instruction files
             'defaults_advice': 0, # one-time offer of `tz defaults` (suggests cheaper default models)
-            'bulk_read_block': 0} # BLOCKS one Read/Grep/Glob after bulk_read_n in a row (use an Explore subagent)
+            'bulk_read_block': 0, # BLOCKS one Read/Grep/Glob after bulk_read_n in a row (use an Explore subagent)
+            'log_compress': 1,    # build/test logs in crushed output: keep every failure line, original stored (tzlogc)
+            'skill_lint': 1,      # advice when a written SKILL.md breaks the skill spec (tzaskills)
+            'read_delta': 0,      # opt-in, BLOCKS a re-read of a changed file once and shows the diff instead (tztokopt)
+            'check_pipe': 1,      # advice when test/build output is piped through head/tail/grep (tzhumanlayer)
+            'scope_check': 1,     # advice when curl/wget targets a host outside .tz/scope.json (tzscope)
+            'beads_prime': 0,     # opt-in: ready-task brief at session start when no task pack (adds context)
+            'safety_extra': 0,    # opt-in: BLOCKS extra destructive/secret commands (tzrules)
+            'safety_strict': 0,   # opt-in: stricter rules, also BLOCKS (tzrules)
+            'custom_rules': 0}    # opt-in: user rulebooks (tzrules)
 
 
 def feature(name):

@@ -74,6 +74,12 @@ try:
         sys.exit(0)  # same event already handled by the other registered copy
     d = json.loads(_raw)
     cwd = d.get('cwd') or os.getcwd()
+    if d.get('source') in ('compact', 'clear'):
+        try:
+            import tztokopt
+            tztokopt.reset(d.get('session_id', 'x'))
+        except Exception:
+            pass
     parts, pk = [], ''
     if d.get('source') == 'compact':  # after compaction: only the continuation note tz-compact.py saved
         note = os.path.expanduser(f"~/.claude/token-zombie/compact-{d.get('session_id', 'x')}.md")
@@ -95,6 +101,9 @@ try:
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import tznext
         pk = tznext.pack(cwd)
+        if not pk:  # feature beads_prime (default off): short brief of ready tasks when no task pack
+            import tzbeads
+            pk = tzbeads.on_start(cwd)
     except Exception:
         pass
     try:  # oversized handoff notes: one line, advice only
