@@ -18,7 +18,7 @@
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"TOKEN ZOMBIE","applicationCategory":"DeveloperApplication","operatingSystem":"macOS, Linux (Windows beta)","description":"Free, local Claude Code plugin that finds wasted tokens and saves your place between chats.","url":"https://rishavm713-create.github.io/token-zombie/","codeRepository":"https://github.com/rishavm713-create/token-zombie","license":"https://opensource.org/license/mit","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
 </script>
 <style>
-:root{color-scheme:dark;--bg:#070b08;--panel:#0e1610;--panel2:#121d15;--line:#22342a;--fg:#eef7f0;--muted:#a3b7a8;--green:#83ffa0;--green2:#3dd66a;--red:#ff9b8a;--ease:cubic-bezier(.2,.7,.2,1)}
+:root{color-scheme:dark;--bg:#070b08;--panel:#0e1610;--panel2:#121d15;--line:#22342a;--fg:#eef7f0;--muted:#a3b7a8;--green:#7cfc00;--green2:#3dd68c;--red:#ff9b8a;--ease:cubic-bezier(.2,.7,.2,1)}
 *{box-sizing:border-box;margin:0}
 html{scroll-behavior:smooth;overflow-x:clip}
 body{background:var(--bg);color:var(--fg);font:18px/1.65 Inter,ui-sans-serif,-apple-system,"SF Pro Text","Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:clip}
@@ -61,25 +61,25 @@ section{padding:104px 0;position:relative}
 /* buttons */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:16px 26px;border-radius:12px;font-weight:700;font-size:17px;border:1px solid var(--line);color:var(--fg);transition:transform .25s var(--ease),box-shadow .25s,border-color .25s;position:relative;overflow:hidden}
 .btn:hover{transform:translateY(-2px);border-color:#46724e}
-.btn.primary{background:var(--green);color:#04110a;border-color:var(--green);box-shadow:0 10px 40px #83ffa033}
-.btn.primary:hover{box-shadow:0 14px 54px #83ffa055}
+.btn.primary{background:var(--green);color:#04110a;border-color:var(--green);box-shadow:0 10px 40px #7cfc0033}
+.btn.primary:hover{box-shadow:0 14px 54px #7cfc0055}
 .btn.primary:after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,#fff7 50%,transparent 65%);transform:translateX(-120%);animation:shine 4.5s 1.5s infinite}
 @keyframes shine{to{transform:translateX(120%)}}
 
 /* hero */
 .hero{padding:88px 0 96px;overflow:hidden}
-.hero:before{content:"";position:absolute;width:760px;height:760px;right:-220px;top:-260px;background:radial-gradient(circle,#83ffa022,transparent 65%);animation:drift 16s ease-in-out infinite alternate;pointer-events:none}
+.hero:before{content:"";position:absolute;width:760px;height:760px;right:-220px;top:-260px;background:radial-gradient(circle,#7cfc0022,transparent 65%);animation:drift 16s ease-in-out infinite alternate;pointer-events:none}
 @keyframes drift{to{transform:translate(-80px,90px) scale(1.12)}}
 .hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
 .pill{display:inline-flex;align-items:center;gap:10px;border:1px solid #3a6a45;background:#0e2014;color:var(--green);font-size:13px;font-weight:800;letter-spacing:.14em;padding:8px 14px;border-radius:99px;margin-bottom:26px}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 #83ffa088;animation:pl 2s infinite}
-@keyframes pl{70%{box-shadow:0 0 0 10px #83ffa000}100%{box-shadow:0 0 0 0 #83ffa000}}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 #7cfc0088;animation:pl 2s infinite}
+@keyframes pl{70%{box-shadow:0 0 0 10px #7cfc0000}100%{box-shadow:0 0 0 0 #7cfc0000}}
 .hero h1 span{display:block;color:var(--green)}
 .hero .lead{margin:26px 0 34px}
 .cta{display:flex;gap:14px;flex-wrap:wrap}
 .trust{display:flex;gap:10px 26px;flex-wrap:wrap;margin-top:34px;color:var(--muted);font-size:15px}
 .trust b{color:var(--green);margin-right:6px}
-.frame{border:1px solid #2f5a3a;border-radius:20px;background:#0a120d;box-shadow:0 40px 100px #000a,0 0 80px #83ffa014;overflow:hidden;animation:float 7s ease-in-out infinite}
+.frame{border:1px solid #2f5a3a;border-radius:20px;background:#0a120d;box-shadow:0 40px 100px #000a,0 0 80px #7cfc0014;overflow:hidden;animation:float 7s ease-in-out infinite}
 @keyframes float{50%{transform:translateY(-10px)}}
 .bar{display:flex;gap:7px;padding:13px 16px;border-bottom:1px solid var(--line);align-items:center;font-size:12px;color:#6f8576;letter-spacing:.12em}
 .bar i{width:10px;height:10px;border-radius:50%;background:#2a3d30}
