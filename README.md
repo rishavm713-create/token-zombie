@@ -156,4 +156,4 @@ Noise is counted in characters, savings in tokens, and each number is labelled m
 
 🌐 [Website](https://rishavm713-create.github.io/token-zombie/) · 📖 [Full guide](docs/REFERENCE.md) · ✅ [Test evidence](docs/TEST_EVIDENCE.md) · 🔐 [Security](.github/SECURITY.md) · 🤝 [Contribute](.github/CONTRIBUTING.md)
 
-Created by [Rishav Mishra](https://github.com/rishavm713-create) · MIT · macOS and Linux (Windows beta)
+Created by [Rishav Mishra](https://github.com/rishavm713-create) · 🌐 [Portfolio](https://rishavm713-create.github.io/) · ✂️ [EditSutra](https://editsutra.github.io/)
