@@ -36,7 +36,107 @@ claude plugin marketplace add rishavm713-create/token-zombie && claude plugin in
 - 🧭 **Plans and ships:** `tz code` plans, `tz split` finds parallel work, `tz pr` prepares pull requests.
 - 🔍 **Honest numbers:** measured or estimated, always labelled.
 
-💡 Built on the best ideas from **44 open-source tools** ([credits](NOTICE)).
+## 🧩 All 69 things it does
+
+<details><summary>Show the full list</summary>
+
+**Understand**
+
+1. Understand the codebase
+2. Map files, folders, dependencies
+3. Remember conversations and decisions
+4. Retrieve project knowledge automatically
+5. Remember unfinished tasks
+6. Understand existing coding standards
+7. Avoid rediscovering what is known
+
+**Save**
+
+8. Compress terminal output
+9. Remove irrelevant tool-result info
+10. Detect repeated commands and outputs
+11. Keep important errors and warnings
+12. Store big outputs, retrieve on demand
+13. Track every token (all logs, by model/day/category)
+14. Track actual and estimated cost
+15. Recommend cheaper models
+16. Measure whether savings are real
+
+**Execute**
+
+17. Understand large tasks
+18. Break tasks into smaller ones
+19. Step-by-step plans
+20. Find parallel tasks
+21. Assign work to coding agents
+22. Monitor agents
+23. Detect duplicated work
+24. Collect agent results
+25. Coordinate agents with each other
+26. Recover interrupted tasks
+
+**Build**
+
+27. Help build complete apps
+28. Coordinate frontend and backend
+29. Build APIs and integrations
+30. Database architecture
+31. Consistency across files
+32. Follow project architecture
+33. Find missing implementation pieces
+34. Continue across sessions
+
+**Test**
+
+35. Run relevant tests
+36. Detect bugs and failures
+37. Inspect code changes
+38. Find missing features
+39. Check security risks
+40. Help fix errors
+41. Re-run failed tests
+42. Verify fixes worked
+43. Block false completion claims
+
+**Keep**
+
+44. Auto checkpoints
+45. Preserve decisions
+46. Save unfinished work
+47. Recover earlier task states
+48. Detailed handoffs
+49. Continue after interruptions
+50. Prevent repetition
+
+**Workflow**
+
+51. Prepare Git commits
+52. Create and manage branches
+53. Prepare pull requests
+54. Implementation reports
+55. Track outstanding tasks
+56. Prepare projects for delivery
+57. Approval for sensitive operations
+58. Verify before declaring complete
+
+**Control**
+
+59. Show active agents
+60. Show current tasks
+61. Show token use
+62. Show cost and savings
+63. Show optimization activity
+64. Show test results
+65. Show checkpoint status
+66. Show outstanding work
+67. Show completion progress
+
+**Meta**
+
+68. Live status board of all 69 (this list)
+69. Test that fails if a DONE row has no real command
+
+</details>
 
 ## 📊 In one test session
 
