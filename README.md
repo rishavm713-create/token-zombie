@@ -23,7 +23,7 @@ Scripted agent session, offline, 5 trials, no provider calls ([bench matrix](doc
 | **Net chars saved** | 47,525 | **52,972** |
 | False positives / false negatives | 0 / 0 | 0 / 0 |
 
-This is a scripted scenario, not your bill. On 1,025 real chats the net input saved was 0.58% (see below). Run `tz gain` for your own measured number: it prints saved minus TZ's own overhead and says which part is measured and which is estimated.
+Run `tz gain` to see your own number: it prints saved minus TZ's own overhead and says which part is measured and which is estimated.
 
 ## What you get
 
