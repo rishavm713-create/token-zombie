@@ -149,9 +149,6 @@ Paste these two lines into Claude Code (the chat box). That's it.
 | ⚙️ Cost of TZ itself | 1,880 characters |
 | 🎯 False alarms / misses | **0 / 0** |
 
-| 💾 Saved today (measured) | **291.7K tokens** across 563 optimizations |
-
-👉 See **your** number: type `tz gain`
 
 Noise is counted in characters, savings in tokens, and each number is labelled measured or estimated. Results vary by workflow, so no fixed saving is promised: see the [benchmark method](docs/BENCHMARK-METHOD.md).
 
