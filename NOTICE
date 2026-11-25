@@ -72,3 +72,40 @@ ccusage (https://github.com/ryoppippi/ccusage), MIT licence; ccstatusline (https
 Used in: bin/tzusage.py blocks() (5-hour block rules) and usable() (auto-compact usable-context share); behaviour rebuilt, no code copied.
 
 skills/tz-craft: ideas from superpowers (MIT, Jesse Vincent), mattpocock/skills (MIT), karpathy-skills (MIT), compound-engineering-plugin (MIT, Every Inc), fast-anything (MIT); vercel-labs/agent-skills react guidance (no licence file: rewritten in our own words, no text copied). All reference text is original.
+
+v2.1 group 3 ports (licence texts under third_party/)
+
+ruflo (https://github.com/ruvnet/ruflo), MIT licence
+Copyright (c) 2024-2026 ruvnet
+Used in: bin/tzbudget.py (alert_level / is_raised / budget_of adapted from plugins/ruflo-mods/hooks/cost/budget.ts, ported to Python).
+
+ccstatusline (https://github.com/sirmalloc/ccstatusline), MIT licence
+Copyright (c) 2025 Matthew Breedlove
+Used in: bin/tzline.py (widget behaviour, settings format and algorithms adapted from src/utils and src/widgets, ported to Python).
+
+claude-squad (https://github.com/smtg-ai/claude-squad), AGPL-3.0
+Used in: bin/tzsquad.py (documented behaviour only; original code, no code, text or assets copied).
+
+claude-mem (https://github.com/thedotmack/claude-mem), Apache License 2.0
+Copyright 2026 Alex Newman
+Used in: bin/tzobs.py (strip_tags, normalize_title, exact_title_match, content_hash adapted and ported to Python, changed; the rest is own code following its behaviour). See third_party/claude-mem/NOTICE.
+
+tree-sitter (https://github.com/tree-sitter/tree-sitter), MIT licence
+Copyright (c) 2018 Max Brunsfeld
+Used in: bin/tzts.py (tag rules adapted from crates/tags/src/tags.rs). py-tree-sitter (MIT, Copyright (c) 2019 Max Brunsfeld, GitHub) is optional at runtime; neither it nor any grammar is bundled.
+
+claw-code (https://github.com/ultraworkers/claw-code), MIT licence as published; code provenance unverified
+Copyright (c) 2026 UltraWorkers and Claw Code contributors
+Used in: bin/tzclaw.py (documented behaviour "stale-branch detection before broad verification" only; original code).
+
+vercel-labs/agent-skills (https://github.com/vercel-labs/agent-skills), no licence file
+Used in: nothing copied. bin/tzskillcheck.py and skills/tz-craft/references/ are original.
+
+lean-ctx (https://github.com/yvgude/lean-ctx), Apache License 2.0 (root LICENSE; commercial and free_runtime paths excluded and not used)
+Copyright 2026 Yves Gugger
+Used in: bin/tzread.py (read modes) and bin/tzout.py _reread (unchanged re-read stub); behaviour only, own Python code.
+
+memsearch (https://github.com/zilliztech/memsearch), MIT licence
+Copyright (c) 2025 Zilliz Inc.
+Used in: bin/tzmemsearch.py (chunking, cleaning, section extraction and incremental-index rules adapted from src/memsearch/chunker.py, core.py, cli.py, scanner.py, ported to Python).
+

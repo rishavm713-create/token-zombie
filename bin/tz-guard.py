@@ -181,6 +181,28 @@ try:
             LIVE[0] = (LIVE[0] + '\n' + tztips.prompt_tips(data)).strip()
         except Exception:
             _diag('tips', ev)
+    if ev == 'UserPromptSubmit':  # v2.1 spend budget: opt-in hard stop, then one warning line per level
+        try:
+            import tzbudget
+            why = tzbudget.block_reason(data)
+        except Exception:
+            why = ''
+            _diag('budget', ev)
+        if why:
+            emit({'decision': 'block', 'reason': why})
+            sys.exit(0)
+        try:
+            import tzbudget
+            LIVE[0] = (LIVE[0] + '\n' + tzbudget.prompt_advice(data)).strip()
+        except Exception:
+            _diag('budget', ev)
+    if ev in ('UserPromptSubmit', 'PreToolUse', 'PostToolUse', 'PostToolUseFailure') and any(
+            _tzl.feature(f) for f in ('obs_record', 'obs_file_context')):  # v2.1 observation memory (opt-in)
+        try:
+            import tzobs
+            LIVE[0] = (LIVE[0] + '\n' + tzobs.hook(data)).strip()
+        except Exception:
+            _diag('obs', ev)
     if ev == 'Stop' and advice('next_task'):  # turn closed past the limit: tell the user to /compact (advice, once per 25k)
         try:
             import tzcont
@@ -243,6 +265,18 @@ try:
                 emit({'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny',
                       'permissionDecisionReason': 'TOKEN ZOMBIE safe: blocked (%s). Ask the owner, or run it with TZ_SAFE=0.' % why}})
                 _pflush()
+        if data.get('tool_name') == 'Bash':  # v2.1 stale branch before a broad test run: warn, or opt-in deny once
+            try:
+                import tzclaw
+                kind, why = tzclaw.hook(data)
+            except Exception:
+                kind, why = '', ''
+                _diag('stale', ev)
+            if kind == 'deny':
+                emit({'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny', 'permissionDecisionReason': why}})
+                _pflush()
+            if kind:
+                LIVE[0] = (LIVE[0] + '\n' + why).strip()
         if data.get('tool_name') in ('Edit', 'Write', 'MultiEdit', 'NotebookEdit') and advice('next_task'):
             try:  # another live chat claimed this file: warn BEFORE the write (advice only)
                 import tzcont

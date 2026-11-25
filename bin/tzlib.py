@@ -61,7 +61,16 @@ FEATURES = {'cache_ttl_auto': 1,  # measured 1 h vs 5 min prompt-cache life (tzc
             'plan_advice': 1,     # big vague task: plan first
             'instr_advice': 1,    # oversized or duplicate always-loaded instruction files
             'defaults_advice': 0, # one-time offer of `tz defaults` (suggests cheaper default models)
-            'bulk_read_block': 0} # BLOCKS one Read/Grep/Glob after bulk_read_n in a row (use an Explore subagent)
+            'bulk_read_block': 0,
+            # v2.1 group 3 ports; blocking, recording and injecting ones are opt-in
+            'budget_warn': 1,         # one line when a budget set with `tz budget set` climbs a level (silent with no budget)
+            'budget_block': 0,        # BLOCKS new prompts at a budget HARD_STOP (handoff saved first)
+            'stale_warn': 1,          # before a broad test run: warn once when the branch is behind main
+            'stale_block': 0,         # BLOCKS that test run once instead
+            'obs_record': 0,          # record prompts/tool observations in the local ledger (tz obs)
+            'obs_file_context': 0,    # inject earlier work on a file before it is read
+            'obs_inject': 0,          # inject the recent-work index at session start
+            'line_custom_command': 0} # let a `tz line` custom-command widget run a shell command # BLOCKS one Read/Grep/Glob after bulk_read_n in a row (use an Explore subagent)
 
 
 def feature(name):
