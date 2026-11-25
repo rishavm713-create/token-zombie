@@ -41,7 +41,7 @@ def extract_mentions(text, root='.'):
     idents = set(re.findall(r'[A-Za-z_][A-Za-z0-9_]*', text))
     paths = {}
     for p in tzmap._files(root):
-        rel = os.path.relpath(p, root)
+        rel = os.path.relpath(p, root).replace(os.sep, "/")
         paths.setdefault(rel, rel); paths.setdefault(os.path.basename(rel), rel)
     toks = set(re.findall(r'[\w./-]+', text))
     return idents, {paths[t] for t in toks if t in paths}
@@ -56,7 +56,7 @@ def ranked(root, focus=(), mentioned_idents=(), mentioned_files=(), methods=Fals
     for p in tzmap._files(root):
         if not p.endswith(EXT):
             continue
-        rel = os.path.relpath(p, root); allf.add(rel)
+        rel = os.path.relpath(p, root).replace(os.sep, "/"); allf.add(rel)
         raw = (tzmap.defs_methods if methods else tzmap.defs)(p)
         ds = {x.split()[-1].split('.')[-1] for x in raw}  # methods rank by leaf name
         for x in raw:

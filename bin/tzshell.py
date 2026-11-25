@@ -245,8 +245,13 @@ SECRET_HOME = [('.ssh', 'ssh'), ('.aws', 'aws'), ('.gcp', 'gcp'), ('.config/gclo
                ('.codex/auth.json', 'codex'), ('.gemini/oauth_creds.json', 'gemini')]
 
 
+def _real(x):
+    """realpath with '/' separators, so the prefix checks below also hold on Windows (D:\\a -> D:/a)."""
+    return os.path.realpath(x).replace(os.sep, '/')
+
+
 def _home():
-    return os.path.realpath(os.path.expanduser('~'))
+    return _real(os.path.expanduser('~'))
 
 
 def _secret(tok):
@@ -268,10 +273,10 @@ def _secret(tok):
             return 'secret.basename.credentials'
         if base.endswith(SECRET_EXT):
             return 'secret.ext.' + base.rsplit('.', 1)[1]
-        p = os.path.normpath(t)
+        p = os.path.normpath(t).replace(os.sep, '/')
         for rel, nm in SECRET_HOME:
-            for root in (h, os.path.expanduser('~')):  # HOME may be a symlink
-                d = os.path.join(root, rel)
+            for root in (h, _real(os.path.expanduser('~'))):  # HOME may be a symlink
+                d = root.rstrip('/') + '/' + rel
                 if p == d or p.startswith(d + '/'):
                     return 'secret.home.' + nm
     return None
@@ -281,8 +286,8 @@ def _secret(tok):
 def _temp_roots():
     r = {'/tmp', '/var/tmp', '/private/tmp', '/private/var/tmp'}
     if os.environ.get('TMPDIR'):
-        r.add(os.path.realpath(os.environ['TMPDIR']).rstrip('/'))
-    return r
+        r.add(_real(os.environ['TMPDIR']).rstrip('/'))
+    return r | {_real(x).rstrip('/') for x in r}  # Windows: /tmp resolves to D:/tmp
 
 
 def _under(p, roots):
@@ -315,9 +320,9 @@ def _rm_target(t, cwd, at=''):
     base = base or ('/' if t.startswith('/') else '.')
     if at is None and not os.path.isabs(base):
         return B('rm.dynamic-target', 'rm -r after a cd whose destination cannot be checked.')
-    p = os.path.realpath(os.path.join(at or cwd, base))
-    c = os.path.realpath(cwd)
-    if p == '/':
+    p = _real(os.path.join(at or cwd, base))
+    c = _real(cwd)
+    if os.path.dirname(p) == p:  # / or a drive root such as D:/
         return B('rm.root-or-home' if glob else 'rm.root', 'rm -r on the filesystem root.')
     if p == h or h.startswith(p + '/'):
         return B('rm.root-or-home', 'rm -r on the home directory or a parent of it.')
@@ -645,7 +650,7 @@ def _find(a, ctx):
             break
         paths.append(x)
     h = _home()
-    safe_p = bool(paths) and all(_under(os.path.realpath(os.path.join(ctx['cwd'], p)), _temp_roots()) for p in paths)
+    safe_p = bool(paths) and all(_under(_real(os.path.join(ctx['cwd'], p)), _temp_roots()) for p in paths)
     if '-delete' in a and not safe_p:
         return B('find.delete', 'find -delete removes files in bulk.')
     for k, x in enumerate(a):

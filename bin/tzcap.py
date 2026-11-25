@@ -220,6 +220,11 @@ def conflicts(cwd, home=None):
     return conf, dups
 
 
+def _sh(path):
+    """argv for the user's skillpack script: Windows cannot exec a shebang script, so run it through bash there."""
+    return [shutil.which('bash') or 'bash', path.replace(os.sep, '/')] if os.name == 'nt' else [path]
+
+
 def profile(prompt, inv, home, apply=False):
     """Plan which parked packs a prompt needs (on) and which enabled packs it does not (off). apply=True runs the user's own skillpack tool."""
     sp = os.path.join(home, '.claude', 'skillpack')
@@ -233,7 +238,7 @@ def profile(prompt, inv, home, apply=False):
         if not os.path.isfile(sp):
             return out + ['skillpack tool not found: nothing applied']
         for w in want:
-            r = subprocess.run([sp, 'on', w], capture_output=True, text=True, timeout=30)
+            r = subprocess.run(_sh(sp) + ['on', w], capture_output=True, text=True, timeout=30)
             out.append(f'applied on {w}: exit {r.returncode}')
     else:
         out.append('plan only. Nothing changed. Apply with --yes (runs your skillpack; a running chat does not reload skills: open a new chat). Turn off when done: skillpack off <pack>')
@@ -267,7 +272,7 @@ def profile_mgr(sub, name, prompt, inv, home, yes):
             j['backup'] = now
             j['applied'] = []
             for w in j['packs']:
-                r = subprocess.run([sp, 'on', w], capture_output=True, text=True, timeout=30)
+                r = subprocess.run(_sh(sp) + ['on', w], capture_output=True, text=True, timeout=30)
                 out.append(f'on {w}: exit {r.returncode}')
                 if r.returncode == 0:
                     j['applied'].append(w)
@@ -281,7 +286,7 @@ def profile_mgr(sub, name, prompt, inv, home, yes):
     sp = os.path.join(home, '.claude', 'skillpack')
     if yes and os.path.isfile(sp):
         for w in j.get('applied', []):
-            out.append(f'off {w}: exit {subprocess.run([sp, "off", w], capture_output=True, timeout=30).returncode}')
+            out.append(f'off {w}: exit {subprocess.run(_sh(sp) + ["off", w], capture_output=True, timeout=30).returncode}')
         j['applied'] = []
         json.dump(j, open(p, 'w'), indent=1)
     return out

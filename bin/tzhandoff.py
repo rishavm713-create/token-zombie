@@ -285,11 +285,25 @@ def wrap(cwd, summary='', decisions=(), test_cmd='', force=False):
     return status, f"tz task-wrap: {status}. Logged to handoffs/DAILY.md; {len(decisions)} decision(s) to MASTER.md. Next independent task: start a fresh session (nothing was committed)."
 
 
+def _interactive():
+    """stdin is a real terminal. Windows: isatty() is also True for NUL (</dev/null), so ask the console API instead."""
+    if not sys.stdin.isatty():
+        return False
+    if os.name != 'nt':
+        return True
+    try:
+        import ctypes
+        k = ctypes.windll.kernel32
+        return bool(k.GetConsoleMode(k.GetStdHandle(-10), ctypes.byref(ctypes.c_uint())))
+    except Exception:
+        return False
+
+
 def confirm(cmd, yes):
     """Run a user-supplied test command only after consent: --yes, or an interactive y at a terminal. Never silently."""
     if not cmd or yes:
         return True
-    if sys.stdin.isatty():
+    if _interactive():
         return input(f'tz will run this command with your permissions:\n  {cmd}\nRun it? [y/N] ').strip().lower() == 'y'
     print(f'tz: refusing to run `{cmd}` without consent. Re-run with --yes to allow it.', file=sys.stderr)
     return False
