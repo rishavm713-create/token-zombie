@@ -379,9 +379,7 @@ try:
                 import tzsplit
                 ts = tzsplit.detect(data.get('prompt')) if advice('pack_hints') else []
                 if ts:
-                    hint = (hint + ' ' if hint else '') + (f'TOKEN ZOMBIE (suggestion): {len(ts)} independent tasks in this prompt. One task per session: '
-                            'propose each as its own session card (start_session, own_initiative, cheapest fitting model, own worktree; the owner clicks to start, or says to do it here), shared live tests behind tz lock, build everything first, test once at the end. '
-                            'Plan: tz split ' + ' '.join('"' + t[:60].replace('"', "'") + '"' for t in ts[:4]))
+                    hint = (hint + ' ' if hint else '') + tzsplit.split_hint(ts)
             except Exception:
                 _diag('split', ev)
             try:  # engineering prompt: point at the coding pipeline once (advice)

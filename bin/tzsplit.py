@@ -4,12 +4,27 @@
 #   tz lock acquire|release|status NAME [--ttl S]   atomic lock dir for a shared resource (live test, device, port); stale after ttl (default 1800s)
 #   tz hsize [DIR] [--json]          handoff size check: daily notes <=30 lines, master top block <=15 lines, weekly merge due
 import json, os, re, sys, time, glob
+from tzlib import feature
 
 D = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, D)
 SHARED = re.compile(r'\b(live test|e2e|premiere|simulator|device|browser|port \d+|database|db|deploy|install|publish)\b', re.I)
 BUILD_FIRST = 'build the whole batch first with syntax checks only; one live test at the end, holding the lock'
 
+
+
+def split_hint(ts):
+    """Advice for a prompt holding several independent tasks. auto_split on (owner default): start them in parallel now."""
+    plan = 'Plan: tz split ' + ' '.join('"' + t[:60].replace('"', "'") + '"' for t in ts[:4])
+    if feature('auto_split'):
+        return (f'TOKEN ZOMBIE (owner standing order, auto_split): {len(ts)} independent tasks in this prompt. Start them in parallel NOW, '
+                'no card: start_session initiation user_asked, one session per task (max 5 at once, the rest as cards), cheapest fitting model, '
+                'each in its own git worktree/branch; inside each session split the work into small independent pieces run as parallel '
+                'Sonnet/Haiku subagents; build everything first, test once at the end, commit on its own branch. This session then merges the '
+                'branches, runs the full test suite once and pushes only after the owner OK (no tag/release). ' + plan)
+    return (f'TOKEN ZOMBIE (suggestion): {len(ts)} independent tasks in this prompt. One task per session: '
+            'propose each as its own session card (start_session, own_initiative, cheapest fitting model, own worktree; the owner clicks to start, or says to do it here), '
+            'shared live tests behind tz lock, build everything first, test once at the end. ' + plan)
 
 def lockdir(name):
     base = os.path.expanduser(os.environ.get('TZ_LOCK_DIR', '~/.claude/token-zombie/locks'))
