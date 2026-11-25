@@ -46,6 +46,7 @@ FEATURES = {'cache_ttl_auto': 1,  # measured 1 h vs 5 min prompt-cache life (tzc
             'stuck_detect': 1,    # OpenHands-style stuck patterns (tzstuck) on tool results
             'mcp_dedup': 1,       # advice when an identical read-only MCP call already succeeded with no write since (tztoolprune.mcp_dup)
             'auto_split': 1,      # several independent tasks: start parallel sessions now (0 = propose cards only)
+            'ship_fast': 1,       # multi-part/large build: parallel sessions + subagents, hours budget (tz speed on|off)
             'plan_reinject': 0,   # re-inject capped plan head after compaction (opt-in: adds context)
             # v2.1 tips: advice is on; anything that blocks or can steer quality down is opt-in
             'size_gate': 0,       # opt-in, once per tier: soft warning on total chat size (the default growth warning stays)
