@@ -62,7 +62,7 @@ The following are future directions, not shipped features:
 
 Claude Code is the supported integration. Other adapters (Codex, Cursor, Windsurf, Gemini, Cline, Roo and Antigravity) are experimental rules-file outputs only; they do not currently provide equivalent hooks or statusline integration.
 
-See [Compatibility](../COMPAT.md).
+See [Compatibility](COMPAT.md).
 
 ## Deliberately out of scope
 

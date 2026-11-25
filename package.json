@@ -8,7 +8,7 @@
   "homepage": "https://rishavm713-create.github.io/token-zombie/",
   "bugs": "https://github.com/rishavm713-create/token-zombie/issues",
   "bin": { "tz": "bin/tz.js" },
-  "files": ["bin/", "catalog/", "docs/*.md", "README.md", "LICENSE", "NOTICE", "SECURITY.md", "CHANGELOG.md"],
+  "files": ["bin/", "catalog/", "docs/*.md", "README.md", "LICENSE", "NOTICE", ".github/SECURITY.md", "CHANGELOG.md"],
   "engines": { "node": ">=14" },
   "keywords": ["claude-code", "tokens", "cli"]
 }
