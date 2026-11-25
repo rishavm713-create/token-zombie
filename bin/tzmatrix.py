@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # `tz bench matrix [--trials N] [--json] [--out FILE]`: offline, zero-cost shared benchmark for v2.1 features.
+# --v040 adds an arm running the v0.4.0 tag hooks on the same scenarios. Method doc: docs/BENCHMARK-METHOD.md.
 # Every arm (TZ off / TZ 2.0 / each feature alone / all on / leave-one-out / all minus conflicts) runs the SAME scripted,
 # labelled scenarios through the real hook dispatcher (bin/tz-guard.py, one subprocess per hook event, fresh fake HOME).
 # MEASURED here: hook behaviour (chars injected, chars kept out of context, denies, false positives/negatives vs labels)
@@ -27,6 +28,16 @@ def arms():
     drop = {b for _, b in CONFLICTS}
     a.append(('all-minus-conflicts', {'features': {f: int(f not in drop) for f in fs}}))
     return a
+
+
+def v040_guard(root):
+    """Extract bin/ of tag v0.4.0 into root (local git only, offline); return its tz-guard.py."""
+    tar = subprocess.run(['git', '-C', B, 'archive', 'v0.4.0', '--', ':/bin'], capture_output=True, check=True).stdout
+    subprocess.run(['tar', '-x', '-C', root], input=tar, check=True)
+    for d, _, files in os.walk(root):
+        if 'tz-guard.py' in files:
+            return os.path.join(d, 'tz-guard.py')
+    raise RuntimeError('v0.4.0 bin/tz-guard.py not found')
 
 
 def _home(conf):
@@ -82,7 +93,7 @@ def sc_dup_read(home, conf, ms):
     j2, t = _run(rd, home)  # identical retry must be allowed (no lock-out)
     ms.append(t)
     fn = 0 if outline or not _deny(j2) else 1
-    return dict(injected=len(reason), saved=len(src) - reread - len(reason), fp=0, fn=fn,
+    return dict(injected=len(reason), saved=len(src) - reread, fp=0, fn=fn,  # gross: net subtracts injected once
                 note='outline -> partial re-read' if outline else 'deny -> full retry')
 
 
@@ -181,7 +192,7 @@ def sc_mcp_dup(home, conf, ms):
     ms.append(t)
     fp = int('already answered' in _txt(j2))
     # scripted agent rule (assumption): with the advice it reuses the 3000-char result instead of calling again
-    return dict(injected=len(_txt(j)), saved=3000 - len(_txt(j)) if hit else 0, fp=fp,
+    return dict(injected=len(_txt(j)), saved=3000 if hit else 0, fp=fp,
                 fn=int(not hit and conf.get('mode') != 'off'), note='advised' if hit else 'no advice')
 
 
@@ -189,19 +200,28 @@ SCEN = [('dup_read', sc_dup_read), ('idle_1h', lambda h, c, m: sc_idle(h, c, m, 
         ('safety', sc_safety), ('big_output', sc_big_output), ('stuck', sc_stuck), ('mcp_dup', sc_mcp_dup)]
 
 
-def run(trials=3, extra=None):
-    rows = []
-    for name, conf in arms():
+def run(trials=3, extra=None, v040=False):
+    global GUARD
+    rows, cur, tmp = [], GUARD, None
+    todo = arms()
+    if v040:
+        tmp = tempfile.mkdtemp(prefix='tzm-v040-')
+        old = v040_guard(tmp)
+        todo.append(('v040', {}))
+    for name, conf in todo:
+        GUARD = old if name == 'v040' else cur
         conf = dict(conf, **(extra or {}))
-        res = {}
+        res, per = {}, [dict(saved=0, injected=0, fp=0, fn=0) for _ in range(trials)]
         for sn, fn in SCEN:
             ms, last = [], None
-            for _ in range(trials):
+            for i in range(trials):
                 h = _home(conf)
                 try:
                     last = fn(h, conf, ms)
                 finally:
                     shutil.rmtree(h, ignore_errors=True)
+                for k in per[i]:
+                    per[i][k] += last[k]
             last['ms_mean'] = round(S.mean(ms), 1)
             last['ms_sd'] = round(S.stdev(ms), 1) if len(ms) > 1 else 0.0
             last['hook_calls'] = len(ms) // trials
@@ -209,17 +229,25 @@ def run(trials=3, extra=None):
         tot = dict(saved=sum(r['saved'] for r in res.values()), injected=sum(r['injected'] for r in res.values()),
                    fp=sum(r['fp'] for r in res.values()), fn=sum(r['fn'] for r in res.values()),
                    ms_per_call=round(S.mean([r['ms_mean'] for r in res.values()]), 1))
-        rows.append(dict(arm=name, config=conf, scenarios=res, total=tot))
-    return dict(kind='tz bench matrix', label='MEASURED hook behaviour (offline, scripted agent); provider tokens UNKNOWN',
+        nets = [p['saved'] - p['injected'] for p in per]
+        var = dict(net_min=min(nets), net_max=max(nets), net_sd=round(S.pstdev(nets), 1),
+                   fp=sorted({p['fp'] for p in per}), fn=sorted({p['fn'] for p in per}))
+        rows.append(dict(arm=name, config=conf, scenarios=res, total=tot, trial_variance=var))
+    GUARD = cur
+    if tmp:
+        shutil.rmtree(tmp, ignore_errors=True)
+    return dict(kind='tz bench matrix', label='MEASURED hook behaviour (offline chars, scripted agent); provider tokens UNKNOWN',
                 trials=trials, python=sys.version.split()[0], when=time.strftime('%Y-%m-%d %H:%M'), rows=rows)
 
 
 def markdown(rep):
     L = [f"# tz bench matrix ({rep['when']}, {rep['trials']} trials, python {rep['python']})", '', rep['label'], '',
-         '| arm | saved chars | injected chars | net chars | FP | FN | ms/hook (mean) |', '|---|---:|---:|---:|---:|---:|---:|']
+         '| arm | saved chars | injected chars | net chars | FP | FN | ms/hook (mean) | net min..max over trials (sd) | FP values | FN values |', '|---|---:|---:|---:|---:|---:|---:|---:|---|---|']
     for r in rep['rows']:
         t = r['total']
-        L.append(f"| {r['arm']} | {t['saved']} | {t['injected']} | {t['saved'] - t['injected']} | {t['fp']} | {t['fn']} | {t['ms_per_call']} |")
+        v = r['trial_variance']
+        L.append(f"| {r['arm']} | {t['saved']} | {t['injected']} | {t['saved'] - t['injected']} | {t['fp']} | {t['fn']} | {t['ms_per_call']} "
+                 f"| {v['net_min']}..{v['net_max']} ({v['net_sd']}) | {v['fp']} | {v['fn']} |")
     L += ['', '| arm | scenario | saved | injected | FP | FN | ms mean ± sd | note |', '|---|---|---:|---:|---:|---:|---|---|']
     for r in rep['rows']:
         for sn, s in r['scenarios'].items():
@@ -231,12 +259,14 @@ def main(argv):
     import argparse
     ap = argparse.ArgumentParser(prog='tz bench matrix')
     ap.add_argument('--trials', type=int, default=3)
+    ap.add_argument('--v040', action='store_true', help='add an arm running the v0.4.0 tag hooks (local git, offline)')
     ap.add_argument('--json', action='store_true')
     ap.add_argument('--out', help='write markdown report here (and FILE.json)')
     ap.add_argument('--read-guard', default='deny', choices=['deny', 'advice', 'off'], help='read_guard for every arm (default deny so the duplicate-Read arm is exercised)')
     a = ap.parse_args(argv)
-    rep = run(max(1, a.trials), {'read_guard': a.read_guard})
+    rep = run(max(1, a.trials), {'read_guard': a.read_guard}, a.v040)
     if a.out:
+        os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
         open(a.out, 'w').write(markdown(rep))
         json.dump(rep, open(a.out + '.json', 'w'), indent=1)
     print(json.dumps(rep, indent=1) if a.json else markdown(rep))
