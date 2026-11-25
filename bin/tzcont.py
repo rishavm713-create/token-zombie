@@ -848,7 +848,7 @@ def tool_advice(data):
             return f'TOKEN ZOMBIE loop: {tool} same input {r.count(h)}x: stop and change approach'
         return ''
     m = _churn_rw(sid, loop)
-    if m:
+    if m and not data.get('_stuck_said'):  # tzstuck already spoke on this call: one loop line, not two
         out.append(m)
     f = ti.get('file_path') or ti.get('notebook_path') or ''
     if tool in ('Edit', 'Write', 'MultiEdit', 'NotebookEdit') and f:

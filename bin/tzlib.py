@@ -40,7 +40,8 @@ def advice(name):
 FEATURES = {'cache_ttl_auto': 1,  # measured 1 h vs 5 min prompt-cache life (tzcont.cache_ttl)
             'dup_skeleton': 1,    # read_guard=deny: the deny carries the file skeleton instead of nothing
             'safety_net': 1,      # parsed destructive-command / secret-path checks (tzsafety) inside the policy engine
-            'stuck_detect': 1,    # repeated identical tool call/output loops (tzcont circuit breaker)
+            'stuck_detect': 1,    # OpenHands-style stuck patterns (tzstuck) on tool results
+            'mcp_dedup': 1,       # advice when an identical read-only MCP call already succeeded with no write since (tztoolprune.mcp_dup)
             'plan_reinject': 0}   # re-inject capped plan head after compaction (opt-in: adds context)
 
 

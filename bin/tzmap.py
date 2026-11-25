@@ -22,6 +22,28 @@ def defs(path):
     return [m.group(1) for m in re.finditer(r'^(?:function\s+)?(\w+)\(\)\s*\{', s, re.M)] if path.endswith('.sh') else []
 
 
+def defs_methods(path):
+    """defs(path) plus Python class methods as 'Class.method' (nested classes dotted); other languages unchanged."""
+    out = defs(path)
+    if not path.endswith('.py'):
+        return out
+    try:
+        tree = ast.parse(open(path, encoding='utf-8', errors='ignore').read())
+    except Exception:
+        return out
+
+    def walk(body, pre):
+        for n in body:
+            if isinstance(n, ast.ClassDef):
+                walk(n.body, pre + n.name + '.')
+            elif pre and isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                out.append(pre + n.name)
+    for n in tree.body:
+        if isinstance(n, ast.ClassDef):
+            walk(n.body, n.name + '.')
+    return out
+
+
 def _files(root):
     for dp, dn, fn in os.walk(root):
         dn[:] = sorted(d for d in dn if d not in SKIP and not d.startswith('.'))

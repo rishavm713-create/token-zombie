@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """tz next: dependency-aware task list (handoffs/tasks/T-*.json), <=2k-token task pack, auto checkpoint, gates, per-session token split.
+Cycle check, atomic claim and hybrid ready order adapted from beads (MIT, Copyright Steve Yegge) internal/storage cycles.go + ready sort, see NOTICE.
 Local files only. Never runs a gated task; never launches sessions. status: done|active|blocked|pending; gate: paid|commit|install|publish."""
 import glob, json, os, re, sys, time
 
 STATUS, GATES, PACK_CHARS = ('done', 'active', 'blocked', 'pending'), ('paid', 'commit', 'install', 'publish'), 8000  # 8000 chars ~ 2k tok
 ET = lambda n: n // 4  # est tokens, same basis as tzopt
+HYBRID_S = 48 * 3600  # beads hybrid: tasks younger than 48 h go by priority, older ones by age (no starvation)
 TESTCMD = re.compile(r'run_all\.sh|pytest|npm (run )?test|plugin test|test_\w+\.sh|cargo test|go test')
 
 
@@ -48,7 +50,46 @@ def near_dup(ts, title, cut=0.6):
     return None
 
 
-def add(cwd, tid, title='', deps=(), gate='', goal='', files=(), nxt='', model='', force=False):
+def find_cycle(ts):
+    """First dependency cycle as [a, b, ..., a], else None (iterative-safe DFS with colours, like beads cycles.go)."""
+    col = {}
+    def dfs(n, path):
+        col[n] = 1
+        for d in ts.get(n, {}).get('deps', []):
+            if d not in ts:
+                continue
+            if col.get(d) == 1:
+                return path[path.index(d):] + [d] if d in path else [d, n, d]
+            if d not in col:
+                r = dfs(d, path + [d])
+                if r:
+                    return r
+        col[n] = 2
+        return None
+    for k in sorted(ts):
+        if k not in col:
+            r = dfs(k, [k])
+            if r:
+                return r
+    return None
+
+
+def add_dep(cwd, tid, dep):
+    """Add dep to tid; refuse (nothing written) when it would create a cycle."""
+    ts = load(cwd)
+    if tid not in ts or dep not in ts:
+        return False, 'no such task'
+    if dep in ts[tid]['deps']:
+        return True, 'already a dependency'
+    ts[tid]['deps'].append(dep)
+    cyc = find_cycle(ts)
+    if cyc:
+        return False, 'refused, dependency cycle: ' + ' -> '.join(cyc)
+    save(cwd, ts[tid])
+    return True, 'dependency added'
+
+
+def add(cwd, tid, title='', deps=(), gate='', goal='', files=(), nxt='', model='', force=False, prio=2):
     ts = load(cwd)
     if tid in ts:
         return None, f'duplicate: {tid} exists ({ts[tid]["status"]}); not overwritten'
@@ -61,15 +102,60 @@ def add(cwd, tid, title='', deps=(), gate='', goal='', files=(), nxt='', model='
     bad = [d for d in deps if d not in ts]
     if bad or gate and gate not in GATES or tid in deps:
         return None, f'bad deps {bad} or gate {gate!r}'
-    t = dict(id=tid, title=title, deps=list(deps), gate=gate, status='pending', goal=goal, files=list(files), next=nxt, model=model, test={})
+    t = dict(id=tid, title=title, deps=list(deps), gate=gate, status='pending', goal=goal, files=list(files), next=nxt, model=model, test={},
+             prio=prio, created=int(time.time()))
+    cyc = find_cycle({**ts, tid: t})
+    if cyc:
+        return None, 'refused, dependency cycle: ' + ' -> '.join(cyc)
     save(cwd, t)
     return t, 'added'
 
 
 def ready(ts):
-    """pending/active tasks whose deps are all done, active first."""
+    """pending/active tasks whose deps are all done: active first, then hybrid (48 h): older tasks by age, then recent ones by priority."""
     r = [t for t in ts.values() if t['status'] in ('active', 'pending') and all(ts.get(d, {}).get('status') == 'done' for d in t['deps'])]
-    return sorted(r, key=lambda t: (t['status'] != 'active', t['id']))
+    now = time.time()
+    def key(t):
+        c = t.get('created') or 0
+        old = now - c > HYBRID_S  # no 'created' (legacy file) counts as old
+        return (t['status'] != 'active', not old, c if old else t.get('prio', 2), c, t['id'])
+    return sorted(r, key=key)
+
+
+def _lock(cwd):
+    return os.path.join(tdir(cwd), '.active.lock')
+
+
+def claim(cwd, tid):
+    """Atomic single-active claim (O_EXCL). (True, '') or (False, holder id). A stale lock (holder no longer active) is replaced."""
+    os.makedirs(tdir(cwd), exist_ok=True)
+    for _ in range(2):
+        try:
+            fd = os.open(_lock(cwd), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            os.write(fd, tid.encode()); os.close(fd)
+            return True, ''
+        except FileExistsError:
+            try:
+                h = open(_lock(cwd)).read().strip()
+            except OSError:
+                continue
+            if h == tid:
+                return True, ''
+            if load(cwd).get(h, {}).get('status') == 'active':
+                return False, h
+            try:
+                os.unlink(_lock(cwd))  # stale
+            except OSError:
+                pass
+    return False, '?'
+
+
+def release(cwd, tid):
+    try:
+        if open(_lock(cwd)).read().strip() == tid:
+            os.unlink(_lock(cwd))
+    except OSError:
+        pass
 
 
 def start(cwd, tid, approved=False):
@@ -86,6 +172,9 @@ def start(cwd, tid, approved=False):
     for o in ts.values():
         if o['status'] == 'active' and o['id'] != tid:
             return False, f'{o["id"]} is already active; finish or block it first'
+    got, holder = claim(cwd, tid)
+    if not got:
+        return False, f'{holder} is already active (claimed); finish or block it first'
     t['status'] = 'active'
     save(cwd, t)
     return True, 'active'
@@ -114,6 +203,7 @@ def done(cwd, tid, cmd='', yes=False):
         return False, f'test failed, task stays {t["status"]}: {line}'
     t['status'] = 'done'
     save(cwd, t)
+    release(cwd, tid)
     return True, f'done, verified: {line}'
 
 
@@ -241,12 +331,12 @@ def render(ts):
 def main(argv):
     import argparse
     ap = argparse.ArgumentParser(prog='tz next')
-    ap.add_argument('sub', nargs='?', default='list', choices=['list', 'add', 'start', 'done', 'block', 'pack', 'checkpoint', 'measure', 'set'])
+    ap.add_argument('sub', nargs='?', default='list', choices=['list', 'add', 'start', 'done', 'block', 'pack', 'checkpoint', 'measure', 'set', 'dep'])
     ap.add_argument('id', nargs='?', default='')
     ap.add_argument('--cwd', default=os.getcwd())
     ap.add_argument('--title', default=''); ap.add_argument('--goal', default=''); ap.add_argument('--dep', action='append', default=[])
     ap.add_argument('--gate', default=''); ap.add_argument('--file', action='append', default=[]); ap.add_argument('--next', dest='nxt', default='')
-    ap.add_argument('--model', default=''); ap.add_argument('--test', default=''); ap.add_argument('--yes', action='store_true')
+    ap.add_argument('--prio', type=int, default=2); ap.add_argument('--model', default=''); ap.add_argument('--test', default=''); ap.add_argument('--yes', action='store_true')
     ap.add_argument('--approved', action='store_true'); ap.add_argument('--force', action='store_true'); ap.add_argument('--transcript', default='')
     a = ap.parse_args(argv)
     cwd = os.path.abspath(a.cwd)
@@ -267,16 +357,21 @@ def main(argv):
     if not a.id:
         print('id required', file=sys.stderr); return 2
     if a.sub == 'add':
-        t, msg = add(cwd, a.id, a.title, a.dep, a.gate, a.goal, a.file, a.nxt, a.model, a.force); print(msg); return 0 if t else 1
+        t, msg = add(cwd, a.id, a.title, a.dep, a.gate, a.goal, a.file, a.nxt, a.model, a.force, a.prio); print(msg); return 0 if t else 1
     if a.sub == 'start':
         ok, msg = start(cwd, a.id, a.approved); print(msg); return 0 if ok else 3
     if a.sub == 'done':
         ok, msg = done(cwd, a.id, a.test, a.yes); print(msg); return 0 if ok else 3
+    if a.sub == 'dep':
+        if not a.dep:
+            print('--dep required', file=sys.stderr); return 2
+        ok, msg = add_dep(cwd, a.id, a.dep[0]); print(msg); return 0 if ok else 3
     ts = load(cwd); t = ts.get(a.id)
     if not t:
         print('no such task'); return 1
     if a.sub == 'block':
         t['status'] = 'blocked' if t['status'] != 'done' else 'done'
+        release(cwd, a.id)
     if a.nxt: t['next'] = a.nxt
     if a.file: t['files'] = a.file
     save(cwd, t); print(t['status']); return 0

@@ -155,6 +155,26 @@ def want(prompt):
     return [c for c, rx in WANT.items() if re.search(rx, p) and kind(c) and state(c) is False]
 
 
+# tz-craft: prompt words -> reference file (first match wins; verify last so "fix failing test" routes to debug)
+CRAFT = [('debug', r'flaky|failing|fails?\b|crash|exception|traceback|bug|broken|regression'),
+         ('tdd', r'\btdd\b|test.first|write (a |the )?tests?'),
+         ('refactor', r'refactor|clean ?up|restructure|rename'),
+         ('review', r'\breview|code review|\bpr\b|pull request'),
+         ('perf', r'slow|perf(ormance)?|latency|optimi[sz]e|memory leak'),
+         ('react', r'react|next\.?js|component|jsx|tsx'),
+         ('git-safety', r'force.push|hard reset|git clean|delete (the )?branch|rebase'),
+         ('plan', r'\bplan\b|roadmap|break (it )?down|design (the|a)'),
+         ('learn', r'lesson|never again|remember (this|to)|add a rule'),
+         ('verify', r'done\?|is it (done|working)|verify|ready to ship|confirm it works')]
+
+
+def craft(prompt):
+    """tz-craft reference name a prompt needs, or None (hint only, never loads anything)."""
+    import re
+    p = (prompt or '').lower()
+    return next((n for n, rx in CRAFT if re.search(rx, p)), None)
+
+
 def rollback():
     """Restore the newest backup of ~/.claude.json and settings.json, and move TZ-parked skills back."""
     msg = []

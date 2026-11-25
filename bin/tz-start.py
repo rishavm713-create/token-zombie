@@ -43,6 +43,27 @@ def head(path, n, stop_at_rule):
     return '\n'.join(out)
 
 
+def _plan(d, peek=False, _c={}):
+    """v2.1 plan re-injection (feature plan_reinject, default off); computed once per run."""
+    if 'v' not in _c:
+        try:
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            import tzfit
+            _c['v'] = tzfit.plan_inject(d)
+        except Exception:
+            _c['v'] = ''
+    return _c['v']
+
+
+def _fit(txt):
+    """Cap SessionStart text with the shared budget fitter (Claude Code truncates hook output near 10k chars)."""
+    try:
+        import tzfit
+        return tzfit.fit(txt)
+    except Exception:
+        return txt
+
+
 try:
     _raw = sys.stdin.read()
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -58,7 +79,7 @@ try:
             txt = 'TOKEN ZOMBIE continuation (saved just before compaction; facts from git + chat log):\n' + open(note).read()[:1500]
         else:
             txt = ''
-        txt = '\n\n'.join(x for x in (lean(), txt) if x)
+        txt = '\n\n'.join(x for x in (lean(), txt, _plan(d)) if x)
         if txt:
             print(json.dumps({'hookSpecificOutput': {'hookEventName': 'SessionStart', 'additionalContext': txt}}))
         sys.exit(0)
@@ -83,10 +104,10 @@ try:
     except Exception:
         pass
     L = lean()
-    if parts or pk or L:
+    if parts or pk or L or _plan(d, peek=True):
         txt = (('TOKEN ZOMBIE start context. Use this; do not read the full HANDOFF.md unless the step needs a detail.\n'
                + '\n\n'.join(parts))[:CAP] if parts else '') + ('\n\n' + pk if pk else '')
-        txt = '\n\n'.join(x for x in (L, txt.strip()) if x)
+        txt = _fit('\n\n'.join(x for x in (L, txt.strip(), _plan(d)) if x))
         print(json.dumps({'hookSpecificOutput': {'hookEventName': 'SessionStart', 'additionalContext': txt}}))
     if d.get('source') != 'resume' and os.environ.get('TZ_FRESH_BG') != '0':  # panel's fresh-chat number; detached, never delays start
         import subprocess

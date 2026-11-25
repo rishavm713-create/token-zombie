@@ -37,9 +37,17 @@ RULES = [
 ]
 
 
-def safe(cmd):
-    """(ok, reason). Quoted text after echo/printf is not scanned."""
-    c = re.sub(r"^\s*(echo|printf)\s.*$", '', cmd, flags=re.M)
+def safe(cmd, cwd=None):
+    """(ok, reason). tzshell parses the command (segments, wrappers, options, cwd-aware rm); RULES regex is the fallback."""
+    try:
+        import tzshell
+        r = tzshell.analyze(cmd, cwd)
+        if r is not None:
+            return r[0], r[1]
+    except Exception:
+        pass  # analyser bug or import failure: fall through to the regex catalogue (fail closed, not open)
+    # only an echo/printf SEGMENT's own text is exempt, never the rest of the line (was: whole line dropped, a bypass)
+    c = '\n'.join(s for s in re.split(r'[;&|\n]+', cmd) if not re.match(r'\s*(echo|printf)\b', s))
     for pat, why in RULES:
         if re.search(pat, c, re.I if 'DROP' in pat else 0):
             return False, why
@@ -57,6 +65,77 @@ def impact(target, root='.'):
     hits = [f for f in out.split() if os.path.normpath(os.path.join(root, f)) != os.path.normpath(os.path.join(root, target))]
     tests = [f for f in hits if re.search(r'test|spec', f)]
     return sym, [f for f in hits if f not in tests], tests
+
+
+def impact_diff(root='.'):
+    """Blast radius of the uncommitted diff (`git diff -U0 HEAD`): changed symbols from hunks, references depth 2, LOW/MEDIUM/HIGH.
+    Depth 1 = files using a changed symbol; depth 2 = files using the symbol that, in those files, encloses the use. -> dict with 'lines'."""
+    import ast, tzmap
+    D = re.compile(r'^\s*(?:export\s+)?(?:async\s+)?(?:def|class|function\*?|const)\s+(\w+)|^\s*(\w+)\s*\(\)\s*\{')
+
+    def enclosing(path, line):
+        """Names of the innermost def/class containing `line` (1-based) in the working file, [] at module level."""
+        try:
+            src = open(os.path.join(root, path), encoding='utf-8', errors='ignore').read()
+        except Exception:
+            return []
+        if path.endswith('.py'):
+            try:
+                hit = [n for n in ast.walk(ast.parse(src)) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+                       and n.lineno <= line <= (n.end_lineno or n.lineno)]
+            except Exception:
+                return []
+            return [min(hit, key=lambda n: (n.end_lineno or 0) - n.lineno).name] if hit else []
+        for l in reversed(src.splitlines()[:line]):
+            m = D.match(l)
+            if m:
+                return [m.group(1) or m.group(2)]
+        return []
+
+    def users(sym, skip):
+        out = sh('git', '-C', root, 'grep', '-nIw', '-e', sym) or ''
+        by = {}
+        for l in out.splitlines():
+            f, _, rest = l.partition(':')
+            ln, _, _ = rest.partition(':')
+            if f != skip and ln.isdigit():
+                by.setdefault(f, []).append(int(ln))
+        return by
+
+    diff = sh('git', '-C', root, 'diff', '-U0', 'HEAD')
+    changed, cur = {}, None
+    for l in diff.splitlines():
+        if l.startswith('+++ '):
+            cur = l[6:] if l.startswith('+++ b/') else None
+        elif l.startswith('@@') and cur:
+            m = re.match(r'@@ -\S+ \+(\d+)(?:,(\d+))?', l)
+            a, k = int(m.group(1)), int(m.group(2) if m.group(2) is not None else 1)
+            for ln in range(a, a + max(k, 1)):
+                for nm in enclosing(cur, ln):
+                    changed.setdefault((cur, nm), 0)
+    res, alltests, total = [], set(), {'d1': set(), 'd2': set()}
+    for (f, nm) in sorted(changed):
+        if len(nm) < 3 or nm in ('main', 'run'):  # entry-point names match every script: pure noise
+            continue
+        d1 = users(nm, f)
+        d2 = set()
+        for uf, lns in d1.items():
+            for ln in lns:
+                for en in enclosing(uf, ln):
+                    if en != nm and len(en) >= 3:
+                        d2 |= set(users(en, uf)) - {f}
+        d2 -= set(d1)
+        res.append({'symbol': nm, 'file': f, 'd1': sorted(d1), 'd2': sorted(d2)})
+        total['d1'] |= set(d1); total['d2'] |= d2
+    alltests = sorted(x for x in total['d1'] | total['d2'] if re.search(r'test|spec', x))
+    n1, n2 = len(total['d1']), len(total['d2'])
+    grade = 'HIGH' if n1 >= 6 or n2 >= 15 else 'MEDIUM' if n1 >= 2 or n2 >= 4 else 'LOW'
+    lines = ['impact --diff: %s (%d changed symbol(s), %d direct file(s), %d indirect file(s), %d test(s)) [MEASURED from git grep]'
+             % (grade, len(res), n1, n2, len(alltests))] if res else ['impact --diff: no changed symbols in git diff HEAD']
+    for r in res:
+        lines.append('  %s (%s): direct %d, indirect %d' % (r['symbol'], r['file'], len(r['d1']), len(r['d2'])))
+    lines += ['  test ' + t for t in alltests[:10]]
+    return {'grade': grade if res else 'NONE', 'symbols': res, 'tests': alltests, 'direct': sorted(total['d1']), 'indirect': sorted(total['d2']), 'lines': lines}
 
 
 def diffcheck(task, allow=None, root='.'):
@@ -104,6 +183,8 @@ def main(argv):
         print('ok' if ok else 'BLOCK: ' + why)
         return 0 if ok else 2
     if c == 'impact':
+        if r[:1] == ['--diff']:
+            print('\n'.join(impact_diff()['lines'])); return 0
         if not r:
             print('usage: tz impact FILE|SYMBOL', file=sys.stderr); return 2
         sym, src, tests = impact(r[0])

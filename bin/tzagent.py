@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # `tz agent "<task>" [--test CMD] [--worktree] [--files a,b] [--budget TOK] [--turns N] [--worker NAME] [--timeout S] [--gate [--build CMD]] [--dry]`: runs the tz code pipeline for real.
-# Minimal loop in the spirit of mini-SWE-agent (MIT): one `claude -p` call per phase, small step cap, token budget, stop on failed test.
+# Minimal loop in the spirit of mini-SWE-agent (MIT; --wall/--max-errors from agents/default.py): one `claude -p` call per phase, small step cap, token budget, stop on failed test.
 # Every phase is one ledger event (tz.db) and one checkpoint file. Permissions: edits only inside the work dir, no push/rm -rf/sudo.
 # CLAUDE_BIN overrides the host binary (tests use tests/fake/claude.py). Fail-open: a ledger error never stops the run.
 import json, os, re, subprocess, sys, time
@@ -19,28 +19,91 @@ def owners_path():
     return os.path.join(STATE, 'owners.json')
 
 
-def claim(task, files, force=False):
-    """File ownership: a file belongs to one task. Returns the list of files already owned by another task (empty = claimed)."""
+LEASE = 7200  # seconds a claim lives without renewal; an expired claim can be taken over (oh-my-claudecode / humanlayer lease idea)
+
+
+def _cdir():
+    return os.path.join(STATE, 'claims')
+
+
+def _cpath(f):
+    import hashlib
+    return os.path.join(_cdir(), hashlib.sha1(f.encode()).hexdigest()[:20] + '.json')
+
+
+def _cread(p):
     try:
-        o = json.load(open(owners_path()))
+        d = json.load(open(p))
+        return d if isinstance(d, dict) else {}
     except Exception:
-        o = {}
-    clash = sorted(f for f in files if o.get(f) not in (None, task))
-    if clash and not force:
-        return clash
+        return {}
+
+
+def _cwrite(p, f, task, now, lease=LEASE):
+    """Atomic create (O_EXCL): exactly one racer wins. Returns True when this call created the claim."""
+    try:
+        fd = os.open(p, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+    except FileExistsError:
+        return False
+    with os.fdopen(fd, 'w') as h:
+        json.dump(dict(file=f, task=task, exp=now + lease), h)
+    return True
+
+
+def _mirror(now):
+    """Keep owners.json (read by tzgate) in step with the live claims: {file: task}."""
+    o = {}
+    try:
+        for n in os.listdir(_cdir()):
+            d = _cread(os.path.join(_cdir(), n))
+            if d.get('file') and (d.get('exp') or 0) > now:
+                o[d['file']] = d.get('task')
+        json.dump(o, open(owners_path() + '.tmp', 'w'))
+        os.replace(owners_path() + '.tmp', owners_path())
+    except Exception:
+        pass
+
+
+def claim(task, files, force=False, lease=LEASE, now=None):
+    """File ownership: a file belongs to one task while its lease runs. Returns the files owned by another live task (empty = claimed)."""
+    now = time.time() if now is None else now
+    os.makedirs(_cdir(), exist_ok=True)
+    clash, mine = [], []
     for f in files:
-        o[f] = task
-    os.makedirs(STATE, exist_ok=True)
-    json.dump(o, open(owners_path(), 'w'))
+        p = _cpath(f)
+        for _ in range(3):
+            if _cwrite(p, f, task, now, lease):
+                mine.append(p); break
+            d = _cread(p)
+            if d.get('task') == task or force or (d.get('exp') or 0) <= now:  # own claim renews; expired or forced claim is taken over
+                try:
+                    os.unlink(p)
+                except FileNotFoundError:
+                    pass
+                continue
+            clash.append(f); break
+        else:
+            clash.append(f)
+    if clash and not force:
+        for p in mine:  # all-or-nothing, like the old owners.json
+            try:
+                os.unlink(p)
+            except OSError:
+                pass
+        return sorted(clash)
+    _mirror(now)
     return []
 
 
 def release(task):
     try:
-        o = {k: v for k, v in json.load(open(owners_path())).items() if v != task}
-        json.dump(o, open(owners_path(), 'w'))
+        for n in os.listdir(_cdir()):
+            p = os.path.join(_cdir(), n)
+            if _cread(p).get('task') == task:
+                os.unlink(p)
     except Exception:
         pass
+    _mirror(time.time())
 
 
 def make_worktree(task, cwd):
@@ -137,23 +200,26 @@ def alive(pid):
     try:
         os.kill(pid, 0)
         return True
+    except PermissionError:
+        return True  # the process exists, it just belongs to another user
     except OSError:
         return False
 
 
-def run(task, cwd, test=None, budget=400000, turns=20, worktree=False, dry=False, worker=None, timeout=1800, gate=False, allow=None, build=None, allow_api=False, resume=None, rollback=False):
+def run(task, cwd, test=None, budget=400000, turns=20, worktree=False, dry=False, worker=None, timeout=1800, gate=False, allow=None, build=None, allow_api=False, resume=None, rollback=False, wall=None, max_errors=None):
     import tzsplit
     pipe = {r['phase']: r for r in tzsplit.code_pipeline(task) if r['phase'] in PHASES}
     rid = resume['rid'] if resume else '%s-%d' % (slug(task)[:20], int(time.time()))
     if worktree and not dry and not resume:
         cwd = make_worktree(task, cwd)
     rows, spent, measured = (list(resume['rows']), resume['spent'], [True]) if resume else ([], 0, [True])
-    meta = dict(task=task, cwd=cwd, test=test, budget=budget, turns=turns, worker=worker, timeout=timeout, gate=gate, allow=allow, build=build, allow_api=allow_api, rollback=rollback, pid=os.getpid(), started=int(time.time()))
+    meta = dict(task=task, cwd=cwd, test=test, budget=budget, turns=turns, worker=worker, timeout=timeout, gate=gate, allow=allow, build=build, allow_api=allow_api, rollback=rollback, wall=wall, max_errors=max_errors, pid=os.getpid(), started=int(time.time()))
     if not dry:
         checkpoint(rid, rows, meta, spent, 'running')
         if rollback:
             import tzrollback; tzrollback.snapshot(cwd, rid)
     done = {r['phase'] for r in rows if r.get('status') == 'ok'}
+    t_start = time.time()
     note = 'This is a RESUMED run: an earlier attempt was interrupted. Inspect `git status` and `git diff` first, keep finished work, and complete only what is missing. ' if resume else ''
     def phase(ph, extra=''):
         nonlocal spent
@@ -162,6 +228,10 @@ def run(task, cwd, test=None, budget=400000, turns=20, worktree=False, dry=False
             rows.append(dict(phase=ph, model=r['model'], skill=r['skill'], status='dry')); return 'dry'
         if spent >= budget:
             rows.append(dict(phase=ph, status='budget')); return 'budget'
+        if wall and time.time() - t_start >= wall:  # checked BEFORE the call, like mini-swe-agent query(): TimeExceeded
+            rows.append(dict(phase=ph, status='wall', note='wall limit %ss reached' % wall)); return 'wall'
+        if max_errors and sum(1 for x in rows if x.get('status') == 'error') >= max_errors:
+            rows.append(dict(phase=ph, status='errors', note='error limit %d reached' % max_errors)); return 'errors'
         sk = ' Use the %s skill if available.' % r['skill'] if r['skill'] else ''
         t0 = time.time()
         text, tok, err, m = call('Task: %s\nPhase: %s. %s%s %s' % (task, ph, r['rule'], sk, extra), r['model'], cwd, turns, worker, timeout, ph in ('build', 'debug'))
@@ -175,7 +245,12 @@ def run(task, cwd, test=None, budget=400000, turns=20, worktree=False, dry=False
     for ph in ('plan', 'build'):
         if ph in done:
             continue  # finished before the interruption: not repeated, not re-billed
-        if phase(ph, note) != 'ok' and not dry:
+        while True:
+            st = phase(ph, note)
+            if st == 'ok' or dry:
+                break
+            if st == 'error' and max_errors:  # --max-errors N: tolerate N-1 failed calls per run, retry the phase (mini-swe-agent consecutive-error idea)
+                continue
             return rid, rows, spent, measured[0]
     if test:
         for attempt in range(3):  # test, then at most 2 debug rounds; a failed run feeds its tail to debug
@@ -198,7 +273,7 @@ def run(task, cwd, test=None, budget=400000, turns=20, worktree=False, dry=False
                 break
             if phase('debug', tzgate.repair_prompt(task, res)) != 'ok':
                 break
-    if rollback and not dry and rows and rows[-1]['status'] in ('fail', 'error', 'budget'):  # run ended failed: undo only what it changed
+    if rollback and not dry and rows and rows[-1]['status'] in ('fail', 'error', 'budget', 'wall', 'errors'):  # run ended failed: undo only what it changed
         import tzrollback
         back = tzrollback.restore(cwd, rid)
         rows.append(dict(phase='rollback', status='ok' if back else 'noop', note='%d file(s) restored: %s' % (len(back), ', '.join(back[:5]))))
@@ -216,7 +291,7 @@ def main(argv):
     for i, a in enumerate(argv):
         if skip:
             skip = False
-        elif a in ('--test', '--budget', '--turns', '--files', '--worker', '--timeout', '--build', '--resume'):
+        elif a in ('--test', '--budget', '--turns', '--files', '--worker', '--timeout', '--build', '--resume', '--wall', '--max-errors'):
             skip = True
         elif not a.startswith('--'):
             words.append(a)
@@ -230,18 +305,18 @@ def main(argv):
             print('run %s already finished; nothing to resume' % rid); return 0
         if m.get('pid') and m['pid'] != os.getpid() and alive(m['pid']):
             print('run %s is still running (pid %s)' % (rid, m['pid']), file=sys.stderr); return 3
-        rid, rows, spent, meas = run(m['task'], m['cwd'], m.get('test'), m.get('budget', 400000), m.get('turns', 20), False, False, m.get('worker'), m.get('timeout', 1800), m.get('gate', False), m.get('allow'), m.get('build'), m.get('allow_api', False), dict(rid=rid, rows=cp['rows'], spent=cp.get('spent', 0)), m.get('rollback', False))
+        rid, rows, spent, meas = run(m['task'], m['cwd'], m.get('test'), m.get('budget', 400000), m.get('turns', 20), False, False, m.get('worker'), m.get('timeout', 1800), m.get('gate', False), m.get('allow'), m.get('build'), m.get('allow_api', False), dict(rid=rid, rows=cp['rows'], spent=cp.get('spent', 0)), m.get('rollback', False), m.get('wall'), m.get('max_errors'))
         for r in rows:
             print('%-6s %-7s %s%s' % (r['phase'], r.get('model', ''), r['status'], '  %s tok' % r['tokens'] if 'tokens' in r else ''))
         print('run %s (resumed): %d tokens total (%s)' % (rid, spent, 'MEASURED from host usage' if meas else 'EST chars/4: this worker reports no usage'))
         return 0 if rows and rows[-1]['status'] in ('ok', 'pass', 'dry') else 1
     if not task:
-        print('usage: tz agent "<task>" [--test CMD] [--worktree] [--files a,b] [--budget TOK] [--turns N] [--worker NAME] [--gate] [--rollback] [--allow-api-change] [--dry] | tz agent --resume ID|last', file=sys.stderr); return 2
+        print('usage: tz agent "<task>" [--test CMD] [--worktree] [--files a,b] [--budget TOK] [--turns N] [--worker NAME] [--gate] [--rollback] [--wall SECONDS] [--max-errors N] [--allow-api-change] [--dry] | tz agent --resume ID|last', file=sys.stderr); return 2
     if op('--files'):  # file ownership: refuse when another task already owns one of these files
         clash = claim(task, op('--files').split(','))
         if clash:
             print('refused: owned by another task: ' + ', '.join(clash), file=sys.stderr); return 3
-    rid, rows, spent, meas = run(task, os.getcwd(), op('--test'), int(op('--budget', 400000)), int(op('--turns', 20)), '--worktree' in argv, '--dry' in argv, op('--worker'), int(op('--timeout', 1800)), '--gate' in argv, op('--files').split(',') if op('--files') else None, op('--build'), '--allow-api-change' in argv, None, '--rollback' in argv)
+    rid, rows, spent, meas = run(task, os.getcwd(), op('--test'), int(op('--budget', 400000)), int(op('--turns', 20)), '--worktree' in argv, '--dry' in argv, op('--worker'), int(op('--timeout', 1800)), '--gate' in argv, op('--files').split(',') if op('--files') else None, op('--build'), '--allow-api-change' in argv, None, '--rollback' in argv, float(op('--wall')) if op('--wall') else None, int(op('--max-errors')) if op('--max-errors') else None)
     for r in rows:
         print('%-6s %-7s %s%s' % (r['phase'], r.get('model', ''), r['status'], '  %s tok' % r['tokens'] if 'tokens' in r else ''))
     print('run %s: %d tokens (%s)' % (rid, spent, 'MEASURED from host usage' if meas else 'EST chars/4: this worker reports no usage'))

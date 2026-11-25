@@ -159,7 +159,7 @@ def main(argv):
                 return 0
             print('usage: tz overlay build | run   (run needs a prior build)', file=sys.stderr)
             return 2
-        mods2 = {'pr': 'tzpr', 'progress': 'tzprogress', 'standards': 'tzstandards', 'features': 'tzfeatures', 'tokens': 'tztokens'}
+        mods2 = {'pr': 'tzpr', 'progress': 'tzprogress', 'standards': 'tzstandards', 'features': 'tzfeatures', 'tokens': 'tztokens', 'toolprune': 'tztoolprune', 'mem': 'tzmem', 'find-code': 'tzfind2'}
         if c in ('reuse', 'gaps', 'missing', 'contract', 'api', 'dbschema', 'coord', 'stack'):
             import tzbuild
             return tzbuild.main([c] + rest)
