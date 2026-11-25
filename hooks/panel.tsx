@@ -10,6 +10,8 @@ const STALE_S = 600
 const KEEP = 'current task, files changed, test results, next step'
 const MODES = ['off', 'lite', 'full', 'ultra'] as const
 // one colour per mode so each reads apart at a glance; off stays dim
+const ZG = ['#7cfc00', '#6ff41c', '#63ec38', '#56e554', '#4add70', '#3dd68c']
+const zombie = (Text: any, bold = false) => 'ZOMBIE'.split('').map((c, i) => <Text key={i} weight={bold ? 'bold' : undefined} color={ZG[i]}>{c}</Text>)
 const MODE_COLOR: Record<string, string | undefined> = { off: undefined, lite: '#5ad1ff', full: '#7cfc00', ultra: '#ff8a1f' }
 const TAGLINE = 'MAKE EVERY SINGLE TOKEN COUNT.'
 // sounds/mode-*.wav come from bin/tzsfx.py; never block or fail a mode switch on audio
@@ -326,7 +328,7 @@ export const register: Register = on => {
         <Box flexDirection="row" gap={1}>
           <Text>🧟</Text>
           <Text bold>
-            TOKEN <Text color={G}>ZOMBIE</Text>
+            TOKEN {zombie(Text)}
           </Text>
           {nums.map(([k, v, l, isG]) => (
             <Text key={`t-${k}`}>
@@ -360,7 +362,7 @@ export const register: Register = on => {
         >
           <Box width={10} flexShrink={0} />
           <Text weight="bold">
-            TOKEN <Text weight="bold" color={G}>ZOMBIE</Text>
+            TOKEN {zombie(Text, true)}
           </Text>
           {nums.map(([k, v, l, isG]) => (
             <Box key={`n-${k}`} flexDirection="column" alignItems="center" flexShrink={1}>
@@ -430,7 +432,7 @@ export const register: Register = on => {
       <Box flexDirection="column">
         <Box>
           <Text bold>
-            TOKEN <Text color={A}>ZOMBIE</Text>
+            TOKEN {zombie(Text)}
           </Text>
           <Text dimColor>  mode </Text>
           <Text bold color={MODE_COLOR[f.mode]} dimColor={f.mode === 'off'}>{f.mode}</Text>
