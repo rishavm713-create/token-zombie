@@ -10,7 +10,7 @@
 
 ## 🚀 Install (30 seconds)
 
-Paste these two lines into Claude Code (the chat box), then restart Claude Code. That's it.
+Paste these two lines into Claude Code (the chat box). That's it.
 
 ```
 /plugin marketplace add rishavm713-create/token-zombie

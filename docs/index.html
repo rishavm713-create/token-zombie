@@ -127,7 +127,7 @@ section{padding:104px 0;position:relative}
 /* install */
 .install{border:1px solid #3a6a45;border-radius:26px;padding:56px;background:radial-gradient(120% 140% at 0 0,#14301c,#0a120d 60%);display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
 .install .lead{margin-top:16px}
-.cmd{border:1px solid var(--line);background:#050806;border-radius:14px;padding:20px 22px;font:15px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--green);word-break:break-all;position:relative}
+.cmd{border:1px solid var(--line);background:#050806;border-radius:14px;padding:20px 22px;font:15px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--green);word-break:normal;white-space:nowrap;overflow-x:auto;position:relative}
 .cmd small{display:block;color:#6f8576;letter-spacing:.14em;font-size:12px;margin-bottom:8px;font-family:inherit}
 .copy{margin-top:14px;width:100%;cursor:pointer;background:transparent;font:inherit;font-weight:700}
 .step2{color:var(--muted);font-size:15px;margin-top:14px}.step2 code{color:var(--green)}
@@ -274,7 +274,7 @@ section{padding:64px 0}.hero{padding:44px 0 56px}.head{margin-bottom:34px}
 
 <section id="install" style="padding-top:0"><div class="wrap">
 <div class="install rv">
-<div><p class="eyebrow">Get started · free</p><h2>Get all 69 features in 30 seconds.</h2><p class="lead">Paste the two lines into Claude Code, restart it, and you are covered.</p><p class="lead" style="font-size:15px">Verified on Claude Code (macOS and Linux; Windows in beta). Other agents get a rules file only and are experimental. <a href="https://github.com/rishavm713-create/token-zombie/blob/main/docs/COMPAT.md">Compatibility</a> · <a href="https://github.com/rishavm713-create/token-zombie/blob/main/docs/BENCHMARK-METHOD.md">Benchmark method</a> · <a href="https://github.com/rishavm713-create/token-zombie/blob/main/docs/TEST_EVIDENCE.md">Test evidence</a></p></div>
+<div><p class="eyebrow">Get started · free</p><h2>Get all 69 features in 30 seconds.</h2><p class="lead">Paste the two lines into Claude Code and you are covered.</p><p class="lead" style="font-size:15px">Verified on Claude Code (macOS and Linux; Windows in beta). Other agents get a rules file only and are experimental. <a href="https://github.com/rishavm713-create/token-zombie/blob/main/docs/COMPAT.md">Compatibility</a> · <a href="https://github.com/rishavm713-create/token-zombie/blob/main/docs/BENCHMARK-METHOD.md">Benchmark method</a> · <a href="https://github.com/rishavm713-create/token-zombie/blob/main/docs/TEST_EVIDENCE.md">Test evidence</a></p></div>
 <div><div class="cmd"><small>PASTE INTO CLAUDE CODE</small><span id="cmd">/plugin marketplace add rishavm713-create/token-zombie<br>/plugin install token-zombie@token-zombie</span></div><a class="btn primary copy" href="https://github.com/rishavm713-create/token-zombie">Get it on GitHub</a><p class="step2">Then run <code>/token-zombie:tz</code>. <a href="https://github.com/rishavm713-create/token-zombie#install">Full guide</a></p></div>
 </div></div></section>
 
