@@ -72,35 +72,35 @@ Source: `V2.1-AUTOMATION-SPEC.md`. Labels:
 - **UNKNOWN**: exists, behaviour or effect not verified.
 - **MISSING**: not built, or built but nothing calls it. "Code only" marks the second case.
 
-**Hook wiring of `bin/tztips.py` is in progress (other session).** At `8c703c3` no hook and no `tz` subcommand calls it. Its functions have tests (`tests/v21/test_tips.py`), so rows that depend on it show "code only". Recheck them after that work lands.
+Updated at `d100060` (after the tips wiring). Hook entry points: `tz-guard.py` (UserPromptSubmit: `cap_block`, `paste_block`, `prompt_tips`; PreToolUse: `bulk_gate`), `tz-start.py` (`start_tips`), `tzcont.py` (`idle_cost`), and `tz tips | instr | defaults | stats --breakdown`. Tests: `tests/v21/test_tips.py`, `tests/v21/test_tips_hooks.py`. No effect below is MEASURED unless it says so.
 
-| # | Item | Status at 8c703c3 | Notes |
+| # | Item | Status at d100060 | Notes |
 |---|---|---|---|
-| 1 | Default model Sonnet, subagents Haiku | MISSING (code only) | `python3 bin/tztips.py defaults`; writes only with `--apply --yes`; `--restore`. |
-| 2 | Earlier auto-compact | MISSING (code only) | `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` checked in docs. The tztips CLI passes no value, so it shows MISSING there. |
-| 3 | Lower thinking / effort | MISSING (code only) | `effortLevel` checked in docs. Effect not measured. |
-| 4 | Defer MCP definitions, park unused MCP | UNKNOWN (partial) | `tz toolprune` lists never-called tools and denies on `--apply`; on demand only. Idle parking and auto-restore not done. Deferral is the host's feature. |
-| 5 | Duplicate / oversized instructions | UNKNOWN (partial) | 2.0 `tz instructions` reports on demand. v2.1 detect-and-fix is code only. |
+| 1 | Default model Sonnet, subagents Haiku | DONE (opt-in) | `tz defaults` dry run; writes only with `apply --yes`; `restore` undoes. One-time offer at start when `defaults_advice` is on. Effect EST. |
+| 2 | Earlier auto-compact | DONE (opt-in) | `tz defaults` sets `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=50` only when that variable is verified to exist; otherwise skipped and reported. Effect EST. |
+| 3 | Lower thinking / effort | DONE-partial (advice) | `model_advice` suggests a smaller model at low effort for mechanical prompts. No automatic effort change. Effect EST. |
+| 4 | Defer MCP definitions, park unused MCP | DONE-partial | `tzondemand` parks and restores MCP servers; `tz toolprune`; `mcp_unused` lists servers unused in the last 5 sessions. No automatic idle parking. |
+| 5 | Duplicate / oversized instructions | DONE | `instr_advice` at session start; `tz instr` report, `--fix` with backup and restore. Test "start instr advice". |
 | 6 | Duplicate read returns outline | MEASURED (opt-in) | Only with `read_guard: "deny"`; the default is advice. Matrix `dup_read` scenario: 2,717 chars saved, 1,411 injected. |
 | 7 | Block whole-file big read | DONE (2.0), effect UNKNOWN | Denies once, with advice; a repeat is allowed. |
-| 8 | Bulk reads to a Haiku Explore subagent | MISSING (code only) | |
+| 8 | Bulk reads to a Haiku Explore subagent | DONE (opt-in block) | `bulk_gate` blocks one Read/Grep/Glob after `bulk_read_n` in a row (`bulk_read_block`); subagents are never blocked. Tests in `test_tips_hooks.py`. |
 | 9 | Big output trim with recall | MEASURED (2.0) | Most of the offline matrix saving comes from this (see `docs/LIMITATIONS.md`). |
-| 10 | Automatic handoff | UNKNOWN (partial) | 2.0 writes a continuation note before compaction; `tz handoff` is on demand. Task-end and threshold writes: code only. |
+| 10 | Automatic handoff | DONE | Continuation note before compaction (2.0); handoff advice at growth thresholds; `cap_block` saves a handoff before it blocks. |
 | 11 | Next chat loads newest handoff only | DONE (2.0) | `tz-start.py`, head of the newest daily file, 30 lines max. |
 | 12 | Terse rules injected | DONE (2.0), effect EST | Skipped when caveman or ponytail is enabled. |
-| 13 | Task switch: offer new chat | EST (partial) | 2.0 stay-or-fresh line. Fresh chat button wording: code only. |
-| 14 | Plan-mode nudge | MISSING (code only) | |
-| 15 | Long instructions: offer skills | MISSING (code only) | |
-| 16 | Fresh chat button at 50k | MISSING (code only) | A hook cannot press it; it can only ask. |
-| 17 | Hard cap 150k, soft 50k / 100k | MISSING (code only) | 2.0 size warnings exist; the new block gate is not live. |
-| 18 | Idle over 5 min: show cost | EST | 2.0 idle advice; v2.1 uses the measured cache life (1 h or 5 min). |
-| 19 | Big paste: save and block | MISSING (code only, warn only) | `tztips.py` only warns; it does not block or convert a paste. |
-| 20 | Model switch | MISSING (code only, advice only) | A hook cannot switch the model. |
-| 21 | Chat started in home folder | MISSING (code only) | |
-| 22 | Many small messages tip | MISSING | |
-| 23 | Auto-archive offer | MISSING | Needs the app's settings tool and the user's yes. |
-| 24 | `tz stats` context breakdown and daily totals | UNKNOWN (partial) | 2.0 `tz stats` has measured / estimated savings and 24 h figures. The breakdown is code only (`tztips.py breakdown`). |
-| 25 | `tzab` combined benchmark | UNKNOWN | `tz ab` exists; no paid trial run (needs the owner's OK). Offline `tz bench matrix` is not a replacement. |
+| 13 | Task switch: offer new chat | DONE, effect EST | `task_switch` (on): offers a new-session card or the "Fresh chat" button. |
+| 14 | Plan-mode nudge | DONE (advice) | `plan_advice`, skipped in plan mode. |
+| 15 | Long instructions: offer skills | DONE (advice) | `tz instr` lists sections that "could be a skill". No automatic conversion. |
+| 16 | Fresh chat button at 50k | DONE (advice) | Size tiers and task-switch text ask for the button. A hook cannot press it. |
+| 17 | Hard cap 150k, soft 50k / 100k | DONE (opt-in) | `size_gate` soft tiers and `cap_block` are opt-in; the cap saves the handoff first; slash commands and "Fresh chat" always pass. Tests. |
+| 18 | Idle over 5 min: show cost | DONE, effect EST | `idle_cost` in `tzcont.py`, uses the measured cache life (1 h or 5 min). |
+| 19 | Big paste: save and block | DONE (block opt-in), VERIFIED live | `paste_block` saves to `handoffs/paste-<time>.md` and blocks; `paste_warn` (on) warns. Live check 2026-11-25, Claude Code 2.1.318, Haiku: a prompt with a codeword was blocked, then the session was resumed and asked for it; the answer was "NONE", so a blocked prompt does not reach the model. The local transcript file still stores it. |
+| 20 | Model switch | DONE (advice) | `model_advice`. A hook cannot switch the model. |
+| 21 | Chat started in home folder | DONE | `home_cwd`, once per chat. Test. |
+| 22 | Many small messages tip | DONE (advice) | `small_msgs`: 4 prompts of 40 chars or fewer in a row. Test. |
+| 23 | Auto-archive offer | DONE (advice) | `archive_advice`: once per chat at a task end; tells Claude to offer the app setting and change it only after the owner's yes. Test. |
+| 24 | `tz stats` context breakdown and daily totals | DONE | `tz stats --breakdown` (`context_breakdown`). Breakdown sizes are EST (chars/4). |
+| 25 | `tzab` combined benchmark | DONE offline, paid run UNKNOWN | `tz bench matrix` runs TZ off / 2.0 / each feature / all on / leave-one-out / all minus conflicts (`tests/v21/test_matrix.py`). The `tz ab` paid trial was not run (needs the owner's OK). |
 
 ## Anthropic's 10 cost tips
 
