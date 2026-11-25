@@ -41,8 +41,10 @@ new 7; echo "$FOREIGN" >"$S"; cp "$S" "$T/e"; TZ_INSTALL_CRASH=1 HOME="$H" bash 
 ok "crash mid-install: exit non-zero, settings byte-identical" '[ $r != 0 ] && cmp -s "$S" "$T/e"'
 ok "crash left a backup + stale tmp, next run recovers" 'ls "$S".bak-tz-* >/dev/null && [ -f "$S.tz-tmp" ] && i >/dev/null && [ ! -f "$S.tz-tmp" ] && grep -q tz-guard "$S"'
 # 8 failure -> rollback (unwritable directory)
+if [[ $(uname -s) == MINGW* || $(uname -s) == MSYS* ]]; then echo "SKIP unwritable-dir: Windows ignores chmod 555 on a directory"; else
 new 8; echo "$FOREIGN" >"$S"; cp "$S" "$T/f"; chmod 555 "$H/.claude"; o=$(i); r=$?; chmod 755 "$H/.claude"
 ok "unwritable dir: install fails cleanly, settings unchanged" '[[ $o == *"failed"* || $o == *rror* ]] && cmp -s "$S" "$T/f"'
+fi
 # 9 restore
 new 9; echo "$FOREIGN" | sed "s#/x/token-zombie/bin/tz-guard.py#/x/other.py#" >"$S"; cp "$S" "$T/g"; i >/dev/null; sleep 1; i >/dev/null; i --restore >/dev/null
 ok "restore after install x2 returns original bytes" 'cmp -s "$S" "$T/g"'

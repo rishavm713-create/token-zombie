@@ -3,7 +3,7 @@
 # -> handoff prep at CRITICAL -> write ~/.claude/token-zombie/status.json (read by dash/companion/statusline).
 # Honest limit: the host cannot be forced to open a fresh session; next-session emits the exact command/brief. Launch only with --yes.
 # One exception, opt-in: feature crash_restart (default OFF) lets tick() resume crashed `tz agent` runs (tzbackoff).
-import json, os, shlex, subprocess, sys, time
+import json, os, shlex, shutil, subprocess, sys, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import tzusage, tzhandoff
 from tzmascot import mascot_state, EMOJI
@@ -200,7 +200,8 @@ def main(argv):
     cmdline = next_session(cwd)
     print(cmdline)
     if a.yes:  # only launch on explicit consent; headless, one prompt
-        subprocess.Popen(['claude', '-p', 'Continue from the handoff. Run `tz resume` and do the next action.'], cwd=cwd,
+        subprocess.Popen([shutil.which('claude') or 'claude', '-p',  # which(): npm ships claude.cmd on Windows
+                          'Continue from the handoff. Run `tz resume` and do the next action.'], cwd=cwd,
                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         print('launched headless claude -p (--yes)')
     return 0

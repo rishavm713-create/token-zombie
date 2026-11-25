@@ -31,7 +31,7 @@ def index(root):
     for p in tzmap._files(root):
         if not p.endswith(TEXT):
             continue
-        rel = os.path.relpath(p, root)
+        rel = os.path.relpath(p, root).replace(os.sep, "/")
         try:
             if os.path.getsize(p) > 400_000:
                 continue

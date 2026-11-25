@@ -69,7 +69,7 @@ def index(root, db=None):
     root = os.path.abspath(root)
     want, n_new = {}, 0
     for f in files(root):
-        rel = os.path.relpath(f, root)
+        rel = os.path.relpath(f, root).replace(os.sep, "/")
         for s, t in chunks(open(f, encoding='utf-8', errors='ignore').read()):
             want[cid(rel, s, t)] = (rel, s, t)
     have = {r[0]: r[1] for r in c.execute('SELECT id, path FROM chunks')}

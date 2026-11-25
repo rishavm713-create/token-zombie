@@ -24,7 +24,8 @@ runs() { # file -> 0 if it can execute
 split() { # stdin grep -n lines -> "P<TAB>line" (stays HIGH) or "L<TAB>line" (cannot run)
   while IFS= read -r l; do
     [ -z "$l" ] && continue
-    f=${l%%:*}; c=${l#*:*:}; c=${c#"${c%%[![:space:]]*}"}
+    v=""; r=$l; case "$l" in [A-Za-z]:[/\\]*) v=${l:0:2}; r=${l:2};; esac  # Windows drive letter: its colon is part of the path
+    f=$v${r%%:*}; c=${r#*:*:}; c=${c#"${c%%[![:space:]]*}"}
     if echo "$f" | grep -qE '\.(md|mdc|txt)$'; then printf 'P\t%s\n' "$l"
     elif echo "$c" | grep -qE '^(#[^!]|#$|//|/\*|\*|<!--|--[[:space:]])'; then printf 'C\t%s\n' "$l"
     elif echo "/$f" | grep -qE "$NONPROD" && ! runs "$f"; then printf 'L\t%s\n' "$l"

@@ -83,8 +83,9 @@ TOK=$(cat "$H/.claude/token-zombie/companion.token")
 ok "companion: no token = 401" '[ "$(curl -s -o /dev/null -w %{http_code} http://127.0.0.1:$P/status.json)" = 401 ]'
 ok "companion: wrong token = 401" '[ "$(curl -s -o /dev/null -w %{http_code} "http://127.0.0.1:$P/status.json?token=x")" = 401 ]'
 ok "companion: token serves status" '[[ $(curl -s "http://127.0.0.1:$P/status.json?token=$TOK") == *mascot* ]]'
-ok "companion: token file mode 600" '[ "$(stat -c %a "$H/.claude/token-zombie/companion.token" 2>/dev/null || stat -f %Lp "$H/.claude/token-zombie/companion.token")" = 600 ]'
-ok "companion bound to loopback only" 'lsof -nP -iTCP:$P -sTCP:LISTEN 2>/dev/null | grep -q "127.0.0.1:$P"'
+[[ $(uname -s) == MINGW* || $(uname -s) == MSYS* ]] && echo "SKIP token-file-mode: Windows has no POSIX file modes" || ok "companion: token file mode 600" '[ "$(stat -c %a "$H/.claude/token-zombie/companion.token" 2>/dev/null || stat -f %Lp "$H/.claude/token-zombie/companion.token")" = 600 ]'
+listens() { if command -v lsof >/dev/null; then lsof -nP -iTCP:$P -sTCP:LISTEN 2>/dev/null; else netstat -an | grep LISTEN; fi; }  # Windows has no lsof
+ok "companion bound to loopback only" 'l=$(listens); grep -q "127\.0\.0\.1:$P " <<<"$l " || grep -q "127\.0\.0\.1:$P$" <<<"$l"; [ $? = 0 ] && ! grep -qE "(0\.0\.0\.0|\[::\]|\*):$P( |$)" <<<"$l"'
 kill $CP 2>/dev/null; wait $CP 2>/dev/null
 # profile save/apply/rollback (dry-run default, fake skillpack)
 mkdir -p "$H/.claude/skills-off/video/cut" "$H/.claude/skills/x"; printf -- '---\nname: video-cut\ndescription: cut video captions shorts podcast clips youtube edits\n---\n' >"$H/.claude/skills-off/video/cut/SKILL.md"

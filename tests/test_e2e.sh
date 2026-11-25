@@ -5,6 +5,7 @@ ok() { if eval "$2"; then pass=$((pass+1)); else fail=$((fail+1)); echo "FAIL: $
 tz() { HOME="$H" PATH="$T/bin:$PATH" python3 "$Z/bin/tz" "$@"; }
 BUS="$H/.claude/token-zombie/status.json"
 printf '#!/bin/bash\necho "$@" >>"%s/claude.log"\n' "$T" >"$T/bin/claude"; chmod +x "$T/bin/claude"
+[[ $(uname -s) == MINGW* || $(uname -s) == MSYS* ]] && printf '@bash "%%~dp0claude" %%*\r\n' >"$T/bin/claude.cmd"  # Windows: PATH lookup finds claude.cmd (how npm installs it), not a shell script
 python3 - "$T/c.jsonl" <<'PY'
 import json,sys
 open(sys.argv[1],'w').write(json.dumps({"message":{"id":"a","usage":{"input_tokens":150000,"output_tokens":5}}})+'\n'+json.dumps({"message":{"id":"b","usage":{"input_tokens":192000,"output_tokens":5}}})+'\n')

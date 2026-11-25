@@ -92,7 +92,9 @@ ok "valid file after corrupt ones: kept, no new quarantine" '[ -e "$BUS" ] && [ 
 ok "_quarantine on vanished source leaves no empty claim" 'py "tzsup._quarantine(\"$T/gone.json\");assert not any(f.startswith(\"gone.json\") for f in os.listdir(\"$T\"))"'
 
 # 10. CLI reachable through a symlink (the PATH setup in docs/INSTALL.md)
+if [[ $(uname -s) == MINGW* || $(uname -s) == MSYS* ]]; then echo "SKIP symlink-on-PATH: Git Bash ln -s copies the file instead of linking"; else
 mkdir -p "$T/pathbin"; ln -s "$Z/bin/tz" "$T/pathbin/tz"
 ok "tz works via symlink on PATH" 'HOME="$H" PATH="$T/pathbin:$PATH" command tz sup status >/dev/null 2>&1; [ $? = 0 ]'
+fi
 
 rm -rf "$T"; echo "pass $pass fail $fail"; [ $fail = 0 ]
