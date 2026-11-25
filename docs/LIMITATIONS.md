@@ -16,10 +16,9 @@
 - `bin/tzfit.py` caps hook text by keeping head and tail. The dropped middle is not saved for recall.
 - Duplicate-MCP advice (`mcp_dup`) is approximate: "read-only" and "nothing written since" are judged from tool names and the transcript. It cannot see changes made outside the chat. Advice only.
 - `tz toolprune`: idle parking and auto-restore are not done. A denied tool stays denied until `--restore`. Evidence is past chats only.
-- `safety_net` is in the feature list but no code reads it. `TZ_SAFE=0` is the real off switch. (Open fix.)
 - The Bash safety check parses commands; it is not a sandbox and cannot catch every destructive form. In v2.1 it fails closed if the check itself crashes.
 - `tz-craft`: the prompt hint (`tzondemand.craft`) is not called by any hook.
-- `bin/tztips.py` (spec tips) is not wired at 8c703c3; wiring is in progress in another session. Its paste check can only warn.
+- `bin/tztips.py` (spec tips) is wired. Most of it is advice with effect EST or UNKNOWN; blocks are opt-in.
 - Not built although research proposed them: budget warning ladder, crash-restart backoff, `tz sym` name paths and `--refs`, AST pattern search, log compressor, `tz debt`, repeat-failure-to-fact memory.
 - REA (reverse engineering) was not used: there were no compiled targets.
 

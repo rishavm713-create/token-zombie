@@ -6,7 +6,7 @@ Plugin:
 claude plugin marketplace add rishavm713-create/token-zombie
 claude plugin install token-zombie@token-zombie
 ```
-That installs what is published on GitHub. v2.1 is not pushed or released as of 2026-11-25.
+That installs what is published on GitHub. As of 2026-11-25 there is no v2.1 tag, `origin/main` is still the 7e2ee6a base, and `origin/feat/v2.1.0` (b00574a) differs from the local tip.
 
 From a local checkout: `./install.sh --dry-run` shows the changes; `./install.sh` applies them. Other flags: `--check`, `--uninstall`, `--restore`, `--statusline-only`. Keep the checkout directory named `token-zombie` (the installer matches `token-zombie/bin/`).
 
@@ -28,7 +28,7 @@ Run as `tz …` (or `python3 bin/tz …`). `tz help` does not list `toolprune`, 
 
 `skills/tz-craft` holds debug, test, refactor, review, plan, perf, React, git-safety, learn and verify notes, loaded on demand.
 
-`bin/tztips.py` (`instr`, `defaults`, `breakdown`, `mcp-unused`) can be run with `python3 bin/tztips.py …`. It is not wired into hooks or `tz` yet (in progress, other session). `defaults --apply --yes` and `instr --fix --apply` change your files; `--restore` undoes them.
+`tz tips`, `tz instr`, `tz defaults [apply --yes | restore]` and `tz stats --breakdown` run `bin/tztips.py`, which the hooks also call. `tz defaults apply --yes` and `tz instr --fix --apply` change your files; `restore` / `--restore` undoes them. Tip switches and their defaults are in `FEATURES` in `bin/tzlib.py`; every one that blocks (`size_cap`, `paste_block`, `bulk_read_block`) is off by default.
 
 ## Feature switches
 Order: mode `off` turns every feature off; else env `TZ_FEAT_<NAME>` (`0`, `off`, `false` or empty = off); else `"features"` in `~/.claude/token-zombie/config.json`; else the default.
@@ -40,7 +40,7 @@ Order: mode `off` turns every feature off; else env `TZ_FEAT_<NAME>` (`0`, `off`
 | `stuck_detect` | on | Repeated-failure / loop advice. |
 | `mcp_dedup` | on | Advice on a repeated identical read-only MCP call. |
 | `plan_reinject` | off | Re-insert the plan head after compaction (adds context). |
-| `safety_net` | on | Listed, but **no code reads it** at 8c703c3: setting it to 0 does not turn the safety check off. Use `TZ_SAFE=0`. |
+| `safety_net` | on | Extra hardening checks inside the shell safety parser (`bin/tzshell.py`). Setting it to 0 does not turn the whole safety check off; `TZ_SAFE=0` does. |
 
 Config example:
 ```json
@@ -55,7 +55,7 @@ Other switches: `TZ_SAFE=0` (Bash safety check), `TZ_OUT=0` or `"out_trim": fals
 - `tz status`, `tz forecast`: context %, tokens, burn rate; 5 h / 7 d limits only if the host provides them.
 - There is **no `tz usage` command**. The v2.1 usage additions in `bin/tzusage.py` show in `tz status`: usable context % [est], cache hit rate (when the log has cache counts), and a 5 h block estimate (only when the host gives no limits).
 - `tz config`: effective settings and their source. It shows settings; it does not set them.
-- `python3 bin/tztips.py breakdown [transcript]`: context breakdown (not wired).
+- `tz stats --breakdown`: context breakdown (sizes EST).
 
 ## Troubleshooting
 | Symptom | Do this |

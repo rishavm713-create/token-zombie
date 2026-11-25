@@ -10,7 +10,7 @@ Aim: fewer re-sent tokens for the same task result. Each ships only after a with
 | Idea | What it would do | Starting point | Limit |
 |---|---|---|---|
 | Task classification | Sort a request: quick answer, small edit, search, hard build | `tz route`, keyword heuristics | Heuristic; a wrong class must cost little. |
-| Model and effort selection | Suggest model / effort per class; set subagent defaults after a yes | `tztips.model_advice`, `defaults` (wiring in progress) | A hook cannot switch the main model. |
+| Model and effort selection | Suggest model / effort per class; set subagent defaults after a yes | `tztips.model_advice`, `defaults` (wired as advice / opt-in) | A hook cannot switch the main model. |
 | Context budgeting | Per-task budget with one warning per step (50/75/90/100%) | `tz agent --budget`, `tzusage`; ladder not built | The context window size is partly an estimate. |
 | Delegation | Send bulk reading and independent parts to cheaper subagents or sessions | bulk-read rule (`tztips`), claim leases | Subagents have their own startup cost; measure net. |
 | Memory | Load only what the next task needs: handoff head, FTS hits, saved facts after repeated failures | `tz mem`, handoffs; repeat-failure facts not built | Stale memory misleads; keep it short and dated. |

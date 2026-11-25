@@ -1,6 +1,6 @@
 # TZ v2.1 repo ledger (44 repos)
 
-Checked 2026-11-25 against code at `8c703c3`. Detail: `docs/research/A-H`, `NOTICE`, and the older `OPEN-SOURCE-INTEGRATION-LEDGER.md` (36 rows, partly 2.0-era; this file wins where they differ).
+Ledger checked 2026-11-25 against code at `8c703c3`; the spec and tips tables were updated at `d100060`. Detail: `docs/research/A-H`, `NOTICE`, and the older `OPEN-SOURCE-INTEGRATION-LEDGER.md` (36 rows, partly 2.0-era; this file wins where they differ).
 
 Status (one per repo):
 - **integrated**: TZ code can run or call the tool itself.
@@ -104,17 +104,17 @@ Updated at `d100060` (after the tips wiring). Hook entry points: `tz-guard.py` (
 
 ## Anthropic's 10 cost tips
 
-| # | Tip | Rows | Status at 8c703c3 (rows 4-6 rechecked at fafcade) |
+| # | Tip | Rows | Status at d100060 |
 |---|---|---|---|
-| 1 | Clear between tasks; `/compact` long chats | 13, 16, 17 | 2.0 advice live (EST). Gate and button text: code only. TZ cannot run `/clear` or `/compact`. |
-| 2 | Keep CLAUDE.md short | 5, 15 | Report on demand (`tz instructions`). Detect-and-fix: code only. |
+| 1 | Clear between tasks; `/compact` long chats | 13, 16, 17 | 2.0 advice live (EST). Task-switch offer on; size gate and cap are opt-in. TZ cannot run `/clear` or `/compact`. |
+| 2 | Keep CLAUDE.md short | 5, 15 | `tz instr` report and `--fix`; advice at session start. Effect EST. |
 | 3 | Turn off unused MCP servers | 4 | `tz toolprune` on demand (partial). Effect UNKNOWN. |
-| 4 | Cheaper model, lower effort for simple work | 1, 3, 20 | Live: mechanical-task model/effort tip (`tztips.prompt_tips` from tz-guard, on by default), once per chat. Advice only. Effect UNKNOWN. |
-| 5 | Give exploration to subagents | 8 | Opt-in: `bulk_read_block` (off by default) denies one Read/Grep/Glob after a long run and points to an Explore subagent. Effect UNKNOWN. |
-| 6 | Plan mode and specific prompts | 14 | Live: big-vague-task plan tip (on by default, silent in plan mode), once per chat. Advice only. Effect UNKNOWN. |
-| 7 | Skills instead of long instructions | 15 | 2.0 skill packs stay parked; `tz-craft` references load on demand (its prompt hint `craft()` is not called by any hook). Offer: code only. |
+| 4 | Cheaper model, lower effort for simple work | 1, 3, 20 | Advice wired; `tz defaults` is opt-in. No automatic model or effort change. Effect EST. |
+| 5 | Give exploration to subagents | 8 | Wired; the block is opt-in (`bulk_read_block`, off by default). Effect UNKNOWN. |
+| 6 | Plan mode and specific prompts | 14 | `plan_advice` wired, on by default. Effect EST. |
+| 7 | Skills instead of long instructions | 15 | 2.0 skill packs stay parked; `tz-craft` references load on demand (its prompt hint `craft()` is not called by any hook). `tz instr` offers skill candidates; no automatic conversion. |
 | 8 | Hooks that cut big output | 9, 6, 7 | Live. Trim MEASURED offline. |
 | 9 | Do not leave a chat idle | 18 | Live, EST. |
-| 10 | Check usage (`/context`, `/cost`, `/usage`) | 24 | `tz status`, `tz stats` live; breakdown: code only. |
+| 10 | Check usage (`/context`, `/cost`, `/usage`) | 24 | `tz status`, `tz stats`, `tz stats --breakdown` (sizes EST, chars/4). |
 
-All tztips wiring: **in progress (other session)**.
+tztips is wired (see the 25-item table); anything that blocks is opt-in.

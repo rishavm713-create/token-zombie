@@ -1,5 +1,5 @@
 # Changelog
-## v2.1.0 (unreleased; branch feat/v2.1.0, not pushed or tagged)
+## v2.1.0 (unreleased; branch feat/v2.1.0, not tagged or released)
 - Fix: install.sh recognises its own hooks whatever the checkout/cache directory is named (was: duplicates, failed uninstall/restore unless the path contained token-zombie/bin).
 - Fix: stuck detector deletes its state file on reset and ignores tool hooks without a tool name.
 
@@ -16,7 +16,7 @@ Added:
 - 5 h usage blocks, cache hit rate, usable context % in `tzusage`.
 - Offline `tz bench matrix`; optional harbor adapter.
 - `skills/tz-craft`.
-- `bin/tztips.py` (spec tips): tested as a module; hook wiring in progress, not yet active.
+- `bin/tztips.py` (spec tips) wired into the hooks and `tz tips | instr | defaults | stats --breakdown`; advice on by default, blocks opt-in.
 
 Changed:
 - Bash safety check fails closed if it crashes (before: allowed), and uses the working directory.
