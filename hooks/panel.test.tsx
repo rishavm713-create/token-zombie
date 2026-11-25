@@ -135,9 +135,10 @@ test('buttons run the expected argv, copy and compact', async ($, on) => {
   await ui.press({ plugin: 'token-zombie', key: 'mode-ultra' })
   expect(clips).toEqual([{ asset: 'sounds/mode-ultra.wav' }])
   const last = () => ran[ran.length - 1]!
-  expect(last().slice(0, 1)).toEqual(['python3'])
+  expect(last().slice(0, 1)).toEqual(['sh'])  // via the tzpy launcher: finds a real Python on Windows
   expect(last().slice(-2)).toEqual(['mode', 'ultra'])
-  expect(last()[1]).toMatch(/bin\/tz$/)
+  expect(last()[1]).toMatch(/bin\/tzpy$/)
+  expect(last()[2]).toMatch(/bin\/tz$/)
 
   await ui.press({ plugin: 'token-zombie', key: 'review' })
   expect(last().slice(-1)).toEqual(['optimize'])

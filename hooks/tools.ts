@@ -37,8 +37,8 @@ async function runTz($: any, name: string, e: any) {
   const argv = TOOLS[name]!.argv(e)
   if (!argv) return { deny: `token-zombie: ${name} needs its input` }
   try {
-    const r = await $.process.run(['python3', `${$.plugin.root}/bin/tz`, ...argv], { timeoutMs: 60_000 })
-    return { result: ((r.stdout + (r.exitCode ? '\n' + r.stderr : '')).slice(0, 20_000) || '(no output)') } as any
+    const r = await $.process.run(['sh', `${$.plugin.root}/bin/tzpy`, `${$.plugin.root}/bin/tz`, ...argv], { timeoutMs: 60_000 })
+    return { result: ((r.stdout + (r.exitCode || !r.stdout ? '\n' + r.stderr : '')).slice(0, 20_000) || '(no output)') } as any
   } catch (err) {
     return { deny: `token-zombie: ${name} failed: ${String((err as Error)?.message ?? err).slice(0, 120)}` }
   }
