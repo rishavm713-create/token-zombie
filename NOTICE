@@ -80,3 +80,27 @@ Used in: bin/tzbudget.py (response-depth table and 25/50/75/100% options from sk
 anthropics/skills (https://github.com/anthropics/skills), Apache License 2.0 (skill-creator only; no root licence)
 Copyright 2026 Anthropic, PBC
 Used in: bin/tzaskills.py validate_text, adapted from skills/skill-creator/scripts/quick_validate.py (modified: stdlib frontmatter reader, Claude Code keys accepted unless strict). Licence: third_party/askills/LICENSE
+
+oh-my-claudecode (https://github.com/Yeachan-Heo/oh-my-claudecode), MIT licence
+Copyright (c) 2025 Yeachan Heo
+Used in: bin/tzteam.py (staged flow, claim recovery and verify gate; ported to stdlib Python). Licence: third_party/oh-my-claudecode/LICENSE
+
+ast-grep (https://github.com/ast-grep/ast-grep), MIT licence
+Copyright (c) 2022 Herrington Darkholme
+Used in: bin/tzsg.py (metavariable grammar and parity cases; the matcher is new). Licence: third_party/ast-grep/LICENSE
+
+ccusage (https://github.com/ryoppippi/ccusage), MIT licence
+Copyright (c) 2025 ryoppippi
+Used in: bin/tzccu.py (log discovery, dedupe and usage parsing; ported to stdlib Python). Licence: third_party/ccusage/LICENSE
+
+headroom (https://github.com/headroomlabs-ai/headroom), Apache License 2.0
+Copyright 2025 Headroom Contributors
+Used in: bin/tzlogc.py, adapted from crates/headroom-core/src/transforms/log_compressor.rs (modified: stdlib Python, simplified, error lines never capped). Licence and upstream NOTICE: third_party/headroom/
+
+cc-safety-net (https://github.com/kenryu42/cc-safety-net), MIT licence
+Copyright (c) 2026 J Liew
+Used in: bin/tzrules.py (rule ids, matcher semantics and rulebook format; rebuilt in Python). Licence: third_party/cc-safety-net/LICENSE
+
+beads (https://github.com/gastownhall/beads), MIT licence
+Copyright (c) 2025 Beads Contributors
+Used in: bin/tzbeads.py (base36 hash id and adaptive length; claim/readiness/compaction behaviour in own code). Licence: third_party/beads/LICENSE
