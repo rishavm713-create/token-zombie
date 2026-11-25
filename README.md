@@ -18,6 +18,13 @@ claude plugin marketplace add rishavm713-create/token-zombie && claude plugin in
 
 🖥️ **Works with:** Claude Code (the verified integration) on macOS and Linux; Windows is in beta. Other agents (Codex, Cursor, Gemini, Cline and others) get a rules file only and are experimental: see [compatibility](docs/COMPAT.md).
 
+💬 **Already inside Claude Code?** Type these two lines in the chat box instead:
+
+```
+/plugin marketplace add rishavm713-create/token-zombie
+/plugin install token-zombie@token-zombie
+```
+
 ↩️ Don't like it? Remove it any time: `/plugin uninstall token-zombie`
 
 ![TOKEN ZOMBIE demo](docs/img/demo-live.svg)
