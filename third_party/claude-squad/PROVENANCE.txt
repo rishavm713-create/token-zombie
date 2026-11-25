@@ -1,0 +1,3 @@
+Source: https://github.com/smtg-ai/claude-squad, licence AGPL-3.0.
+TOKEN ZOMBIE Core is MIT, so nothing from claude-squad is copied or distributed: no code, text or assets.
+bin/tzsquad.py is original code, rebuilt from the documented behaviour (list / diff / pause / resume / kill / open of parallel git worktree sessions).

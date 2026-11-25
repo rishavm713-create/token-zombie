@@ -22,6 +22,13 @@ Pick ONE reference by task, read it, apply it. Do not read the others.
 - worktree, finishing a branch: references/finish-branch.md
 - slow code, memory, latency: references/perf.md
 - React or Next.js components: references/react.md
+- React server/client rendering and data: references/react-server.md
+- designing a component API: references/component-api.md
+- page or view transitions: references/view-transitions.md
+- React Native: references/react-native.md
+- web UI review (a11y, forms, layout): references/web-ui.md
+- UI text, docs, error messages: references/writing.md
+- writing or checking a skill: references/skill-authoring.md
 - commit, branch, reset, push, delete: references/git-safety.md
 - turning a lesson into a rule: references/learn.md
 - testing a skill or agent rule: references/skill-test.md

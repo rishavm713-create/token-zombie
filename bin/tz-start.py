@@ -130,6 +130,12 @@ try:
         tips = tztips.start_tips(d)
     except Exception:
         tips = ''
+    try:  # v2.1 opt-in: recent observed work (tz obs)
+        import tzobs
+        obs = tzobs.hook(d) if _tzl.feature('obs_inject') else ''
+    except Exception:
+        obs = ''
+    tips = '\n\n'.join(x for x in (tips, obs) if x)
     facts = _facts(d)
     if parts or pk or L or tips or facts or _plan(d, peek=True):
         txt = (('TOKEN ZOMBIE start context. Use this; do not read the full HANDOFF.md unless the step needs a detail.\n'

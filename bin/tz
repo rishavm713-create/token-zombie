@@ -44,7 +44,16 @@ HELP = """tz <command> [args]
   replay [transcript]                            costliest steps (input-eq) + repeated tool calls
   skills [prompt words]                          skills loaded/parked; relevance advice
   skills find Q | preview DIR | stage DIR --yes | unstage N | usage | updates   curated catalog search, safety preview of a local clone, staged reversible install
+  skills check DIR [--json] [--strict]           check a skill folder (format, size, links)
   capabilities                                   skills/plugins/MCP inventory, overlaps
+  budget [check] | set KEY AMOUNT|off            spend budgets with warning levels (hard stop is opt-in)
+  line render|preview|widgets|init|add|import    configurable status line
+  squad list|diff|pause|resume|kill|open         parallel worktree sessions
+  obs search|timeline|get|sessions|context|add   local observation memory (recording is opt-in)
+  ts doctor|tags|check|skel FILE                 code tags and syntax check (tree-sitter if installed, else stdlib)
+  stale [--dir D] [--base REF] [--json]          is this branch behind main? (local refs only)
+  memsearch index|search|expand                  search Markdown memory notes
+  read FILE [mode]                               outline, diff, line range or task windows of a file
   ondemand [on|off NAME|end|log|rollback]        optional MCP/plugin/skill on for a task, off at chat end
   security <dir>                                 GREEN/YELLOW/RED scan of a skill/plugin/repo
   audit                                          security grade of every installed skill
@@ -164,6 +173,12 @@ def main(argv):
         if c in ('handoff', 'resume', 'task-wrap', 'checkpoint', 'import'):
             import tzhandoff
             return tzhandoff.main([c, *rest])
+        if c == 'skills' and rest[:1] == ['check']:
+            import tzskillcheck
+            return tzskillcheck.main(rest)
+        if c in ('budget', 'line', 'squad', 'obs', 'ts', 'stale', 'memsearch', 'read'):  # v2.1 group 3 ports
+            return __import__({'budget': 'tzbudget', 'line': 'tzline', 'squad': 'tzsquad', 'obs': 'tzobs', 'ts': 'tzts',
+                               'stale': 'tzclaw', 'memsearch': 'tzmemsearch', 'read': 'tzread'}[c]).main(rest)
         if c == 'skills' and rest[:1] in (['find'], ['preview'], ['stage'], ['unstage'], ['usage'], ['updates']):
             import tzfinder
             return tzfinder.main(rest)
