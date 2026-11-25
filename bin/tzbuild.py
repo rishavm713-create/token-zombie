@@ -6,7 +6,7 @@
 #   tz contract [dir]       frontend fetch() calls vs backend routes: mismatches
 #   tz api [dir]            list HTTP routes found; --openapi prints a skeleton
 #   tz dbschema [dir]       tables/columns from SQL and ORM models; flags foreign keys without index
-#   tz coord post|list|claim|done ...   shared note board between sessions (file: ~/.claude/token-zombie/coord.json)
+#   tz coord post|list|claim|done|handoff|wait ...   shared note board between sessions (file: ~/.claude/token-zombie/coord.json)
 #   tz stack [idea|design|web|off]      turn on the skill packs an idea-to-product build needs (calls ~/.claude/skillpack)
 import json, os, re, subprocess, sys, time
 
@@ -193,26 +193,60 @@ def dbschema(a):
 
 # ---- coord / stack -----------------------------------------------------
 def coord(a):
+    """Note board between agents. post TEXT [--after ID] | list | claim ID | done ID | handoff ID WHO [NOTE] | wait ID [--timeout S]"""
     p = os.path.join(STATE, 'coord.json')
     try:
         b = json.load(open(p))
     except Exception:
         b = []
+    me = os.environ.get('CLAUDE_SESSION_ID', 'me')[:12]
+    byid = lambda i: next((x for x in b if x['id'] == int(i)), None)
     op = a[0] if a else 'list'
     if op == 'post':
-        b.append(dict(id=len(b) + 1, who=os.environ.get('CLAUDE_SESSION_ID', 'me')[:12], note=' '.join(a[1:]), status='open', t=int(time.time())))
-    elif op in ('claim', 'done') and len(a) > 1 and a[1].isdigit():
-        for x in b:
-            if x['id'] == int(a[1]):
-                if op == 'claim' and x['status'] != 'open':
-                    print('refused: #%s is %s' % (a[1], x['status'])); return 3
-                x['status'] = 'claimed' if op == 'claim' else 'done'
+        w = list(a[1:]); dep = None
+        if '--after' in w:
+            k = w.index('--after'); dep = int(w[k + 1]) if k + 1 < len(w) and w[k + 1].isdigit() else None; del w[k:k + 2]
+        b.append(dict(id=max([x['id'] for x in b] or [0]) + 1, who=me, note=' '.join(w), status='open', t=int(time.time()), after=dep))
+    elif op in ('claim', 'done', 'handoff') and len(a) > 1 and a[1].isdigit():
+        x = byid(a[1])
+        if x is None:
+            print('refused: no #%s' % a[1]); return 3
+        if op == 'claim':
+            d = byid(x['after']) if x.get('after') else None
+            if x['status'] != 'open':
+                print('refused: #%s is %s by %s' % (a[1], x['status'], x['who'])); return 3
+            if d and d['status'] != 'done':
+                print('refused: #%s waits for #%s (%s)' % (a[1], d['id'], d['status'])); return 3
+            x['status'], x['who'] = 'claimed', me
+        elif op == 'done':
+            x['status'] = 'done'
+        else:  # handoff: give the item to another agent, open again for them to claim
+            if len(a) < 3:
+                print('usage: tz coord handoff ID WHO [NOTE]', file=sys.stderr); return 2
+            x['status'], x['who'] = 'open', a[2]
+            x['note'] += ' | handoff from %s: %s' % (me, ' '.join(a[3:]) or 'continue')
+    elif op == 'wait' and len(a) > 1 and a[1].isdigit():  # block until #ID is done (poll); exit 4 on timeout
+        lim = float(a[a.index('--timeout') + 1]) if '--timeout' in a else 60.0
+        t0 = time.time()
+        while True:
+            try:
+                b = json.load(open(p))
+            except Exception:
+                b = []
+            x = byid(a[1])
+            if x is None:
+                print('refused: no #%s' % a[1]); return 3
+            if x['status'] == 'done':
+                print('#%s done' % a[1]); return 0
+            if time.time() - t0 >= lim:
+                print('timeout: #%s still %s' % (a[1], x['status'])); return 4
+            time.sleep(0.2)
     elif op != 'list':
-        print('usage: tz coord post TEXT | list | claim ID | done ID', file=sys.stderr); return 2
+        print('usage: tz coord post TEXT [--after ID] | list | claim ID | done ID | handoff ID WHO [NOTE] | wait ID [--timeout S]', file=sys.stderr); return 2
     os.makedirs(STATE, exist_ok=True)
-    json.dump(b, open(p, 'w'))
+    json.dump(b, open(p + '.tmp', 'w')); os.replace(p + '.tmp', p)
     for x in b[-20:]:
-        print('#%-3d %-8s %-12s %s' % (x['id'], x['status'], x['who'], x['note']))
+        print('#%-3d %-8s %-12s %s%s' % (x['id'], x['status'], x['who'], x['note'], ' (after #%s)' % x['after'] if x.get('after') else ''))
     return 0
 
 

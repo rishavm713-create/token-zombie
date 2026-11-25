@@ -269,6 +269,7 @@ def main(argv):
     if a.cmd == 'state':
         p, ch = write_state(a.cwd)
         print(f"{os.path.relpath(p, a.cwd)}: " + (f"updated sections {', '.join(ch)}" if ch else 'unchanged (no facts changed)'))
+        print('\n'.join(_lines(p)[3:]))  # known facts surfaced here so a fresh chat reads them instead of re-exploring
     elif a.cmd == 'expensive':
         print(expensive(a.cwd, a.transcript, a.session, a.force)[0])
     elif a.cmd == 'replay':

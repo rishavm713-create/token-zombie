@@ -120,6 +120,38 @@ def advise(inv, prompt, n=5):
     return [(s['name'], 'installed (already loaded)' if kind == 'skills' else f"parked in pack '{s.get('pack')}': ~/.claude/skillpack on {s.get('pack')} (ask first)", k) for k, kind, s in sc[:n]]
 
 
+CODE_EXT = ('.py', '.js', '.ts', '.tsx', '.jsx', '.sh', '.rb', '.go', '.php', '.json', '.yml', '.yaml', '.env', '.cfg', '.ini', '.toml')
+SECRET = re.compile(r'AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE[ ]KEY-----|gh[pousr]_[A-Za-z0-9]{30,}|sk-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|(?i:(password|passwd|secret|api[_-]?key|token))["\']?\s*[:=]\s*["\'][^"\'\s$%{]{8,}["\']')
+RISKY = [(re.compile(r'(?<![\w.])(eval|exec)\s*\(|\bos\.system\(|shell\s*=\s*True|\bnew Function\('), 'dangerous call (eval/exec/shell=True)'),
+         (re.compile(r'chmod\s+(-R\s+)?[0-7]?777|0o777|\bverify\s*=\s*False'), 'risky permission/setting (777, TLS verify off)'),
+         (re.compile(r'(curl|wget)[^|;\n]*[|]\s*(sudo\s+)?(ba|z)?sh\b'), 'download piped into a shell')]
+
+
+def code_risks(root):
+    """Project-code scan: (hardcoded secrets, risky calls) as 'file:line: why' lines. Static patterns only."""
+    sec, risk = [], []
+    for d, ds, fs in os.walk(root):
+        ds[:] = [x for x in ds if x not in ('.git', 'node_modules', '__pycache__', '.venv')]
+        for f in fs:
+            if not f.endswith(CODE_EXT) and f != '.env':
+                continue
+            p = os.path.join(d, f)
+            try:
+                lines = open(p, errors='ignore').read().splitlines()
+            except OSError:
+                continue
+            for n, l in enumerate(lines, 1):
+                if len(l) > 600 or l.lstrip().startswith(('#', '//')):
+                    continue
+                rel = '%s:%d' % (os.path.relpath(p, root), n)
+                if SECRET.search(l):
+                    sec.append(f'{rel}: hardcoded secret')
+                for rx, why in RISKY:
+                    if rx.search(l):
+                        risk.append(f'{rel}: {why}')
+    return sec, risk
+
+
 def grade(path):
     """(GREEN|YELLOW|RED, evidence lines) from tz-vet.sh. Static scan only: cannot prove safety."""
     try:
@@ -306,8 +338,14 @@ def main(argv):
             print('tz security <dir>: give a skill/plugin/repo directory', file=sys.stderr)
             return 2
         g, ev = grade(a.arg[0])
+        sec, risk = code_risks(a.arg[0])
+        if sec:
+            g = 'RED'
+        elif risk and g == 'GREEN':
+            g = 'YELLOW'
+        ev = ev + ['[HIGH] ' + x for x in sec[:10]] + ['[REVIEW] ' + x for x in risk[:10]]
         print(f'{g}  {a.arg[0]}')
-        for l in ev[:15]:
+        for l in ev[:30]:
             print('  ' + l)
         print('Static scan only: GREEN = no concerning indicators found, not proof of safety. Installing needs your approval.')
         return {'GREEN': 0, 'YELLOW': 0, 'RED': 1}[g]

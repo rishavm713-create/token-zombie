@@ -410,6 +410,12 @@ def main(argv):
               + (f" | unmatched stops {s['notes']['unmatched_subagent_stops']}" if s['notes'].get('unmatched_subagent_stops') else ''))
         for i, x in s['agents'].items():
             print(f"  {x.get('status'):8} {x.get('type')} model={x.get('model')} bg={x.get('bg')} '{x.get('desc', '')}'")
+        try:  # tz agent runs (checkpoints): live pid, task, age, files
+            import tzagent
+            if tzagent.runs():
+                tzagent.listing()
+        except Exception:
+            pass
         try:  # per-subagent cost from this session's subagent transcripts [measured tokens, EST $]
             for k, c in agent_costs(sid).items():
                 print(f"  {k}: {c['calls']} calls, {c['tok']:,} input-eq+out tok, ~${c['usd']:.2f} [EST API-equivalent list price]")
