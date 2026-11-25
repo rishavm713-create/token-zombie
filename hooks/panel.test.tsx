@@ -217,7 +217,8 @@ test('slim bar on desktop: real numbers, green saved, svg mascot, chevron opens 
   }
   expect((await val(/^AGENTS$/))?.text).toBe('3')
   expect((await val(/^SKILLS USED$/))?.text).toBe('3') // invoked only: loaded/discovered/on-disk never counted
-  expect(await val(/^TOKENS SAVED/)).toBeUndefined() // tile removed from the bar
+  expect(await val(/^TOKENS SAVED$/)).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /24H|· EST/ })).toBeUndefined() // label has no 24H · EST suffix
   expect((await val(/^OPTIMIZATIONS$/))?.text).toBe('1')
   expect((await ui.find({ type: 'Button', key: 'tz-mode' }))?.props.label).toBe('ULTRA') // mode replaces the Open button; press cycles it
   expect(await ui.find({ type: 'Text', text: /\[EST\]/ })).toBeUndefined()
