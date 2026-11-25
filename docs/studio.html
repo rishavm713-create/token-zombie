@@ -106,8 +106,8 @@ footer a{color:var(--mut)}
 <body>
 
 <nav><div class="wrap">
-<a class="logo" href="#">TZ <span>STUDIO</span></a>
-<div class="nl"><a class="h" href="#how">How it works</a><a class="h" href="#pipeline">Pipeline</a><a class="h" href="#safe">Safety</a><a class="h" href="#faq">FAQ</a><a href="./">Token Zombie</a><span class="pill">PRIVATE BETA</span></div>
+<a class="logo" href="#"><img src="img/mascot.svg" alt="" width="22" height="32" style="vertical-align:middle;margin-right:8px">TZ <span>STUDIO</span></a>
+<div class="nl"><a class="h" href="#how">How it works</a><a class="h" href="#pipeline">Pipeline</a><a class="h" href="#safe">Safety</a><a class="h" href="#about">About</a><a class="h" href="#faq">FAQ</a><a href="./">Token Zombie</a><span class="pill">PRIVATE BETA</span></div>
 </div></nav>
 
 <header class="hero"><div class="wrap">
@@ -129,7 +129,7 @@ footer a{color:var(--mut)}
 <span class="g">✓</span> t2  auth                verify passed   checkpoint 7be203
 <span class="g">✓</span> t3  invoice screens     verify passed   checkpoint c90d15
 <span class="y">⏸</span> t4  deploy to hosting   <span class="y">waiting for your approval</span>
-<span class="c">  budget used $1.84 of $5.00</span></div>
+<span class="c">  3 of 9 tasks done · 1 waiting on you</span></div>
 </div>
 </div></header>
 
@@ -141,7 +141,7 @@ footer a{color:var(--mut)}
 <div class="card"><div class="ic">1</div><h3>Plan</h3><p>Your idea becomes requirements, an architecture summary and an ordered task list with dependencies.</p></div>
 <div class="card"><div class="ic">2</div><h3>Run</h3><p>Tasks execute through Claude Code in dependency order, with a live log you can watch in the browser.</p></div>
 <div class="card"><div class="ic">3</div><h3>Verify</h3><p>Each task can carry a check that must pass before it counts as done. Failures stay failures.</p></div>
-<div class="card"><div class="ic">4</div><h3>Approve</h3><p>Deploys, deletes, spending and outbound messages wait for a clear yes from you.</p></div>
+<div class="card"><div class="ic">4</div><h3>Approve</h3><p>Deploys, deletes and outbound messages wait for a clear yes from you.</p></div>
 <div class="card"><div class="ic">5</div><h3>Checkpoint</h3><p>Every passing task is its own git commit in your project, so you can roll back any step.</p></div>
 <div class="card"><div class="ic">6</div><h3>Playbooks</h3><p>Rules per project type (SaaS, creative, game, book, automation, website, enterprise). New rules are promoted only after a test.</p></div>
 </div>
@@ -171,13 +171,13 @@ footer a{color:var(--mut)}
 <div>
 <div class="eye">Safety first</div>
 <h2>Nothing risky happens without you.</h2>
-<p class="sub">Studio never deploys, deletes, spends money or sends messages on its own. It pauses, shows what it wants to do, and waits.</p>
-<ul class="ticks"><li>Hard budget cap per project, with a stop when it is reached</li><li>Secrets never written into specs or logs</li><li>Runs on your machine, your code stays with you</li><li>Every step has a run record you can read</li></ul>
+<p class="sub">Studio never deploys, deletes or sends messages on its own. It pauses, shows what it wants to do, and waits.</p>
+<ul class="ticks"><li>You can stop a run at any point and pick it up later</li><li>Secrets never written into specs or logs</li><li>Runs on your machine, your code stays with you</li><li>Every step has a run record you can read</li></ul>
 </div>
 <div class="gate" id="gate" aria-live="polite">
 <div class="row"><span>t3 · invoice screens</span><span class="ok">passed</span></div>
 <div class="row"><span>t4 · deploy to hosting</span><span class="wt" id="st">waiting for approval</span></div>
-<div class="row"><span>Budget</span><span>$1.84 / $5.00</span></div>
+<div class="row"><span>Progress</span><span>3 of 9 tasks done</span></div>
 <div class="btns"><button class="a" id="ap">Approve</button><button id="rj">Reject</button></div>
 </div>
 </div>
@@ -192,12 +192,24 @@ footer a{color:var(--mut)}
 </div>
 </div></section>
 
+<section id="about"><div class="wrap">
+<div class="two" style="gap:56px">
+<img src="img/rishav.webp" alt="Rishav Mishra, creator of Token Zombie and TZ Studio" width="900" height="900" loading="lazy" style="width:100%;max-width:440px;border-radius:var(--r);border:1px solid var(--line);justify-self:center">
+<div>
+<div class="eye">About</div>
+<h2>Built by Rishav Mishra.</h2>
+<p class="sub">I built Token Zombie because I hit the problem myself: AI coding helpers waste effort and lose their place. Studio is the next step, a way to run a whole project with Claude Code without losing track of it.</p>
+<p class="sub" style="margin-top:14px;font-size:16px">I also make EditSutra, a video editing tool, and I use real projects like it to test Studio.</p>
+<div class="cta" style="justify-content:flex-start"><a class="btn" href="https://rishavm713-create.github.io/">Portfolio</a><a class="btn" href="https://editsutra.github.io/">EditSutra</a><a class="btn" href="./">Token Zombie</a></div>
+</div></div>
+</div></section>
+
 <section id="faq"><div class="wrap">
 <div class="eye">FAQ</div>
 <h2>Questions.</h2>
 <details><summary>Do I need Claude Code?</summary><p>Yes. Studio uses Claude Code as its engine, so you need it installed and your own Claude access. Studio does not include a Claude subscription.</p></details>
 <details><summary>Does my code leave my computer?</summary><p>Studio runs locally and keeps projects in folders on your machine. Claude Code itself talks to Anthropic as it normally does.</p></details>
-<details><summary>What does it cost?</summary><p>Pricing is not set yet. The beta is private and free to the people invited.</p></details>
+<details><summary>What does it cost?</summary><p>Studio will be a monthly subscription. You also need your own Claude Code subscription, which is separate and paid to Anthropic. Nothing else is charged.</p></details>
 <details><summary>Can a non-programmer use it?</summary><p>That is the goal, but the beta is built for developers and technical founders first. A non-technical experience comes later, once the engine is proven.</p></details>
 <details><summary>How is it different from Token Zombie?</summary><p>Token Zombie trims Claude Code token waste. Studio manages a whole project from idea to delivery. They are separate tools.</p></details>
 </div></section>
@@ -206,7 +218,7 @@ footer a{color:var(--mut)}
 <div class="eye">Early access</div>
 <h2>Early access is not open yet.</h2>
 <p class="sub" style="margin:0 auto">Studio is in a private beta with a small group. A waitlist will open here once there is something worth testing in your hands.</p>
-<p class="fine" style="margin-top:22px">Meanwhile, try <a href="./" style="color:var(--acc)">Token Zombie</a>, the free tool that cuts Claude Code token waste.</p>
+<p class="fine" style="margin-top:22px">Studio will be a monthly subscription, used with your own Claude Code subscription. Meanwhile, see <a href="./" style="color:var(--acc)">Token Zombie</a>.</p>
 </div></section>
 
 <footer><div class="wrap">
