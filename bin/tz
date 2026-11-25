@@ -17,7 +17,7 @@ HELP = """tz <command> [args]
   replayrank [DIR]   instruction files ranked by token size x replay frequency
   planphase status|next|gate PLAN.md   phase-by-phase plan reading with a verify gate
   scope HOST... [--file F]             authorized-scope check (deny wins, default deny)
-  logc [FILE] | rules explain|verify|list | budget <prompt>  staged runs, code search, usage, logs, safety rules, depth
+  logc [FILE] | rules explain|verify|list | depth <prompt>  staged runs, code search, usage, logs, safety rules, depth
   startup [N]                                    what a new chat loads (startup audit)
   optimize [--transcript F]                      duplicate reads / repeated commands in the chat log
   filter [--lines N] < text                      shrink noisy command output
