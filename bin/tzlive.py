@@ -26,6 +26,31 @@ def xlock(f):
         except OSError:
             time.sleep(0.05)
 
+def pid_alive(pid):
+    """True if the process exists. Windows: os.kill(pid, 0) is CTRL_C_EVENT there (it signals, not probes), so ask the kernel."""
+    try:
+        pid = int(pid)
+        if os.name != 'nt':
+            os.kill(pid, 0)
+            return True
+        import ctypes
+        k = ctypes.WinDLL('kernel32', use_last_error=True)
+        k.OpenProcess.restype = ctypes.c_void_p
+        k.GetExitCodeProcess.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_ulong)]
+        k.CloseHandle.argtypes = [ctypes.c_void_p]
+        h = k.OpenProcess(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
+        if not h:
+            return ctypes.get_last_error() == 5  # access denied: it exists
+        code = ctypes.c_ulong()
+        got = k.GetExitCodeProcess(h, ctypes.byref(code))
+        k.CloseHandle(h)
+        return not got or code.value == 259  # STILL_ACTIVE
+    except PermissionError:
+        return True
+    except (OSError, ValueError, TypeError, OverflowError):
+        return False
+
+
 SAFE_FS = ('Grep', 'Glob')
 SAFE_WEB = ('WebSearch', 'WebFetch')
 READ_ONLY = SAFE_FS + SAFE_WEB + ('Read', 'Skill', 'TodoWrite', 'ToolSearch', 'TaskOutput', 'TaskList', 'TaskGet', 'ListMcpResourcesTool')

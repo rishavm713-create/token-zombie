@@ -134,11 +134,8 @@ def load_run(rid):
 
 
 def alive(pid):
-    try:
-        os.kill(pid, 0)
-        return True
-    except OSError:
-        return False
+    from tzlive import pid_alive
+    return pid_alive(pid)
 
 
 def run(task, cwd, test=None, budget=400000, turns=20, worktree=False, dry=False, worker=None, timeout=1800, gate=False, allow=None, build=None, allow_api=False, resume=None, rollback=False):

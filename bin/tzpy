@@ -2,6 +2,7 @@
 # Run a TZ Python script with a working Python 3: python3 on macOS/Linux; on Windows (Git Bash, which Claude Code
 # uses for hooks) the first of `py -3`, python, python3 that really runs (python3 there may be a Store stub). Cached.
 if [ "$OS" != "Windows_NT" ]; then exec python3 "$@"; fi
+export PYTHONUTF8=1  # hooks read/write UTF-8, not the Windows code page
 c="${TEMP:-${TMP:-/tmp}}/tz-python"
 if [ -s "$c" ]; then read -r p < "$c"; exec $p "$@"; fi
 for p in "py -3" python python3; do
