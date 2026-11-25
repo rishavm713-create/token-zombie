@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # `tz pr [--base BRANCH]`: prepares a commit message and PR body from the real diff. Read-only: never commits, pushes or opens anything.
-import json, os, re, subprocess, sys
+import shutil, json, os, re, subprocess, sys
 
 SECRET = re.compile(r'AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9_-]{20,}|ghp_[A-Za-z0-9]{30,}|-----BEGIN [A-Z ]*PRIVATE[ ]KEY-----|(?:api[_-]?key|secret|token|password)\s*[=:]\s*["\'][^"\'\s]{12,}["\']', re.I)
 
@@ -19,7 +19,7 @@ def checklist(run_tests=False):
     out = [('tests present', bool(tests), '%d test file(s)' % len(tests) if tests else 'no test files tracked')]
     if run_tests:
         if os.path.isfile(os.path.join(root, 'tests/run_all.sh')):
-            r = subprocess.run(['bash', 'tests/run_all.sh'], cwd=root, capture_output=True, text=True)
+            r = subprocess.run([shutil.which('bash') or 'bash', 'tests/run_all.sh'], cwd=root, capture_output=True, text=True)
             out.append(('tests passing', r.returncode == 0, 'exit %d' % r.returncode))
         else:
             out.append(('tests passing', False, 'no tests/run_all.sh to run'))
