@@ -40,7 +40,8 @@ def advice(name):
 
 # v2.1 feature registry (one place): name -> default. env TZ_FEAT_<NAME>=0/1 beats config.json "features" beats this.
 # mode "off" turns every feature off. Hook-side features only; commands (tz toolprune, tz mem, ...) always work on demand.
-FEATURES = {'cache_ttl_auto': 1,  # measured 1 h vs 5 min prompt-cache life (tzcont.cache_ttl)
+FEATURES = {'banner': 1,           # one visible 'Token Zombie is on' line at session start (systemMessage); off = silent
+            'cache_ttl_auto': 1,  # measured 1 h vs 5 min prompt-cache life (tzcont.cache_ttl)
             'dup_skeleton': 1,    # read_guard=deny: the deny carries the file skeleton instead of nothing
             'safety_net': 1,      # parsed destructive-command / secret-path checks (tzsafety) inside the policy engine
             'stuck_detect': 1,    # OpenHands-style stuck patterns (tzstuck) on tool results

@@ -76,6 +76,21 @@ def _fit(txt):
         return txt
 
 
+
+def _vis():
+    """One user-visible line (systemMessage) so TZ shows in every UI, incl. the desktop app; feature banner, default on."""
+    try:
+        if not _tzl.feature('banner'):
+            return ''
+        v = ''
+        try:
+            v = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.claude-plugin', 'plugin.json'))).get('version', '')
+        except Exception:
+            pass
+        return 'Token Zombie ' + (('v' + v + ' ') if v else '') + 'is on: saves tokens automatically. See savings: tz gain'
+    except Exception:
+        return ''
+
 try:
     _raw = sys.stdin.read()
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -141,7 +156,12 @@ try:
         txt = (('TOKEN ZOMBIE start context. Use this; do not read the full HANDOFF.md unless the step needs a detail.\n'
                + '\n\n'.join(parts))[:CAP] if parts else '') + ('\n\n' + pk if pk else '')
         txt = _fit('\n\n'.join(x for x in (L, txt.strip(), tips, facts, _plan(d)) if x))
-        print(json.dumps({'hookSpecificOutput': {'hookEventName': 'SessionStart', 'additionalContext': txt}}))
+        _o = {'hookSpecificOutput': {'hookEventName': 'SessionStart', 'additionalContext': txt}}
+        if _vis():
+            _o['systemMessage'] = _vis()
+        print(json.dumps(_o))
+    elif _vis():
+        print(json.dumps({'systemMessage': _vis()}))
     if d.get('source') != 'resume' and os.environ.get('TZ_FRESH_BG') != '0':  # panel's fresh-chat number; detached, never delays start
         import subprocess
         subprocess.Popen([sys.executable, '-c', 'import sys; sys.path.insert(0, sys.argv[1]); import tzopt; tzopt.fresh_file()',
