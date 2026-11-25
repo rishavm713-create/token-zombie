@@ -91,6 +91,7 @@ def git(*x):
 
 
 git('init', '-q')
+git('config', 'core.autocrlf', 'false')  # Windows git defaults to CRLF conversion; the test compares exact bytes
 w(os.path.join(repo, 'app.txt'), 'ok\n')
 w(os.path.join(repo, 'user.txt'), 'v1\n')
 w(os.path.join(repo, 'run.sh'), '#!/bin/sh\n', 0o755)

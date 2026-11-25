@@ -41,4 +41,4 @@ claude plugin marketplace add rishavm713-create/token-zombie && claude plugin in
 
 🌐 [Website](https://rishavm713-create.github.io/token-zombie/) · 📖 [Full guide](docs/REFERENCE.md) · ✅ [Test evidence](docs/TEST_EVIDENCE.md) · 🔐 [Security](.github/SECURITY.md) · 🤝 [Contribute](.github/CONTRIBUTING.md)
 
-Made by Rishav Mishra · MIT · macOS and Linux
+Created by [Rishav Mishra](https://github.com/rishavm713-create) · MIT · macOS and Linux
