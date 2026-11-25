@@ -1,11 +1,15 @@
-# Release handoff, v2.1.0
-- PR #4 feat/v2.1.0 -> main: MERGED (merge commit 78743eb). Tag v2.1.0 -> 78743eb pushed. GitHub release created from CHANGELOG.
-- Website: docs/index.html pill and release link now say v2.1 / v2.1.0 (Pages from docs/).
-- Owner tasks: run `./install.sh` yourself (never done on live ~/.claude by Claude); `tz hooks live`; HOST-VERIFY checklist; OK for paid `tz ab` trials.
+# Release handoff
+## v2.1.0 (done)
+PR #4 merged (78743eb), tag v2.1.0 pushed, GitHub release created. g0 merged via PR #6.
+## merge/g123 (local only, NOT pushed, no PR)
+g1, g2, g3 merged on top of main; see docs/INTEGRATION_STATUS.md (conflicts + open items) and docs/TEST_EVIDENCE.md (suite: pending at time of writing).
+## Owner tasks
+- Run `./install.sh` yourself (Claude never runs it on live ~/.claude); then `tz hooks live`, HOST-VERIFY checklist.
+- OK needed for: paid `tz ab` trials; deleting remote group branches; pushing/merging merge/g123.
+- Licence review: claude-squad LICENSE (possibly AGPL) and token-optimizer LICENSE were deleted by the group branches.
 ## Next steps, in order
-1. Windows session (other account/Mac): fix 11 failures (test_smoke 8, test_stuck 2, test_g03_ruflo 1) from CI run 45604891823; do not mix with other work.
-2. g0 -> branch from main, merge, run `bash tests/run_all.sh`, push.
-3. g1: resolve NOTICE, bin/tz, bin/tzbudget.py conflicts; test.
-4. g2, g3: commit uncommitted files in their worktrees, check licences (AGPL), test, merge one at a time.
-5. Other projects: EditSutra captions-audit fix, GTA6 clips question.
-Rules: one integration owner; no force push; one writer per file set; full suite after each merge.
+1. Read final suite TOTAL in TEST_EVIDENCE; fix any failure.
+2. Licence review; restore or justify deleted LICENSE files.
+3. Verify g1 `tz budget` vs v21; push merge/g123 and open PR only with owner OK.
+4. Windows session: 11 CI failures, separate work.
+Rules: one integration owner; no force push; full suite after each merge.
