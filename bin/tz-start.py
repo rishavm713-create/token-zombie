@@ -57,6 +57,16 @@ def _plan(d, peek=False, _c={}):
     return _c['v']
 
 
+def _facts(d):
+    """Opt-in (micro_skills) learned-facts block, or ''. Fail open."""
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import tzfacts
+        return tzfacts.session_start(d)
+    except Exception:
+        return ''
+
+
 def _fit(txt):
     """Cap SessionStart text with the shared budget fitter (Claude Code truncates hook output near 10k chars)."""
     try:
@@ -66,6 +76,21 @@ def _fit(txt):
         return txt
 
 
+
+def _vis():
+    """One user-visible line (systemMessage) so TZ shows in every UI, incl. the desktop app; feature banner, default on."""
+    try:
+        if not _tzl.feature('banner'):
+            return ''
+        v = ''
+        try:
+            v = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.claude-plugin', 'plugin.json'))).get('version', '')
+        except Exception:
+            pass
+        return 'Token Zombie ' + (('v' + v + ' ') if v else '') + 'is on: saves tokens automatically. See savings: tz gain'
+    except Exception:
+        return ''
+
 try:
     _raw = sys.stdin.read()
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -74,6 +99,12 @@ try:
         sys.exit(0)  # same event already handled by the other registered copy
     d = json.loads(_raw)
     cwd = d.get('cwd') or os.getcwd()
+    if d.get('source') in ('compact', 'clear'):
+        try:
+            import tztokopt
+            tztokopt.reset(d.get('session_id', 'x'))
+        except Exception:
+            pass
     parts, pk = [], ''
     if d.get('source') == 'compact':  # after compaction: only the continuation note tz-compact.py saved
         note = os.path.expanduser(f"~/.claude/token-zombie/compact-{d.get('session_id', 'x')}.md")
@@ -81,7 +112,7 @@ try:
             txt = 'TOKEN ZOMBIE continuation (saved just before compaction; facts from git + chat log):\n' + open(note).read()[:1500]
         else:
             txt = ''
-        txt = '\n\n'.join(x for x in (lean(), txt, _plan(d)) if x)
+        txt = '\n\n'.join(x for x in (lean(), txt, _facts(d), _plan(d)) if x)
         if txt:
             print(json.dumps({'hookSpecificOutput': {'hookEventName': 'SessionStart', 'additionalContext': txt}}))
         sys.exit(0)
@@ -95,6 +126,9 @@ try:
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import tznext
         pk = tznext.pack(cwd)
+        if not pk:  # feature beads_prime (default off): short brief of ready tasks when no task pack
+            import tzbeads
+            pk = tzbeads.on_start(cwd)
     except Exception:
         pass
     try:  # oversized handoff notes: one line, advice only
@@ -111,11 +145,23 @@ try:
         tips = tztips.start_tips(d)
     except Exception:
         tips = ''
-    if parts or pk or L or tips or _plan(d, peek=True):
+    try:  # v2.1 opt-in: recent observed work (tz obs)
+        import tzobs
+        obs = tzobs.hook(d) if _tzl.feature('obs_inject') else ''
+    except Exception:
+        obs = ''
+    tips = '\n\n'.join(x for x in (tips, obs) if x)
+    facts = _facts(d)
+    if parts or pk or L or tips or facts or _plan(d, peek=True):
         txt = (('TOKEN ZOMBIE start context. Use this; do not read the full HANDOFF.md unless the step needs a detail.\n'
                + '\n\n'.join(parts))[:CAP] if parts else '') + ('\n\n' + pk if pk else '')
-        txt = _fit('\n\n'.join(x for x in (L, txt.strip(), tips, _plan(d)) if x))
-        print(json.dumps({'hookSpecificOutput': {'hookEventName': 'SessionStart', 'additionalContext': txt}}))
+        txt = _fit('\n\n'.join(x for x in (L, txt.strip(), tips, facts, _plan(d)) if x))
+        _o = {'hookSpecificOutput': {'hookEventName': 'SessionStart', 'additionalContext': txt}}
+        if _vis():
+            _o['systemMessage'] = _vis()
+        print(json.dumps(_o))
+    elif _vis():
+        print(json.dumps({'systemMessage': _vis()}))
     if d.get('source') != 'resume' and os.environ.get('TZ_FRESH_BG') != '0':  # panel's fresh-chat number; detached, never delays start
         import subprocess
         subprocess.Popen([sys.executable, '-c', 'import sys; sys.path.insert(0, sys.argv[1]); import tzopt; tzopt.fresh_file()',

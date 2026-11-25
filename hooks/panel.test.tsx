@@ -135,7 +135,7 @@ test('buttons run the expected argv, copy and compact', async ($, on) => {
   await ui.press({ plugin: 'token-zombie', key: 'mode-ultra' })
   expect(clips).toEqual([{ asset: 'sounds/mode-ultra.wav' }])
   const last = () => ran[ran.length - 1]!
-  expect(last().slice(0, 1)).toEqual([process.platform === 'win32' ? 'py' : 'python3'])
+  expect(last().slice(0, 1)).toEqual([typeof process !== 'undefined' && (process as { platform?: string }).platform === 'win32' ? 'py' : 'python3'])
   expect(last().slice(-2)).toEqual(['mode', 'ultra'])
   expect(last().slice(-3)[0]).toMatch(/bin\/tz$/)
 

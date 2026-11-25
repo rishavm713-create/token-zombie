@@ -40,7 +40,8 @@ def advice(name):
 
 # v2.1 feature registry (one place): name -> default. env TZ_FEAT_<NAME>=0/1 beats config.json "features" beats this.
 # mode "off" turns every feature off. Hook-side features only; commands (tz toolprune, tz mem, ...) always work on demand.
-FEATURES = {'cache_ttl_auto': 1,  # measured 1 h vs 5 min prompt-cache life (tzcont.cache_ttl)
+FEATURES = {'banner': 1,           # one visible 'Token Zombie is on' line at session start (systemMessage); off = silent
+            'cache_ttl_auto': 1,  # measured 1 h vs 5 min prompt-cache life (tzcont.cache_ttl)
             'dup_skeleton': 1,    # read_guard=deny: the deny carries the file skeleton instead of nothing
             'safety_net': 1,      # parsed destructive-command / secret-path checks (tzsafety) inside the policy engine
             'stuck_detect': 1,    # OpenHands-style stuck patterns (tzstuck) on tool results
@@ -64,7 +65,30 @@ FEATURES = {'cache_ttl_auto': 1,  # measured 1 h vs 5 min prompt-cache life (tzc
             'plan_advice': 1,     # big vague task: plan first
             'instr_advice': 1,    # oversized or duplicate always-loaded instruction files
             'defaults_advice': 0, # one-time offer of `tz defaults` (suggests cheaper default models)
-            'bulk_read_block': 0} # BLOCKS one Read/Grep/Glob after bulk_read_n in a row (use an Explore subagent)
+            'bulk_read_block': 0, # BLOCKS one Read/Grep/Glob after bulk_read_n in a row (use an Explore subagent)
+            'log_compress': 1,    # build/test logs in crushed output: keep every failure line, original stored (tzlogc)
+            'skill_lint': 1,      # advice when a written SKILL.md breaks the skill spec (tzaskills)
+            'read_delta': 0,      # opt-in, BLOCKS a re-read of a changed file once and shows the diff instead (tztokopt)
+            'check_pipe': 1,      # advice when test/build output is piped through head/tail/grep (tzhumanlayer)
+            'scope_check': 1,     # advice when curl/wget targets a host outside .tz/scope.json (tzscope)
+            'beads_prime': 0,     # opt-in: ready-task brief at session start when no task pack (adds context)
+            'safety_extra': 0,    # opt-in: BLOCKS extra destructive/secret commands (tzrules)
+            'safety_strict': 0,   # opt-in: stricter rules, also BLOCKS (tzrules)
+            'custom_rules': 0,    # opt-in: user rulebooks (tzrules)
+            # v2.1 group 2 repo ports: all opt-in (they block or add context / change output)
+            'git_guard': 0,        # BLOCKS risky git commands on PreToolUse (tzgitguard)
+            'unverified_claim': 0, # Stop: one advice line when success is claimed with no passing check (tzclaim)
+            'micro_skills': 0,     # facts learned from repeated failures, added at SessionStart (tzfacts)
+            'rtk_filters': 0,      # extra per-command output filters in tzcrush (tzrtk)
+            # v2.1 group 3 ports; blocking, recording and injecting ones are opt-in
+            'budget_warn': 1,         # one line when a budget set with `tz budget set` climbs a level (silent with no budget)
+            'budget_block': 0,        # BLOCKS new prompts at a budget HARD_STOP (handoff saved first)
+            'stale_warn': 1,          # before a broad test run: warn once when the branch is behind main
+            'stale_block': 0,         # BLOCKS that test run once instead
+            'obs_record': 0,          # record prompts/tool observations in the local ledger (tz obs)
+            'obs_file_context': 0,    # inject earlier work on a file before it is read
+            'obs_inject': 0,          # inject the recent-work index at session start
+            'line_custom_command': 0}
 
 
 def feature(name):

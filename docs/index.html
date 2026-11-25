@@ -14,7 +14,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://rishavm713-create.github.io/token-zombie/img/social-preview.png">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"TOKEN ZOMBIE","applicationCategory":"DeveloperApplication","operatingSystem":"macOS, Linux, Windows","description":"Free, local Claude Code plugin that finds wasted tokens and saves your place between chats.","url":"https://rishavm713-create.github.io/token-zombie/","codeRepository":"https://github.com/rishavm713-create/token-zombie","license":"https://opensource.org/license/mit","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"TOKEN ZOMBIE","applicationCategory":"DeveloperApplication","operatingSystem":"macOS, Linux","description":"Free, local Claude Code plugin that finds wasted tokens and saves your place between chats.","url":"https://rishavm713-create.github.io/token-zombie/","codeRepository":"https://github.com/rishavm713-create/token-zombie","license":"https://opensource.org/license/mit","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
 </script>
 <style>
 :root{color-scheme:dark;--bg:#070b08;--panel:#0e1610;--panel2:#121d15;--line:#22342a;--fg:#eef7f0;--muted:#a3b7a8;--green:#83ffa0;--green2:#3dd66a;--red:#ff9b8a;--ease:cubic-bezier(.2,.7,.2,1)}
@@ -201,6 +201,8 @@ section{padding:64px 0}.hero{padding:44px 0 56px}.head{margin-bottom:34px}
 <div class="stat rv" style="--i:3"><b>1</b><span>Command to install</span></div>
 </div></div>
 
+<section id="honest"><div class="wrap"><div class="head rv"><p class="eyebrow">Honest numbers</p><h2>What is measured. What is not.</h2><p class="lead">Net input saved on a replay of 1,025 real chats, after TZ's own overhead: <b>0.58%</b> (MEASURED). Answer quality and provider tokens: UNKNOWN until the paid A/B is run. Output compressors such as rtk and headroom reduce raw output more; TZ adds waste detection, handoffs and honest labels. Run <code>tz stats</code> for your own figure. Windows CI is known to fail and is deferred.</p></div></div></section>
+
 <section id="problem"><div class="wrap">
 <div class="head rv"><p class="eyebrow">The problem</p><h2>Long chats quietly burn your limit.</h2><p class="lead">You hit the weekly limit and cannot tell where it went. Three leaks cause most of it.</p></div>
 <div class="grid g3">
@@ -219,7 +221,7 @@ section{padding:64px 0}.hero{padding:44px 0 56px}.head{margin-bottom:34px}
 </div></div></section>
 
 <section id="new"><div class="wrap">
-<div class="head rv"><p class="eyebrow">New in 2.0</p><h2>Less rework. Safer changes.</h2><p class="lead">Every feature below is built and covered by the test suite: 1032 checks pass. Savings are read from your own Claude Code logs; run <code>tz stats</code> to see yours.</p></div>
+<div class="head rv"><p class="eyebrow">New in 2.0 and 2.1</p><h2>Less rework. Safer changes.</h2><p class="lead">Every feature below is built and covered by the test suite: 3068 checks pass on v2.1.0 (MEASURED). Savings are read from your own Claude Code logs; run <code>tz stats</code> to see yours.</p></div>
 <div class="grid g4">
 <div class="card rv"><span class="num">TOKENS</span><h3>No double reads</h3><p>A file Claude already read comes back as a short stub. Big JSON keeps only the outliers; colour codes are stripped.</p></div>
 <div class="card rv" style="--i:1"><span class="num">MEMORY</span><h3>Tasks in order</h3><p>Tasks can wait on other tasks; <code>tz next</code> picks the one that is ready. Failed or stalled runs are flagged.</p></div>
@@ -229,6 +231,10 @@ section{padding:64px 0}.hero{padding:44px 0 56px}.head{margin-bottom:34px}
 <div class="card rv" style="--i:1"><span class="num">VERIFY</span><h3>Independent checks</h3><p>The gate detects and runs tests, lint, type and audit tools, and catches API drift. "Done" needs proof.</p></div>
 <div class="card rv" style="--i:2"><span class="num">RECOVER</span><h3>Undo and resume</h3><p><code>tz agent --rollback</code> restores only the files a failed run changed. Interrupted runs resume from a checkpoint.</p></div>
 <div class="card rv" style="--i:3"><span class="num">OPEN SOURCE</span><h3>Reused, credited</h3><p>Permissively licensed code is reused with attribution in NOTICE. <a href="https://github.com/rishavm713-create/token-zombie/releases/tag/v2.1.0">Release notes</a></p></div>
+<div class="card rv"><span class="num">AUTOMATIC</span><h3>You do not type these</h3><p>Once hooks are registered, advice runs by itself: idle-cache cost, big pastes, repeat reads, stuck loops, log trimming, SKILL.md lint, stale-branch and budget warnings. Anything that blocks is opt-in.</p></div>
+<div class="card rv" style="--i:1"><span class="num">GUARDS</span><h3>Opt-in blockers</h3><p><code>tz gitguard</code>, <code>tz rules</code> and <code>tz scope</code> check risky git commands, destructive commands and outside hosts. Blocking stays off until you turn it on.</p></div>
+<div class="card rv" style="--i:2"><span class="num">LOGS</span><h3>Trimmed, never lost</h3><p><code>tz logc</code> keeps every failure line of build and test logs; <code>tz delta</code> shows a diff instead of a full re-read (opt-in).</p></div>
+<div class="card rv" style="--i:3"><span class="num">BUDGET</span><h3>Know your limit</h3><p><code>tz budget</code> and <code>tz stale</code> warn when a budget climbs or the branch is behind main. Windows CI is known-failing and deferred.</p></div>
 </div></div></section>
 
 <section id="see"><div class="wrap">

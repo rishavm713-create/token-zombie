@@ -99,7 +99,7 @@ def handler(tok, port=None):
             else:
                 self.send_response(404); self.end_headers(); return
             self.send_response(200); self.send_header('Content-Type', ct); self.send_header('Cache-Control', 'no-store')
-            self.send_header('X-Content-Type-Options', 'nosniff'); self.send_header('Content-Security-Policy', "default-src 'none'; script-src 'unsafe-inline'; connect-src 'self'")
+            self.send_header('X-Content-Type-Options', 'nosniff'); self.send_header('Content-Security-Policy', "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'")
             self.end_headers(); self.wfile.write(body)
         def do_POST(self):
             self.send_response(405); self.end_headers()

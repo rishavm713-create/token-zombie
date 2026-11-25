@@ -88,3 +88,111 @@ compound-engineering-plugin (https://github.com/EveryInc/compound-engineering-pl
 fast-anything (https://github.com/EL4CTEO/fast-anything), MIT. Copyright (c) 2026 EL4CTEO. Used in: bin/tzfast.py (adapted). Licence: third_party/fast-anything/LICENSE
 planning-with-files (see above), MIT. Copyright (c) 2026 Ahmad Adi. Also used in: bin/tzplanfiles.py (adapted from the upstream scripts and templates, ported to Python) and third_party/planning-with-files/phase-counts-cases.json (parity cases). Licence: third_party/planning-with-files/LICENSE
 SWE-bench (https://github.com/SWE-bench/SWE-bench), MIT. Used in: bin/tzswebench.py (test-log parsers and FAIL_TO_PASS/PASS_TO_PASS grading adapted from the upstream harness; no Docker, no dataset). Licence: third_party/swe-bench/LICENSE
+
+anthropics/skills (https://github.com/anthropics/skills), Apache License 2.0 (skill-creator only; no root licence)
+Copyright 2026 Anthropic, PBC
+Used in: bin/tzaskills.py validate_text, adapted from skills/skill-creator/scripts/quick_validate.py (modified: stdlib frontmatter reader, Claude Code keys accepted unless strict). Licence: third_party/askills/LICENSE
+
+oh-my-claudecode (https://github.com/Yeachan-Heo/oh-my-claudecode), MIT licence
+Copyright (c) 2025 Yeachan Heo
+Used in: bin/tzteam.py (staged flow, claim recovery and verify gate; ported to stdlib Python). Licence: third_party/oh-my-claudecode/LICENSE
+
+ast-grep (https://github.com/ast-grep/ast-grep), MIT licence
+Copyright (c) 2022 Herrington Darkholme
+Used in: bin/tzsg.py (metavariable grammar and parity cases; the matcher is new). Licence: third_party/ast-grep/LICENSE
+
+ccusage (https://github.com/ryoppippi/ccusage), MIT licence
+Copyright (c) 2025 ryoppippi
+Used in: bin/tzccu.py (log discovery, dedupe and usage parsing; ported to stdlib Python). Licence: third_party/ccusage/LICENSE
+
+headroom (https://github.com/headroomlabs-ai/headroom), Apache License 2.0
+Copyright 2025 Headroom Contributors
+Used in: bin/tzlogc.py, adapted from crates/headroom-core/src/transforms/log_compressor.rs (modified: stdlib Python, simplified, error lines never capped). Licence and upstream NOTICE: third_party/headroom/
+
+cc-safety-net (https://github.com/kenryu42/cc-safety-net), MIT licence
+Copyright (c) 2026 J Liew
+Used in: bin/tzrules.py (rule ids, matcher semantics and rulebook format; rebuilt in Python). Licence: third_party/cc-safety-net/LICENSE
+
+beads (https://github.com/gastownhall/beads), MIT licence
+Copyright (c) 2025 Beads Contributors
+Used in: bin/tzbeads.py (base36 hash id and adaptive length; claim/readiness/compaction behaviour in own code). Licence: third_party/beads/LICENSE
+
+karpathy-skills (https://github.com/jokim1/karpathy-skills), MIT licence
+Copyright (c) 2026 Joseph Kim
+Used in: bin/tzreplayrank.py (token-size x replay ranking and verified-slice baseline/snapshot/auto-revert rules from skills/karpathy-audit and karpathy-refactor SKILL.md; Python written for TZ). Licence: third_party/karpathy/LICENSE
+
+humanlayer (https://github.com/humanlayer/humanlayer), Apache License 2.0
+Copyright 2025-2026 QueryTale, Inc. d/b/a HumanLayer
+Used in: bin/tzhumanlayer.py, a modified Python port of .claude/hooks/block-test-output-filtering.sh, plus a rebuild of the phase workflow in apps/riptide-rpi-claude-plugin (implement-plan SKILL.md, plan_template.md format). Licence: third_party/humanlayer/LICENSE
+
+Claude-BugHunter (https://github.com/elementalsouls/Claude-BugHunter), MIT licence (code only; no docs or skills copied)
+Copyright (c) 2026 Sachin Sharma
+Used in: bin/tzscope.py (host matching adapted from engine/scope.py; test cases from its self-test). Licence: third_party/bughunter/LICENSE
+
+--- v2.1 group 2 repo ports. MIT/Apache permission texts as above apply to each MIT/Apache entry; licence copies in third_party/<name>/. ---
+
+RTK (https://github.com/rtk-ai/rtk), Apache License 2.0, Copyright 2026 RTK AI Labs
+Used in: bin/tzrtk.py (per-command output filters adapted from src/cmds, ported to Python and changed). BUSL-1.1 engine not used.
+
+microsoft/TokenEconomizer (https://github.com/microsoft/TokenEconomizer), MIT licence, Copyright (c) 2026 Microsoft
+Used in: bin/tzfacts.py (fact lifecycle, scoring and error classes adapted from microskills/, changed).
+
+mattpocock/skills (https://github.com/mattpocock/skills), MIT licence, Copyright (c) 2026 Matt Pocock
+Used in: bin/tzgitguard.py (blocked-command list from git-guardrails-claude-code, changed), skills/tz-craft references.
+
+obra/superpowers (https://github.com/obra/superpowers), MIT licence, Copyright (c) 2025 Jesse Vincent
+Used in: bin/tzclaim.py (adapted from verification-before-completion), skills/tz-craft references.
+
+langfuse (https://github.com/langfuse/langfuse), MIT licence for the parts outside ee/, Copyright (c) 2023-2026 ClickHouse, Inc.
+Used in: bin/tztrace.py (trace model and cost details, changed). Nothing from ee/ directories.
+
+harbor (https://github.com/laude-institute/harbor), Apache License 2.0
+Used in: bin/tzscrub.py (adapted from harbor redaction.py, changed).
+
+terminal-bench (https://github.com/laude-institute/terminal-bench), Apache License 2.0
+Used in: bin/tztbench.py (task parsing, resolve rule and pass@k, ported to Python stdlib and changed).
+
+REA (https://github.com/morluto/rea), MIT licence, Copyright (c) 2026 morluto
+Used in: bin/tzscrub.py mark_untrusted() (idea of labelling target output as untrusted data; no source copied).
+
+context-mode (https://github.com/mksglu/context-mode), Elastic License 2.0: NOT bundled, no code, prompts or assets copied.
+bin/tzsandbox.py is an independent implementation of behaviour described in the public README.
+
+serena (https://github.com/oraios/serena), GPL-3.0-or-later application (SolidLSP MIT): no code, prompts or docstrings copied.
+bin/tzsym.py is an independent rebuild of observed symbol-lookup behaviour.
+v2.1 group 3 ports (licence texts under third_party/)
+
+ruflo (https://github.com/ruvnet/ruflo), MIT licence
+Copyright (c) 2024-2026 ruvnet
+Used in: bin/tzbudget.py (alert_level / is_raised / budget_of adapted from plugins/ruflo-mods/hooks/cost/budget.ts, ported to Python).
+
+ccstatusline (https://github.com/sirmalloc/ccstatusline), MIT licence
+Copyright (c) 2025 Matthew Breedlove
+Used in: bin/tzline.py (widget behaviour, settings format and algorithms adapted from src/utils and src/widgets, ported to Python).
+
+claude-squad (https://github.com/smtg-ai/claude-squad), AGPL-3.0
+Used in: bin/tzsquad.py (documented behaviour only; original code, no code, text or assets copied).
+
+claude-mem (https://github.com/thedotmack/claude-mem), Apache License 2.0
+Copyright 2026 Alex Newman
+Used in: bin/tzobs.py (strip_tags, normalize_title, exact_title_match, content_hash adapted and ported to Python, changed; the rest is own code following its behaviour). See third_party/claude-mem/NOTICE.
+
+tree-sitter (https://github.com/tree-sitter/tree-sitter), MIT licence
+Copyright (c) 2018 Max Brunsfeld
+Used in: bin/tzts.py (tag rules adapted from crates/tags/src/tags.rs). py-tree-sitter (MIT, Copyright (c) 2019 Max Brunsfeld, GitHub) is optional at runtime; neither it nor any grammar is bundled.
+
+claw-code (https://github.com/ultraworkers/claw-code), MIT licence as published; code provenance unverified
+Copyright (c) 2026 UltraWorkers and Claw Code contributors
+Used in: bin/tzclaw.py (documented behaviour "stale-branch detection before broad verification" only; original code).
+
+vercel-labs/agent-skills (https://github.com/vercel-labs/agent-skills), no licence file
+Used in: nothing copied. bin/tzskillcheck.py and skills/tz-craft/references/ are original.
+
+lean-ctx (https://github.com/yvgude/lean-ctx), Apache License 2.0 (root LICENSE; commercial and free_runtime paths excluded and not used)
+Copyright 2026 Yves Gugger
+Used in: bin/tzread.py (read modes) and bin/tzout.py _reread (unchanged re-read stub); behaviour only, own Python code.
+
+memsearch (https://github.com/zilliztech/memsearch), MIT licence
+Copyright (c) 2025 Zilliz Inc.
+Used in: bin/tzmemsearch.py (chunking, cleaning, section extraction and incremental-index rules adapted from src/memsearch/chunker.py, core.py, cli.py, scanner.py, ported to Python).
+

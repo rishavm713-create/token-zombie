@@ -181,17 +181,51 @@ try:
             LIVE[0] = (LIVE[0] + '\n' + tztips.prompt_tips(data)).strip()
         except Exception:
             _diag('tips', ev)
+    claim = ''
+    if ev == 'Stop':  # opt-in (unverified_claim): success claimed with no passing check; advice only
+        try:
+            import tzclaim
+            claim = tzclaim.stop_advice(data)
+        except Exception:
+            _diag('claim', ev)
+    if ev == 'Stop' and claim and not advice('next_task'):
+        emit({'systemMessage': claim})
+    if ev == 'UserPromptSubmit':  # v2.1 spend budget: opt-in hard stop, then one warning line per level
+        try:
+            import tzbudget
+            why = tzbudget.block_reason(data)
+        except Exception:
+            why = ''
+            _diag('budget', ev)
+        if why:
+            emit({'decision': 'block', 'reason': why})
+            sys.exit(0)
+        try:
+            import tzbudget
+            LIVE[0] = (LIVE[0] + '\n' + tzbudget.prompt_advice(data)).strip()
+        except Exception:
+            _diag('budget', ev)
+    if ev in ('UserPromptSubmit', 'PreToolUse', 'PostToolUse', 'PostToolUseFailure') and any(
+            _tzl.feature(f) for f in ('obs_record', 'obs_file_context')):  # v2.1 observation memory (opt-in)
+        try:
+            import tzobs
+            LIVE[0] = (LIVE[0] + '\n' + tzobs.hook(data)).strip()
+        except Exception:
+            _diag('obs', ev)
     if ev == 'Stop' and advice('next_task'):  # turn closed past the limit: tell the user to /compact (advice, once per 25k)
         try:
             import tzcont
             m = tzcont.compact_hint(data, used_tokens(data))
             pc = tzcont.pack_cleanup(data)
-            m = '\n'.join(x for x in (m, pc, tzcont.untested_advice(data)) if x)
+            m = '\n'.join(x for x in (m, pc, tzcont.untested_advice(data), claim) if x)
             if m:
-                tzbus_mood('compact')
+                if m != claim:
+                    tzbus_mood('compact')
                 emit({'systemMessage': m, **({'hookSpecificOutput': {'hookEventName': ev}} if LIVE[0] else {})})
         except Exception:
             _diag('compact', ev)
+            if claim:
+                emit({'systemMessage': claim})
     if ev == 'Stop':  # keep the fresh-chat saving in TOKENS SAVED current (scan of recent logs, at most every 5 min)
         try:
             import tzopt
@@ -200,6 +234,12 @@ try:
                 tzopt.fresh_file()
         except Exception:
             _diag('fresh', ev)
+    if ev == 'SessionEnd':  # opt-in (micro_skills): learn facts from the finished transcript
+        try:
+            import tzfacts
+            tzfacts.session_end(data)
+        except Exception:
+            _diag('facts', ev)
     if ev == 'SessionEnd':  # on-demand: turn off what this chat turned on (verified, logged)
         try:
             import tzondemand
@@ -211,6 +251,12 @@ try:
     if ev == 'SubagentStart' and advice('pack_hints'):  # subagent report is re-sent every later call: cap it (advice, fail open)
         emit({'hookSpecificOutput': {'hookEventName': ev, 'additionalContext': 'TOKEN ZOMBIE: final report <= 300 words: verdict, evidence as file:line paths, no pasted file contents or history.'}})
         sys.exit(0)
+    if ev in ('PreCompact', 'PostCompact'):  # earlier reads leave the context: forget their snapshots
+        try:
+            import tztokopt
+            tztokopt.reset(data.get('session_id', 'x'))
+        except Exception:
+            _diag('delta', ev)
     if ev in ('Stop', 'SessionEnd', 'PreCompact', 'SubagentStop', 'SubagentStart', 'InstructionsLoaded', 'PostCompact') + ('PostToolBatch', 'PreModelSwitch', 'PostModelSwitch', 'WorktreeCreate', 'WorktreeRemove', 'FileChanged'):
         sys.exit(0)
     if ev == 'PreToolUse':  # policy engine: advice only, fail open, TZ_POLICY=0 disables
@@ -231,6 +277,16 @@ try:
         if why:
             emit({'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny', 'permissionDecisionReason': why}})
             _pflush()
+    if ev == 'PreToolUse' and data.get('tool_name') == 'Bash':  # opt-in (git_guard): hook() fails closed while on
+        try:
+            import tzgitguard
+            why = tzgitguard.hook(data)
+        except Exception:
+            why = ''
+            _diag('gitguard', ev)
+        if why:
+            emit({'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny', 'permissionDecisionReason': why}})
+            _pflush()
     if ev == 'PreToolUse' and data.get('tool_name', 'Read') != 'Read':
         if data.get('tool_name') == 'Bash' and os.environ.get('TZ_SAFE') != '0':  # destructive-command guard (tz safe); TZ_SAFE=0 turns it off
             try:
@@ -243,12 +299,44 @@ try:
                 emit({'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny',
                       'permissionDecisionReason': 'TOKEN ZOMBIE safe: blocked (%s). Ask the owner, or run it with TZ_SAFE=0.' % why}})
                 _pflush()
+        if data.get('tool_name') == 'Bash':  # v2.1 stale branch before a broad test run: warn, or opt-in deny once
+            try:
+                import tzclaw
+                kind, why = tzclaw.hook(data)
+            except Exception:
+                kind, why = '', ''
+                _diag('stale', ev)
+            if kind == 'deny':
+                emit({'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny', 'permissionDecisionReason': why}})
+                _pflush()
+            if kind:
+                LIVE[0] = (LIVE[0] + '\n' + why).strip()
         if data.get('tool_name') in ('Edit', 'Write', 'MultiEdit', 'NotebookEdit') and advice('next_task'):
             try:  # another live chat claimed this file: warn BEFORE the write (advice only)
                 import tzcont
                 LIVE[0] = (LIVE[0] + '\n' + tzcont.file_guard(data)).strip()
             except Exception:
                 _diag('fileguard', ev)
+        if data.get('tool_name') == 'Bash':  # test/build output piped away hides lines and the exit code (advice only)
+            try:
+                from tzlib import feature
+                if feature('check_pipe'):
+                    from tzhumanlayer import check_pipe_advice
+                    m = check_pipe_advice(data)
+                    if m:
+                        LIVE[0] = (LIVE[0] + '\n' + m).strip()
+            except Exception:
+                _diag('check_pipe', ev)
+        if data.get('tool_name') == 'Bash':  # curl/wget host outside .tz/scope.json (advice only; silent without that file)
+            try:
+                from tzlib import feature
+                if feature('scope_check'):
+                    import tzscope
+                    m = tzscope.advise(data)
+                    if m:
+                        LIVE[0] = (LIVE[0] + '\n' + m).strip()
+            except Exception:
+                _diag('scope', ev)
         if (data.get('tool_name') or '').startswith('mcp__'):  # v2.1: same read-only MCP call already answered (advice only)
             try:
                 from tztoolprune import mcp_dup
@@ -258,6 +346,16 @@ try:
         if LIVE[0]:
             emit({'hookSpecificOutput': {'hookEventName': 'PreToolUse'}})
         sys.exit(0)
+    if ev in ('PreToolUse', 'PostToolUse') and data.get('tool_name') == 'Read':  # opt-in read_delta: re-read of a changed file gets the diff
+        try:
+            import tztokopt
+            why = tztokopt.advise(data)
+        except Exception:
+            why = ''
+            _diag('delta', ev)
+        if why and ev == 'PreToolUse':
+            emit({'hookSpecificOutput': {'hookEventName': ev, 'permissionDecision': 'deny', 'permissionDecisionReason': why}})
+            _pflush()
     if ev == 'PreToolUse':  # big Read: nudge once, never block twice (whole file may be truly needed)
         ti = data.get('tool_input') or {}
         f = ti.get('file_path') or ''
@@ -304,6 +402,14 @@ try:
                 LIVE[0] = (LIVE[0] + '\n' + m).strip()
         except Exception:
             _diag('stuck', ev)
+    if ev == 'PostToolUse' and data.get('tool_name') in ('Write', 'Edit', 'MultiEdit'):  # SKILL.md spec check (advice only)
+        try:
+            import tzaskills
+            m = tzaskills.advise(data)
+            if m:
+                LIVE[0] = (LIVE[0] + '\n' + m).strip()
+        except Exception:
+            _diag('skill_lint', ev)
     if ev == 'PostToolUseFailure':
         if LIVE[0]:
             emit({'hookSpecificOutput': {'hookEventName': ev}})
