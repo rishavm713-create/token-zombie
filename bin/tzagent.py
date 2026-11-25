@@ -215,7 +215,7 @@ def run(task, cwd, test=None, budget=400000, turns=20, worktree=False, dry=False
         if rollback:
             import tzrollback; tzrollback.snapshot(cwd, rid)
     done = {r['phase'] for r in rows if r.get('status') == 'ok'}
-    t_start = time.time()
+    t_start = time.perf_counter()  # time.time() can stand still ~15 ms on Windows
     note = 'This is a RESUMED run: an earlier attempt was interrupted. Inspect `git status` and `git diff` first, keep finished work, and complete only what is missing. ' if resume else ''
     def phase(ph, extra=''):
         nonlocal spent
@@ -224,7 +224,7 @@ def run(task, cwd, test=None, budget=400000, turns=20, worktree=False, dry=False
             rows.append(dict(phase=ph, model=r['model'], skill=r['skill'], status='dry')); return 'dry'
         if spent >= budget:
             rows.append(dict(phase=ph, status='budget')); return 'budget'
-        if wall and time.time() - t_start >= wall:  # checked BEFORE the call, like mini-swe-agent query(): TimeExceeded
+        if wall and time.perf_counter() - t_start >= wall:  # checked BEFORE the call, like mini-swe-agent query(): TimeExceeded
             rows.append(dict(phase=ph, status='wall', note='wall limit %ss reached' % wall)); return 'wall'
         if max_errors and sum(1 for x in rows if x.get('status') == 'error') >= max_errors:
             rows.append(dict(phase=ph, status='errors', note='error limit %d reached' % max_errors)); return 'errors'

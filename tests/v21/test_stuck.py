@@ -51,7 +51,7 @@ os.environ['TZ_FEAT_STUCK_DETECT'] = '1'
 ok('state file written atomically, no tmp left', os.listdir(os.path.join(H, '.claude', 'token-zombie')) and not [f for f in os.listdir(os.path.join(H, '.claude', 'token-zombie')) if f.startswith('.stuck')])
 # tzagent
 ok('alive(self)', tzagent.alive(os.getpid()))
-ok('alive(1) true (PermissionError = exists)', tzagent.alive(1))
+ok('alive(1) true (PermissionError = exists)', tzagent.alive(os.getppid() if os.name == 'nt' else 1))  # Windows has no PID 1
 ok('alive(dead) false', not tzagent.alive(2 ** 22 + 12345))
 ok('claim fresh', tzagent.claim('t1', ['a.py']) == [])
 ok('claim clash', tzagent.claim('t2', ['a.py', 'b.py']) == ['a.py'] and not os.path.exists(tzagent._cpath('b.py')))

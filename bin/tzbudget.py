@@ -137,7 +137,7 @@ def session_logs(transcript):
     if not transcript or not os.path.isfile(transcript):
         return []
     sub = os.path.join(glob.escape(os.path.splitext(transcript)[0]), 'subagents', '**', '*.jsonl')
-    return [transcript] + sorted(glob.glob(sub, recursive=True))
+    return [os.path.normpath(p) for p in [transcript] + sorted(glob.glob(sub, recursive=True))]
 
 
 def week_logs(now):
@@ -152,7 +152,7 @@ def week_logs(now):
             continue
         if now - mt <= WEEK * 86400:
             fresh.append((mt, p))
-    return [p for _, p in sorted(fresh, reverse=True)]
+    return [os.path.normpath(p) for _, p in sorted(fresh, reverse=True)]  # one cache key per file on Windows too
 
 
 def _sum(files, paths, since=''):

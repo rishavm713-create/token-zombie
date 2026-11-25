@@ -104,14 +104,14 @@ Updated at `d100060` (after the tips wiring). Hook entry points: `tz-guard.py` (
 
 ## Anthropic's 10 cost tips
 
-| # | Tip | Rows | Status at 8c703c3 |
+| # | Tip | Rows | Status at 8c703c3 (rows 4-6 rechecked at fafcade) |
 |---|---|---|---|
 | 1 | Clear between tasks; `/compact` long chats | 13, 16, 17 | 2.0 advice live (EST). Gate and button text: code only. TZ cannot run `/clear` or `/compact`. |
 | 2 | Keep CLAUDE.md short | 5, 15 | Report on demand (`tz instructions`). Detect-and-fix: code only. |
 | 3 | Turn off unused MCP servers | 4 | `tz toolprune` on demand (partial). Effect UNKNOWN. |
-| 4 | Cheaper model, lower effort for simple work | 1, 3, 20 | MISSING from hooks (code only). |
-| 5 | Give exploration to subagents | 8 | MISSING from hooks (code only). |
-| 6 | Plan mode and specific prompts | 14 | MISSING from hooks (code only). |
+| 4 | Cheaper model, lower effort for simple work | 1, 3, 20 | Live: mechanical-task model/effort tip (`tztips.prompt_tips` from tz-guard, on by default), once per chat. Advice only. Effect UNKNOWN. |
+| 5 | Give exploration to subagents | 8 | Opt-in: `bulk_read_block` (off by default) denies one Read/Grep/Glob after a long run and points to an Explore subagent. Effect UNKNOWN. |
+| 6 | Plan mode and specific prompts | 14 | Live: big-vague-task plan tip (on by default, silent in plan mode), once per chat. Advice only. Effect UNKNOWN. |
 | 7 | Skills instead of long instructions | 15 | 2.0 skill packs stay parked; `tz-craft` references load on demand (its prompt hint `craft()` is not called by any hook). Offer: code only. |
 | 8 | Hooks that cut big output | 9, 6, 7 | Live. Trim MEASURED offline. |
 | 9 | Do not leave a chat idle | 18 | Live, EST. |
