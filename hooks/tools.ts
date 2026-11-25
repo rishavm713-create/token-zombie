@@ -2,6 +2,8 @@
 
 // Callable tz tools: each wraps an existing `tz` command (no new engine). Argv only, no shell; fixed command per tool.
 // Also a hook-proof log: counts the hook events this session actually delivered (`tz hooks`-style evidence from a live host).
+import { PY } from './pycmd'
+
 const TOOLS: Record<string, { desc: string; argv: (i: any) => string[] | null; props?: Record<string, unknown> }> = {
   tz_recall: { desc: 'Search saved tz memory (spilled outputs, handoffs, ledger) for a topic.', props: { query: { type: 'string' } },
     argv: i => (i.query ? ['recall', String(i.query)] : null) },
@@ -37,7 +39,7 @@ async function runTz($: any, name: string, e: any) {
   const argv = TOOLS[name]!.argv(e)
   if (!argv) return { deny: `token-zombie: ${name} needs its input` }
   try {
-    const r = await $.process.run(['sh', `${$.plugin.root}/bin/tzpy`, `${$.plugin.root}/bin/tz`, ...argv], { timeoutMs: 60_000 })
+    const r = await $.process.run([...PY, `${$.plugin.root}/bin/tz`, ...argv], { timeoutMs: 60_000 })
     return { result: ((r.stdout + (r.exitCode || !r.stdout ? '\n' + r.stderr : '')).slice(0, 20_000) || '(no output)') } as any
   } catch (err) {
     return { deny: `token-zombie: ${name} failed: ${String((err as Error)?.message ?? err).slice(0, 120)}` }
