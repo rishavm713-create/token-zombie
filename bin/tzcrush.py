@@ -91,9 +91,26 @@ def clean(text):
     return re.sub(r'\n{3,}', '\n\n', t)
 
 
+def _buildlog(text):
+    """tzlogc output when feature log_compress is on and the text is a build/test log, else None."""
+    try:
+        from tzlib import feature
+        if not feature('log_compress'):
+            return None
+        import tzlogc
+        r = tzlogc.compress(text)
+    except Exception:
+        return None
+    return r and r['text']
+
+
 def crush(text):
     """(new_text, kind) or (None, kind) when it did not shrink by >=10%. Caller must spill the original first."""
     k = kind(text)
+    if k != 'json' and not text.startswith('diff --git'):  # test output can hold '@@' hunks and still be a log
+        new = _buildlog(text)
+        if new is not None:
+            return new, 'buildlog'
     text = clean(text) if k in ('log', 'text') else text
     try:
         new = {'json': _json, 'diff': _diff, 'log': _log}.get(k, lambda t: t)(text)

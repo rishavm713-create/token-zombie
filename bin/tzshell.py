@@ -3,6 +3,8 @@
 # Rule ids, reasons and the verdict fixtures it is tested against are adapted from kenryu42/cc-safety-net
 # (MIT, Copyright (c) 2026 J Liew), see NOTICE. Independent rebuild in Python: no TypeScript was copied.
 # analyze(cmd, cwd) -> (ok, reason, rule_id) | None.  None = text could not be parsed and shows no dangerous raw text.
+# Feature safety_net (on) = bypass fixes: more wrappers, cd tracking, subshells, stdin redirects, braces.
+# Features safety_extra / safety_strict / custom_rules (off) add the rules in tzrules.py.
 import os, re, shlex
 
 SHELLS = {'bash', 'sh', 'zsh', 'dash', 'ksh'}
@@ -10,6 +12,19 @@ ECHO = {'echo', 'printf'}  # only THEIR OWN arguments are exempt, never the rest
 KEYWORDS = {'{', '}', '!', 'then', 'do', 'else', 'elif', 'if', 'while', 'until'}
 FETCH = {'curl', 'wget', 'cat', 'base64', 'nc', 'openssl', 'gpg', 'echo', 'printf', 'fetch'}
 MAX_DEPTH = 8
+TRACE = None  # tzrules.explain sets a list; run() records each unwrapped command into it
+# prefix commands that run their operands: name -> options that take a value
+WRAPPERS = {'busybox': set(), 'chronic': set(), 'coproc': set(), 'unbuffer': set(), 'caffeinate': {'-t', '-w'},
+            'stdbuf': {'-i', '-o', '-e'}, 'ionice': {'-c', '-n', '-p'}}
+
+
+def _on(name):
+    """Feature switch; if tzlib cannot load, only the default-on hardening stays active."""
+    try:
+        from tzlib import feature
+        return feature(name)
+    except Exception:
+        return name == 'safety_net'
 
 
 class ParseError(Exception):
@@ -255,9 +270,10 @@ def _secret(tok):
             return 'secret.ext.' + base.rsplit('.', 1)[1]
         p = os.path.normpath(t)
         for rel, nm in SECRET_HOME:
-            d = os.path.join(h, rel)
-            if p == d or p.startswith(d + '/'):
-                return 'secret.home.' + nm
+            for root in (h, os.path.expanduser('~')):  # HOME may be a symlink
+                d = os.path.join(root, rel)
+                if p == d or p.startswith(d + '/'):
+                    return 'secret.home.' + nm
     return None
 
 
@@ -273,7 +289,15 @@ def _under(p, roots):
     return any(p.startswith(r.rstrip('/') + '/') for r in roots)
 
 
-def _rm_target(t, cwd):
+def _braces(t, n=0):
+    """Expand {a,b} so `{/,build}` is checked as each real operand."""
+    m = re.search(r'(?<!\$)\{([^{}]*,[^{}]*)\}', t)
+    if not m or n > 3:
+        return [t]
+    return [y for x in m.group(1).split(',')[:32] for y in _braces(t[:m.start()] + x + t[m.end():], n + 1)]
+
+
+def _rm_target(t, cwd, at=''):
     """Verdict for one recursive-rm operand, or None when it is inside cwd or a temp dir."""
     h = _home()
     m = re.match(r'^\$\{?TMPDIR\}?(/.*)$', t)
@@ -289,7 +313,9 @@ def _rm_target(t, cwd):
     glob = gi is not None
     base = '/'.join(parts[:gi]) if glob else t
     base = base or ('/' if t.startswith('/') else '.')
-    p = os.path.realpath(os.path.join(cwd, base))
+    if at is None and not os.path.isabs(base):
+        return B('rm.dynamic-target', 'rm -r after a cd whose destination cannot be checked.')
+    p = os.path.realpath(os.path.join(at or cwd, base))
     c = os.path.realpath(cwd)
     if p == '/':
         return B('rm.root-or-home' if glob else 'rm.root', 'rm -r on the filesystem root.')
@@ -413,6 +439,7 @@ def _eval_text(s, ctx):
 
 
 def _text(s, ctx):
+    """Analyse nested shell text in the caller's directory."""
     return analyze_text(s, ctx['cwd'], ctx['depth'] + 1, ctx.get('piped', False), ctx)
 
 
@@ -442,8 +469,12 @@ def run(t, ctx):
     """Verdict (rule_id, reason) for one tokenised simple command, or None. Unwraps sudo/env/xargs/bash -c/..."""
     if ctx['depth'] > MAX_DEPTH:
         return B('analysis.depth', 'Command nesting is too deep to analyse.')
+    hard, env = _on('safety_net'), {}
     while True:
         while t and (re.match(r'^[A-Za-z_]\w*=', t[0]) or t[0] in KEYWORDS):
+            k, eq, val = t[0].partition('=')
+            if eq:
+                env[k] = val
             t = t[1:]
         if not t:
             return None
@@ -453,6 +484,9 @@ def run(t, ctx):
         elif c == 'env':
             i = 0
             while i < len(a) and (a[i].startswith('-') or '=' in a[i]):
+                k, eq, val = a[i].partition('=')
+                if eq and not k.startswith('-'):
+                    env[k] = val
                 i += 2 if a[i] in ('-u', '-C', '-S', '--unset', '--chdir') else 1
             t = a[i:]
         elif c == 'command':
@@ -468,12 +502,62 @@ def run(t, ctx):
             t = a[1:]
         elif c in ('time', 'nohup', 'setsid', 'builtin'):
             t = _skip_opts(a) if c == 'time' else a
+        elif hard and c in WRAPPERS:
+            t = _skip_opts(a, WRAPPERS[c])
+        elif hard and c in ('chrt', 'taskset'):  # one priority / mask operand before the command
+            r = _skip_opts(a, {'-c'} if c == 'taskset' else set())
+            t = r if c == 'taskset' and '-c' in a else r[1:]
+        elif hard and c == 'flock':
+            r = _skip_opts(a, {'-w', '-E', '--timeout', '--conflict-exit-code'})[1:]
+            if r[:1] == ['-c'] and len(r) > 1:
+                return _eval_text(r[1], ctx)
+            t = r
         else:
             break
+    if TRACE is not None:
+        TRACE.append({'depth': ctx['depth'], 'dir': ctx.get('at', ctx['cwd']), 'tokens': list(t)})
+    v = _builtin(c, a, t, ctx, hard)
+    if v or not (_on('safety_extra') or _on('safety_strict') or _on('custom_rules')):
+        return v
+    import tzrules
+    return tzrules.check(t, env, ctx)
+
+
+def _parallel(a, ctx):
+    """GNU parallel: literal ::: inputs are checked one by one; piped input to rm -r or a shell is blocked."""
+    i = 0
+    while i < len(a) and a[i].startswith('-') and a[i] != '--':
+        i += 2 if a[i] in ('-j', '-P', '-I', '-S', '-a', '--jobs', '--colsep', '--arg-file', '--sshlogin') else 1
+    rest = a[i + 1:] if a[i:i + 1] == ['--'] else a[i:]
+    cut = next((k for k, x in enumerate(rest) if x.startswith(':::')), len(rest))
+    inner, fed = rest[:cut], [x for x in rest[cut:] if not x.startswith(':::')]
+    if not inner:
+        if ctx.get('piped'):
+            return B('parallel.command-stream-dynamic', 'parallel runs commands read from input; they cannot be checked.')
+        for x in fed:
+            v = _text(x, ctx)
+            if v:
+                return v
+        return None
+    base = os.path.basename(inner[0])
+    if ctx.get('piped') or cut == len(rest):
+        L, S, P, dd = _opts(inner[1:], GL['rmcmd'])
+        if base == 'rm' and ('recursive' in L or S & set('rR')):
+            return B('parallel.rm-recursive-force-dynamic', 'parallel rm -r deletes whatever its input names.')
+        if base in SHELLS:
+            return B('parallel.shell-dynamic', 'parallel feeding a shell runs unchecked input.')
+    words = [x for x in inner if x != '{}'] + fed
+    return run(words, dict(ctx, depth=ctx['depth'] + 1))
+
+
+def _builtin(c, a, t, ctx, hard):
+    """Default rules for one unwrapped command."""
     if c in ECHO:
         return None
     for x in a:  # credentials are never read through any command (templates like .env.example are fine)
         r = _secret(x)
+        if not r and hard and c == 'git' and ':' in x and '://' not in x:
+            r = _secret(x.split(':', 1)[1])  # git show HEAD:.env
         if r:
             return B(r, 'Touches a credentials file (%s). Ask the owner first.' % x)
     if re.search(r'\b(DROP\s+(TABLE|DATABASE)|TRUNCATE\s+TABLE)\b', ' '.join(t), re.I):
@@ -488,20 +572,27 @@ def run(t, ctx):
             return B('xargs.rm-recursive-force-dynamic', 'xargs rm -r deletes whatever its input names.')
         if ctx.get('fexec'):
             return B('find.exec-rm', 'find -exec rm -r removes files in bulk.')
-        for x in P:
-            v = _rm_target(x, ctx['cwd'])
+        for x in [y for p in P for y in (_braces(p) if hard else [p])]:
+            v = _rm_target(x, ctx['cwd'], ctx.get('at', ''))
             if v:
                 return v
         return None
     if c in SHELLS:
-        ci = None
-        for j, x in enumerate(a):
+        ci, j = None, 0
+        while j < len(a):
+            x = a[j]
             if re.match(r'^-[A-Za-z]*c[A-Za-z]*$', x):
                 ci = j
                 break
+            if hard and x in ('-o', '+o', '-O', '+O', '--rcfile', '--init-file'):
+                j += 2  # these take a value, so `bash -o pipefail -c ..` still reaches -c
+                continue
             if x == '--' or not x.startswith('-'):
                 break
+            j += 1
         if ci is None:
+            if hard and ctx.get('stdin') is not None and j >= len(a):
+                return _eval_text(ctx['stdin'], dict(ctx, stdin=None))
             if ctx.get('xargs'):
                 return B('xargs.shell-dynamic', 'xargs feeding a shell runs unchecked input.')
             if ctx.get('piped'):
@@ -512,6 +603,11 @@ def run(t, ctx):
         return _eval_text(a[ci + 1], ctx)
     if c == 'eval':
         return _eval_text(' '.join(a), ctx)
+    if hard and c == 'su':
+        code = next((a[k + 1] for k, x in enumerate(a[:-1]) if x in ('-c', '--command')), None)
+        return _eval_text(code, ctx) if code is not None else None
+    if hard and c == 'parallel':
+        return _parallel(a, ctx)
     if c == 'xargs':
         i = 0
         while i < len(a) and a[i].startswith('-') and a[i] != '--':
@@ -567,8 +663,8 @@ _REDIR = re.compile(r'^\d*(>>?|<<?<?|&>>?|>&|<&)')
 _DISK = re.compile(r'^(/dev/(sd|nvme|disk|rdisk|hd)\w*)')
 
 
-def _strip_redirects(toks):
-    """Drop redirections; a redirect onto a raw disk device is itself a verdict."""
+def _strip_redirects(toks, ins=None):
+    """Drop redirections; a redirect onto a raw disk device is itself a verdict. `ins` collects (op, source) pairs."""
     out, i = [], 0
     while i < len(toks):
         m = _REDIR.match(toks[i])
@@ -578,8 +674,41 @@ def _strip_redirects(toks):
         tgt = toks[i][m.end():] or (toks[i + 1] if i + 1 < len(toks) else '')
         if m.group(1).startswith('>') and _DISK.match(tgt):
             return None, B('redirect.block-device', 'redirect onto a raw disk device')
+        if ins is not None and m.group(1) in ('<', '<<<'):
+            ins.append((m.group(1), tgt))
         i += 1 if toks[i][m.end():] else 2
     return out, None
+
+
+def _chdir(toks, at, stack):
+    """Directory after a cd/pushd/popd segment; None = cannot be known. Other commands leave it unchanged."""
+    while toks and (toks[0] in KEYWORDS or toks[0] in ('builtin', 'command')):
+        toks = toks[1:]
+    if not toks or toks[0] not in ('cd', 'pushd', 'popd'):
+        return at
+    if toks[0] == 'popd':
+        return stack.pop() if stack else None
+    if toks[0] == 'pushd':
+        stack.append(at)
+    args = [x for x in toks[1:] if x == '-' or not x.startswith('-')]
+    d = args[0] if args else '~'
+    d = os.path.expanduser(d.replace('${HOME}', '~').replace('$HOME', '~'))
+    if d == '-' or re.search(r'[$`*?]', d) or (at is None and not os.path.isabs(d)):
+        return None
+    return os.path.normpath(os.path.join(at or '/', d))
+
+
+def _stdin_check(ins):
+    """`cat < .env` reads the secret even though the path is not an argument."""
+    for op, src in ins:
+        if op == '<':
+            r = _secret(src)
+            if not r and _on('safety_extra'):
+                import tzrules
+                r = tzrules.secret_extra(src)
+            if r:
+                return B(r, 'Reads a credentials file (%s) through a redirect. Ask the owner first.' % src)
+    return None
 
 
 def analyze_text(s, cwd, depth=0, piped=False, parent=None):
@@ -587,21 +716,39 @@ def analyze_text(s, cwd, depth=0, piped=False, parent=None):
     if depth > MAX_DEPTH:
         return B('analysis.depth', 'Command nesting is too deep to analyse.')
     segs, subs = scan(s)
+    hard = _on('safety_net')
+    at = (parent or {}).get('at', cwd)
     for sub in subs:
-        v = analyze_text(sub, cwd, depth + 1)
+        v = analyze_text(sub, cwd, depth + 1, parent={'at': at})
         if v:
             return v
+    dirs, groups = [], []  # pushd stack; directories saved at each open subshell
     for text, op in segs:
+        closed = 0
+        while hard and text.startswith('(') and not text.startswith('(('):
+            groups.append(at)
+            text = text[1:].lstrip()
+        while closed < len(groups) and text.endswith(')') and text.count(')') > text.count('('):
+            text = text[:-1].rstrip()
+            closed += 1
         try:
             toks = shlex.split(text, posix=True)
         except ValueError as e:
             raise ParseError(str(e))
-        toks, v = _strip_redirects(toks)
+        ins = []
+        toks, v = _strip_redirects(toks, ins)
+        v = v or (_stdin_check(ins) if hard else None)
         if v:
             return v
-        v = run(toks, {'cwd': cwd, 'depth': depth, 'piped': op == '|' or (piped and op == '')})
+        here = next((src for o, src in ins if o == '<<<'), None)
+        v = run(toks, {'cwd': cwd, 'at': at, 'depth': depth, 'stdin': here,
+                       'piped': op == '|' or (piped and op == '')})
         if v:
             return v
+        if hard:
+            at = _chdir(toks, at, dirs)
+        for _ in range(closed):
+            at = groups.pop()
     return None
 
 

@@ -8,14 +8,15 @@ from tzlib import cfg
 SPAN = {'five_hour': ('5h', 18000), 'seven_day': ('7d', 604800)}
 
 
-def totals(path):
-    """Sum real usage from a chat log: dict in/out/cache_read/cache_write/last_ctx/turns + first/last timestamps + ctx points."""
+def totals(path, prior=None):
+    """Sum real usage from a chat log: dict in/out/cache_read/cache_write/last_ctx/turns + first/last timestamps + ctx points.
+    prior {message id: counts} = replies already summed by an earlier scan: only their growth is added (and it is updated)."""
     t = dict(inp=0, out=0, cr=0, cw=0, last=0, turns=0, t0=None, t1=None, pts=[], ents=[], w5=0, w1h=0, think=0)
-    seen = set()
+    got = {}  # reply key -> [input, output, cache_read, cache_write, 5m, 1h, thinking, time]
     if not path or not os.path.isfile(path):
         return t
     with open(path, 'rb') as f:
-        for raw in f:
+        for n, raw in enumerate(f):
             line = raw.decode('utf-8', 'ignore')
             if '"usage"' not in line:
                 continue
@@ -27,25 +28,41 @@ def totals(path):
             u = m.get('usage')
             if not isinstance(u, dict):
                 continue
-            key = m.get('id') or d.get('uuid')
-            if key and key in seen:  # one API reply can be logged in several lines
+            v = [u.get(k) or 0 for k in ('input_tokens', 'output_tokens', 'cache_read_input_tokens', 'cache_creation_input_tokens')]
+            if m.get('model') == '<synthetic>' and not any(v):  # local error notice, not a reply: must not zero the context
                 continue
-            seen.add(key)
-            i, o, cr, cw = (u.get(k) or 0 for k in ('input_tokens', 'output_tokens', 'cache_read_input_tokens', 'cache_creation_input_tokens'))
             cc = u.get('cache_creation')  # 5-minute vs 1-hour cache writes [MEASURED when the host logs the split]
-            if isinstance(cc, dict):
-                t['w5'] += cc.get('ephemeral_5m_input_tokens') or 0; t['w1h'] += cc.get('ephemeral_1h_input_tokens') or 0
-            for b in (m.get('content') or []):  # thinking tokens are inside output_tokens; chars/4 is an EST of their share
-                if isinstance(b, dict) and b.get('type') == 'thinking':
-                    t['think'] += len(b.get('thinking') or '') // 4
-            t['inp'] += i; t['out'] += o; t['cr'] += cr; t['cw'] += cw; t['turns'] += 1
-            t['last'] = i + cr + cw
-            ts = _ts(d.get('timestamp'))
-            if ts:
-                t['t0'] = t['t0'] or ts
-                t['t1'] = ts
-                t['pts'].append((ts, t['last']))
-                t['ents'].append((ts, i + o + cr + cw))
+            cc = cc if isinstance(cc, dict) else {}
+            v += [cc.get('ephemeral_5m_input_tokens') or 0, cc.get('ephemeral_1h_input_tokens') or 0]
+            # thinking tokens are inside output_tokens; chars/4 is an EST of their share
+            v.append(sum(len(b.get('thinking') or '') // 4 for b in (m.get('content') or [])
+                         if isinstance(b, dict) and b.get('type') == 'thinking'))
+            key = m.get('id') or d.get('uuid') or n
+            old = got.get(key)
+            if old is None:
+                got[key] = v + [_ts(d.get('timestamp'))]
+                continue
+            # one API reply is logged in several lines and output grows while streaming: keep the fullest count (ccusage rule)
+            think = max(old[6], v[6])
+            if sum(v[:4]) > sum(old[:4]):
+                old[:6] = v[:6]
+            old[6] = think
+    for key, v in got.items():
+        ts = v[7]
+        seen = prior.get(key) if prior is not None else None
+        if seen and sum(v[:4]) <= sum(seen[:4]):
+            continue
+        for k, x, y in zip(('inp', 'out', 'cr', 'cw', 'w5', 'w1h', 'think'), v, seen or [0] * 7):
+            t[k] += max(0, x - y)
+        t['turns'] += 0 if seen else 1
+        t['last'] = v[0] + v[2] + v[3]
+        if prior is not None:
+            prior[key] = v[:7]
+        if ts:
+            t['t0'] = t['t0'] or ts
+            t['t1'] = ts
+            t['pts'].append((ts, t['last']))
+            t['ents'].append((ts, sum(v[:4]) - sum((seen or [0] * 4)[:4])))
     return t
 
 
@@ -124,7 +141,8 @@ def totals_inc(path, state_file):
         with tempfile.NamedTemporaryFile('wb', delete=False) as tmp:
             tmp.write(chunk[:end])
         try:
-            d = totals(tmp.name)
+            ids = st.get('ids') or {}
+            d = totals(tmp.name, ids)
         finally:
             os.unlink(tmp.name)
         for k in ('inp', 'out', 'cr', 'cw', 'turns', 'w5', 'w1h', 'think'):
@@ -134,7 +152,7 @@ def totals_inc(path, state_file):
         base['pts'] = (base['pts'] + d['pts'])[-200:]
         try:
             os.makedirs(os.path.dirname(state_file), exist_ok=True)
-            json.dump(dict(off=st['off'] + end, t=base), open(state_file, 'w'))
+            json.dump(dict(off=st['off'] + end, t=base, ids=dict(list(ids.items())[-20:])), open(state_file, 'w'))  # a reply's lines are adjacent
         except OSError:
             pass
     return base
