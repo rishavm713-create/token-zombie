@@ -4,6 +4,7 @@
 import os, sys, json, time, tempfile, subprocess
 from harness import ok, done, Z
 H = tempfile.mkdtemp(); os.environ['HOME'] = H; os.environ['TZ_FEAT_STUCK_DETECT'] = '1'
+os.environ['USERPROFILE'] = os.environ['HOME']  # Windows expanduser reads this one
 import tzstuck, tzagent
 tzagent.STATE = os.path.join(H, '.claude', 'token-zombie')
 S = [0]

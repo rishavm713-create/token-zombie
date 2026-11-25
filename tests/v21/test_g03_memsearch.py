@@ -115,6 +115,7 @@ try:
     m.USE_FTS = True
     # CLI
     os.environ['HOME'] = T
+    os.environ['USERPROFILE'] = os.environ['HOME']  # Windows expanduser reads this one
 
     def run(*argv):
         o = io.StringIO()
@@ -132,6 +133,7 @@ finally:
     os.chdir(old_cwd)
     if old_home is not None:
         os.environ['HOME'] = old_home
+        os.environ['USERPROFILE'] = os.environ['HOME']  # Windows expanduser reads this one
     shutil.rmtree(T, ignore_errors=True)
 
 done()

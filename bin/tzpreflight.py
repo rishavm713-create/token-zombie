@@ -34,7 +34,7 @@ def offline(evidence=None):
     T = tempfile.mkdtemp(prefix='tzpf-')
     for t in ('task1', 'task2'):
         w = os.path.join(T, t); _fixture_copy(w)
-        r = subprocess.run(['bash', os.path.join(AB, 'accept', f'accept_{t}.sh'), w], capture_output=True, text=True)
+        r = subprocess.run([shutil.which('bash') or 'bash', os.path.join(AB, 'accept', f'accept_{t}.sh').replace(os.sep, '/'), w.replace(os.sep, '/')], capture_output=True, text=True)
         R.append((f'{t} not pre-solved', r.returncode != 0 and 'REJECT' in r.stdout, 'untouched fixture must REJECT'))
     hj = json.load(open(os.path.join(Z, 'hooks', 'hooks.json')))['hooks']
     rx = open(os.path.join(AB, 'run_experiment.sh')).read()
@@ -42,7 +42,8 @@ def offline(evidence=None):
     if evidence:
         empty = not os.path.exists(evidence) or not os.listdir(evidence)
         R.append(('evidence dir new/empty', empty, evidence + ('' if empty else ': holds an old run; use a new dir')))
-    busy = subprocess.run(['pgrep', '-f', 'tzab.py'], capture_output=True, text=True).stdout.split()
+    # shortcut: no busy check where pgrep is missing (Windows); add one if A/B runs overlap there
+    busy = subprocess.run(['pgrep', '-f', 'tzab.py'], capture_output=True, text=True).stdout.split() if shutil.which('pgrep') else []
     busy = [p for p in busy if p != str(os.getpid())]
     R.append(('no A/B run in progress', not busy, ' '.join(busy) or 'none'))
     return R

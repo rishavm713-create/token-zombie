@@ -4,6 +4,7 @@ from harness import ok, done, Z
 
 HOME = tempfile.mkdtemp()
 os.environ['HOME'] = HOME
+os.environ['USERPROFILE'] = os.environ['HOME']  # Windows expanduser reads this one
 for k in [k for k in os.environ if k.startswith('TZ_')]:
     del os.environ[k]
 import tzobs as O

@@ -16,7 +16,7 @@ o=$(n start b); r=$?; ok "start with deps undone refused" '[[ $o == *dependencie
 n start a >/dev/null; o=$(n pack); ok "pack has goal/files/next, no test yet" '[[ $o == *"goal A"* && $o == *bin/a.py* && $o == *"write a"* && $o == *"none yet"* ]]'
 o=$(n start b); ok "second active refused" '[[ $o == *dependencies* || $o == *active* ]]'
 o=$(n done a --test "true"); ok "done without --yes does not run" '[[ $o == *"--yes"* ]] && grep -q pending "$P/handoffs/tasks/T-b.json"'
-o=$(n done a --test "echo boom; false" --yes); r=$?; ok "failed test: task stays active, failure recorded" '[[ $o == *"test failed"* && $r = 3 ]] && grep -q "\"ok\": false" "$P/handoffs/tasks/T-a.json" && grep -q "\"status\": \"active\"" "$P/handoffs/tasks/T-a.json"'
+o=$(n done a --test "echo boom && exit 1" --yes); r=$?; ok "failed test: task stays active, failure recorded" '[[ $o == *"test failed"* && $r = 3 ]] && grep -q "\"ok\": false" "$P/handoffs/tasks/T-a.json" && grep -q "\"status\": \"active\"" "$P/handoffs/tasks/T-a.json"'
 o=$(n done a --test "echo 7 passed" --yes); ok "passing test: done + verified" '[[ $o == *"done, verified"* ]]'
 o=$(n start a); ok "done task not restarted/overwritten" '[[ $o == *"already done"* ]]'
 n start b >/dev/null; n done b --test "echo ok" --yes >/dev/null

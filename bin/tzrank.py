@@ -47,11 +47,16 @@ def extract_mentions(text, root='.'):
     return idents, {paths[t] for t in toks if t in paths}
 
 
+def _rel(f):
+    """A caller's path in the form ranked uses: normalized, forward slashes on every OS."""
+    return os.path.normpath(f).replace(os.sep, "/")
+
+
 def ranked(root, focus=(), mentioned_idents=(), mentioned_files=(), methods=False, tagless=False):
     """[(rank, file, ident)] best first. Same weighting as aider: x10 long snake/camel names, x0.1 private or
     defined in >5 files, sqrt(ref count), x50 refs from focus files; self-loop 0.1 for unreferenced defs."""
     defines, refs, qual = defaultdict(set), defaultdict(list), {}
-    mentioned_idents = set(mentioned_idents); mentioned_files = {os.path.normpath(f) for f in mentioned_files}
+    mentioned_idents = set(mentioned_idents); mentioned_files = {_rel(f) for f in mentioned_files}
     allf = set()
     for p in tzmap._files(root):
         if not p.endswith(EXT):
@@ -73,7 +78,7 @@ def ranked(root, focus=(), mentioned_idents=(), mentioned_files=(), methods=Fals
         for w, k in c.items():
             refs[w].extend([rel] * k)
     edges = defaultdict(float); nodes = set()
-    focus = {os.path.normpath(f) for f in focus}
+    focus = {_rel(f) for f in focus}
     for ident, definers in defines.items():
         nodes |= definers
         if not refs.get(ident):
@@ -102,7 +107,7 @@ def ranked(root, focus=(), mentioned_idents=(), mentioned_files=(), methods=Fals
         for f in nodes:
             if f in mentioned_files:
                 pers[f] = max(pers.get(f, 0), base)
-            if {*f.split(os.sep), os.path.basename(f), os.path.splitext(os.path.basename(f))[0]} & mentioned_idents:
+            if {*f.split('/'), os.path.basename(f), os.path.splitext(os.path.basename(f))[0]} & mentioned_idents:
                 pers[f] = pers.get(f, 0) + base
     r = pagerank(nodes, flat, pers or None)
     out_w = defaultdict(float)

@@ -14,7 +14,7 @@ ok "tz price table" 'HOME="$H" python3 "$Z/bin/tzprice.py" | grep -q "as_of 2026
 ok "tz price json" 'HOME="$H" python3 "$Z/bin/tzprice.py" haiku --json | python3 -c "import json,sys; d=json.load(sys.stdin); assert d[\"prices\"]=={\"haiku\":[1.0,5.0]}"'
 echo '{"prices":{"sonnet":[2,10],"newm":[7,9]},"cache":{"read":0.2}}' > "$H/.claude/token-zombie/prices.json"
 ok "override merges" '[ "$(p_ "print(t.price(\"sonnet\"), t.price(\"x-newm\"), t.price(\"opus\"), t.CACHE[\"read\"])")" = "(2.0, 10.0) (7.0, 9.0) (5.0, 25.0) 0.2" ]'
-ok "override path shown" 'HOME="$H" python3 "$Z/bin/tzprice.py" | grep -q "$H/.claude/token-zombie/prices.json (found)"'
+ok "override path shown" 'HOME="$H" python3 "$Z/bin/tzprice.py" | tr "\\\\" / | grep -q "$H/.claude/token-zombie/prices.json (found)"'
 echo '{bad json' > "$H/.claude/token-zombie/prices.json"
 ok "bad JSON ignored" '[ "$(p_ "print(t.price(\"sonnet\"), t.CACHE[\"read\"])")" = "(3.0, 15.0) 0.1" ]'
 echo "pass $pass fail $fail"; rm -rf "$T"; [ $fail = 0 ]

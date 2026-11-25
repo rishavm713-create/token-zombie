@@ -34,7 +34,7 @@ mkdir "$T/ng"; hf handoff --cwd "$T/ng" --task x --next y >/dev/null; o=$(hf res
 hf handoff --cwd "$P" --remember "fact1" --remember "fact1" >/dev/null; ok "memory dedupe" '[ $(grep -c "fact1" "$P/handoffs/MASTER.md") = 1 ]'
 # tz-start still reads the handoff dir (back-compat)
 PJ="$P"; command -v cygpath >/dev/null && PJ=$(cygpath -m "$P")  # Windows: python cannot resolve an MSYS /tmp path inside JSON
-o=$(echo "{\"cwd\":\"$PJ\"}" | HOME="$H" python3 "$Z/bin/tz-start.py"); ok "tz-start injects tz handoff" '[[ $o == *"NEXT ACTION"* ]]'
+o=$(echo "{\"cwd\":\"$PJ\"}" | HOME="$H" python3 "$Z/bin/tz-start.py"); ok "tz-start injects tz handoff" '[[ $o == *"NEXT ACTION"* ]] || { echo "tz-start said: ${o:0:600}"; false; }'
 # task-wrap / checkpoint / DAILY / MASTER lifecycle
 W="$T/w"; mkdir -p "$W"; echo 'exit 0' > "$W/t.sh"; git -C "$W" init -q; echo x > "$W/f"
 hf handoff --cwd "$W" --task life --next "finish" >/dev/null

@@ -168,7 +168,7 @@ def expensive(cwd, transcript, session_id='x', force=False, growth=None):
     git_now = f"Git: {snap['branch']}@{snap['head']}, {len(snap['changed'])} uncommitted" if snap['repo'] else 'Git: not a repo'
     ok = git_now in _lines(p)
     L += ['EXPENSIVE: ' + ('; '.join(why) or 'forced'),
-          f"checkpoint {'VERIFIED' if ok else 'NOT verified (git changed while saving; run tz state)'}: {os.path.relpath(p, cwd)} ({git_now})",
+          f"checkpoint {'VERIFIED' if ok else 'NOT verified (git changed while saving; run tz state)'}: {os.path.relpath(p, cwd).replace(os.sep, '/')} ({git_now})",
           startup_line(cwd)]
     return '\n'.join(L), True
 

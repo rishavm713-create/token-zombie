@@ -2,6 +2,7 @@
 import datetime as dt, json, os, subprocess, sys, tempfile, time
 HOME = tempfile.mkdtemp()
 os.environ['HOME'] = HOME
+os.environ['USERPROFILE'] = os.environ['HOME']  # Windows expanduser reads this one
 for k in [k for k in os.environ if k.startswith('TZ_')]:
     del os.environ[k]
 from harness import ok, done, Z

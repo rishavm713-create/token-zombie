@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Phase 3 hardening: public-API change detection, tests-actually-ran, regression link, project lint/type/audit detection, resume of killed agent runs.
 cd "$(dirname "$0")/.." || exit 1
-R=$PWD; T=$(mktemp -d); export HOME="$T/home" TZ_DEDUPE=0; mkdir -p "$HOME"; P=0; F=0
+R=$(pwd); T=$(mktemp -d); export HOME="$T/home" TZ_DEDUPE=0; mkdir -p "$HOME"; P=0; F=0
 ok(){ if eval "$1"; then echo "ok $2"; P=$((P+1)); else echo "FAIL $2"; F=$((F+1)); fi; }
 g(){ python3 "$R/bin/tzgate.py" gate "$@"; }
 repo(){ d=$(mktemp -d -p "$T"); cd "$d"; git init -q; printf 'def add(a, b):\n    return a + b\n\ndef _helper(x):\n    return x\n' > calc.py
@@ -48,6 +48,7 @@ repo; printf 'def add(a, b)\n    return a\n' > calc.py
 ok "g t | grep -q 'syntax .*FAIL'" "syntax error in a changed file is caught without any tool installed"
 # --- project-configured lint / type / audit (stub binaries; real ruff/mypy/pip-audit are not required to run this suite)
 S=$T/stub; mkdir -p $S
+command -v cygpath >/dev/null && S=$(cygpath -u "$S")  # MSYS: a D:/ entry splits PATH at the colon
 printf '#!/bin/sh\necho "E501 line too long"; exit 1\n' > $S/ruff; printf '#!/bin/sh\nexit 0\n' > $S/mypy
 printf '#!/bin/sh\necho "Connection error: ENOTFOUND pypi.org"; exit 1\n' > $S/pip-audit; chmod +x $S/*
 NOTOOLS="/usr/bin:/bin"

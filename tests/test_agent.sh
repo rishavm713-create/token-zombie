@@ -14,11 +14,11 @@ print(json.dumps({'type': 'assistant', 'message': {'id': 'm' + str(len(p)), 'usa
 print(json.dumps({'type': 'result', 'result': 'done'}))
 PY
 chmod +x "$T/fake"; export CLAUDE_BIN="$T/fake"
-mkdir -p "$T/w"; cd "$T/w" && git init -q && git commit -q --allow-empty -m i
+mkdir -p "$T/w"; cd "$T/w" && git init -q && git -c user.email=t@t -c user.name=t commit -q --allow-empty -m i
 O=$(python3 "$R/bin/tz" agent "make out file" --test 'grep -q good out.txt'); echo "$O" | sed 's/^/   /'
 ok "echo \"\$O\" | grep -q 'debug.*ok'" debug-after-failed-test
 ok "echo \"\$O\" | tail -2 | head -1 | grep -q 'pass'" test-passes-after-debug
-ok "[ \$(sqlite3 $T/.claude/token-zombie/tz.db \"select count(*) from events where kind='agent'\" 2>/dev/null || echo 0) -ge 4 ]" ledger-events
+ok "[ \$(python3 -c \"import sqlite3,sys;print(sqlite3.connect(sys.argv[1]).execute(sys.argv[2]).fetchone()[0])\" $T/.claude/token-zombie/tz.db \"select count(*) from events where kind='agent'\" 2>/dev/null || echo 0) -ge 4 ]" ledger-events
 O=$(FAKE_TOK=999999 python3 "$R/bin/tz" agent "big spend" --budget 1000); ok "echo \"\$O\" | grep -q 'build.*budget'" budget-stop
 ok "python3 -c \"import sys;sys.path.insert(0,'$R/bin');import tzagent as a;assert a.claim('t1',['x.py'])==[];assert a.claim('t2',['x.py','y.py'])==['x.py'];a.release('t1');assert a.claim('t2',['x.py'])==[]\"" ownership
 python3 "$R/bin/tz" agent "wt task" --worktree >/dev/null 2>&1

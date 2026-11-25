@@ -62,13 +62,13 @@ def important_files(root):
             names = os.listdir(os.path.join(root, d))
         except OSError:
             continue
-        out += [r for r in (os.path.join(d, n) for n in names) if is_important(r) and os.path.isfile(os.path.join(root, r))]
+        out += [r for r in (os.path.join(d, n).replace(os.sep, '/') for n in names) if is_important(r) and os.path.isfile(os.path.join(root, r))]
     return sorted(out)
 
 
 def with_important(root, rs, focus=()):
     """Ranked (v, file, ident) with unlisted important files first, so a token budget keeps them."""
-    have = {f for _, f, _ in rs} | {os.path.normpath(f) for f in focus}
+    have = {f for _, f, _ in rs} | {os.path.normpath(f).replace(os.sep, '/') for f in focus}
     return [(0.0, f, '') for f in important_files(root) if f not in have] + list(rs)
 
 
@@ -236,6 +236,15 @@ def _found(path, text):
     return {int(n) for n in re.findall(re.escape(os.path.basename(path)) + r':(\d+)\b', text)}
 
 
+def _split(cmd):
+    """shlex.split, except on Windows a backslash is a path separator, not an escape."""
+    lex = shlex.shlex(cmd, posix=True)
+    lex.whitespace_split, lex.commenters = True, ''
+    if os.name == 'nt':
+        lex.escape = ''
+    return list(lex)
+
+
 def lint_file(path, cmd=None):
     """Errors plus marked source context; '' when clean or no checker applies. cmd is a user linter run on path."""
     code = _read(path)
@@ -244,7 +253,7 @@ def lint_file(path, cmd=None):
     full = os.path.abspath(path)  # a name starting with '-' must not become a checker option
     ext = os.path.splitext(path)[1]
     if cmd:
-        rc, text = _run(shlex.split(cmd) + [full])
+        rc, text = _run(_split(cmd) + [full])
         nums = _found(path, text)
     elif ext == '.py':
         try:
@@ -259,7 +268,8 @@ def lint_file(path, cmd=None):
         rc, text = _run(['node', '--check', full])
         nums = _found(path, text)
     elif ext == '.sh' and shutil.which('bash'):
-        rc, text = _run(['bash', '-n', full])
+        # WHY which(): on Windows a bare 'bash' starts System32's WSL launcher, not the bash on PATH
+        rc, text = _run([shutil.which('bash'), '-n', full.replace(os.sep, '/')])
         nums = {int(n) for n in re.findall(r'line (\d+):', text)}
     else:
         return ''

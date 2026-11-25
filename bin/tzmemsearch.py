@@ -120,15 +120,19 @@ def _open(path):
     """Open (and create) the index; sets .fts when FTS5 is usable."""
     os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
     c = sqlite3.connect(path, factory=tzmem._C)
-    c.execute('CREATE TABLE IF NOT EXISTS chunks(rid INTEGER PRIMARY KEY, id TEXT UNIQUE, source TEXT, heading TEXT,'
-              ' level INT, start INT, stop INT, hash TEXT, content TEXT)')
-    c.execute('CREATE INDEX IF NOT EXISTS chunks_source ON chunks(source)')
-    if USE_FTS:
-        try:
-            c.execute('CREATE VIRTUAL TABLE IF NOT EXISTS fts USING fts5(text)')
-            c.fts = True
-        except sqlite3.OperationalError:
-            c.fts = False
+    try:
+        c.execute('CREATE TABLE IF NOT EXISTS chunks(rid INTEGER PRIMARY KEY, id TEXT UNIQUE, source TEXT, heading TEXT,'
+                  ' level INT, start INT, stop INT, hash TEXT, content TEXT)')
+        c.execute('CREATE INDEX IF NOT EXISTS chunks_source ON chunks(source)')
+        if USE_FTS:
+            try:
+                c.execute('CREATE VIRTUAL TABLE IF NOT EXISTS fts USING fts5(text)')
+                c.fts = True
+            except sqlite3.OperationalError:
+                c.fts = False
+    except sqlite3.Error:
+        c.close()  # WHY: Windows cannot delete a damaged index that is still open
+        raise
     return c
 
 

@@ -13,9 +13,10 @@ def check(path):
         if ext == '.json':
             json.load(open(path, encoding='utf-8')); return ''
         cmd = {'.sh': ['bash', '-n'], '.js': ['node', '--check'], '.mjs': ['node', '--check']}.get(ext)
-        if not cmd or not shutil.which(cmd[0]):
+        exe = cmd and shutil.which(cmd[0])
+        if not exe:
             return ''
-        r = subprocess.run(cmd + [path], capture_output=True, text=True, timeout=10)
+        r = subprocess.run([exe] + cmd[1:] + [path], capture_output=True, text=True, timeout=10)
         return '' if r.returncode == 0 else ' '.join((r.stderr or r.stdout).split())[:200]
     except SyntaxError as e:
         return f'line {e.lineno}: {e.msg}'

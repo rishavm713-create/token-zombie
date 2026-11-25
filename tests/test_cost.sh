@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tz costly / noise, agent_model + costly_kind policy rules, /compact focus line at 70%
 cd "$(dirname "$0")/.." || exit 1
-R=$PWD; T=$(mktemp -d); export HOME="$T"; P=0; F=0
+R=$(pwd); T=$(mktemp -d); export HOME="$T"; P=0; F=0
 ok(){ if eval "$1"; then echo "ok $2"; P=$((P+1)); else echo "FAIL $2"; F=$((F+1)); fi; }
 mkdir -p "$T/w"; python3 bin/tz handoff save --cwd "$T/w" --objective "ship export" --next "run the export test" >/dev/null 2>&1
 ok "python3 -c \"import sys;sys.path.insert(0,'bin');import tzcont as t;l=t.compact_line('$T/w');assert l.startswith('/compact keep') and 'run the export test' in l\"" compact-line
