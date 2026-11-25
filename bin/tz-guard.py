@@ -265,6 +265,16 @@ try:
                         LIVE[0] = (LIVE[0] + '\n' + m).strip()
             except Exception:
                 _diag('check_pipe', ev)
+        if data.get('tool_name') == 'Bash':  # curl/wget host outside .tz/scope.json (advice only; silent without that file)
+            try:
+                from tzlib import feature
+                if feature('scope_check'):
+                    import tzscope
+                    m = tzscope.advise(data)
+                    if m:
+                        LIVE[0] = (LIVE[0] + '\n' + m).strip()
+            except Exception:
+                _diag('scope', ev)
         if (data.get('tool_name') or '').startswith('mcp__'):  # v2.1: same read-only MCP call already answered (advice only)
             try:
                 from tztoolprune import mcp_dup

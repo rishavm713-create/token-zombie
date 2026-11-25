@@ -112,3 +112,7 @@ Used in: bin/tzreplayrank.py (token-size x replay ranking and verified-slice bas
 humanlayer (https://github.com/humanlayer/humanlayer), Apache License 2.0
 Copyright 2025-2026 QueryTale, Inc. d/b/a HumanLayer
 Used in: bin/tzhumanlayer.py, a modified Python port of .claude/hooks/block-test-output-filtering.sh, plus a rebuild of the phase workflow in apps/riptide-rpi-claude-plugin (implement-plan SKILL.md, plan_template.md format). Licence: third_party/humanlayer/LICENSE
+
+Claude-BugHunter (https://github.com/elementalsouls/Claude-BugHunter), MIT licence (code only; no docs or skills copied)
+Copyright (c) 2026 Sachin Sharma
+Used in: bin/tzscope.py (host matching adapted from engine/scope.py; test cases from its self-test). Licence: third_party/bughunter/LICENSE

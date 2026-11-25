@@ -66,6 +66,7 @@ FEATURES = {'cache_ttl_auto': 1,  # measured 1 h vs 5 min prompt-cache life (tzc
             'skill_lint': 1,      # advice when a written SKILL.md breaks the skill spec (tzaskills)
             'read_delta': 0,      # opt-in, BLOCKS a re-read of a changed file once and shows the diff instead (tztokopt)
             'check_pipe': 1,      # advice when test/build output is piped through head/tail/grep (tzhumanlayer)
+            'scope_check': 1,     # advice when curl/wget targets a host outside .tz/scope.json (tzscope)
             'beads_prime': 0,     # opt-in: ready-task brief at session start when no task pack (adds context)
             'safety_extra': 0,    # opt-in: BLOCKS extra destructive/secret commands (tzrules)
             'safety_strict': 0,   # opt-in: stricter rules, also BLOCKS (tzrules)
