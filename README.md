@@ -6,7 +6,7 @@
 
 [![CI](https://github.com/rishavm713-create/token-zombie/actions/workflows/ci.yml/badge.svg)](https://github.com/rishavm713-create/token-zombie/actions/workflows/ci.yml) [![License](https://img.shields.io/badge/License-MIT-4c9a1a)](LICENSE) [![Local first](https://img.shields.io/badge/Local--first-no%20telemetry-83ffa0)](SECURITY.md)
 
-![TOKEN ZOMBIE demo](docs/img/demo.gif)
+![TOKEN ZOMBIE demo](docs/img/demo-bench.svg)
 
 TOKEN ZOMBIE (TZ) trims noisy tool output, warns before a chat runs out of room, and saves handoffs so a fresh chat continues where you stopped. It adds no AI calls of its own.
 
