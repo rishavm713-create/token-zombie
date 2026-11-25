@@ -34,6 +34,7 @@ HELP = """tz <command> [args]
   learn [--apply] [--target F]                   mine repeated tool failures from chat logs; dry run unless --apply
   split "task A" "task B"                       one session per task: model pick, worktree cmd, locks, build-first rule
   costly [--no-write]                            biggest tool outputs in recent chats; hot kinds get a warning next time
+  agent --list | --collect                       running/finished agents with task, files, tokens, diff; --allow-dup overrides the duplicate-task refusal
   agent "<task>" [--test CMD] [--worktree] run the tz code pipeline for real (plan, build, test, debug), budget + ledger
   map [dir]                                      compact repo map (file -> defs), Aider-style; read this instead of many files
   xcheck [--json FILE]                           cross-check token totals against ccusage (if installed)
@@ -65,7 +66,7 @@ HELP = """tz <command> [args]
   mode [off|lite|full|ultra]                     show or set the mode profile (backs up config.json)
   config                                         effective settings and where each comes from
   speed [on|off|status]                          ship-fast mode (default on): parallel sessions + subagents, hours budget
-  report                                         status + optimize + stats + capabilities in one view
+  report [--implemented]                         what was implemented (git files/tests/tasks) + status + optimize + stats + capabilities in one view
   sup start|tick|status|next-session|task      supervisor: usage level -> auto checkpoint -> status bus (status.json)
   route <prompt> [--model M] | --write [FILE] [--yes]   model advice + /model line; --write adds a model-per-task rules block to CLAUDE.md (dry run without --yes)
   adapters [--rules NAME [--out F]]             supported agents + honest capabilities, rules file generation
@@ -75,9 +76,9 @@ HELP = """tz <command> [args]
   mascot                                        zombie state line
   overlay build|run                             native always-on-top status window (macOS, swiftc from Command Line Tools)
   bench quality TRIALS.json                         tokens per PASSED task, control vs treatment (needs 5+5 trials to count as proof)
-  pr [--base B]                                  commit message + PR body from the real diff (read-only; never commits or pushes)
+  pr [--base B] | pr check [--run-tests]        PR body from the real diff (read-only) | delivery checklist: READY / NOT READY
   progress                                       project completion % from task files
-  standards [dir]                                detected coding conventions (indent, quotes, test/lint tools)
+  standards [dir]                                detected conventions; --check lists per-file violations (naming/indent/quotes/layers/layout)
   tokens [--days N] [--json]                     every token in every chat log by model and day, per category (MEASURED)
   reuse [REPO..]                                 licence audit: REUSE (MIT/Apache, credit) | CHECK | STUDY-only (no licence)
   gaps [dir]                                     stubs, TODOs, unresolved local imports
@@ -85,7 +86,7 @@ HELP = """tz <command> [args]
   contract [dir]                                 frontend fetch calls with no backend route
   api [dir] [--openapi]                          route list or OpenAPI skeleton
   dbschema [dir]                                 tables, columns, foreign keys without index
-  coord post|list|claim|done                     shared note board between sessions
+  coord post|list|claim|done|handoff|wait         shared note board between sessions
   safe "CMD"                                     block destructive shell commands (reset --hard, rm -r /, force push)
   sym NAME                                       where NAME is defined (file:line) + files that use it (impact)
   rank [DIR] [--n N] [--focus FILE..]            top definitions by reference PageRank (adapted from aider repomap, Apache-2.0)
@@ -108,7 +109,7 @@ HELP = """tz <command> [args]
   adapters --usage codex [--days N] [--json]    Codex CLI usage from ~/.codex/sessions (MEASURED)
   reconcile | vault-find WORDS | overlap SESSION_DIR | skills-outcome [DIR]   savings check, task retrieval, agent file clashes, skill vs rework
   conflicts FILE...                                  contradictory always/never rules across instruction files
-  rework [LOG] [--json]                              repeat/retry/loop counts from a chat log (MEASURED counts)
+  rework [LOG] [--json] | --tests [DIR] [--cmd C|--log F]   loop counts from a chat log; or run tests/parse a log and list failures
   hooks bench|live                              hook wall-time baseline (temp HOME) / live per-event hook time + injected chars
   live [show|skills|agents]                     this session: skill states, agent lifecycle, dedupe advices (MEASURED from hooks)
   preflight [--evidence D] [--validate D] [--smoke --yes]  A/B readiness: offline checks; validate a finished run; paid smoke run
@@ -246,6 +247,11 @@ def main(argv):
         if c == 'config':
             return config()
         if c == 'report':
+            import tzpr
+            print('== IMPLEMENTED')
+            tzpr.implemented()
+            if '--implemented' in rest:
+                return 0
             for title, cmd in (('STATUS', ['status']), ('OPTIMIZE', ['optimize']), ('SAVINGS', ['stats']), ('CAPABILITIES', ['capabilities'])):
                 print(f'== {title}')
                 main(cmd + rest if cmd == ['status'] else cmd)

@@ -354,6 +354,21 @@ def measure(cwd, transcript, home=None):
     return m
 
 
+def results(ts):
+    """Last recorded test result per task (pass/fail + counts parsed from the result line) and totals."""
+    L, tp, tf, bad = [], 0, 0, 0
+    for t in ts.values():
+        r = t.get('test') or {}
+        if not r.get('cmd') and not r.get('result'):
+            continue
+        res = r.get('result', '')
+        mp, mf = re.search(r'pass[ :]+(\d+)', res), re.search(r'fail[ :]+(\d+)', res)
+        p_, f_ = int(mp.group(1)) if mp else (1 if r.get('ok') else 0), int(mf.group(1)) if mf else (0 if r.get('ok') else 1)
+        tp += p_; tf += f_; bad += 0 if r.get('ok') else 1
+        L.append(f'{"PASS" if r.get("ok") else "FAIL"} {t["id"]:14} pass {p_} fail {f_}  {r.get("time", "")}  gate={t.get("gate") or "-"}  `{r.get("cmd", "")[:50]}`')
+    return L, tp, tf, bad
+
+
 def render(ts, cwd=None):
     """Task list + the next eligible task; compacted tasks are only counted."""
     if not ts:
@@ -377,7 +392,7 @@ def render(ts, cwd=None):
 def main(argv):
     import argparse
     ap = argparse.ArgumentParser(prog='tz next')
-    ap.add_argument('sub', nargs='?', default='list', choices=['list', 'add', 'start', 'done', 'block', 'pack', 'checkpoint', 'measure', 'set', 'dep', *tzbeads.SUBS])
+    ap.add_argument('sub', nargs='?', default='list', choices=['list', 'add', 'start', 'done', 'block', 'pack', 'checkpoint', 'measure', 'set', 'dep', 'results', *tzbeads.SUBS])
     ap.add_argument('id', nargs='?', default='')
     ap.add_argument('--cwd', default=os.getcwd())
     ap.add_argument('--title', default=''); ap.add_argument('--goal', default=''); ap.add_argument('--dep', action='append', default=[])
@@ -389,7 +404,18 @@ def main(argv):
     a = ap.parse_args(argv)
     cwd = os.path.abspath(a.cwd)
     if a.sub == 'list':
-        print(render(load(cwd), cwd)); return 0
+        ts = load(cwd)
+        print(render(ts, cwd))
+        L, tp, tf, bad = results(ts)
+        if L:
+            print(f'TESTS: pass {tp} fail {tf}, {bad} task(s) failing (tz next results)')
+        return 0
+    if a.sub == 'results':
+        L, tp, tf, bad = results(load(cwd))
+        print('\n'.join(L) if L else 'no test results recorded yet (tz next done <id> --test CMD --yes)')
+        if L:
+            print(f'TOTAL pass {tp} fail {tf} ({len(L)} task(s), {bad} failing)')
+        return 1 if bad else 0
     if a.sub == 'pack':
         print(pack(cwd) or 'no active task'); return 0
     if a.sub == 'checkpoint':

@@ -33,7 +33,7 @@ Run `tz gain` to see your own number: it prints saved minus TZ's own overhead an
 | Repeat reads, repeat MCP calls and stuck loops flagged early | MEASURED in the same matrix (false positives/negatives listed per arm) |
 | Handoff note plus checkpoints, so a fresh chat continues | Covered by the test suite |
 | Honest numbers: every figure labelled MEASURED / EST / UNKNOWN, TZ's own overhead subtracted | `tz stats` |
-| Test suite | MEASURED 3624 pass, 0 fail, 2 skip on v2.1.0: [TEST_EVIDENCE](docs/TEST_EVIDENCE.md) |
+| Test suite | MEASURED 3685 pass, 0 fail, 2 skip on v2.1.0: [TEST_EVIDENCE](docs/TEST_EVIDENCE.md) |
 
 **Honest size of the saving:** on a free replay of 1,025 real chats the net input saved after TZ's own overhead was **0.58%** (MEASURED, [gap analysis](docs/COMPETITIVE-GAP-ANALYSIS.md)). Provider tokens and answer quality: **UNKNOWN** (paid `tz ab` A/B not run). Your own number: `tz stats`.
 

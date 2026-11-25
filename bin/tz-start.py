@@ -142,6 +142,9 @@ try:
     daily = sorted(glob.glob(os.path.join(cwd, 'handoffs', '*.md')), key=os.path.getmtime)
     if daily:
         parts.append(f'## {daily[-1]} (newest handoff)\n' + head(daily[-1], DAILY, False))
+    st = os.path.join(cwd, 'handoffs', 'STATE.md')
+    if os.path.isfile(st):  # known facts first: a fresh chat reuses them instead of re-exploring
+        parts.append('## handoffs/STATE.md (known facts; `tz find WORDS` searches notes + code)\n' + head(st, 25, False))
     try:  # active task pack (<=2k tok), when handoffs/tasks has one
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import tznext

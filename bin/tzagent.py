@@ -279,9 +279,66 @@ def run(task, cwd, test=None, budget=400000, turns=20, worktree=False, dry=False
     return rid, rows, spent, measured[0]
 
 
+def _norm(t):
+    return ' '.join(re.sub(r'[^a-z0-9]+', ' ', (t or '').lower()).split())
+
+
+def runs():
+    """All tz agent runs from their checkpoints: [(rid, checkpoint)], oldest first."""
+    d = os.path.join(STATE, 'agent'); out = []
+    for x in sorted(os.listdir(d)) if os.path.isdir(d) else []:
+        if x.endswith('.json'):
+            rid, cp = load_run(x[:-5])
+            if cp:
+                out.append((rid, cp))
+    return sorted(out, key=lambda r: r[1]['meta'].get('started', 0))
+
+
+def live_state(cp):
+    m = cp['meta']
+    if cp.get('state') == 'done':
+        return 'done'
+    return 'running' if m.get('pid') and alive(m['pid']) else 'dead'
+
+
+def duplicate(task, cwd):
+    """A live agent already doing the same task text in the same directory (None if none)."""
+    for rid, cp in runs():
+        m = cp['meta']
+        if live_state(cp) == 'running' and m.get('pid') != os.getpid() and _norm(m.get('task')) == _norm(task) and os.path.abspath(m.get('cwd') or '') == os.path.abspath(cwd):
+            return rid, m
+    return None
+
+
+def listing(collect=False):
+    """One line per run (running agents first-class: task, pid, age, files); --collect adds each run's phases and the git diff of its dir."""
+    rs = runs(); now = time.time()
+    if not rs:
+        print('no tz agent runs'); return 0
+    cnt = {}
+    for rid, cp in rs:
+        cnt[live_state(cp)] = cnt.get(live_state(cp), 0) + 1
+    print('agents: ' + ', '.join('%d %s' % (v, k) for k, v in sorted(cnt.items())))
+    for rid, cp in rs:
+        m, st = cp['meta'], live_state(cp)
+        last = cp['rows'][-1] if cp['rows'] else {}
+        print('%-8s %s pid=%s age=%ds tok=%s last=%s/%s files=%s task=%s' % (st, rid, m.get('pid'), int(now - m.get('started', now)), cp.get('spent', 0), last.get('phase', '-'), last.get('status', '-'), ','.join(m.get('allow') or []) or '-', m.get('task')))
+        if collect:
+            for r in cp['rows']:
+                print('    %-6s %-6s %s' % (r['phase'], r['status'], (r.get('note') or '').replace('\n', ' ')[:80]))
+            try:
+                g = subprocess.run(['git', 'diff', '--stat', 'HEAD'], cwd=m.get('cwd'), capture_output=True, text=True, timeout=20)
+                print('    diff: ' + (g.stdout.strip().splitlines()[-1] if g.stdout.strip() else 'no changes'))
+            except Exception:
+                print('    diff: n/a')
+    return 0
+
+
 def main(argv):
     if argv and argv[0] == 'agent':
         argv = argv[1:]
+    if '--list' in argv or '--collect' in argv:
+        return listing('--collect' in argv)
     op = lambda k, d=None: argv[argv.index(k) + 1] if k in argv else d
     words, skip = [], False
     for i, a in enumerate(argv):
@@ -308,11 +365,16 @@ def main(argv):
         return 0 if rows and rows[-1]['status'] in ('ok', 'pass', 'dry') else 1
     if not task:
         print('usage: tz agent "<task>" [--test CMD] [--worktree] [--files a,b] [--budget TOK] [--turns N] [--worker NAME] [--gate] [--rollback] [--wall SECONDS] [--max-errors N] [--allow-api-change] [--dry] | tz agent --resume ID|last', file=sys.stderr); return 2
+    dup = duplicate(task, os.getcwd()) if '--allow-dup' not in argv else None
+    if dup:
+        print('refused: duplicate work: run %s (pid %s) is already doing this task' % (dup[0], dup[1].get('pid')), file=sys.stderr); return 3
     if op('--files'):  # file ownership: refuse when another task already owns one of these files
         clash = claim(task, op('--files').split(','))
         if clash:
             print('refused: owned by another task: ' + ', '.join(clash), file=sys.stderr); return 3
     rid, rows, spent, meas = run(task, os.getcwd(), op('--test'), int(op('--budget', 400000)), int(op('--turns', 20)), '--worktree' in argv, '--dry' in argv, op('--worker'), int(op('--timeout', 1800)), '--gate' in argv, op('--files').split(',') if op('--files') else None, op('--build'), '--allow-api-change' in argv, None, '--rollback' in argv, float(op('--wall')) if op('--wall') else None, int(op('--max-errors')) if op('--max-errors') else None)
+    if op('--files') and '--dry' not in argv:
+        release(task)  # finished: the files are free for the next task
     for r in rows:
         print('%-6s %-7s %s%s' % (r['phase'], r.get('model', ''), r['status'], '  %s tok' % r['tokens'] if 'tokens' in r else ''))
     print('run %s: %d tokens (%s)' % (rid, spent, 'MEASURED from host usage' if meas else 'EST chars/4: this worker reports no usage'))

@@ -4,7 +4,7 @@
 
 <p align="center">Claude Code re-reads the same things again and again and burns your usage.<br><b>TOKEN ZOMBIE stops that.</b> 💸 Free · 🔒 Stays on your computer · 🚫 No tracking</p>
 
-<p align="center"><a href="https://github.com/rishavm713-create/token-zombie/actions/workflows/ci.yml"><img src="https://github.com/rishavm713-create/token-zombie/actions/workflows/ci.yml/badge.svg" alt="CI"></a> <img src="https://img.shields.io/badge/tests-3624%20pass-83ffa0" alt="3624 tests pass"> <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-4c9a1a" alt="MIT"></a></p>
+<p align="center"><a href="https://github.com/rishavm713-create/token-zombie/actions/workflows/ci.yml"><img src="https://github.com/rishavm713-create/token-zombie/actions/workflows/ci.yml/badge.svg" alt="CI"></a> <img src="https://img.shields.io/badge/tests-3685%20pass-83ffa0" alt="3685 tests pass"> <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-4c9a1a" alt="MIT"></a></p>
 
 ## 🚀 Install (30 seconds)
 
