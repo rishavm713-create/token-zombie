@@ -201,6 +201,8 @@ section{padding:64px 0}.hero{padding:44px 0 56px}.head{margin-bottom:34px}
 <div class="stat rv" style="--i:3"><b>1</b><span>Command to install</span></div>
 </div></div>
 
+<section id="honest"><div class="wrap"><div class="head rv"><p class="eyebrow">Honest numbers</p><h2>What is measured. What is not.</h2><p class="lead">Net input saved on a replay of 1,025 real chats, after TZ's own overhead: <b>0.58%</b> (MEASURED). Answer quality and provider tokens: UNKNOWN until the paid A/B is run. Output compressors such as rtk and headroom reduce raw output more; TZ adds waste detection, handoffs and honest labels. Run <code>tz stats</code> for your own figure. Windows CI is known to fail and is deferred.</p></div></div></section>
+
 <section id="problem"><div class="wrap">
 <div class="head rv"><p class="eyebrow">The problem</p><h2>Long chats quietly burn your limit.</h2><p class="lead">You hit the weekly limit and cannot tell where it went. Three leaks cause most of it.</p></div>
 <div class="grid g3">
@@ -219,7 +221,7 @@ section{padding:64px 0}.hero{padding:44px 0 56px}.head{margin-bottom:34px}
 </div></div></section>
 
 <section id="new"><div class="wrap">
-<div class="head rv"><p class="eyebrow">New in 2.0 and 2.1</p><h2>Less rework. Safer changes.</h2><p class="lead">Every feature below is built and covered by the test suite: 1032 checks pass. Savings are read from your own Claude Code logs; run <code>tz stats</code> to see yours.</p></div>
+<div class="head rv"><p class="eyebrow">New in 2.0 and 2.1</p><h2>Less rework. Safer changes.</h2><p class="lead">Every feature below is built and covered by the test suite: 3068 checks pass on v2.1.0 (MEASURED). Savings are read from your own Claude Code logs; run <code>tz stats</code> to see yours.</p></div>
 <div class="grid g4">
 <div class="card rv"><span class="num">TOKENS</span><h3>No double reads</h3><p>A file Claude already read comes back as a short stub. Big JSON keeps only the outliers; colour codes are stripped.</p></div>
 <div class="card rv" style="--i:1"><span class="num">MEMORY</span><h3>Tasks in order</h3><p>Tasks can wait on other tasks; <code>tz next</code> picks the one that is ready. Failed or stalled runs are flagged.</p></div>

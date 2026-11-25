@@ -2,22 +2,48 @@
 
 <h1 align="center">TOKEN ZOMBIE</h1>
 
-<p align="center"><b>Stop paying for tokens Claude Code wastes.</b><br>Free · Runs on your computer · Nothing is sent anywhere</p>
+<p align="center"><b>Stop paying for tokens Claude Code wastes.</b><br>Trims noisy tool output, warns before a chat overflows, saves your place. Free · Local · No telemetry · No AI calls of its own</p>
 
-[![CI](https://github.com/rishavm713-create/token-zombie/actions/workflows/ci.yml/badge.svg)](https://github.com/rishavm713-create/token-zombie/actions/workflows/ci.yml) [![License](https://img.shields.io/badge/License-MIT-4c9a1a)](LICENSE) [![Local first](https://img.shields.io/badge/Local--first-no%20telemetry-83ffa0)](SECURITY.md)
+<p align="center"><a href="https://github.com/rishavm713-create/token-zombie/actions/workflows/ci.yml"><img src="https://github.com/rishavm713-create/token-zombie/actions/workflows/ci.yml/badge.svg" alt="CI"></a> <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-4c9a1a" alt="MIT"></a> <a href="SECURITY.md"><img src="https://img.shields.io/badge/Local--first-no%20telemetry-83ffa0" alt="Local-first, no telemetry"></a> <img src="https://img.shields.io/badge/Platforms-macOS%20%7C%20Linux-555" alt="macOS and Linux"> <img src="https://img.shields.io/badge/Python-3-3776ab" alt="Python 3"></p>
+
+```bash
+claude plugin marketplace add rishavm713-create/token-zombie && claude plugin install token-zombie@token-zombie
+```
 
 ![TOKEN ZOMBIE demo](docs/img/demo-bench.svg)
 
-TOKEN ZOMBIE (TZ) trims noisy tool output, warns before a chat runs out of room, and saves handoffs so a fresh chat continues where you stopped. It adds no AI calls of its own.
+## What you get
 
-## Install
+| Claim | Evidence |
+|---|---|
+| Long build/test/tool output trimmed, every failure line kept, original recallable with `tz recall` | Lossless by design; behaviour MEASURED in [bench matrix](docs/bench/matrix-2026-11-25.md) (offline chars, 5 trials) |
+| Repeat reads, repeat MCP calls and stuck loops flagged early | MEASURED in the same matrix (false positives/negatives listed per arm) |
+| Handoff note plus checkpoints, so a fresh chat continues | Covered by the test suite |
+| Honest numbers: every figure labelled MEASURED / EST / UNKNOWN, TZ's own overhead subtracted | `tz stats` |
+| Test suite | MEASURED 3068 pass, 1 fail (fixed), 2 skip on v2.1.0: [TEST_EVIDENCE](docs/TEST_EVIDENCE.md) |
 
-```bash
-claude plugin marketplace add rishavm713-create/token-zombie
-claude plugin install token-zombie@token-zombie
-```
+**Honest size of the saving:** on a free replay of 1,025 real chats the net input saved after TZ's own overhead was **0.58%** (MEASURED, [gap analysis](docs/COMPETITIVE-GAP-ANALYSIS.md)). Provider tokens and answer quality: **UNKNOWN** (paid `tz ab` A/B not run). Your own number: `tz stats`.
 
-Restart Claude Code, then run `/token-zombie:tz`. Or `npm i -g token-zombie` for the `tz` CLI alone (needs python3). Verify and roll back: [install guide](docs/INSTALL.md).
+## Quick start
+
+1. **Install** with the command above, then restart Claude Code.
+2. **Check:** run `/token-zombie:tz` (status) and `tz hooks live` (are the hooks firing).
+3. **Work as usual.** Warnings and trimming happen by themselves; when a chat gets big, `tz handoff` saves your place and `tz resume` continues in a fresh chat.
+
+CLI only, rollback and verification: [install guide](docs/INSTALL.md). The npm package `token-zombie` is not published yet (UNKNOWN until the owner publishes it), so do not rely on `npm i -g`.
+
+## Why TZ
+
+| | TZ | Output compressors (e.g. rtk, headroom) | Memory plugins (e.g. claude-mem) |
+|---|---|---|---|
+| Trims tool output | Yes, lossless with recall | Yes, their main job; stronger on raw reduction | No |
+| Warns before context overflows, handoffs | Yes | Mostly no | Partly |
+| Flags repeat reads, stuck loops, risky commands | Yes | No | No |
+| Labels every number MEASURED / EST / UNKNOWN | Yes | Varies | Varies |
+| Licence, telemetry | MIT, none | Apache-2.0 (checked 2026-11-25) | Apache-2.0 |
+| Maturity and reach | New, 1 star | Far larger, battle-tested | Far larger |
+
+TZ is not a replacement for them: use an output compressor beside it if you want deeper raw reduction. TZ's angle is waste detection, safe handoffs and numbers you can trust. Details: [competitor learnings](docs/COMPETITOR-LEARNINGS.md).
 
 ## You do not type these
 
