@@ -37,3 +37,5 @@ jobs:
           mkdir -p "$RUNNER_TEMP/tzt"; echo "TMPDIR=$(cygpath -m "$RUNNER_TEMP/tzt")" >> "$GITHUB_ENV"
           python -I -c "import os;print('USERPROFILE follows HOME:', os.environ.get('USERPROFILE'))"
       - run: bash tests/run_all.sh
+        env:
+          TZ_SUITE_VERBOSE: '1'  # print the tail of each failing test file's output

@@ -16,6 +16,7 @@ FAIL: $t timed out after ${TZ_SUITE_TIMEOUT:-600}s (hang)
 pass 0 fail 1"; echo "$out" | grep -E '^(FAIL|SKIP)' ; S=$((S+$(echo "$out" | grep -c '^SKIP'))); line=$(echo "$out" | grep -E 'pass[ :]+[0-9]+' | tail -1)
   p=$(echo "$line" | sed -E 's/.*pass[ :]+([0-9]+).*/\1/'); f=$(echo "$line" | sed -E 's/.*fail[ :]+([0-9]+).*/\1/')
   echo "$t: $line"; P=$((P+${p:-0})); F=$((F+${f:-0}))
+  [ -n "$TZ_SUITE_VERBOSE" ] && [ "${f:-0}" != 0 ] && echo "$out" | tail -${TZ_SUITE_VERBOSE_LINES:-60} | sed "s/^/  | $t | /"  # CI diagnostics: context of a failing file
 done
 [ -n "$CLEAN" ] && git -C "$R" checkout -- $CLEAN 2>/dev/null
 echo "TOTAL pass $P fail $F skip $S (skips are not counted as passes)"; [ $F = 0 ]
