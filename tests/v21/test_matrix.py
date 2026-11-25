@@ -29,4 +29,13 @@ ok('stuck_detect overhead small (<=200 chars, measured)', R['all']['total']['inj
 ok('all-minus-conflicts == all (empty list)', net['all-minus-conflicts'] == net['all'])
 ok('safety: all blocks every labelled bad command', R['all']['scenarios']['safety']['fn'] == 0)
 ok('off arm: TZ silent on safety (mode off)', R['off']['scenarios']['safety']['fp'] == 0)
+sc = lambda a, s: R[a]['scenarios'][s]
+ok('saved is gross (injected subtracted once): mcp_dup', sc('all', 'mcp_dup')['saved'] == 3000)
+ok('deny -> full retry saves nothing, costs only the deny text', sc('tz20', 'dup_read')['saved'] == 0 and sc('tz20', 'dup_read')['injected'] > 0)
+
+old = M.run(2, {'read_guard': 'deny'}, v040=True)
+O = {r['arm']: r for r in old['rows']}
+ok('v040 arm added and guard restored', 'v040' in O and M.GUARD.startswith(M.B))
+ok('trial variance recorded', all({'net_min', 'net_max', 'net_sd', 'fp', 'fn'} <= set(r['trial_variance']) for r in old['rows']))
+ok('report shows variance', 'net min..max' in M.markdown(old))
 done()
