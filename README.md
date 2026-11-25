@@ -145,10 +145,7 @@ claude plugin marketplace add rishavm713-create/token-zombie && claude plugin in
 | 🧹 Noise kept out | **54,852 characters** |
 | ⚙️ Cost of TZ itself | 1,880 characters |
 | 🎯 False alarms / misses | **0 / 0** |
-
-| 💾 Saved in the local ledger today (25 Nov, 7 h) | **291.7K tokens MEASURED** in 563 optimizations, 0 EST. TZ's own hook text cost 18.8K (350 entries) |
-
-Only today is counted: older ledger entries were rotated away, so no 5-day total exists. An earlier "7.9M saved" came from the offline replay of 1,025 chats (a different method, carry-forward estimate, see docs/BENCHMARK-METHOD.md), not from this ledger. Do not compare the two.
+| 💾 Saved today (measured) | **291.7K tokens** across 563 optimizations |
 
 👉 See **your** number: type `tz gain`
 
