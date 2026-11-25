@@ -8,7 +8,7 @@ from tzlib import cfg
 SPAN = {'five_hour': ('5h', 18000), 'seven_day': ('7d', 604800)}
 
 
-def totals(path, prior=None):
+def totals(path, prior=None, since=None):
     """Sum real usage from a chat log: dict in/out/cache_read/cache_write/last_ctx/turns + first/last timestamps + ctx points.
     prior {message id: counts} = replies already summed by an earlier scan: only their growth is added (and it is updated)."""
     t = dict(inp=0, out=0, cr=0, cw=0, last=0, turns=0, t0=None, t1=None, pts=[], ents=[], w5=0, w1h=0, think=0)
@@ -49,6 +49,8 @@ def totals(path, prior=None):
             old[6] = think
     for key, v in got.items():
         ts = v[7]
+        if since and ts and ts < since:
+            continue  # reply older than the window
         seen = prior.get(key) if prior is not None else None
         if seen and sum(v[:4]) <= sum(seen[:4]):
             continue
@@ -275,10 +277,38 @@ def report(path, rl=None, now=None):
     return '\n'.join(L), dict(state=st, ctx_pct=pct, rate=rate, mins=mins, limits=lims, totals={k: v for k, v in t.items() if k not in ('pts', 'ents')})
 
 
+def record(root=None, now=None, hours=24, out=None):
+    """MEASURED tokens used in the last `hours` across every chat log: real input/output/cache_read/cache_write per reply
+    (message.usage), deduped per reply id. Writes ~/.claude/token-zombie/usage.json for the panel; returns the dict."""
+    import time
+    now = now or time.time()
+    since = now - hours * 3600
+    root = root or os.path.expanduser('~/.claude/projects')
+    r = dict(ts=now, hours=hours, inp=0, out=0, cr=0, cw=0, turns=0, basis='measured')
+    for p in glob.glob(os.path.join(root, '**', '*.jsonl'), recursive=True):
+        try:
+            if os.path.getmtime(p) < since:
+                continue
+        except OSError:
+            continue
+        t = totals(p, since=since)
+        for k, k2 in (('inp', 'inp'), ('out', 'out'), ('cr', 'cr'), ('cw', 'cw'), ('turns', 'turns')):
+            r[k] += t[k2]
+    out = out or os.path.expanduser('~/.claude/token-zombie/usage.json')
+    try:
+        os.makedirs(os.path.dirname(out), exist_ok=True)
+        tmp = out + '.tmp'
+        open(tmp, 'w').write(json.dumps(r))
+        os.replace(tmp, out)
+    except OSError:
+        pass
+    return r
+
+
 def main(argv):
     import argparse
     ap = argparse.ArgumentParser(prog='tz status|forecast')
-    ap.add_argument('cmd', nargs='?', default='status', choices=['status', 'forecast'])
+    ap.add_argument('cmd', nargs='?', default='status', choices=['status', 'forecast', 'record'])
     ap.add_argument('--transcript')
     ap.add_argument('--cwd', default=os.getcwd())
     ap.add_argument('--rate-limits', help='JSON like {"five_hour":{"used_percentage":40,"resets_at":...}}')
@@ -288,6 +318,10 @@ def main(argv):
     except ValueError:
         print('tz: --rate-limits is not valid JSON', file=sys.stderr)
         return 2
+    if a.cmd == 'record':
+        r = record()
+        print(f"24h MEASURED: input {r['inp']} output {r['out']} cache_read {r['cr']} cache_write {r['cw']} ({r['turns']} replies)")
+        return 0
     path = a.transcript or find_transcript(os.path.abspath(a.cwd))
     text, info = report(path, rl)
     if a.cmd == 'forecast':
