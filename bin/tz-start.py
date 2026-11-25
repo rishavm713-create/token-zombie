@@ -77,17 +77,37 @@ def _fit(txt):
 
 
 
+def _warn():
+    """HARD RULE: one line when this plugin checkout is not on main or panel files are edited, so a stale/broken bar load is visible. Silent outside git."""
+    try:
+        import subprocess
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+        g = lambda *a: subprocess.run(['git', '-C', root, *a], capture_output=True, text=True, timeout=5)
+        b = g('rev-parse', '--abbrev-ref', 'HEAD')
+        if b.returncode != 0:
+            return ''
+        br, dirty = b.stdout.strip(), g('status', '--porcelain', '--', 'hooks', 'types').stdout.strip()
+        w = []
+        if br != 'main':
+            w.append(f'plugin folder is on branch {br}, not main')
+        if dirty:
+            w.append('panel files (hooks/, types/) have uncommitted edits')
+        return ('TZ WARNING: ' + '; '.join(w) + ' - the bar may be stale or broken') if w else ''
+    except Exception:
+        return ''
+
+
 def _vis():
     """One user-visible line (systemMessage) so TZ shows in every UI, incl. the desktop app; feature banner, default on."""
     try:
         if not _tzl.feature('banner'):
-            return ''
+            return _warn()
         v = ''
         try:
             v = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.claude-plugin', 'plugin.json'))).get('version', '')
         except Exception:
             pass
-        return 'Token Zombie ' + (('v' + v + ' ') if v else '') + 'is on: saves tokens automatically. See savings: tz gain'
+        return 'Token Zombie ' + (('v' + v + ' ') if v else '') + 'is on: saves tokens automatically. See savings: tz gain' + (' | ' + _warn() if _warn() else '')
     except Exception:
         return ''
 
@@ -123,6 +143,9 @@ try:
                     key=lambda f: (os.path.getmtime(f), f))  # MASTER.md is the memory file, written in the same instant: never the 'newest handoff'
     if daily:
         parts.append(f'## {daily[-1]} (newest handoff)\n' + head(daily[-1], DAILY, False))
+    st = os.path.join(cwd, 'handoffs', 'STATE.md')
+    if os.path.isfile(st):  # known facts first: a fresh chat reuses them instead of re-exploring
+        parts.append('## handoffs/STATE.md (known facts; `tz find WORDS` searches notes + code)\n' + head(st, 25, False))
     try:  # active task pack (<=2k tok), when handoffs/tasks has one
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import tznext
@@ -165,7 +188,7 @@ try:
         print(json.dumps({'systemMessage': _vis()}))
     if d.get('source') != 'resume' and os.environ.get('TZ_FRESH_BG') != '0':  # panel's fresh-chat number; detached, never delays start
         import subprocess
-        subprocess.Popen([sys.executable, '-c', 'import sys; sys.path.insert(0, sys.argv[1]); import tzopt; tzopt.fresh_file()',
+        subprocess.Popen([sys.executable, '-c', 'import sys; sys.path.insert(0, sys.argv[1]); import tzopt, tzusage; tzopt.fresh_file(); tzusage.record()',
                           os.path.dirname(os.path.abspath(__file__))], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
 except Exception:
     sys.exit(0)

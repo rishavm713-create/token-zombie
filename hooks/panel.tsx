@@ -24,7 +24,7 @@ const files = atom(FI, { sig: '', status: null, isStale: false, host: null, isHo
 const acts = atom(AC, [], { shape: 'acts-1' })
 const note = atom(NO, { label: '', lines: [], err: '' }, { shape: 'note-1' })
 const BA = { plugin: 'token-zombie', key: 'bar' } as const
-const bar = atom(BA, { sig: '', agents: null, skills: null, saved: 0, opts: 0, hasLedger: false, recentAt: 0 } as Bar, { shape: 'bar-1' })
+const bar = atom(BA, { sig: '', agents: null, skills: null, saved: 0, opts: 0, hasLedger: false, recentAt: 0 } as Bar, { shape: 'bar-2' })
 
 let isPlaced = true // module copy of ui.open's answer; a reload resets it, harmless
 
@@ -108,7 +108,7 @@ async function poll($: any) {
     const home = await $.env.get('HOME')
     if (!home) return
     const d = `${home}/.claude/token-zombie`
-    const [s, h, c, lg, md, fr, ec, hi, cp, cd] = await Promise.all([
+    const [s, h, c, lg, md, fr, ec, hi, cp, cd, us] = await Promise.all([
       readOr($, `${d}/status.json`),
       readOr($, `${d}/host.json`),
       readOr($, `${d}/config.json`),
@@ -119,6 +119,7 @@ async function poll($: any) {
       readOr($, `${d}/history.json`),
       readOr($, `${d}/caps.jsonl`),
       readOr($, `${d}/coding.json`),
+      readOr($, `${d}/usage.json`),
     ])
     const now = (await $.clock.now()) / 1000
     const status = obj(s)
@@ -147,16 +148,20 @@ async function poll($: any) {
         : null
     // 24h line: today's history.json entry (tz stats) + on/off events in caps.jsonl within 24 h
     const dt = new Date(now * 1000)
-    const used = num(obj(obj(hi)?.[`${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`])?.used)
+    const dused = num(obj(obj(hi)?.[`${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`])?.used)
     const evs = cp.split('\n').filter(l => (num(obj(l)?.t) ?? 0) >= now - 86400).length
-    const day = used === undefined && evs === 0 ? null : { used: used ?? 0, events: evs }
+    const day = dused === undefined && evs === 0 ? null : { used: dused ?? 0, events: evs }
     // coding quality (MEASURED counts; pass/fail read from test output text): written by the hooks, shown only if < 24 h old
     const cj = obj(cd)
     const coding =
       cj && now - (num(cj.ts) ?? 0) <= 86400 && (num(cj.edits) ?? 0) > 0
         ? { edits: num(cj.edits) as number, runs: num(cj.runs) ?? 0, last: typeof cj.last === 'string' ? cj.last : 'none', unt: num(cj.unt) ?? 0 }
         : null
-    const b = { agents, skills, ...ledger(lg, now), fresh, econ, day, coding }
+    // MEASURED tokens used, last 24 h: real per-reply input/output/cache usage from the chat logs (bin/tzusage.py record); shown only if < 25 h old
+    const uj = obj(us)
+    const [ui, uo, ur, uw] = ['inp', 'out', 'cr', 'cw'].map(k => num(uj?.[k]) ?? 0)
+    const used = uj && now - (num(uj.ts) ?? 0) <= 90000 && num(uj.inp) !== undefined ? { tot: ui + uo + ur + uw, inp: ui, out: uo, cr: ur, cw: uw, n: num(uj.turns) ?? 0 } : null
+    const b = { agents, skills, ...ledger(lg, now), fresh, econ, day, coding, used }
     const bsig = JSON.stringify(b)
     if (bsig !== (await read($, bar)).sig) await update($, bar, () => ({ sig: bsig, ...b }))
     const sig = JSON.stringify([s, h, mode, isStale, isHostFresh, md])
@@ -307,7 +312,7 @@ export const register: Register = on => {
     const nums: [string, string, string, boolean][] = [
       ['agents', b.agents === null ? '—' : String(b.agents), 'AGENTS', false],
       ['skills', b.skills === null ? '—' : String(b.skills), 'SKILLS USED', false],
-      ['saved', b.hasLedger || b.fresh?.tok ? big(b.saved + (b.fresh?.tok ?? 0)) : '0', 'TOKENS SAVED', true],
+      ['saved', b.hasLedger || b.fresh?.tok ? big(b.saved + (b.fresh?.tok ?? 0)) : '0', 'TOKENS SAVED · 24H · EST', true],
       ['opts', String(b.opts), 'OPTIMIZATIONS', false],
     ]
     const expand = (
@@ -462,6 +467,19 @@ export const register: Register = on => {
             'econ',
             `10 turns: stay $${fb.econ.cont.toFixed(2)} compact $${fb.econ.compact.toFixed(2)} fresh $${fb.econ.fresh.toFixed(2)} -> ${fb.econ.best} [EST]`,
             'econ',
+          )}
+        {row(
+          'used',
+          fb.used
+            ? `${big(fb.used.tot)} measured, 24h: in ${big(fb.used.inp)} out ${big(fb.used.out)} cache-read ${big(fb.used.cr)} cache-write ${big(fb.used.cw)} (${fb.used.n} replies)`
+            : 'no measured usage yet (written at chat start)',
+          'used',
+        )}
+        {fb.used &&
+          row(
+            'baseline',
+            `without TZ ~${big(fb.used.tot + fb.saved + (fb.fresh?.tok ?? 0))} [EST] - used ${big(fb.used.tot)} [MEASURED] = saved ${big(fb.saved + (fb.fresh?.tok ?? 0))} [EST]`,
+            'baseline',
           )}
         {fb.day && row('24h', `used ${big(fb.day.used)}, ${fb.day.events} on/off`, 'day')}
         {row('context', ctx(f), 'ctx')}

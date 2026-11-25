@@ -99,6 +99,19 @@ def find_notes(root, words, ctx=1):
     return out
 
 
+def _all_lines(root):
+    """[(file, line_no, line)] of every non-empty line in *.md under root (newest file first)."""
+    out = []
+    for f in sorted(glob.glob(os.path.join(root, '**', '*.md'), recursive=True), reverse=True):
+        try:
+            for n, l in enumerate(open(f, encoding='utf-8', errors='ignore').read().splitlines(), 1):
+                if l.strip():
+                    out.append((f, n, l.strip()))
+        except OSError:
+            pass
+    return out
+
+
 def doctor():
     """One-screen health check, every line MEASURED from local files. Returns list of (status, text)."""
     st = os.path.expanduser('~/.claude/token-zombie')
@@ -273,6 +286,21 @@ def main(argv):
         for f, n, l in r[:20]:
             print(f'  {f}:{n}  {l}')
         print(f'{len(r)} line(s) in handoff notes' + (' (first 20 shown)' if len(r) > 20 else '') + '; open the file for full context')
+        if not r and a:  # no line holds every word: rank note lines by how many words they hold, then name likely code files
+            ws = [w.lower() for w in a]
+            sc = []
+            for f, n, l in _all_lines(root):
+                k = sum(w in l.lower() for w in ws)
+                if k:
+                    sc.append((-k, f, n, l[:160]))
+            for k, f, n, l in sorted(sc)[:8]:
+                print(f'  ~{-k}/{len(ws)} words  {f}:{n}  {l}')
+            try:
+                import tzfind2
+                for sco, f in tzfind2.find(os.getcwd(), ' '.join(a), 5):
+                    print(f'  code: {f}')
+            except Exception:
+                pass
         return 0
     if c == 'doctor':
         for stt, tx in doctor():

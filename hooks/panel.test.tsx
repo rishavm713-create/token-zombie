@@ -217,12 +217,12 @@ test('slim bar on desktop: real numbers, green saved, svg mascot, chevron opens 
   }
   expect((await val(/^AGENTS$/))?.text).toBe('3')
   expect((await val(/^SKILLS USED$/))?.text).toBe('3') // invoked only: loaded/discovered/on-disk never counted
-  const saved = await val(/^TOKENS SAVED$/)
+  const saved = await val(/^TOKENS SAVED · 24H · EST$/)
   expect(saved?.text).toBe('480')
   expect(saved?.props.color).toBe('green')
   expect((await val(/^OPTIMIZATIONS$/))?.text).toBe('1')
   expect((await ui.find({ type: 'Button', key: 'tz-mode' }))?.props.label).toBe('ULTRA') // mode replaces the Open button; press cycles it
-  expect(await ui.find({ type: 'Text', text: /EST/ })).toBeUndefined()
+  expect(await ui.find({ type: 'Text', text: /\[EST\]/ })).toBeUndefined()
   const svg = await ui.find({ type: 'Svg' })
   expect(svg?.props.source).toBe('<svg>excited</svg>')
   expect(svg?.props.alt).toMatch(/mascot: excited/)
@@ -323,5 +323,38 @@ test('24h line: today used tokens from history.json + on/off events in last 24 h
   await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
   ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
   expect(await ui.find({ type: 'Text', text: /on\/off/ })).toBeUndefined()
+  await ui.unmount()
+})
+
+// HARD RULE guard: the bar must always render a tree (even with no state files, on every surface),
+// and TOKENS SAVED is labelled EST while TOKENS USED is MEASURED from usage.json (exact sum of the four usage fields).
+test('AbovePrompt returns a tree on every surface with no files; measured used sums exactly', async ($, on) => {
+  const fs: Record<string, string> = {}
+  world(on, fs)
+  await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
+  for (const surface of ['terminal', 'desktop'] as const) {
+    const ui = await $.ui.mount({ ...BAND, surface })
+    expect(await ui.find({ type: 'Text', text: /ZOMBIE|TOKEN/ })).toBeDefined()
+    await ui.unmount()
+  }
+  fs['usage.json'] = JSON.stringify({ ts: NOW - 60, hours: 24, inp: 300, out: 180, cr: 9000, cw: 20, turns: 3, basis: 'measured' })
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  let ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
+  const all = await ui.findAll({ type: 'Text' })
+  expect(all.some(x => /^TOKENS USED/.test(x.text))).toBe(false) // tile removed from the bar
+  await ui.unmount()
+  fs['usage.json'] = JSON.stringify({ ts: NOW - 200000, inp: 5, out: 5, cr: 5, cw: 5, turns: 1 }) // older than 25 h => not shown
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
+  const old = await ui.findAll({ type: 'Text' })
+  expect(old.some(x => /^TOKENS USED/.test(x.text))).toBe(false)
+  await ui.unmount()
+})
+
+test('baseline row: without-TZ (EST) minus used (MEASURED) = saved (EST), labelled', async ($, on) => {
+  world(on, { 'usage.json': JSON.stringify({ ts: NOW - 60, inp: 100, out: 100, cr: 800, cw: 0, turns: 2 }), 'fresh.json': JSON.stringify({ ts: NOW - 60, tok: 500, n: 1 }) })
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await ui.find({ type: 'Text', text: /without TZ ~1\.5K \[EST\] - used 1\.0K \[MEASURED\] = saved 500 \[EST\]/ })).toBeDefined()
   await ui.unmount()
 })

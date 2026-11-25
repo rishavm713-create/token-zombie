@@ -29,6 +29,7 @@ export type Bar = {
   recentAt: number
   fresh?: { tok: number; n: number } | null
   day?: { used: number; events: number } | null
+  used?: { tot: number; inp: number; out: number; cr: number; cw: number; n: number } | null
   econ?: { cont: number; compact: number; fresh: number; best: string } | null
 }
 export type Act = { id: string; tool: string; isDone: boolean }

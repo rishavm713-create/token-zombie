@@ -61,7 +61,56 @@ def analyse(path):
                 rework_score=score(len(order), errors, sum(v - 1 for v in sig.values() if v > 1), fail_sig, edits))
 
 
+def parse_failures(text):
+    """Failures/errors found in test output text: counts + failing test names. Pure parsing, no execution."""
+    names = re.findall(r'^(?:FAIL(?:ED)?:?\s+|ERROR:?\s+|not ok \d+\s+-?\s*|[\u2717\u2715]\s*)(\S.{0,80})', text, re.M)
+    names += re.findall(r'^FAILED\s+(\S+)', text, re.M)
+    m = re.search(r'(\d+) failed', text) or re.search(r'fail(?:ures)?[ :=]+(\d+)', text, re.I)
+    n = int(m.group(1)) if m else len(set(names))
+    tb = len(re.findall(r'Traceback \(most recent|^\w*Error:', text, re.M))
+    return dict(failed=max(n, len(set(names))), errors=tb, names=sorted(set(names))[:10])
+
+
+def detect_cmd(root):
+    j = os.path.join(root, 'package.json')
+    if os.path.isfile(j) and '"test"' in open(j, errors='ignore').read():
+        return 'npm test'
+    if os.path.isfile(os.path.join(root, 'run_all.sh')) or os.path.isfile(os.path.join(root, 'tests', 'run_all.sh')):
+        return 'bash ' + ('tests/' if os.path.isfile(os.path.join(root, 'tests', 'run_all.sh')) else '') + 'run_all.sh'
+    if any(os.path.isfile(os.path.join(root, x)) for x in ('pytest.ini', 'pyproject.toml', 'setup.cfg')) or os.path.isdir(os.path.join(root, 'tests')):
+        return sys.executable + ' -m pytest -q' if os.path.isdir(os.path.join(root, 'tests')) and any(f.startswith('test_') and f.endswith('.py') for f in os.listdir(os.path.join(root, 'tests'))) else ''
+    return ''
+
+
+def tests_main(argv):
+    """`tz rework --tests [DIR|--log FILE] [--cmd CMD]`: run the project's test command (or parse a saved log) and report failures."""
+    import subprocess
+    a = [x for x in argv if not x.startswith('--')]
+    log = argv[argv.index('--log') + 1] if '--log' in argv else ''
+    cmd = argv[argv.index('--cmd') + 1] if '--cmd' in argv else ''
+    root = os.path.abspath(next((x for x in a if os.path.isdir(x)), os.getcwd()))
+    if log:
+        text, rc, src = open(log, errors='replace').read(), None, 'log ' + log
+    else:
+        cmd = cmd or detect_cmd(root)
+        if not cmd:
+            print('tz rework --tests: no test command found; pass --cmd CMD or --log FILE'); return 2
+        try:
+            r = subprocess.run(cmd, shell=True, cwd=root, capture_output=True, text=True, timeout=600)
+        except subprocess.TimeoutExpired:
+            print('tz rework --tests: test command timed out after 600s'); return 1
+        text, rc, src = r.stdout + '\n' + r.stderr, r.returncode, 'ran: ' + cmd
+    f = parse_failures(text)
+    bad = (rc not in (0, None)) or f['failed'] or f['errors']
+    print(f"test run [MEASURED] {src}: {'FAILURES' if bad else 'all passed'}, exit {rc}, {f['failed']} failed, {f['errors']} error(s)")
+    for n in f['names']:
+        print('  failing: ' + n)
+    return 1 if bad else 0
+
+
 def main(argv):
+    if '--tests' in argv:
+        return tests_main([x for x in argv if x != '--tests'])
     js = '--json' in argv
     a = [x for x in argv if not x.startswith('--')]
     p = a[0] if a else None

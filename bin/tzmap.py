@@ -101,14 +101,71 @@ def exists(root, words, n=15):
     return [(f, dn) for _, f, dn in sorted(out)[:n]]
 
 
+JSIMP = re.compile(r"""(?:from\s+|import\s+|require\(\s*|import\(\s*)['"](\.[^'"]*)['"]""")
+JSEXT = ('', '.js', '.ts', '.tsx', '.jsx', '.mjs', '/index.js', '/index.ts')
+
+
+def deps(root):
+    """{file: sorted local files it imports} for py (import / from-import by module path or unique basename) and js/ts (relative specifiers)."""
+    files = {_rel(p, root) for p in _files(root)}
+    base = {}
+    for f in files:
+        if f.endswith('.py'):
+            base.setdefault(os.path.basename(f)[:-3], []).append(f)
+    out = {}
+    for f in sorted(files):
+        try:
+            s = open(os.path.join(root, f), encoding='utf-8', errors='ignore').read()
+        except Exception:
+            continue
+        hit = set()
+        if f.endswith('.py'):
+            try:
+                tree = ast.parse(s)
+            except Exception:
+                continue
+            for n in ast.walk(tree):
+                if isinstance(n, ast.Import):
+                    mods = [a.name for a in n.names]
+                elif isinstance(n, ast.ImportFrom):
+                    mods = [n.module or ''] + [(n.module + '.' if n.module else '') + a.name for a in n.names]
+                else:
+                    continue
+                for m in mods:
+                    if not m:
+                        continue
+                    rel = m.replace('.', '/') + '.py'
+                    c = [x for x in files if x == rel or x.endswith('/' + rel)] or base.get(m.split('.')[-1], [])
+                    if len(c) == 1:
+                        hit.add(c[0])
+        elif f.endswith(('.js', '.ts', '.tsx', '.jsx', '.mjs')):
+            for m in JSIMP.findall(s):
+                t = os.path.normpath(os.path.join(os.path.dirname(f), m)).replace(os.sep, '/')
+                hit |= {t + e for e in JSEXT if t + e in files}
+        hit.discard(f)
+        if hit:
+            out[f] = sorted(hit)
+    return out
+
+
 def build(root, limit=40):
     out = []
+    dirs = {}
     for dp, dn, fn in os.walk(root):
         dn[:] = sorted(d for d in dn if d not in SKIP and not d.startswith('.'))
         for f in sorted(fn):
             d = defs(os.path.join(dp, f))
+            r = _rel(os.path.join(dp, f), root)
+            k = os.path.dirname(r) or '.'
+            dirs[k] = dirs.get(k, 0) + 1
             if d:
-                out.append('%s: %s' % (_rel(os.path.join(dp, f), root), ' '.join(d[:limit])))
+                out.append('%s: %s' % (r, ' '.join(d[:limit])))
+    dp = deps(root)
+    if dp:
+        out.append('# imports (file -> local files it imports)')
+        out += ['%s -> %s' % (f, ' '.join(t)) for f, t in dp.items()]
+    out.append('# folders (dir: files)')
+    out += ['%s/: %d' % (d, n) for d, n in sorted(dirs.items())]
     return '\n'.join(out)
 
 

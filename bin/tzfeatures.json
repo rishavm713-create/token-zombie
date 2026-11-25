@@ -10,7 +10,7 @@
 "2",
 "Understand",
 "Map files, folders, dependencies",
-"P",
+"D",
 "map"
 ],
 [
@@ -24,7 +24,7 @@
 "4",
 "Understand",
 "Retrieve project knowledge automatically",
-"P",
+"D",
 "find"
 ],
 [
@@ -45,7 +45,7 @@
 "7",
 "Understand",
 "Avoid rediscovering what is known",
-"P",
+"D",
 "state"
 ],
 [
@@ -108,7 +108,7 @@
 "16",
 "Save",
 "Measure whether savings are real",
-"P",
+"D",
 "bench"
 ],
 [
@@ -143,35 +143,35 @@
 "21",
 "Execute",
 "Assign work to coding agents",
-"P",
+"D",
 "agent"
 ],
 [
 "22",
 "Execute",
 "Monitor agents",
-"P",
+"D",
 "live"
 ],
 [
 "23",
 "Execute",
 "Detect duplicated work",
-"P",
+"D",
 "agent"
 ],
 [
 "24",
 "Execute",
 "Collect agent results",
-"P",
+"D",
 "agent"
 ],
 [
 "25",
 "Execute",
 "Coordinate agents with each other",
-"P",
+"D",
 "coord*"
 ],
 [
@@ -185,7 +185,7 @@
 "27",
 "Build",
 "Help build complete apps",
-"P",
+"D",
 "agent"
 ],
 [
@@ -213,14 +213,14 @@
 "31",
 "Build",
 "Consistency across files",
-"P",
+"D",
 "standards*"
 ],
 [
 "32",
 "Build",
 "Follow project architecture",
-"P",
+"D",
 "standards*"
 ],
 [
@@ -248,7 +248,7 @@
 "36",
 "Test",
 "Detect bugs and failures",
-"P",
+"D",
 "rework"
 ],
 [
@@ -269,7 +269,7 @@
 "39",
 "Test",
 "Check security risks",
-"P",
+"D",
 "security"
 ],
 [
@@ -360,7 +360,7 @@
 "52",
 "Workflow",
 "Create and manage branches",
-"P",
+"D",
 "worktree"
 ],
 [
@@ -374,7 +374,7 @@
 "54",
 "Workflow",
 "Implementation reports",
-"P",
+"D",
 "report"
 ],
 [
@@ -388,7 +388,7 @@
 "56",
 "Workflow",
 "Prepare projects for delivery",
-"P",
+"D",
 "pr*"
 ],
 [
@@ -409,7 +409,7 @@
 "59",
 "Control",
 "Show active agents",
-"P",
+"D",
 "live"
 ],
 [
@@ -444,7 +444,7 @@
 "64",
 "Control",
 "Show test results",
-"P",
+"D",
 "next"
 ],
 [
