@@ -10,15 +10,13 @@
 
 ## 🚀 Install (30 seconds)
 
-Paste this into your terminal, then restart Claude Code. That's it.
+**Option 1: paste this into your terminal**, then restart Claude Code. That's it.
 
 ```bash
 claude plugin marketplace add rishavm713-create/token-zombie && claude plugin install token-zombie@token-zombie
 ```
 
-🖥️ **Works with:** Claude Code (the verified integration) on macOS and Linux; Windows is in beta. Other agents (Codex, Cursor, Gemini, Cline and others) get a rules file only and are experimental: see [compatibility](docs/COMPAT.md).
-
-💬 **Already inside Claude Code?** Type these two lines in the chat box instead:
+**Option 2: paste this into Claude Code** (the chat box), then restart Claude Code.
 
 ```
 /plugin marketplace add rishavm713-create/token-zombie
