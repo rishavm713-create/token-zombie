@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """`tz fast`: profile the real workload, record a hot function's real calls, prove a rewrite behaves the same."""
 # adapted from EL4CTEO/fast-anything src/python/runner.py, src/hotspot.rs, src/bench.rs
-# (MIT, Copyright (c) 2025 Juan Peláez / 23blocks), see NOTICE. Python to Python only; no Rust toolchain.
+# (MIT, Copyright (c) 2026 EL4CTEO), see NOTICE. Python to Python only; no Rust toolchain.
 import argparse, ast, base64, cProfile, dataclasses, hashlib, importlib, importlib.util, json, math, os, pstats
 import random, re, runpy, shlex, shutil, signal, statistics, subprocess, sys, threading, time, _thread
 

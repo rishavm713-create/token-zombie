@@ -1,0 +1,185 @@
+[
+  {
+    "name": "subheadings",
+    "plan": "### Phase 1: Discovery\n- **Status:** complete\n\n### Phase 2: Implementation\n#### Phase 2a: backend\n- [x] api\n#### Phase 2b: frontend\n- [x] ui\n- **Status:** complete\n\n### Phase 3: Delivery\n- **Status:** complete\n",
+    "total": 3,
+    "complete": 3,
+    "in_progress": 0,
+    "pending": 0,
+    "valid": true
+  },
+  {
+    "name": "quoted_status",
+    "plan": "### Phase 1: Discovery\n- **Status:** complete\n### Phase 2: Implementation\n- **Status:** complete\n### Phase 3: Delivery\n- **Status:** pending\n## Decisions Made\n| Decision | Rationale |\n|----------|-----------|\n| A phase is only marked **Status:** complete after its tests pass | avoids false completion |\n",
+    "total": 3,
+    "complete": 2,
+    "in_progress": 0,
+    "pending": 1,
+    "valid": true
+  },
+  {
+    "name": "mixed_statuses",
+    "plan": "### Phase 1: A [complete]\n### Phase 2: B\n- **Status:** complete\n### Phase 3: C\n- [in_progress]\n### Phase 4: D\n- **Status:** pending\n",
+    "total": 4,
+    "complete": 2,
+    "in_progress": 1,
+    "pending": 1,
+    "valid": true
+  },
+  {
+    "name": "fenced_examples",
+    "plan": "````markdown\n### Phase 91: Example\n**Status:** complete\n```\n### Phase 92: Still fenced\n**Status:** pending\n````\n### Phase 1: Real\n~~~markdown\n### Phase 93: Example\n**Status:** pending\n~~~\n**Status:** in_progress\n",
+    "total": 1,
+    "complete": 0,
+    "in_progress": 1,
+    "pending": 0,
+    "valid": true
+  },
+  {
+    "name": "heading_boundaries",
+    "plan": "### Phase 1: Real\n**Status:** complete\n### Phase-based metrics\n**Status:** pending\n#### Phase 9: Not a phase\n[complete]\n# Appendix\n**Status:** complete\n",
+    "total": 1,
+    "complete": 1,
+    "in_progress": 0,
+    "pending": 0,
+    "valid": true
+  },
+  {
+    "name": "no_phases",
+    "plan": "# Notes\n### Phases are prose\n**Status:** complete\n```\n### Phase 1: Example\n**Status:** in_progress\n```\n",
+    "total": 0,
+    "complete": 0,
+    "in_progress": 0,
+    "pending": 0,
+    "valid": false
+  },
+  {
+    "name": "duplicate_status",
+    "plan": "### Phase 1: Real\n**Status:** complete\n**Status:** complete\n",
+    "total": 1,
+    "complete": 0,
+    "in_progress": 0,
+    "pending": 0,
+    "valid": false
+  },
+  {
+    "name": "adjacent_conflicting_statuses",
+    "plan": "### Phase 1: Real\n**Status:** complete[pending]\n",
+    "total": 1,
+    "complete": 0,
+    "in_progress": 0,
+    "pending": 0,
+    "valid": false
+  },
+  {
+    "name": "invalid_backtick_opener",
+    "plan": "### Phase 1: Real\n**Status:** complete\n```example```\n### Phase 2: Still real\n**Status:** pending\n",
+    "total": 2,
+    "complete": 1,
+    "in_progress": 0,
+    "pending": 1,
+    "valid": true
+  },
+  {
+    "name": "indented_boundary",
+    "plan": "### Phase 1: Real\n**Status:** complete\n  ## Notes\n**Status:** pending\n",
+    "total": 1,
+    "complete": 1,
+    "in_progress": 0,
+    "pending": 0,
+    "valid": true
+  },
+  {
+    "name": "indented_false_status",
+    "plan": "### Phase 1: Unmarked\n ## Notes\n**Status:** complete\n",
+    "total": 1,
+    "complete": 0,
+    "in_progress": 0,
+    "pending": 0,
+    "valid": false
+  },
+  {
+    "name": "fenced_legacy_table",
+    "plan": "```markdown\n### Phase 1: Example\n| 1 | complete |\n```\n",
+    "total": 0,
+    "complete": 0,
+    "in_progress": 0,
+    "pending": 0,
+    "valid": false
+  },
+  {
+    "name": "tilde_fence_with_backtick_info",
+    "plan": "~~~`example`\n### Phase 9: Quoted\n**Status:** complete\n~~~\n### Phase 1: Real\n**Status:** in_progress\n",
+    "total": 1,
+    "complete": 0,
+    "in_progress": 1,
+    "pending": 0,
+    "valid": true
+  },
+  {
+    "name": "windows_utf8_bom",
+    "plan": "\ufeff### Phase 1: Review\n**Status:** pending\n### Phase 2: Build\n**Status:** complete\n",
+    "total": 2,
+    "complete": 1,
+    "in_progress": 0,
+    "pending": 1,
+    "valid": true
+  },
+  {
+    "name": "active_with_pending_checklist_item",
+    "plan": "### Phase 1: Build\n**Status:** in_progress\n- [pending] Review the result\n",
+    "total": 1,
+    "complete": 0,
+    "in_progress": 1,
+    "pending": 0,
+    "valid": false
+  },
+  {
+    "name": "unfinished_markdown_example",
+    "plan": "### Phase 1: Review\n**Status:** complete\n\n````text\nsample output\n```\n",
+    "total": 1,
+    "complete": 1,
+    "in_progress": 0,
+    "pending": 0,
+    "valid": false,
+    "invalid_structure": true
+  },
+  {
+    "name": "phase_heading_missing_space",
+    "plan": "### Phase 1: Review\n**Status:** complete\n### Phase2: Build\n**Status:** pending\n",
+    "total": 1,
+    "complete": 1,
+    "in_progress": 0,
+    "pending": 0,
+    "valid": false,
+    "invalid_structure": true
+  },
+  {
+    "name": "indented_atx_phases",
+    "plan": "### Phase 1: Review\n**Status:** complete\n ### Phase 2: Build\n**Status:** pending\n  ### Phase 3: Validate\n**Status:** in_progress\n   ### Phase 4: Document\n**Status:** pending\n## Notes\n    ### Phase 5: Code example\n",
+    "total": 4,
+    "complete": 1,
+    "in_progress": 1,
+    "pending": 2,
+    "valid": true
+  },
+  {
+    "name": "quoted_example_is_not_phase_evidence",
+    "plan": "### Phase 1: Build\n\n  > ```markdown\n  > **Status:** complete\n  > ```\n",
+    "total": 1,
+    "complete": 0,
+    "in_progress": 0,
+    "pending": 0,
+    "valid": false
+  },
+  {
+    "name": "quoted_example_stays_in_active_phase_body",
+    "plan": "### Phase 1: Build\n**Status:** in_progress\n\n> Expected output: [complete]\n",
+    "total": 1,
+    "complete": 0,
+    "in_progress": 1,
+    "pending": 0,
+    "valid": true,
+    "smart_contains": "> Expected output: [complete]"
+  }
+]
