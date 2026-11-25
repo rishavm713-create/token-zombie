@@ -249,7 +249,8 @@ def bulk_reads(transcript_lines, n=None):
 def bulk_block_msg():
     return ('TOKEN ZOMBIE: many Read/Grep/Glob calls in a row in the main chat. Use an Explore subagent '
             '(Agent tool, subagent_type Explore) for the rest of the searching; it returns only the conclusion. '
-            'Turn this block off: TZ_FEAT_BULK_READ_BLOCK=0 or `tz config features.bulk_read_block 0`.')
+            'This blocks once; repeating the call works. Turn it off: TZ_FEAT_BULK_READ_BLOCK=0, or '
+            'features.bulk_read_block 0 in ~/.claude/token-zombie/config.json.')
 
 
 # ---------- 5. size gate + handoff ----------
@@ -505,7 +506,165 @@ def render_breakdown(b):
     return '\n'.join(rows + ['Exact numbers: /context (breakdown), /cost (session cost), /usage (plan limits).'])
 
 
-# ---------- 13. CLI ----------
+# ---------- 13. hook glue (called by tz-guard / tz-start) ----------
+def _tail(path, size=400000):
+    try:
+        with open(path, 'rb') as f:
+            f.seek(max(0, os.path.getsize(path) - size))
+            return f.read().decode('utf-8', 'ignore').splitlines()
+    except Exception:
+        return []
+
+
+def chat_size(path):
+    """(latest main-chat input tokens, model). 0 tokens after a compaction until the next reply reports the new size."""
+    for l in reversed(_tail(path)):
+        if '"compact_boundary"' in l or '"isCompactSummary":true' in l.replace(' ', ''):
+            return 0, ''
+        if '"usage"' not in l:
+            continue
+        try:
+            d = json.loads(l); m = d.get('message') or {}; u = m.get('usage') or {}
+            t = sum(int(u.get(k) or 0) for k in ('input_tokens', 'cache_read_input_tokens', 'cache_creation_input_tokens'))
+        except Exception:
+            continue
+        if t and not d.get('isSidechain'):
+            return t, str(m.get('model') or '')
+    return 0, ''
+
+
+def _state_path(sid):
+    return os.path.expanduser('~/.claude/token-zombie/tips-%s.json' % re.sub(r'[^A-Za-z0-9_-]', '_', str(sid)))
+
+
+def load_state(sid):
+    try:
+        return json.load(open(_state_path(sid)))
+    except Exception:
+        return {}
+
+
+def save_state(sid, st):
+    try:
+        os.makedirs(os.path.dirname(_state_path(sid)), exist_ok=True)
+        json.dump(st, open(_state_path(sid), 'w'))
+    except Exception:
+        pass
+
+
+def cap_block(data):
+    """Block reason when feature size_cap is on and the chat is at the cap, else ''. Slash commands and the Fresh chat
+    click always pass, so the way out is never blocked. The handoff is saved before the reason is returned."""
+    import tzlib
+    prompt = (data.get('prompt') or '').strip()
+    if not tzlib.feature('size_cap') or prompt.startswith('/') or re.fullmatch(r'(?i)fresh chat[.!]?', prompt):
+        return ''
+    n = chat_size(data.get('transcript_path'))[0]
+    tier, msg = size_gate(n)
+    if tier != 'block':
+        return ''
+    cwd = data.get('cwd') or os.getcwd()
+    p = save_handoff(cwd, 'auto-saved at the size cap: chat %d tokens, session %s.\nChat log: %s\nNext: read this file, check git status, continue.'
+                     % (n, data.get('session_id', 'x'), data.get('transcript_path')))
+    if p:
+        msg = 'TOKEN ZOMBIE: chat is %d tokens: /clear now; handoff saved to %s.' % (n, p)
+    else:
+        msg = 'TOKEN ZOMBIE: chat is %d tokens: handoff could NOT be saved; run `tz handoff save`, then /clear.' % n
+    return msg + (' Your last message was not sent. Turn this cap off: TZ_FEAT_SIZE_CAP=0, or "features": {"size_cap": 0} '
+                  'in ~/.claude/token-zombie/config.json.')
+
+
+def prompt_tips(data, home=None):
+    """Advice lines for one UserPromptSubmit. Each speaks at most once per chat (size: once per tier; paste: each time;
+    task switch: each detected switch)."""
+    import tzlib
+    on = tzlib.feature
+    sid, prompt = data.get('session_id', 'x'), data.get('prompt') or ''
+    st = load_state(sid); said = set(st.get('said', [])); out = []
+
+    def once(key, text):
+        if text and key not in said:
+            said.add(key); out.append(text)
+
+    n, model = chat_size(data.get('transcript_path'))
+    if on('size_gate'):
+        tier, msg = size_gate(n, {'size_cap': 0})
+        if tier != 'ok':
+            once(tier, msg)
+    prev = st.get('prev', [])
+    if on('task_switch') and task_switch(prompt, prev):
+        out.append('TOKEN ZOMBIE task switch: this looks unrelated to the earlier work. Before carrying the old context, offer '
+                   'a fresh start: a new-session card, or a "Fresh chat" button (write the handoff first). If it is a follow-up, ignore this.')
+    kept = ' '.join(sorted(_words(prompt) | _paths(prompt)))[:600]  # words and paths only, never the raw prompt
+    if len(kept.split()) >= 3:
+        st['prev'] = (prev + [kept])[-3:]
+    if on('home_cwd') and 'home' not in said:
+        once('home', home_cwd(data.get('cwd') or os.getcwd(), home or os.path.expanduser('~')))
+    if on('paste_warn'):
+        w = paste_warn(prompt)
+        if w:
+            out.append(w)
+    if on('model_advice') and model:
+        once('model', model_advice(prompt, model))
+    if on('plan_advice') and data.get('permission_mode') != 'plan':
+        once('plan', plan_advice(prompt))
+    if on('instr_advice') and 'instr' not in said:  # normally said by tz-start; this covers chats it did not see
+        said.add('instr')
+        a = instr_advice(instr_report(home or os.path.expanduser('~'), data.get('cwd') or os.getcwd()))
+        if a:
+            out.append(a)
+    st['said'] = sorted(said)
+    save_state(sid, st)
+    return '\n'.join(out)
+
+
+def start_tips(data, home=None):
+    """SessionStart lines: instruction-file report, and (opt-in) a one-time-ever defaults offer."""
+    import tzlib
+    home = home or os.path.expanduser('~')
+    sid, out = data.get('session_id', 'x'), []
+    if tzlib.feature('instr_advice'):
+        st = load_state(sid)
+        if 'instr' not in st.get('said', []):
+            a = instr_advice(instr_report(home, data.get('cwd') or os.getcwd()))
+            if a:
+                out.append(a)
+            st['said'] = st.get('said', []) + ['instr']
+            save_state(sid, st)
+    flag = os.path.join(home, '.claude', 'token-zombie', 'defaults-offered')
+    if tzlib.feature('defaults_advice') and not os.path.exists(flag):
+        try:
+            plan = [c for c in defaults_plan(json.loads(_read(os.path.join(home, '.claude', 'settings.json')) or '{}'), {}) if c[0] != 'MISSING']
+            if plan:
+                os.makedirs(os.path.dirname(flag), exist_ok=True)
+                open(flag, 'w').write('1')
+                out.append('TOKEN ZOMBIE defaults: cheaper defaults available (%s). Show the owner the diff with `tz defaults`; '
+                           'run `tz defaults apply --yes` only after their yes (undo: `tz defaults restore`).' % ', '.join(c[0] for c in plan))
+        except Exception:
+            pass
+    return '\n'.join(out)
+
+
+def bulk_gate(data):
+    """Deny reason for the next Read/Grep/Glob after a run of them in the main chat (feature bulk_read_block). One deny,
+    then the next bulk_read_n such calls pass, so it can never lock the work out. Subagents are never blocked."""
+    import tzlib
+    if not tzlib.feature('bulk_read_block') or data.get('agent_id') or data.get('tool_name') not in READS:
+        return ''
+    sid = data.get('session_id', 'x')
+    streak = bulk_reads(_tail(data.get('transcript_path')))
+    st = load_state(sid)
+    left = st.get('bulk_left', 0)
+    if not streak:
+        if left:
+            st['bulk_left'] = 0; save_state(sid, st)
+        return ''
+    st['bulk_left'] = left - 1 if left > 0 else int(_cfg('bulk_read_n'))
+    save_state(sid, st)
+    return '' if left > 0 else bulk_block_msg()
+
+
+# ---------- 14. CLI ----------
 def main(argv=None):
     a = list(sys.argv[1:] if argv is None else argv)
     home, cwd = os.path.expanduser('~'), os.getcwd()

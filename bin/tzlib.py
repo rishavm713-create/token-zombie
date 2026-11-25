@@ -7,6 +7,9 @@ DEFAULTS = {'limit': 100000,    # growth past first reply: suggest fresh session
             'read_warn': 40000, # bytes: first whole Read of a bigger file asks for a targeted read once
             'plan_warn': 90, 'plan_stop': 97,  # plan-usage % (only from real provider data)
             'startup_warn': 60000,
+            # v2.1 tips (tztips): token numbers are chat size; each block also has a feature switch below
+            'instr_warn_tokens': 3000, 'bulk_read_n': 8, 'size_soft': [50000, 100000], 'size_cap': 150000,
+            'paste_warn_chars': 8000, 'mcp_unused_sessions': 5,
             'fresh_overlap': 30, # %: prompt words already seen in this chat at or above this => follow-up, stay
             'cache_ttl': 300,   # seconds: provider prompt-cache life; idle longer => staying re-writes the whole history
             'ctx_window': 200000}  # tokens: ESTIMATE of the model context window (logs do not state it)  # tokens: --startup warns when the median new-chat size is above this
@@ -42,7 +45,19 @@ FEATURES = {'cache_ttl_auto': 1,  # measured 1 h vs 5 min prompt-cache life (tzc
             'safety_net': 1,      # parsed destructive-command / secret-path checks (tzsafety) inside the policy engine
             'stuck_detect': 1,    # OpenHands-style stuck patterns (tzstuck) on tool results
             'mcp_dedup': 1,       # advice when an identical read-only MCP call already succeeded with no write since (tztoolprune.mcp_dup)
-            'plan_reinject': 0}   # re-inject capped plan head after compaction (opt-in: adds context)
+            'plan_reinject': 0,   # re-inject capped plan head after compaction (opt-in: adds context)
+            # v2.1 tips: advice is on; anything that blocks or can steer quality down is opt-in
+            'size_gate': 0,       # opt-in, once per tier: soft warning on total chat size (the default growth warning stays)
+            'size_cap': 0,        # BLOCKS new prompts at size_cap tokens (handoff saved first)
+            'task_switch': 1,     # unrelated new task detected: offer a fresh chat
+            'idle_cost': 1,       # idle past the cache life: show the re-write cost and offer a fresh chat
+            'home_cwd': 1,        # chat started in ~: suggest the project folder
+            'paste_warn': 1,      # very large pasted prompt
+            'model_advice': 1,    # mechanical task on a big model
+            'plan_advice': 1,     # big vague task: plan first
+            'instr_advice': 1,    # oversized or duplicate always-loaded instruction files
+            'defaults_advice': 0, # one-time offer of `tz defaults` (suggests cheaper default models)
+            'bulk_read_block': 0} # BLOCKS one Read/Grep/Glob after bulk_read_n in a row (use an Explore subagent)
 
 
 def feature(name):
@@ -56,7 +71,10 @@ def feature(name):
 
 
 def cfg(key):
-    return int(os.environ.get(f'TZ_{key.upper()}') or _conf.get(key) or PROFILES[mode()].get(key) or DEFAULTS[key])
+    v = os.environ.get(f'TZ_{key.upper()}') or _conf.get(key) or PROFILES[mode()].get(key) or DEFAULTS[key]
+    if isinstance(DEFAULTS[key], list):
+        return [int(x) for x in (json.loads(v) if isinstance(v, str) else v)]
+    return int(v)
 
 
 LIMIT, HARD = cfg('limit'), cfg('hard')

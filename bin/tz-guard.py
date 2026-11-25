@@ -91,6 +91,13 @@ def emit(obj):
             tzdb.alert_open(data.get('session_id', 'x'), data.get('hook_event_name') or '', m.strip(), _tsize())
     except Exception:
         pass
+    for holder, k_ in ((obj, 'reason'), (hs, 'permissionDecisionReason')):  # deny/block text obeys the same cap
+        if holder.get(k_):
+            try:
+                import tzfit
+                holder[k_] = tzfit.fit(holder[k_])
+            except Exception:
+                pass
     t = json.dumps(obj); OUT[0] += len(t); print(t)
     CTX[0] += len(hs.get('additionalContext') or '') + len(hs.get('permissionDecisionReason') or '')
 
@@ -159,6 +166,21 @@ try:
             LIVE[0] = ''
     except Exception:
         _diag('live', ev)
+    if ev == 'UserPromptSubmit':  # v2.1 tips: opt-in hard size cap first, then one-line advice merged into this event's output
+        try:
+            import tztips
+            why = tztips.cap_block(data)
+        except Exception:
+            why = ''
+            _diag('sizecap', ev)
+        if why:
+            emit({'decision': 'block', 'reason': why})
+            sys.exit(0)
+        try:
+            import tztips
+            LIVE[0] = (LIVE[0] + '\n' + tztips.prompt_tips(data)).strip()
+        except Exception:
+            _diag('tips', ev)
     if ev == 'Stop' and advice('next_task'):  # turn closed past the limit: tell the user to /compact (advice, once per 25k)
         try:
             import tzcont
@@ -199,6 +221,16 @@ try:
                 LIVE[0] = (LIVE[0] + '\n' + pa).strip()
         except Exception:
             _diag('policy', ev)
+    if ev == 'PreToolUse' and data.get('tool_name') in ('Read', 'Grep', 'Glob'):  # v2.1 opt-in bulk-read block
+        try:
+            import tztips
+            why = tztips.bulk_gate(data)
+        except Exception:
+            why = ''
+            _diag('bulk', ev)
+        if why:
+            emit({'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny', 'permissionDecisionReason': why}})
+            _pflush()
     if ev == 'PreToolUse' and data.get('tool_name', 'Read') != 'Read':
         if data.get('tool_name') == 'Bash' and os.environ.get('TZ_SAFE') != '0':  # destructive-command guard (tz safe); TZ_SAFE=0 turns it off
             try:

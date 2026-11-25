@@ -104,10 +104,15 @@ try:
     except Exception:
         pass
     L = lean()
-    if parts or pk or L or _plan(d, peek=True):
+    try:  # v2.1: instruction-file report, opt-in defaults offer
+        import tztips
+        tips = tztips.start_tips(d)
+    except Exception:
+        tips = ''
+    if parts or pk or L or tips or _plan(d, peek=True):
         txt = (('TOKEN ZOMBIE start context. Use this; do not read the full HANDOFF.md unless the step needs a detail.\n'
                + '\n\n'.join(parts))[:CAP] if parts else '') + ('\n\n' + pk if pk else '')
-        txt = _fit('\n\n'.join(x for x in (L, txt.strip(), _plan(d)) if x))
+        txt = _fit('\n\n'.join(x for x in (L, txt.strip(), tips, _plan(d)) if x))
         print(json.dumps({'hookSpecificOutput': {'hookEventName': 'SessionStart', 'additionalContext': txt}}))
     if d.get('source') != 'resume' and os.environ.get('TZ_FRESH_BG') != '0':  # panel's fresh-chat number; detached, never delays start
         import subprocess
