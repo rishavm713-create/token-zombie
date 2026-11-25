@@ -29,6 +29,10 @@ def _files(root):
             yield os.path.join(dp, f)
 
 
+def _rel(p, root):
+    return os.path.relpath(p, root).replace(os.sep, '/')
+
+
 def sym(root, name):
     """(defs, refs): file:line where name is defined (py/js/ts/sh), and files that mention it as a word elsewhere."""
     d = re.compile(r'^\s*(?:export\s+)?(?:default\s+)?(?:async\s+)?(?:def|class|function\*?|const|let|var|interface|type|enum)\s+%s\b|^\s*%s\s*\(\)\s*\{' % (re.escape(name), re.escape(name)))
@@ -41,7 +45,7 @@ def sym(root, name):
             lines = open(p, encoding='utf-8', errors='ignore').read().splitlines()
         except Exception:
             continue
-        r = os.path.relpath(p, root); hit = False
+        r = _rel(p, root); hit = False
         for i, l in enumerate(lines, 1):
             if d.search(l):
                 defs_.append(f'{r}:{i}')
@@ -71,7 +75,7 @@ def exists(root, words, n=15):
         for dname in defs(p):
             nm = dname.split()[-1]; k = len(q & _parts(nm))
             if k:
-                out.append((-k, os.path.relpath(p, root), dname))
+                out.append((-k, _rel(p, root), dname))
     return [(f, dn) for _, f, dn in sorted(out)[:n]]
 
 
@@ -82,7 +86,7 @@ def build(root, limit=40):
         for f in sorted(fn):
             d = defs(os.path.join(dp, f))
             if d:
-                out.append('%s: %s' % (os.path.relpath(os.path.join(dp, f), root), ' '.join(d[:limit])))
+                out.append('%s: %s' % (_rel(os.path.join(dp, f), root), ' '.join(d[:limit])))
     return '\n'.join(out)
 
 
