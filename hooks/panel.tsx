@@ -10,7 +10,7 @@ const STALE_S = 600
 const KEEP = 'current task, files changed, test results, next step'
 const MODES = ['off', 'lite', 'full', 'ultra'] as const
 // one colour per mode so each reads apart at a glance; off stays dim
-const MODE_COLOR: Record<string, string | undefined> = { off: undefined, lite: '#5ad1ff', full: 'green', ultra: '#ff8a1f' }
+const MODE_COLOR: Record<string, string | undefined> = { off: undefined, lite: '#5ad1ff', full: '#7cfc00', ultra: '#ff8a1f' }
 const TAGLINE = 'MAKE EVERY SINGLE TOKEN COUNT.'
 // sounds/mode-*.wav come from bin/tzsfx.py; never block or fail a mode switch on audio
 const sfx = ($: any, m: string) => void $.audio.play({ asset: `sounds/mode-${m}.wav` }, { gain: 0.6 }).catch(() => {})
@@ -304,7 +304,7 @@ export const register: Register = on => {
     const b = await read($, bar)
     const now = (await $.clock.now()) / 1000
     const vs = visual(f, b, e.props.isWorking, now)
-    const G = 'green'
+    const G = '#7cfc00'
     const mode = f.mode.toUpperCase()
     const isOff = f.mode === 'off'
     const MC = MODE_COLOR[f.mode] ?? G
@@ -400,7 +400,7 @@ export const register: Register = on => {
     const list = (await read($, acts)).slice(-5)
     const n = await read($, note)
     const s = f.status
-    const A = 'green'
+    const A = '#7cfc00'
     const row = (label: string, value: string, key: string) => (
       <Box key={key}>
         <Text dimColor>{label.padEnd(9)}</Text>

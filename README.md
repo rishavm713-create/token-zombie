@@ -6,7 +6,7 @@
 
 <p align="center">Claude Code token optimization: context management, usage tracking and session handoff in one local plugin.</p>
 
-<p align="center"><img src="https://img.shields.io/badge/tests-3693%20pass-83ffa0" alt="3693 tests pass"> <img src="https://img.shields.io/badge/made%20with-Claude%20Code-d97757" alt="Made with Claude Code"> <img src="https://img.shields.io/badge/macOS-supported-83ffa0" alt="macOS"> <img src="https://img.shields.io/badge/Linux-supported-83ffa0" alt="Linux"> <img src="https://img.shields.io/badge/Windows-beta-f0b429" alt="Windows beta"> <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-4c9a1a" alt="MIT"></a></p>
+<p align="center"><img src="https://img.shields.io/badge/tests-3693%20pass-7cfc00" alt="3693 tests pass"> <img src="https://img.shields.io/badge/made%20with-Claude%20Code-d97757" alt="Made with Claude Code"> <img src="https://img.shields.io/badge/macOS-supported-7cfc00" alt="macOS"> <img src="https://img.shields.io/badge/Linux-supported-7cfc00" alt="Linux"> <img src="https://img.shields.io/badge/Windows-beta-f0b429" alt="Windows beta"> <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-4c9a1a" alt="MIT"></a></p>
 
 ## 🚀 Install (30 seconds)
 
