@@ -313,7 +313,6 @@ export const register: Register = on => {
       ['agents', b.agents === null ? '—' : String(b.agents), 'AGENTS', false],
       ['skills', b.skills === null ? '—' : String(b.skills), 'SKILLS USED', false],
       ['saved', b.hasLedger || b.fresh?.tok ? big(b.saved + (b.fresh?.tok ?? 0)) : '0', 'TOKENS SAVED · 24H · EST', true],
-      ['used', b.used ? big(b.used.tot) : '—', 'TOKENS USED · 24H · MEASURED', false],
       ['opts', String(b.opts), 'OPTIMIZATIONS', false],
     ]
     const expand = (
