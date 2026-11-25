@@ -1,0 +1,2 @@
+bin/tzscrub.py: secret scrub of JSON/JSONL kept valid, adapted from harbor src/harbor/utils/redaction.py
+(Apache-2.0, laude-institute/harbor contributors). Changed: stdlib only, env-secret discovery, length floor.

@@ -1,11 +1,19 @@
 # Verify before claiming done
 
-Evidence first, words second. A claim is only as good as the command you ran after the last edit.
+Evidence first. A claim is only as good as the command you ran after the last edit.
 
-- Name the check that would prove the claim (test, build, run, diff). Run it now, in full, and read the output to the end.
-- Done means that check passed after your final change. An earlier green run does not count.
-- Report what you ran and what it printed. If you did not run something, say "not verified", never "should work".
-- unverified_claim: any sentence that says fixed, passing, working, complete or safe with no matching command output behind it. Before sending, scan your own reply for these. Each one gets either a run or a downgrade to "not verified".
-- Delegated work (a subagent, a script) is a claim too: look at the changed files or rerun its check yourself.
-- A fix for a bug is verified only when the original failing case now passes and the neighbours still pass.
+1. Name the command that would prove the claim.
+2. Run it in full now; read to the end, check exit code and failure count.
+3. Report what ran and printed. Not run: say "not verified", never "should work".
+
+| Claim | Needs |
+|---|---|
+| tests pass | this run, 0 failures |
+| build ok | build exit 0 (lint is not a build) |
+| bug fixed | original failing case passes, neighbours too |
+| regression test | passes, fails with the fix reverted, passes again |
+| agent finished | read the VCS diff, rerun its check |
+| requirements met | each item checked one by one |
+
+- unverified_claim: fixed, passing, working, complete or done with no matching output. Scan your reply before sending (also before commit or PR): run it or downgrade it.
 - Say what is left undone in the same message.

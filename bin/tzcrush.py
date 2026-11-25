@@ -2,6 +2,7 @@
 # Content-aware crushing for big tool output: detect JSON / unified diff / repetitive log, shrink structurally.
 # Always paired with tzout.spill (original kept; `tz recall ID`). Pure stdlib. Idea of a content router seen in Headroom (Apache-2.0); independent code.
 import json, re, statistics
+import tzrtk
 # Ideas adapted (independent code): Headroom (Apache-2.0) SmartCrusher outlier retention; RTK (Apache-2.0) strip-ANSI / collapse-blank stages.
 _ANSI = re.compile(r'\x1b\[[0-9;?]*[ -/]*[@-~]')
 
@@ -67,7 +68,17 @@ def _diff(text):
         near = any(lines[j][:1] in '+-' for j in range(max(0, i - 1), min(len(lines), i + 2)))
         if ch or near:
             out.append(l)
-    return '\n'.join(out)
+    new = '\n'.join(out)
+    return tzrtk.cap_hunks(new) if _rtk_on() else new
+
+
+def _rtk_on():
+    """Feature gate for the per-command filters and the hunk cap."""
+    try:
+        from tzlib import feature
+        return feature('rtk_filters')
+    except Exception:
+        return False
 
 
 def _log(text):
@@ -104,8 +115,13 @@ def _buildlog(text):
     return r and r['text']
 
 
-def crush(text):
-    """(new_text, kind) or (None, kind) when it did not shrink by >=10%. Caller must spill the original first."""
+def crush(text, cmd=None):
+    """(new_text, kind) or (None, kind) when it did not shrink by >=10%. Caller must spill the original first.
+    cmd (the shell command, when known) picks a per-command filter; without it only strict first-line signatures do."""
+    if _rtk_on():
+        new, name = tzrtk.apply(text, cmd)
+        if new is not None:
+            return new, 'rtk:' + name
     k = kind(text)
     if k != 'json' and not text.startswith('diff --git'):  # test output can hold '@@' hunks and still be a log
         new = _buildlog(text)
