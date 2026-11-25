@@ -17,6 +17,8 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # tests/v21/test_matrix.py extracts the v0.4.0 baseline with git archive; a shallow clone has no tags
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
