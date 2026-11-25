@@ -72,3 +72,7 @@ ccusage (https://github.com/ryoppippi/ccusage), MIT licence; ccstatusline (https
 Used in: bin/tzusage.py blocks() (5-hour block rules) and usable() (auto-compact usable-context share); behaviour rebuilt, no code copied.
 
 skills/tz-craft: ideas from superpowers (MIT, Jesse Vincent), mattpocock/skills (MIT), karpathy-skills (MIT), compound-engineering-plugin (MIT, Every Inc), fast-anything (MIT); vercel-labs/agent-skills react guidance (no licence file: rewritten in our own words, no text copied). All reference text is original.
+
+everything-claude-code (https://github.com/affaan-m/everything-claude-code), MIT licence
+Copyright (c) 2026 Affaan Mustafa
+Used in: bin/tzbudget.py (response-depth table and 25/50/75/100% options from skills/token-budget-advisor; stdlib rebuild, no code vendored). Licence: third_party/everything-claude-code/LICENSE
