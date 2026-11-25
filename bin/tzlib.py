@@ -73,7 +73,12 @@ FEATURES = {'cache_ttl_auto': 1,  # measured 1 h vs 5 min prompt-cache life (tzc
             'beads_prime': 0,     # opt-in: ready-task brief at session start when no task pack (adds context)
             'safety_extra': 0,    # opt-in: BLOCKS extra destructive/secret commands (tzrules)
             'safety_strict': 0,   # opt-in: stricter rules, also BLOCKS (tzrules)
-            'custom_rules': 0}    # opt-in: user rulebooks (tzrules)
+            'custom_rules': 0,    # opt-in: user rulebooks (tzrules)
+            # v2.1 group 2 repo ports: all opt-in (they block or add context / change output)
+            'git_guard': 0,        # BLOCKS risky git commands on PreToolUse (tzgitguard)
+            'unverified_claim': 0, # Stop: one advice line when success is claimed with no passing check (tzclaim)
+            'micro_skills': 0,     # facts learned from repeated failures, added at SessionStart (tzfacts)
+            'rtk_filters': 0}      # extra per-command output filters in tzcrush (tzrtk)
 
 
 def feature(name):

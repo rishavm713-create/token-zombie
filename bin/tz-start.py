@@ -57,6 +57,16 @@ def _plan(d, peek=False, _c={}):
     return _c['v']
 
 
+def _facts(d):
+    """Opt-in (micro_skills) learned-facts block, or ''. Fail open."""
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import tzfacts
+        return tzfacts.session_start(d)
+    except Exception:
+        return ''
+
+
 def _fit(txt):
     """Cap SessionStart text with the shared budget fitter (Claude Code truncates hook output near 10k chars)."""
     try:
@@ -87,7 +97,7 @@ try:
             txt = 'TOKEN ZOMBIE continuation (saved just before compaction; facts from git + chat log):\n' + open(note).read()[:1500]
         else:
             txt = ''
-        txt = '\n\n'.join(x for x in (lean(), txt, _plan(d)) if x)
+        txt = '\n\n'.join(x for x in (lean(), txt, _facts(d), _plan(d)) if x)
         if txt:
             print(json.dumps({'hookSpecificOutput': {'hookEventName': 'SessionStart', 'additionalContext': txt}}))
         sys.exit(0)
@@ -120,10 +130,11 @@ try:
         tips = tztips.start_tips(d)
     except Exception:
         tips = ''
-    if parts or pk or L or tips or _plan(d, peek=True):
+    facts = _facts(d)
+    if parts or pk or L or tips or facts or _plan(d, peek=True):
         txt = (('TOKEN ZOMBIE start context. Use this; do not read the full HANDOFF.md unless the step needs a detail.\n'
                + '\n\n'.join(parts))[:CAP] if parts else '') + ('\n\n' + pk if pk else '')
-        txt = _fit('\n\n'.join(x for x in (L, txt.strip(), tips, _plan(d)) if x))
+        txt = _fit('\n\n'.join(x for x in (L, txt.strip(), tips, facts, _plan(d)) if x))
         print(json.dumps({'hookSpecificOutput': {'hookEventName': 'SessionStart', 'additionalContext': txt}}))
     if d.get('source') != 'resume' and os.environ.get('TZ_FRESH_BG') != '0':  # panel's fresh-chat number; detached, never delays start
         import subprocess

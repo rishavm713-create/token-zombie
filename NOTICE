@@ -128,3 +128,35 @@ Used in: bin/tzhumanlayer.py, a modified Python port of .claude/hooks/block-test
 Claude-BugHunter (https://github.com/elementalsouls/Claude-BugHunter), MIT licence (code only; no docs or skills copied)
 Copyright (c) 2026 Sachin Sharma
 Used in: bin/tzscope.py (host matching adapted from engine/scope.py; test cases from its self-test). Licence: third_party/bughunter/LICENSE
+
+--- v2.1 group 2 repo ports. MIT/Apache permission texts as above apply to each MIT/Apache entry; licence copies in third_party/<name>/. ---
+
+RTK (https://github.com/rtk-ai/rtk), Apache License 2.0, Copyright 2026 RTK AI Labs
+Used in: bin/tzrtk.py (per-command output filters adapted from src/cmds, ported to Python and changed). BUSL-1.1 engine not used.
+
+microsoft/TokenEconomizer (https://github.com/microsoft/TokenEconomizer), MIT licence, Copyright (c) 2026 Microsoft
+Used in: bin/tzfacts.py (fact lifecycle, scoring and error classes adapted from microskills/, changed).
+
+mattpocock/skills (https://github.com/mattpocock/skills), MIT licence, Copyright (c) 2026 Matt Pocock
+Used in: bin/tzgitguard.py (blocked-command list from git-guardrails-claude-code, changed), skills/tz-craft references.
+
+obra/superpowers (https://github.com/obra/superpowers), MIT licence, Copyright (c) 2025 Jesse Vincent
+Used in: bin/tzclaim.py (adapted from verification-before-completion), skills/tz-craft references.
+
+langfuse (https://github.com/langfuse/langfuse), MIT licence for the parts outside ee/, Copyright (c) 2023-2026 ClickHouse, Inc.
+Used in: bin/tztrace.py (trace model and cost details, changed). Nothing from ee/ directories.
+
+harbor (https://github.com/laude-institute/harbor), Apache License 2.0
+Used in: bin/tzscrub.py (adapted from harbor redaction.py, changed).
+
+terminal-bench (https://github.com/laude-institute/terminal-bench), Apache License 2.0
+Used in: bin/tztbench.py (task parsing, resolve rule and pass@k, ported to Python stdlib and changed).
+
+REA (https://github.com/morluto/rea), MIT licence, Copyright (c) 2026 morluto
+Used in: bin/tzscrub.py mark_untrusted() (idea of labelling target output as untrusted data; no source copied).
+
+context-mode (https://github.com/mksglu/context-mode), Elastic License 2.0: NOT bundled, no code, prompts or assets copied.
+bin/tzsandbox.py is an independent implementation of behaviour described in the public README.
+
+serena (https://github.com/oraios/serena), GPL-3.0-or-later application (SolidLSP MIT): no code, prompts or docstrings copied.
+bin/tzsym.py is an independent rebuild of observed symbol-lookup behaviour.
