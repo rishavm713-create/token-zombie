@@ -65,6 +65,7 @@ FEATURES = {'cache_ttl_auto': 1,  # measured 1 h vs 5 min prompt-cache life (tzc
             'log_compress': 1,    # build/test logs in crushed output: keep every failure line, original stored (tzlogc)
             'skill_lint': 1,      # advice when a written SKILL.md breaks the skill spec (tzaskills)
             'read_delta': 0,      # opt-in, BLOCKS a re-read of a changed file once and shows the diff instead (tztokopt)
+            'check_pipe': 1,      # advice when test/build output is piped through head/tail/grep (tzhumanlayer)
             'beads_prime': 0,     # opt-in: ready-task brief at session start when no task pack (adds context)
             'safety_extra': 0,    # opt-in: BLOCKS extra destructive/secret commands (tzrules)
             'safety_strict': 0,   # opt-in: stricter rules, also BLOCKS (tzrules)

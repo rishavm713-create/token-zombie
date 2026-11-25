@@ -255,6 +255,16 @@ try:
                 LIVE[0] = (LIVE[0] + '\n' + tzcont.file_guard(data)).strip()
             except Exception:
                 _diag('fileguard', ev)
+        if data.get('tool_name') == 'Bash':  # test/build output piped away hides lines and the exit code (advice only)
+            try:
+                from tzlib import feature
+                if feature('check_pipe'):
+                    from tzhumanlayer import check_pipe_advice
+                    m = check_pipe_advice(data)
+                    if m:
+                        LIVE[0] = (LIVE[0] + '\n' + m).strip()
+            except Exception:
+                _diag('check_pipe', ev)
         if (data.get('tool_name') or '').startswith('mcp__'):  # v2.1: same read-only MCP call already answered (advice only)
             try:
                 from tztoolprune import mcp_dup

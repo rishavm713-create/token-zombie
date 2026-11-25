@@ -108,3 +108,7 @@ Used in: bin/tzbeads.py (base36 hash id and adaptive length; claim/readiness/com
 karpathy-skills (https://github.com/jokim1/karpathy-skills), MIT licence
 Copyright (c) 2026 Joseph Kim
 Used in: bin/tzreplayrank.py (token-size x replay ranking and verified-slice baseline/snapshot/auto-revert rules from skills/karpathy-audit and karpathy-refactor SKILL.md; Python written for TZ). Licence: third_party/karpathy/LICENSE
+
+humanlayer (https://github.com/humanlayer/humanlayer), Apache License 2.0
+Copyright 2025-2026 QueryTale, Inc. d/b/a HumanLayer
+Used in: bin/tzhumanlayer.py, a modified Python port of .claude/hooks/block-test-output-filtering.sh, plus a rebuild of the phase workflow in apps/riptide-rpi-claude-plugin (implement-plan SKILL.md, plan_template.md format). Licence: third_party/humanlayer/LICENSE
