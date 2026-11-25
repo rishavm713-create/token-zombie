@@ -10,13 +10,7 @@
 
 ## 🚀 Install (30 seconds)
 
-**Option 1: paste this into your terminal**, then restart Claude Code. That's it.
-
-```bash
-claude plugin marketplace add rishavm713-create/token-zombie && claude plugin install token-zombie@token-zombie
-```
-
-**Option 2: paste this into Claude Code** (the chat box), then restart Claude Code.
+Paste these two lines into Claude Code (the chat box), then restart Claude Code. That's it.
 
 ```
 /plugin marketplace add rishavm713-create/token-zombie
