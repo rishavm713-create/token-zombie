@@ -4,6 +4,8 @@
 
 <p align="center">Claude Code re-reads the same things again and again and burns your usage.<br><b>TOKEN ZOMBIE stops that.</b> 💸 Free · 🔒 Stays on your computer · 🚫 No tracking</p>
 
+<p align="center">Claude Code token optimization: context management, usage tracking and session handoff in one local plugin.</p>
+
 <p align="center"><img src="https://img.shields.io/badge/tests-3693%20pass-83ffa0" alt="3693 tests pass"> <img src="https://img.shields.io/badge/made%20with-Claude%20Code-d97757" alt="Made with Claude Code"> <img src="https://img.shields.io/badge/macOS-supported-83ffa0" alt="macOS"> <img src="https://img.shields.io/badge/Linux-supported-83ffa0" alt="Linux"> <img src="https://img.shields.io/badge/Windows-beta-f0b429" alt="Windows beta"> <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-4c9a1a" alt="MIT"></a></p>
 
 ## 🚀 Install (30 seconds)
@@ -13,6 +15,8 @@ Paste this into your terminal, then restart Claude Code. That's it.
 ```bash
 claude plugin marketplace add rishavm713-create/token-zombie && claude plugin install token-zombie@token-zombie
 ```
+
+🖥️ **Works with:** Claude Code (the verified integration) on macOS and Linux; Windows is in beta. Other agents (Codex, Cursor, Gemini, Cline and others) get a rules file only and are experimental: see [compatibility](docs/COMPAT.md).
 
 ↩️ Don't like it? Remove it any time: `/plugin uninstall token-zombie`
 
@@ -150,8 +154,10 @@ claude plugin marketplace add rishavm713-create/token-zombie && claude plugin in
 
 👉 See **your** number: type `tz gain`
 
+Noise is counted in characters, savings in tokens, and each number is labelled measured or estimated. Results vary by workflow, so no fixed saving is promised: see the [benchmark method](docs/BENCHMARK-METHOD.md).
+
 ## 📚 Learn more
 
 🌐 [Website](https://rishavm713-create.github.io/token-zombie/) · 📖 [Full guide](docs/REFERENCE.md) · ✅ [Test evidence](docs/TEST_EVIDENCE.md) · 🔐 [Security](.github/SECURITY.md) · 🤝 [Contribute](.github/CONTRIBUTING.md)
 
-Created by [Rishav Mishra](https://github.com/rishavm713-create) · MIT · macOS and Linux
+Created by [Rishav Mishra](https://github.com/rishavm713-create) · MIT · macOS and Linux (Windows beta)
