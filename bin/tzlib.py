@@ -54,6 +54,9 @@ FEATURES = {'cache_ttl_auto': 1,  # measured 1 h vs 5 min prompt-cache life (tzc
             'idle_cost': 1,       # idle past the cache life: show the re-write cost and offer a fresh chat
             'home_cwd': 1,        # chat started in ~: suggest the project folder
             'paste_warn': 1,      # very large pasted prompt
+            'paste_block': 0,     # BLOCKS a very large pasted prompt after saving it to handoffs/paste-<time>.md
+            'small_msgs': 1,      # several short prompts in a row: send one full message
+            'archive_advice': 1,  # once per chat at a task end: offer the app's auto-archive setting (asks first)
             'model_advice': 1,    # mechanical task on a big model
             'plan_advice': 1,     # big vague task: plan first
             'instr_advice': 1,    # oversized or duplicate always-loaded instruction files

@@ -6,7 +6,8 @@
 import os, re, sys, json, time, shutil
 
 DEF = {'instr_warn_tokens': 3000, 'bulk_read_n': 8, 'size_soft': [50000, 100000], 'size_cap': 150000,
-       'paste_warn_chars': 8000, 'mcp_unused_sessions': 5}
+       'paste_warn_chars': 8000, 'mcp_unused_sessions': 5, 'paste_block_chars': 40000, 'small_msgs_n': 4,
+       'small_msgs_chars': 40}
 
 
 def _cfg(key, c=None):
@@ -377,6 +378,44 @@ def paste_warn(prompt, n=None):
     return ''
 
 
+def paste_block(data, now=None):
+    """Opt-in (feature paste_block): save a very large prompt to <cwd>/handoffs/paste-<time>.md and return a block reason.
+    Claude Code drops a blocked prompt from the context. '' when off, small, or the save failed (then nothing is blocked)."""
+    try:
+        import tzlib
+        prompt = data.get('prompt') or ''
+        if not tzlib.feature('paste_block') or len(prompt) <= _cfg('paste_block_chars') or prompt.lstrip().startswith('/'):
+            return ''
+        now = now or time.time()
+        d = os.path.join(data.get('cwd') or os.getcwd(), 'handoffs'); os.makedirs(d, exist_ok=True)
+        p = os.path.join(d, 'paste-%s.md' % time.strftime('%Y%m%d-%H%M%S', time.localtime(now)))
+        open(p, 'w', encoding='utf-8').write(prompt)
+        return ('TOKEN ZOMBIE paste: %d chars [est %d tokens] saved to %s and not sent. Send "read %s" (plus what to do with it). '
+                'Turn this off: TZ_FEAT_PASTE_BLOCK=0.' % (len(prompt), len(prompt) // 4, p, p))
+    except Exception:
+        return ''
+
+
+def small_msgs(lens, n=None, chars=None):
+    """Tip when the last n prompts were all short: each one re-sends the whole chat."""
+    n, chars = n or _cfg('small_msgs_n'), chars or _cfg('small_msgs_chars')
+    if len(lens) >= n and all(0 < x <= chars for x in lens[-n:]):
+        return ('TOKEN ZOMBIE: %d short messages in a row; each one re-sends the whole chat. Send one full message with '
+                'everything instead.' % n)
+    return ''
+
+
+ARCHIVE_CUE = re.compile(r'\b(done|finished|that\'?s all|thanks?|thank you|ship it|wrap up)\b', re.I)
+
+
+def archive_advice(prompt):
+    """Task-end prompt: tell the model to offer the app's auto-archive setting; it changes it only after the owner's yes."""
+    if ARCHIVE_CUE.search(prompt or '') and len(prompt or '') < 200:
+        return ('TOKEN ZOMBIE archive: the task looks finished. If the Code tab auto-archive setting is off (ccd_settings '
+                'get_settings), offer once to turn it on; change it only after the owner says yes.')
+    return ''
+
+
 # ---------- 10. defaults ----------
 def defaults_plan(settings, verified_env):
     ch = []
@@ -618,6 +657,12 @@ def prompt_tips(data, home=None):
         w = paste_warn(prompt)
         if w:
             out.append(w)
+    if on('small_msgs'):
+        st['lens'] = (st.get('lens', []) + [len(prompt.strip())])[-8:]
+        if 'small' not in said and small_msgs(st['lens']):
+            once('small', small_msgs(st['lens']))
+    if on('archive_advice'):
+        once('archive', archive_advice(prompt))
     if on('model_advice') and model:
         once('model', model_advice(prompt, model))
     if on('plan_advice') and data.get('permission_mode') != 'plan':

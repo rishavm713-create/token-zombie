@@ -169,7 +169,7 @@ try:
     if ev == 'UserPromptSubmit':  # v2.1 tips: opt-in hard size cap first, then one-line advice merged into this event's output
         try:
             import tztips
-            why = tztips.cap_block(data)
+            why = tztips.cap_block(data) or tztips.paste_block(data)
         except Exception:
             why = ''
             _diag('sizecap', ev)
