@@ -50,7 +50,7 @@ def _target(payload):
         return None
     if any(ti.get(k) not in (None, '') for k in ('offset', 'limit', 'pages')) or payload.get('agent_id'):
         return None  # partial reads; sub-agents have their own context and never saw the parent's copy
-    if _SECRET.search(fp) or _SECRET.search(os.path.realpath(fp)):
+    if _SECRET.search(fp.replace('\\', '/')) or _SECRET.search(os.path.realpath(fp).replace('\\', '/')):
         return None
     return str(sid), fp
 

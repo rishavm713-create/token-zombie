@@ -3,7 +3,7 @@ import os, tempfile, io, contextlib, stat
 from harness import ok, done, Z
 
 H = tempfile.mkdtemp()
-os.environ['HOME'] = H
+os.environ['HOME'] = os.environ['USERPROFILE'] = H
 import tztokopt as T
 
 F = os.path.join(H, 'a.py')
@@ -22,7 +22,7 @@ def pay(p=F, sid='s1', tool='Read', **ti):
 write(BASE)
 ok('first read allowed', T.delta(pay()) is None)
 ok('remember stores', T.remember(pay()))
-ok('snapshot is private', stat.S_IMODE(os.stat(T._path('s1')).st_mode) == 0o600)
+ok('snapshot is private', os.name == 'nt' or stat.S_IMODE(os.stat(T._path('s1')).st_mode) == 0o600)  # no POSIX modes on Windows
 ok('unchanged left to other guards', T.delta(pay()) is None)
 new = list(BASE)
 for i in (5, 90, 180):
