@@ -341,14 +341,13 @@ test('AbovePrompt returns a tree on every surface with no files; measured used s
   await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
   let ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
   const all = await ui.findAll({ type: 'Text' })
-  const i = all.findIndex(x => /^TOKENS USED · 24H · MEASURED$/.test(x.text))
-  expect(all[i - 1]?.text).toBe('9.5K') // 300 + 180 + 9000 + 20 = 9500
+  expect(all.some(x => /^TOKENS USED/.test(x.text))).toBe(false) // tile removed from the bar
   await ui.unmount()
   fs['usage.json'] = JSON.stringify({ ts: NOW - 200000, inp: 5, out: 5, cr: 5, cw: 5, turns: 1 }) // older than 25 h => not shown
   await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
   ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
   const old = await ui.findAll({ type: 'Text' })
-  expect(old[old.findIndex(x => /^TOKENS USED · 24H · MEASURED$/.test(x.text)) - 1]?.text).toBe('—')
+  expect(old.some(x => /^TOKENS USED/.test(x.text))).toBe(false)
   await ui.unmount()
 })
 
