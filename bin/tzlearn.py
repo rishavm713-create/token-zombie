@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # `tz learn`: mine repeated tool failures from chat logs and propose corrections. Dry run by default; --apply writes a marked block
 # into CLAUDE.local.md (or --target FILE). Local only, MEASURED from logs. Idea seen in Headroom `learn` (Apache-2.0); independent code.
+# `tz learn capture|recall|check|review` is the verified-lesson loop in tzcompound.py.
 import collections, glob, json, os, re, sys
 
 B, E = '<!-- TZ-LEARN -->', '<!-- /TZ-LEARN -->'
@@ -53,6 +54,9 @@ def apply(path, lines):
 
 
 def main(argv):
+    import tzcompound
+    if argv and argv[0] in tzcompound.COMMANDS:
+        return tzcompound.main(argv)
     root = os.path.expanduser('~/.claude/projects')
     cwd = os.getcwd()
     d = os.path.join(root, re.sub(r'[^A-Za-z0-9]', '-', cwd))

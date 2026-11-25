@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-# `tz rank [--focus FILE..] [--n N] [DIR]`: the most important definitions in a repo, ranked by who references them.
+# `tz rank [--focus FILE..] [--n N] [--tokens N] [--mention TEXT] [--lines] [DIR]`: the most important definitions in a repo, ranked by who references them.
 # Adapted from aider/repomap.py RepoMap.get_ranked_tags (https://github.com/Aider-AI/aider),
 # Copyright 2023-2025 Paul Gauthier and Aider contributors, Apache License 2.0 (see NOTICE).
 # Changes: tags come from tzmap.defs (ast/regex, no tree-sitter) and word-token references; networkx.pagerank
 # replaced by a small power iteration; short names (<6) down-weighted; no disk cache.
 # Also adapted: get_ranked_tags personalization (mentioned idents x10, mentioned files, path-part match) and
 # get_ranked_tags_map_uncached token-budget binary search (--tokens); aider/coders/base.py get_ident_mentions idea.
+# --tokens / --lines maps list key project files first and can show definition lines (tzaider, same source).
 import math, os, re, sys
 from collections import Counter, defaultdict
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import tzmap
+import tzaider, tzmap
 
 EXT = ('.py', '.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs', '.sh')
 WORD = re.compile(r'[A-Za-z_][A-Za-z0-9_]{2,}')
@@ -159,20 +160,25 @@ def main(argv):
     for k in ('--tokens', '--mention'):  # value options; strip them so the old positional parsing is untouched
         if k in argv:
             i = argv.index(k); opt[k] = argv[i + 1]; argv = argv[:i] + argv[i + 2:]
-    methods = '--methods' in argv or bool(opt)
-    argv = [a for a in argv if a != '--methods']
+    lines = '--lines' in argv
+    methods = '--methods' in argv or lines or bool(opt)
+    argv = [a for a in argv if a not in ('--methods', '--lines')]
     n = int(argv[argv.index('--n') + 1]) if '--n' in argv else 20
     focus = argv[argv.index('--focus') + 1:] if '--focus' in argv else []
     pos = [a for a in argv[:argv.index('--focus')] if '--focus' in argv] if focus else argv
     pos = [a for i, a in enumerate(pos) if a != '--n' and (i == 0 or pos[i - 1] != '--n')]
     root = os.path.abspath(pos[0] if pos else '.')
-    if opt:
+    if opt or lines:
         mi, mf = extract_mentions(opt.get('--mention', ''), root)
         rs = ranked(root, focus, mi, mf, methods=True, tagless=True)
+        render = (lambda ts: tzaider.render_lines(root, ts)) if lines else render_tags
         if '--tokens' in opt:
-            text, k, t = fit_budget(rs, int(opt['--tokens']), render_tags)
+            text, k, t = fit_budget(tzaider.with_important(root, rs, focus), int(opt['--tokens']), render)
             print(text, end='')
             print(f'{k} tag(s), ~{t} tokens [est chars/4] of budget {opt["--tokens"]}')
+            return 0
+        if lines:
+            print(render(tzaider.with_important(root, rs[:n], focus)), end='')
             return 0
         rs = rs[:n]
     else:

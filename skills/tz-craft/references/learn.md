@@ -1,10 +1,10 @@
 # Learn from a mistake
 
-Turn a correction into one durable, checkable rule.
+Turn one solved, verified problem into the cheapest thing that stops a repeat.
 
-1. Name what went wrong in one sentence and its root cause (not the symptom).
-2. Write the rule as an instruction that would have prevented it: specific, positive, with the trigger ("when X, do Y").
-3. Check it is new: search existing notes and rules first; merge or sharpen an old one instead of adding a near duplicate.
-4. Put it where it will be read at the right time (project notes for project facts, global notes for habits). Keep it to one or two lines.
-5. If a command or test can enforce it, add that too; a check beats a reminder.
-6. Drop rules that are stale or never triggered. Short lists get followed.
+1. Keep it only if the reason is not readable from code, tests, checks or docs, and losing it would likely cause a repeat or a long re-investigation. Else write nothing and say why.
+2. One lesson per run. Name symptom, root cause (not the symptom), fix.
+3. Take the first form that works: remove the second way of doing it; a test or lint rule (see it fail on the defect, pass on the tree); a line in an existing coding standard; a learning doc.
+4. Doc: `tz learn capture --title T --symptom S --cause C --fix F --detect D` (dry run; `--apply` writes `docs/solutions/`, 1.5 KB max). A wrong or overlapping doc is updated, never duplicated.
+5. A habit or project fact instead: one "when X, do Y" line in project or global notes; merge near duplicates, drop stale rules.
+6. Before similar work: `tz learn recall WORDS`. After refactors: `tz learn check` flags stale citations; fix them, do not delete unasked.
