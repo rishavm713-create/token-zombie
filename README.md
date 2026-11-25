@@ -12,6 +12,19 @@ claude plugin marketplace add rishavm713-create/token-zombie && claude plugin in
 
 ![TOKEN ZOMBIE demo](docs/img/demo-bench.svg)
 
+## What it does to one session (measured)
+
+Scripted agent session, offline, 5 trials, no provider calls ([bench matrix](docs/bench/matrix-2026-11-25.md)):
+
+| | TZ off | TZ all hooks on |
+|---|---:|---:|
+| Chars kept out of context | 47,724 | 54,852 |
+| Chars TZ injects (its own overhead) | 199 | 1,880 |
+| **Net chars saved** | 47,525 | **52,972** |
+| False positives / false negatives | 0 / 0 | 0 / 0 |
+
+This is a scripted scenario, not your bill. On 1,025 real chats the net input saved was 0.58% (see below). Run `tz gain` for your own measured number: it prints saved minus TZ's own overhead and says which part is measured and which is estimated.
+
 ## What you get
 
 | Claim | Evidence |
@@ -28,7 +41,8 @@ claude plugin marketplace add rishavm713-create/token-zombie && claude plugin in
 
 1. **Install** with the command above, then restart Claude Code.
 2. **Check:** run `/token-zombie:tz` (status) and `tz hooks live` (are the hooks firing).
-3. **Work as usual.** Warnings and trimming happen by themselves; when a chat gets big, `tz handoff` saves your place and `tz resume` continues in a fresh chat.
+3. **See your number:** `tz gain` (net tokens saved after TZ's own overhead, each line labelled MEASURED or EST).
+4. **Work as usual.** Warnings and trimming happen by themselves; when a chat gets big, `tz handoff` saves your place and `tz resume` continues in a fresh chat.
 
 CLI only, rollback and verification: [install guide](docs/INSTALL.md). The npm package `token-zombie` is not published yet (UNKNOWN until the owner publishes it), so do not rely on `npm i -g`.
 
