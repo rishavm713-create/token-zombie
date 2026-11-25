@@ -58,6 +58,13 @@ def render(text, cap=None):
     return f'input ~{n} tok, answer window {lo}-{hi} tok\n' + '\n'.join(f'[{p}%] ~{v} tok' for p, v in o.items())
 
 
-if __name__ == '__main__':
+def main(argv=None):
+    """`tz budget <prompt>` (or stdin)."""
     import sys
-    print(render(sys.stdin.read() if not sys.argv[1:] else ' '.join(sys.argv[1:])))
+    argv = sys.argv[1:] if argv is None else argv
+    print(render(' '.join(argv) if argv else sys.stdin.read()))
+    return 0
+
+
+if __name__ == '__main__':
+    main()

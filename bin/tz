@@ -10,6 +10,9 @@ HELP = """tz <command> [args]
   status [--transcript F] [--rate-limits JSON]   context %, tokens, burn, 5h/7d only if provided, warn state
   forecast                                       burn-rate + limit forecast lines only
   next [add|start|done|pack|checkpoint|measure]  dependency-aware tasks, task pack, gates, per-session token split
+  team "task" | sg PATTERN [PATH] | ccu [daily|weekly|monthly|session|blocks]
+  delta diff OLD NEW | delta reset SESSION | skill-lint [DIR]  changed-file diff, SKILL.md spec check
+  logc [FILE] | rules explain|verify|list | budget <prompt>  staged runs, code search, usage, logs, safety rules, depth
   startup [N]                                    what a new chat loads (startup audit)
   optimize [--transcript F]                      duplicate reads / repeated commands in the chat log
   filter [--lines N] < text                      shrink noisy command output
@@ -161,7 +164,7 @@ def main(argv):
         if c in ('skills', 'capabilities', 'security', 'audit', 'instructions', 'profile'):
             import tzcap
             return tzcap.main([c, *rest])
-        mods = {'learn': 'tzlearn', 'sup': 'tzsup', 'route': 'tzroute', 'adapters': 'tzadapters', 'reg': 'tzreg', 'dash': 'tzdash', 'companion': 'tzcompanion', 'mascot': 'tzmascot', 'hooks': 'tzhooks', 'live': 'tzlive', 'ledger': 'tzdb', 'compress': 'tzcompress', 'rework': 'tzrework', 'attr': 'tzattr', 'price': 'tzprice', 'policy': 'tzpolicy', 'reconcile': 'tzmore', 'export': 'tzmore', 'workflow': 'tzmore', 'worktree': 'tzmore', 'find': 'tzmore', 'doctor': 'tzmore', 'split': 'tzsplit', 'code': 'tzsplit', 'similar': 'tzsimilar', 'costly': 'tzcost', 'map': 'tzmap', 'sym': 'tzmap', 'rank': 'tzrank', 'exists': 'tzmap', 'agent': 'tzagent', 'xcheck': 'tzmap', 'noise': 'tzcost', 'lock': 'tzsplit', 'hsize': 'tzsplit', 'vault-find': 'tzmore', 'overlap': 'tzmore', 'skills-outcome': 'tzmore', 'conflicts': 'tzattr', 'preflight': 'tzpreflight', 'recall': 'tzout', 'next': 'tznext', 'state': 'tzcont', 'replay': 'tzcont', 'expensive': 'tzcont', 'waste-audit': 'tzcont', 'ondemand': 'tzondemand', 'systems': 'tzsystems', 'shadow': 'tzout'}
+        mods = {'delta': 'tztokopt', 'skill-lint': 'tzaskills', 'team': 'tzteam', 'sg': 'tzsg', 'ccu': 'tzccu', 'logc': 'tzlogc', 'rules': 'tzrules', 'budget': 'tzbudget', 'learn': 'tzlearn', 'sup': 'tzsup', 'route': 'tzroute', 'adapters': 'tzadapters', 'reg': 'tzreg', 'dash': 'tzdash', 'companion': 'tzcompanion', 'mascot': 'tzmascot', 'hooks': 'tzhooks', 'live': 'tzlive', 'ledger': 'tzdb', 'compress': 'tzcompress', 'rework': 'tzrework', 'attr': 'tzattr', 'price': 'tzprice', 'policy': 'tzpolicy', 'reconcile': 'tzmore', 'export': 'tzmore', 'workflow': 'tzmore', 'worktree': 'tzmore', 'find': 'tzmore', 'doctor': 'tzmore', 'split': 'tzsplit', 'code': 'tzsplit', 'similar': 'tzsimilar', 'costly': 'tzcost', 'map': 'tzmap', 'sym': 'tzmap', 'rank': 'tzrank', 'exists': 'tzmap', 'agent': 'tzagent', 'xcheck': 'tzmap', 'noise': 'tzcost', 'lock': 'tzsplit', 'hsize': 'tzsplit', 'vault-find': 'tzmore', 'overlap': 'tzmore', 'skills-outcome': 'tzmore', 'conflicts': 'tzattr', 'preflight': 'tzpreflight', 'recall': 'tzout', 'next': 'tznext', 'state': 'tzcont', 'replay': 'tzcont', 'expensive': 'tzcont', 'waste-audit': 'tzcont', 'ondemand': 'tzondemand', 'systems': 'tzsystems', 'shadow': 'tzout'}
         if c in mods:
             return __import__(mods[c]).main(([c] if mods[c] in ('tzcont', 'tzout', 'tzattr', 'tzmore', 'tzsplit', 'tzcost', 'tzmap', 'tzagent', 'tzrank') else []) + rest)
         if c == 'overlay':  # build/run the native always-on-top window (Command Line Tools swiftc; installs nothing)

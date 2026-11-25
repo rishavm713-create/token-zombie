@@ -211,6 +211,12 @@ try:
     if ev == 'SubagentStart' and advice('pack_hints'):  # subagent report is re-sent every later call: cap it (advice, fail open)
         emit({'hookSpecificOutput': {'hookEventName': ev, 'additionalContext': 'TOKEN ZOMBIE: final report <= 300 words: verdict, evidence as file:line paths, no pasted file contents or history.'}})
         sys.exit(0)
+    if ev in ('PreCompact', 'PostCompact'):  # earlier reads leave the context: forget their snapshots
+        try:
+            import tztokopt
+            tztokopt.reset(data.get('session_id', 'x'))
+        except Exception:
+            _diag('delta', ev)
     if ev in ('Stop', 'SessionEnd', 'PreCompact', 'SubagentStop', 'SubagentStart', 'InstructionsLoaded', 'PostCompact') + ('PostToolBatch', 'PreModelSwitch', 'PostModelSwitch', 'WorktreeCreate', 'WorktreeRemove', 'FileChanged'):
         sys.exit(0)
     if ev == 'PreToolUse':  # policy engine: advice only, fail open, TZ_POLICY=0 disables
@@ -258,6 +264,16 @@ try:
         if LIVE[0]:
             emit({'hookSpecificOutput': {'hookEventName': 'PreToolUse'}})
         sys.exit(0)
+    if ev in ('PreToolUse', 'PostToolUse') and data.get('tool_name') == 'Read':  # opt-in read_delta: re-read of a changed file gets the diff
+        try:
+            import tztokopt
+            why = tztokopt.advise(data)
+        except Exception:
+            why = ''
+            _diag('delta', ev)
+        if why and ev == 'PreToolUse':
+            emit({'hookSpecificOutput': {'hookEventName': ev, 'permissionDecision': 'deny', 'permissionDecisionReason': why}})
+            _pflush()
     if ev == 'PreToolUse':  # big Read: nudge once, never block twice (whole file may be truly needed)
         ti = data.get('tool_input') or {}
         f = ti.get('file_path') or ''
@@ -304,6 +320,14 @@ try:
                 LIVE[0] = (LIVE[0] + '\n' + m).strip()
         except Exception:
             _diag('stuck', ev)
+    if ev == 'PostToolUse' and data.get('tool_name') in ('Write', 'Edit', 'MultiEdit'):  # SKILL.md spec check (advice only)
+        try:
+            import tzaskills
+            m = tzaskills.advise(data)
+            if m:
+                LIVE[0] = (LIVE[0] + '\n' + m).strip()
+        except Exception:
+            _diag('skill_lint', ev)
     if ev == 'PostToolUseFailure':
         if LIVE[0]:
             emit({'hookSpecificOutput': {'hookEventName': ev}})

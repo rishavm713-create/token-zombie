@@ -76,3 +76,7 @@ skills/tz-craft: ideas from superpowers (MIT, Jesse Vincent), mattpocock/skills 
 everything-claude-code (https://github.com/affaan-m/everything-claude-code), MIT licence
 Copyright (c) 2026 Affaan Mustafa
 Used in: bin/tzbudget.py (response-depth table and 25/50/75/100% options from skills/token-budget-advisor; stdlib rebuild, no code vendored). Licence: third_party/everything-claude-code/LICENSE
+
+anthropics/skills (https://github.com/anthropics/skills), Apache License 2.0 (skill-creator only; no root licence)
+Copyright 2026 Anthropic, PBC
+Used in: bin/tzaskills.py validate_text, adapted from skills/skill-creator/scripts/quick_validate.py (modified: stdlib frontmatter reader, Claude Code keys accepted unless strict). Licence: third_party/askills/LICENSE
