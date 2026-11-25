@@ -27,6 +27,17 @@ claude plugin marketplace add rishavm713-create/token-zombie && claude plugin in
 | 💾 **Never lose your place** | One command saves where you stopped; a fresh chat picks it up. |
 | 🔍 **Honest numbers** | Every number says if it was measured or estimated. |
 
+## ✨ Everything it does
+
+- 💸 **Saves tokens:** trims noisy output (get it back any time with `tz recall`), spots repeated reads, suggests cheaper models, tracks cost.
+- ⚠️ **Warns early:** before a chat gets too big or loops. `tz budget` shows your limit.
+- 🛡️ **Stays safe:** stops risky commands like `rm -rf /` and false "done" claims.
+- 💾 **Never loses your place:** `tz handoff` saves it, `tz resume` continues in a fresh chat.
+- 🧭 **Plans and ships:** `tz code` plans, `tz split` finds parallel work, `tz pr` prepares pull requests.
+- 🔍 **Honest numbers:** measured or estimated, always labelled.
+
+💡 Built on the best ideas from **44 open-source tools** ([credits](NOTICE)).
+
 ## 📊 In one test session
 
 | | Result |
