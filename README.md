@@ -17,7 +17,7 @@ Paste these two lines into Claude Code (the chat box). That's it.
 /plugin install token-zombie@token-zombie
 ```
 
-↩️ Don't like it? Remove it any time: `/plugin uninstall token-zombie`
+**Our guarantee:** if it does not save you tokens, remove it in one command (`/plugin uninstall token-zombie`) and you have lost nothing.
 
 ![TOKEN ZOMBIE demo](docs/img/demo-live.svg)
 
