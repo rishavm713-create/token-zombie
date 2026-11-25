@@ -25,6 +25,7 @@ No v2.1 feature registers its own hook entry; every feature is a function called
 | safety_net | 1 | tzshell (parser) via tzops.safe | PreToolUse Bash |
 | stuck_detect | 1 | tzstuck.check | PostToolUse / PostToolUseFailure; UserPromptSubmit resets |
 | mcp_dedup | 1 | tztoolprune.mcp_dup | PreToolUse mcp__* (advice only) |
+| ship_fast | 1 | tzsplit.ship_hint (wraps split_hint / auto_split) | UserPromptSubmit advice; `tz speed on\|off` |
 | plan_reinject | 0 | tzfit.plan_inject | SessionStart (pointer on startup, head+tail on compact/resume, hash-gated) |
 
 On-demand only (CLI, never in a hook): `tz toolprune` (report; `--apply`/`--restore` explicit), `tz mem index|search`,

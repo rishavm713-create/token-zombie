@@ -410,8 +410,9 @@ try:
             try:  # several independent tasks in one prompt: one session per task, build first, test last
                 import tzsplit
                 ts = tzsplit.detect(data.get('prompt')) if advice('pack_hints') else []
-                if ts:
-                    hint = (hint + ' ' if hint else '') + tzsplit.split_hint(ts)
+                sh = tzsplit.ship_hint(data.get('prompt'), ts) if advice('pack_hints') else ''
+                if sh:
+                    hint = (hint + ' ' if hint else '') + sh
             except Exception:
                 _diag('split', ev)
             try:  # engineering prompt: point at the coding pipeline once (advice)

@@ -46,6 +46,8 @@ Config example:
 ```json
 {"features": {"stuck_detect": false}, "read_guard": "deny"}
 ```
+Ship fast (on by default): for a prompt with several independent tasks, or one large build task (keyword heuristic), TZ tells Claude to start one session per independent piece (max 5, own worktree), use parallel Sonnet/Haiku subagents inside each, build first and test once, merge and run the full suite once, estimate the time in hours and keep pieces to 30 minutes or less. It is advice to Claude (a hook cannot start sessions), it never allows a push, tag or publish without your OK, its effect on speed and token use is not measured, and parallel sessions can use more tokens. The same orders carry the ship flow: merge, run the full suite once, push, watch CI on all OSes, fix without weakening tests, report each session's link and status. When your own short prompt is a go-ahead such as "yes push", TZ quotes it back and tells Claude to forward it to the session that holds the work; a push approval never covers a tag, and a tag or release needs green CI. Detection is a narrow keyword match that ignores questions, negations, pasted text, and messages tagged as coming from another session or an event; an untagged first message written by another session cannot be told apart from yours. Switch: `tz speed on|off|status` (`features.ship_fast` in config.json, env `TZ_FEAT_SHIP_FAST=0`); with `TZ_FEAT_AUTO_SPLIT=0` it proposes session cards instead of starting them.
+
 Other switches: `TZ_SAFE=0` (Bash safety check), `TZ_OUT=0` or `"out_trim": false` (output trim), `read_guard` = `advice` (default) / `deny` / `off`, `tz mode off|lite|full|ultra`.
 
 ## Usage and stats
