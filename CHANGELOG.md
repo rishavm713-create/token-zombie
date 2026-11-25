@@ -1,4 +1,8 @@
 # Changelog
+## Unreleased
+- Auto handoff at 100k tokens: the end-of-turn hint writes `handoffs/YYYY-MM-DD.md` (done / left / next, at most 30 lines) and tells the owner to start a fresh chat; the bar shows "Start a new chat · handoff saved".
+- Reading and searching go to cheap subagents (one line in the core rules); output trim now also covers stderr and Agent/Task results.
+
 ## v2.1.0 (2026-11-25; tag v2.1.0 on main 78743eb)
 - Fix: install.sh recognises its own hooks whatever the checkout/cache directory is named (was: duplicates, failed uninstall/restore unless the path contained token-zombie/bin).
 - Fix: stuck detector deletes its state file on reset and ignores tool hooks without a tool name.
