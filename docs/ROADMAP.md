@@ -2,7 +2,20 @@
 
 This roadmap separates shipped capabilities from validation work and future plans. Status is based on the repository's implementation and audit documents, not marketing intent.
 
-Last reviewed: 2026-11-22.
+Last reviewed: 2026-11-25 (only the orchestration section is new; the rest was last reviewed 2026-11-22/23). v2.1 status: [LEDGER](LEDGER.md).
+
+## Orchestration ideas after v2.1 (added 2026-11-25; ideas, not built)
+Aim: fewer re-sent tokens for the same task result. Each ships only after a with/without comparison with a quality check.
+
+| Idea | What it would do | Starting point | Limit |
+|---|---|---|---|
+| Task classification | Sort a request: quick answer, small edit, search, hard build | `tz route`, keyword heuristics | Heuristic; a wrong class must cost little. |
+| Model and effort selection | Suggest model / effort per class; set subagent defaults after a yes | `tztips.model_advice`, `defaults` (wiring in progress) | A hook cannot switch the main model. |
+| Context budgeting | Per-task budget with one warning per step (50/75/90/100%) | `tz agent --budget`, `tzusage`; ladder not built | The context window size is partly an estimate. |
+| Delegation | Send bulk reading and independent parts to cheaper subagents or sessions | bulk-read rule (`tztips`), claim leases | Subagents have their own startup cost; measure net. |
+| Memory | Load only what the next task needs: handoff head, FTS hits, saved facts after repeated failures | `tz mem`, handoffs; repeat-failure facts not built | Stale memory misleads; keep it short and dated. |
+
+Evaluate first: a repeatable task set with pass / fail checks, tokens per passed task, 5 or more trials per arm (`tz bench quality`; paid runs need the owner's OK).
 
 ## Available in the repository
 
