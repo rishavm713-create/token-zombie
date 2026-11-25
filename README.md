@@ -20,7 +20,7 @@ claude plugin marketplace add rishavm713-create/token-zombie && claude plugin in
 
 ## 🤔 What do I get?
 
-| | |
+| ✨ Feature | 💬 In plain words |
 |---|---|
 | ✂️ **Less noise** | Long, messy output is trimmed. Nothing is lost: ask for it back any time. |
 | ⚠️ **Early warnings** | Told before a chat gets too big or goes in circles. |
@@ -140,7 +140,7 @@ claude plugin marketplace add rishavm713-create/token-zombie && claude plugin in
 
 ## 📊 In one test session
 
-| | Result |
+| 📋 What we measured | Result |
 |---|---:|
 | 🧹 Noise kept out | **54,852 characters** |
 | ⚙️ Cost of TZ itself | 1,880 characters |
