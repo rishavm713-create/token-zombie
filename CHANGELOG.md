@@ -1,5 +1,5 @@
 # Changelog
-## v2.1.0 (unreleased; branch feat/v2.1.0, not tagged or released)
+## v2.1.0 (2026-11-25; tag v2.1.0 on main 78743eb)
 - Fix: install.sh recognises its own hooks whatever the checkout/cache directory is named (was: duplicates, failed uninstall/restore unless the path contained token-zombie/bin).
 - Fix: stuck detector deletes its state file on reset and ignores tool hooks without a tool name.
 
