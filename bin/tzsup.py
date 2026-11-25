@@ -2,6 +2,7 @@
 # Supervisor + shared status bus. tick() is cheap (no tests, no network, no launches): usage level + burn -> auto checkpoint
 # -> handoff prep at CRITICAL -> write ~/.claude/token-zombie/status.json (read by dash/companion/statusline).
 # Honest limit: the host cannot be forced to open a fresh session; next-session emits the exact command/brief. Launch only with --yes.
+# One exception, opt-in: feature crash_restart (default OFF) lets tick() resume crashed `tz agent` runs (tzbackoff).
 import json, os, shlex, subprocess, sys, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import tzusage, tzhandoff
@@ -129,6 +130,14 @@ def tick(transcript, cwd, rl=None):
             s['gaps'] = tzlive.detect(tzlive._load(tzlive.path(sid)))
     except Exception:
         pass
+    try:
+        from tzlib import feature
+        if feature('crash_restart'):
+            import tzbackoff
+            acts += ['crash-%s:%s' % (d['did'], d['run']) for d in tzbackoff.check()]
+            s['crash_failed'] = tzbackoff.failed()  # stays visible after the one-off action
+    except Exception:
+        pass  # fail open
     s['activity'], s['activity_src'] = tzbus.activity()
     s['mascot'] = mascot_state(s)
     s['emoji'] = EMOJI[s['mascot']]
@@ -157,6 +166,9 @@ def next_session(cwd):
 
 def main(argv):
     import argparse
+    if argv[:1] == ['restart']:  # own flags (--dry, --every), so handled before argparse
+        import tzbackoff
+        return tzbackoff.main(argv[1:])
     ap = argparse.ArgumentParser(prog='tz sup')
     ap.add_argument('cmd', choices=['start', 'tick', 'status', 'next-session', 'task'])
     ap.add_argument('args', nargs='*')

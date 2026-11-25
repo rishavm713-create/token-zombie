@@ -72,3 +72,7 @@ ccusage (https://github.com/ryoppippi/ccusage), MIT licence; ccstatusline (https
 Used in: bin/tzusage.py blocks() (5-hour block rules) and usable() (auto-compact usable-context share); behaviour rebuilt, no code copied.
 
 skills/tz-craft: ideas from superpowers (MIT, Jesse Vincent), mattpocock/skills (MIT), karpathy-skills (MIT), compound-engineering-plugin (MIT, Every Inc), fast-anything (MIT); vercel-labs/agent-skills react guidance (no licence file: rewritten in our own words, no text copied). All reference text is original.
+
+repomap (https://github.com/SylphxAI/repomap), MIT. Used in: bin/tzimpact.py (idea of the `impact` output only; independent code). Licence: third_party/repomap/LICENSE
+OpenHands software-agent-sdk (https://github.com/OpenHands/software-agent-sdk), MIT. Used in: bin/tzcondense.py (keep-first/keep-last history condensing idea; independent code). Licence: third_party/openhands/LICENSE
+mini-swe-agent (https://github.com/SWE-agent/mini-swe-agent), MIT. Used in: bin/tzcondense.py `cut` (head+tail output cut idea; independent code). Licence: third_party/mini-swe-agent/LICENSE
