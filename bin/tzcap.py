@@ -2,7 +2,7 @@
 # Token-zombie capability intelligence: inventory of skills / parked skills / plugins / MCP servers, overlap detection,
 # relevance advice per prompt, security grade (GREEN/YELLOW/RED) via tz-vet.sh. Read-only: never installs, enables or edits anything.
 # Startup cost is split: skill descriptions (est, chars/4) | plugin tools & MCP schemas (UNKNOWN: not in config) | hooks.
-import json, os, re, subprocess, sys
+import json, os, re, subprocess, sys, shutil
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 VET = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tz-vet.sh')
@@ -123,7 +123,7 @@ def advise(inv, prompt, n=5):
 def grade(path):
     """(GREEN|YELLOW|RED, evidence lines) from tz-vet.sh. Static scan only: cannot prove safety."""
     try:
-        r = subprocess.run(['bash', VET, path], capture_output=True, text=True, timeout=120)
+        r = subprocess.run([shutil.which('bash') or 'bash', VET, path], capture_output=True, text=True, timeout=120)
     except Exception as e:
         return 'YELLOW', [f'scan failed: {e}']
     ev = [l for l in r.stdout.splitlines() if l.startswith('[')]

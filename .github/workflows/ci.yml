@@ -28,6 +28,9 @@ jobs:
         run: |
           sp="$(python -c 'import sysconfig;print(sysconfig.get_paths()["purelib"])')"
           printf '%s\n' "import os,sys; h=os.environ.get('HOME'); h and os.environ.__setitem__('USERPROFILE', h); [s.reconfigure(newline='\\n') for s in (sys.stdout, sys.stderr) if hasattr(s, 'reconfigure')]" > "$sp/tz_test_home.pth"
+          # bin/tzpy tries `py -3` first, which may be another Python: give it the same shim
+          sp3="$(py -3 -c 'import sysconfig;print(sysconfig.get_paths()["purelib"])' 2>/dev/null | tr -d '\r')"
+          if [ -n "$sp3" ] && [ "$sp3" != "$sp" ]; then mkdir -p "$sp3"; cp "$sp/tz_test_home.pth" "$sp3/"; fi
           # temp dirs as D:/... so paths inside python -c strings resolve on Windows Python
           mkdir -p "$RUNNER_TEMP/tzt"; echo "TMPDIR=$(cygpath -m "$RUNNER_TEMP/tzt")" >> "$GITHUB_ENV"
           python -I -c "import os;print('USERPROFILE follows HOME:', os.environ.get('USERPROFILE'))"

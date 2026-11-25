@@ -50,10 +50,15 @@ ok "g t | grep -q 'syntax .*FAIL'" "syntax error in a changed file is caught wit
 S=$T/stub; mkdir -p $S
 printf '#!/bin/sh\necho "E501 line too long"; exit 1\n' > $S/ruff; printf '#!/bin/sh\nexit 0\n' > $S/mypy
 printf '#!/bin/sh\necho "Connection error: ENOTFOUND pypi.org"; exit 1\n' > $S/pip-audit; chmod +x $S/*
+NOTOOLS="/usr/bin:/bin"
+case "$(uname -s)" in MINGW*|MSYS*)  # cmd.exe runs only PATHEXT files; python and git live outside /usr/bin
+  printf '@echo E501 line too long\r\n@exit /b 1\r\n' > $S/ruff.cmd; printf '@exit /b 0\r\n' > $S/mypy.cmd
+  printf '@echo Connection error: ENOTFOUND pypi.org\r\n@exit /b 1\r\n' > $S/pip-audit.cmd
+  NOTOOLS="$(dirname "$(command -v python3)"):$(dirname "$(command -v git)"):$NOTOOLS";; esac
 repo; echo '# x' >> calc.py; printf '[lint]\n' > ruff.toml; printf '[mypy]\n' > mypy.ini; echo flask >requirements.txt
 O=$(PATH="$S:$PATH" g t --test "$UT")
 ok "echo \"\$O\" | grep -q 'lint .*FAIL.*ruff check' && echo \"\$O\" | grep -q 'types .*ok' && echo \"\$O\" | grep -q 'audit .*skip.*needs network'" "configured ruff fails the gate, mypy passes, offline pip-audit is reported skipped (not passed)"
-O=$(PATH="/usr/bin:/bin" g t --test "$UT"); ok "echo \"\$O\" | grep -q 'lint .*skip.*not installed'" "configured but uninstalled tool is skipped and said so"
+O=$(PATH="$NOTOOLS" g t --test "$UT"); ok "echo \"\$O\" | grep -q 'lint .*skip.*not installed'" "configured but uninstalled tool is skipped and said so"
 repo; echo '# x' >> calc.py; O=$(PATH="$S:$PATH" g t --test "$UT"); ok "! echo \"\$O\" | grep -qE '^(lint|types|audit)'" "no config means no lint/type/audit check is invented"
 # --- resume of a killed agent run
 repo; export TZ_WORKERS_DIR=$T/w2; L=$T/calls.log; : > $L
@@ -64,7 +69,7 @@ p = sys.argv[sys.argv.index('-p') + 1]; L = os.environ['FAKE_LOG']
 ph = 'build' if 'Phase: build' in p else 'plan' if 'Phase: plan' in p else 'other'
 open(L, 'a').write(ph + (' RESUMED' if 'RESUMED' in p else '') + '\n')
 if ph == 'build' and not os.path.exists(L + '.killed'):
-    open(L + '.killed', 'w').write('1'); os.kill(os.getppid(), signal.SIGKILL); sys.exit(1)
+    open(L + '.killed', 'w').write('1'); os.kill(os.getppid(), getattr(signal, 'SIGKILL', signal.SIGTERM)); sys.exit(1)
 if ph == 'build': open('out.txt', 'w').write('good')
 print(json.dumps({'type': 'assistant', 'message': {'id': 'm1', 'usage': {'input_tokens': 100, 'output_tokens': 1}}}))
 print(json.dumps({'type': 'result', 'result': 'done'}))

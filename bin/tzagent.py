@@ -116,7 +116,8 @@ def make_worktree(task, cwd):
 
 def call_claude(prompt, model, cwd, turns, timeout=1800):
     """One host call. Returns (text, tokens, error). Tokens = sum of usage in the stream (MEASURED when the host reports it)."""
-    cmd = [os.environ.get('CLAUDE_BIN', 'claude'), '-p', prompt, '--model', model, '--output-format', 'stream-json', '--verbose',
+    from tzab import _launcher  # Windows cannot exec claude.cmd or a script CLAUDE_BIN directly
+    cmd = [*_launcher(os.environ.get('CLAUDE_BIN', 'claude')), '-p', prompt, '--model', model, '--output-format', 'stream-json', '--verbose',
            '--max-turns', str(turns), '--permission-mode', 'acceptEdits', '--allowedTools', ','.join(ALLOW), '--disallowedTools', ','.join(DENY)]
     try:
         import tzworkers; r = tzworkers.run_pg(cmd, cwd, timeout)
@@ -197,13 +198,8 @@ def load_run(rid):
 
 
 def alive(pid):
-    try:
-        os.kill(pid, 0)
-        return True
-    except PermissionError:
-        return True  # the process exists, it just belongs to another user
-    except OSError:
-        return False
+    from tzlive import pid_alive
+    return pid_alive(pid)
 
 
 def run(task, cwd, test=None, budget=400000, turns=20, worktree=False, dry=False, worker=None, timeout=1800, gate=False, allow=None, build=None, allow_api=False, resume=None, rollback=False, wall=None, max_errors=None):
