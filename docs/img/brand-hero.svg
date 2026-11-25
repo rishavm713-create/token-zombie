@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 220" role="img" aria-label="TOKEN ZOMBIE. Make every single token count.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 220" role="img" aria-label="TOKEN ZOMBIE. Make every single token count."><defs><linearGradient id="tzg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7CFC00"/><stop offset="1" stop-color="#3DD68C"/></linearGradient></defs>
   <rect width="900" height="220" fill="#000"/>
-  <text x="450" y="118" text-anchor="middle" font-family="Impact, 'Arial Black', 'Helvetica Neue', Arial, sans-serif" font-size="92" font-weight="900" letter-spacing="4"><tspan fill="#fff">TOKEN </tspan><tspan fill="#7CFC00">ZOMBIE</tspan></text>
+  <text x="450" y="118" text-anchor="middle" font-family="Impact, 'Arial Black', 'Helvetica Neue', Arial, sans-serif" font-size="92" font-weight="900" letter-spacing="4"><tspan fill="#fff">TOKEN </tspan><tspan fill="url(#tzg)">ZOMBIE</tspan></text>
   <text x="450" y="172" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="26" font-weight="700" letter-spacing="6" fill="#fff">MAKE EVERY SINGLE TOKEN COUNT.</text>
 </svg>
