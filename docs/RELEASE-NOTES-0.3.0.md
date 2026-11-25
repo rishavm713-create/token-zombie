@@ -30,7 +30,7 @@ TOKEN ZOMBIE is a local-first token saver for Claude Code. It makes no network c
 ## Compatibility
 - Claude Code >= 2.1.318 is tested.
 - macOS is tested. Linux runs in CI. Windows is untested.
-- Other agents are rules-only and EXPERIMENTAL ([COMPAT.md](../COMPAT.md)).
+- Other agents are rules-only and EXPERIMENTAL ([COMPAT.md](COMPAT.md)).
 
 ## Tests
 - `bash tests/run_all.sh`: 517 shell checks.

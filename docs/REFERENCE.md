@@ -4,7 +4,7 @@
 
 <p align="center"><b>Stop paying for tokens Claude Code wastes.</b><br>Trims noisy tool output, warns before a chat overflows, saves your place. Free · Local · No telemetry · No AI calls of its own</p>
 
-<p align="center"><a href="https://github.com/rishavm713-create/token-zombie/actions/workflows/ci.yml"><img src="https://github.com/rishavm713-create/token-zombie/actions/workflows/ci.yml/badge.svg" alt="CI"></a> <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-4c9a1a" alt="MIT"></a> <a href="SECURITY.md"><img src="https://img.shields.io/badge/Local--first-no%20telemetry-83ffa0" alt="Local-first, no telemetry"></a> <img src="https://img.shields.io/badge/Platforms-macOS%20%7C%20Linux-555" alt="macOS and Linux"> <img src="https://img.shields.io/badge/Python-3-3776ab" alt="Python 3"></p>
+<p align="center"><a href="https://github.com/rishavm713-create/token-zombie/actions/workflows/ci.yml"><img src="https://github.com/rishavm713-create/token-zombie/actions/workflows/ci.yml/badge.svg" alt="CI"></a> <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-4c9a1a" alt="MIT"></a> <a href="../.github/SECURITY.md"><img src="https://img.shields.io/badge/Local--first-no%20telemetry-83ffa0" alt="Local-first, no telemetry"></a> <img src="https://img.shields.io/badge/Platforms-macOS%20%7C%20Linux-555" alt="macOS and Linux"> <img src="https://img.shields.io/badge/Python-3-3776ab" alt="Python 3"></p>
 
 ```bash
 claude plugin marketplace add rishavm713-create/token-zombie && claude plugin install token-zombie@token-zombie
@@ -89,10 +89,10 @@ CI: the badge above is live. The Windows CI job is known to fail and is deferred
 
 ## Safety
 
-Local only, no telemetry. Destructive commands are caught and checkpoints allow rollback. Details: [SECURITY.md](SECURITY.md).
+Local only, no telemetry. Destructive commands are caught and checkpoints allow rollback. Details: [SECURITY.md](../.github/SECURITY.md).
 
 ## More
 
-[Overview](docs/OVERVIEW.md) · [Install](docs/INSTALL.md) · [CLI](docs/CLI.md) · [Modes](docs/MODES.md) · [Metrics](docs/METRICS.md) · [Benchmark method](docs/BENCHMARK-METHOD.md) · [Limitations](docs/LIMITATIONS.md) · [Contributing](CONTRIBUTING.md) · [Brand policy](BRANDING.md) · [Website](https://rishavm713-create.github.io/token-zombie/) · [Discussions](https://github.com/rishavm713-create/token-zombie/discussions)
+[Overview](docs/OVERVIEW.md) · [Install](docs/INSTALL.md) · [CLI](docs/CLI.md) · [Modes](docs/MODES.md) · [Metrics](docs/METRICS.md) · [Benchmark method](docs/BENCHMARK-METHOD.md) · [Limitations](docs/LIMITATIONS.md) · [Contributing](../.github/CONTRIBUTING.md) · [Brand policy](BRANDING.md) · [Website](https://rishavm713-create.github.io/token-zombie/) · [Discussions](https://github.com/rishavm713-create/token-zombie/discussions)
 
 Created by [Rishav Mishra](https://rishavm713-create.github.io/). Copyright © 2026 Rishav Mishra. [MIT licence](LICENSE); credits: [NOTICE](NOTICE).
