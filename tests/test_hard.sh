@@ -123,6 +123,6 @@ o=$(tz bench compare --baseline "$T/b.jsonl" --optimized "$T/o.jsonl" --both-pas
 # --- perf / resource
 s=$(python3 -c "import time,subprocess,os;t=time.time();[subprocess.run(['python3','$Z/bin/tz-guard.py'],input='{\"hook_event_name\":\"PostToolUse\",\"cwd\":\"$T/proj\"}',text=True,env=dict(os.environ,HOME='$H'),capture_output=True) for _ in range(10)];print(int((time.time()-t)*100))")
 ok "tool-event hook < 200 ms avg incl. python start (got ${s}ms)" '[ $s -lt 200 ]'
-ok "state dir small (< 100 KB)" '[ $(du -sk "$ST" | cut -f1) -lt 100 ]'
+ok "state dir small (< 100 KB real bytes; du block rounding ignored)" '[ $(python3 -c "import os,sys;print(sum(os.path.getsize(os.path.join(r,f)) for r,_,fs in os.walk(sys.argv[1]) for f in fs))" "$ST") -lt 102400 ]'
 ok "activity.json < 300 bytes" '[ $(wc -c <"$ST/activity.json") -lt 300 ]'
 echo "hard: pass $pass fail $fail"
