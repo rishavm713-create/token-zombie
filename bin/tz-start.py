@@ -16,6 +16,7 @@ LEAN = ('TOKEN ZOMBIE core rules (lean rules). Replies: answer first, terse; no 
         'new code; no unasked features, options or abstractions; touch only what the task needs, match the style, fix root '
         'causes; check security and correctness of what you change; test real changes (one small test for new logic) and '
         'loop until it passes. Review, audit and commit skills only on demand. '
+        'Reading, searching and bulk-scanning go to a cheap subagent (Agent with model haiku for search, sonnet for analysis); the main chat only wires and checks. '
         'Mark a deliberate shortcut in a code comment as `shortcut: <limit>, <when to upgrade>`; never cut input '
         'validation or data-loss error handling. '
         'End with one line: what you skipped or did not check.')

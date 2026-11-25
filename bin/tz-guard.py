@@ -215,7 +215,9 @@ try:
     if ev == 'Stop' and advice('next_task'):  # turn closed past the limit: tell the user to /compact (advice, once per 25k)
         try:
             import tzcont
-            m = tzcont.compact_hint(data, used_tokens(data))
+            _u = used_tokens(data)
+            tzcont.newchat_flag(data, _u)  # bar: "start a new chat" past the limit
+            m = tzcont.compact_hint(data, _u)
             pc = tzcont.pack_cleanup(data)
             m = '\n'.join(x for x in (m, pc, tzcont.untested_advice(data), claim) if x)
             if m:

@@ -113,16 +113,18 @@ def trim(d):
                 return None, 0
             r['content'], saved = c
         elif tool == 'Bash' and isinstance(r, dict) and isinstance(r.get('stdout'), str):  # only what rtk left big
-            c = cut(r['stdout'], OTHER_MAX, False)
-            if not c:
+            for k in ('stdout', 'stderr'):  # long stderr (build logs) is cut the same way
+                c = cut(r[k], OTHER_MAX, False) if isinstance(r.get(k), str) else None
+                if c:
+                    r[k] = c[0]; saved += c[1]
+            if not saved:
                 return None, 0
-            r['stdout'], saved = c
         elif tool == 'WebFetch' and isinstance(r, dict) and isinstance(r.get('result'), str):
             c = cut(r['result'], OTHER_MAX, False)
             if not c:
                 return None, 0
             r['result'], saved = c
-        elif tool.startswith('mcp__'):
+        elif tool.startswith('mcp__') or tool in ('Agent', 'Task'):  # subagent reports enter the chat whole: same cut
             blocks = r if isinstance(r, list) else (r.get('content') if isinstance(r, dict) else None)
             if isinstance(r, str):
                 c = cut(r, OTHER_MAX, False)
