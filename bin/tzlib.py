@@ -48,6 +48,8 @@ FEATURES = {'cache_ttl_auto': 1,  # measured 1 h vs 5 min prompt-cache life (tzc
             'auto_split': 1,      # several independent tasks: start parallel sessions now (0 = propose cards only)
             'ship_fast': 1,       # multi-part/large build: parallel sessions + subagents, hours budget (tz speed on|off)
             'plan_reinject': 0,   # re-inject capped plan head after compaction (opt-in: adds context)
+            'crash_restart': 0,   # `tz sup` tick restarts crashed `tz agent` runs (spends model tokens)
+            'learn_loop': 0,      # tzcompound check hook: nudge to capture a lesson after a fail -> pass
             # v2.1 tips: advice is on; anything that blocks or can steer quality down is opt-in
             'size_gate': 0,       # opt-in, once per tier: soft warning on total chat size (the default growth warning stays)
             'size_cap': 0,        # BLOCKS new prompts at size_cap tokens (handoff saved first)
