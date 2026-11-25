@@ -123,9 +123,13 @@ def check(data):
     sid = data.get('session_id') or 'x'
     st = _load(sid)
     if data.get('hook_event_name') == 'UserPromptSubmit':  # window resets after a user message (OpenHands test_reset_after_user_message)
-        st['ev'], st['said'] = [], {}
-        _save(sid, st)
+        try:
+            os.remove(_path(sid))  # no file = empty window
+        except OSError:
+            pass
         return ''
+    if not data.get('tool_name') and str(data.get('hook_event_name')).startswith('PostToolUse'):
+        return ''  # a tool hook without a tool is not an assistant message
     st['ev'] = (st['ev'] + [event(data)])[-WIN:]
     pat = patterns(st['ev'])
     st['said'] = {k: v for k, v in st['said'].items() if pat.get(k) == v}  # streak ended -> pattern may speak again
