@@ -255,6 +255,7 @@ def main(argv):
     ap.add_argument('--cwd', default=os.getcwd())
     ap.add_argument('--transcript')
     ap.add_argument('--session', default='x')
+    ap.add_argument('--facts', action='store_true', help='state: also print the known facts')
     ap.add_argument('--force', action='store_true', help='expensive: checkpoint now even below the thresholds')
     ap.add_argument('file', nargs='?', help='replay: transcript .jsonl (default: newest of this folder)')
     a = ap.parse_args(argv)
@@ -269,7 +270,7 @@ def main(argv):
     if a.cmd == 'state':
         p, ch = write_state(a.cwd)
         print(f"{os.path.relpath(p, a.cwd)}: " + (f"updated sections {', '.join(ch)}" if ch else 'unchanged (no facts changed)'))
-        print('\n'.join(_lines(p)[3:]))  # known facts surfaced here so a fresh chat reads them instead of re-exploring
+        if a.facts: print('\n'.join(_lines(p)[3:]))  # known facts surfaced here so a fresh chat reads them instead of re-exploring
     elif a.cmd == 'expensive':
         print(expensive(a.cwd, a.transcript, a.session, a.force)[0])
     elif a.cmd == 'replay':

@@ -17,7 +17,7 @@ cd "$P"
 o=$(tz find sqlite cache 2>&1); ok "find: all-words hit" '[[ $o == *"sqlite for the cache"* ]]'
 o=$(tz find sqlite backoff invoice 2>&1); ok "find: ranked fallback surfaces partial note hits" '[[ $o == *"~1/3"* && $o == *"sqlite"* ]]'
 ok "find: fallback names code file" '[[ $o == *"code: src/billing.py"* ]]'
-o=$(tz state 2>&1); ok "state: prints known facts" '[[ $o == *"## Master"* && $o == *"## Current work"* ]]'
+o=$(tz state --facts 2>&1); ok "state: prints known facts" '[[ $o == *"## Master"* && $o == *"## Current work"* ]]'
 ok "state: STATE.md written" '[ -f handoffs/STATE.md ]'
 s=$(echo "{\"session_id\":\"s1\",\"cwd\":\"$P\",\"source\":\"startup\",\"hook_event_name\":\"SessionStart\"}" | HOME="$H" TZ_FRESH_BG=0 python3 "$Z/bin/tz-start.py")
 ok "start hook injects STATE.md facts" '[[ $s == *"known facts"* && $s == *"Current work"* ]]'
