@@ -1,0 +1,2 @@
+bin/tzdiag.py: idea of post-edit diagnostics (cheap check right after an edit) from parcadei/Continuous-Claude-v3 (MIT).
+No code copied; own stdlib implementation.

@@ -2,10 +2,12 @@
 
 Find the cause before you change anything.
 
-1. Reproduce it. Get a command that fails every time. If it is flaky, loop it, log the inputs, and pin the clock, random seed, ordering and network until it fails on demand.
-2. Read the exact error and the first frame in your own code, not the last line only.
-3. Shrink: remove input, config or code until the smallest case still fails.
-4. Write one hypothesis, then one check that could disprove it. Test it with a print, a debugger step or a bisect (git bisect for "worked last week").
-5. Fix the cause, not the symptom. A retry, sleep or catch-all that hides it is not a fix.
-6. Keep the reproduction as a regression test.
-7. After two failed theories, stop guessing: list what you assumed and verify each assumption directly.
+1. Reproduce it with a command that fails every time. Flaky: see debug-flaky.md.
+2. Read the whole error and trace; note the first frame in your own code.
+3. Check what changed: diff, recent commits, dependencies, config, environment. `git bisect` for "worked last week".
+4. Several components: log what enters and leaves each boundary, run once, then dig only into the layer that breaks.
+5. Compare with similar code that works; list every difference.
+6. Shrink input, config or code to the smallest failing case.
+7. One hypothesis ("X causes it because Y"), one variable, one check that could disprove it. Bad value deep in the stack: debug-trace.md.
+8. Fix the cause, not the symptom: one change, failing test first, kept as regression. No catch-all or retry that hides it.
+9. Failed guess: revert it before the next. After three failed fixes, question the design and ask the owner.

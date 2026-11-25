@@ -4,7 +4,7 @@
 # (tokeneconomizer/plugin/fold.py enough_evidence, plugin/denylist.py, toolprune/tools.py PROTECTED_TOOLS, plugin/config.py defaults)
 # (MIT, Copyright (c) Microsoft Corporation), see NOTICE. Re-implemented stdlib-only against Claude Code transcripts.
 # Also: mcp_dup(), PreToolUse advice for a repeated identical MCP call (own design; idea source token-optimizer, no code reused).
-import argparse, fnmatch, glob, hashlib, json, os, sys, time
+import argparse, fnmatch, glob, hashlib, json, os, re, sys, time
 
 # TokenEconomizer defaults (config.py:194-199): evidence prompts, min sessions, session floor; high-risk tools need 3x.
 EVIDENCE, MIN_SESSIONS, SESSIONS, HIGH_RISK_FACTOR, WINDOW = 10, 2, 5, 3, 10
@@ -16,6 +16,9 @@ PROTECT_GLOBS = ('mcp__token-zombie__*',)   # our own tools stay available
 HIGH_RISK = frozenset({'NotebookEdit'})
 MCP_GUESS = 600                             # [est] chars of one MCP tool schema when only its name is known
 APPLIED = 'untool_applied.json'
+PENDING = 'untool_pending.json'
+# upstream toolprune_quiet_minutes (config.py:198) and the 24 h cap from the research spec
+QUIET_MINUTES, PENDING_CAP_H = 60, 24
 
 
 def protected(name, extra=()):
@@ -168,19 +171,19 @@ def apply(settings, tools, project=None, protect=()):
     add = [t for t in dict.fromkeys(tools) if t not in (deny or [])]
     if not add:
         return []
+    if 'permissions' in cur and perms is None:      # refuse before any file (backup included) is written
+        raise RuntimeError(f'refusing to edit {settings}: permissions is not an object')
+    if deny is None and perms and 'deny' in perms:
+        raise RuntimeError(f'refusing to edit {settings}: permissions.deny is not a list')
     rec_path = os.path.join(os.path.dirname(settings), APPLIED)
     rec = json.load(open(rec_path)) if os.path.exists(rec_path) else {'added': []}
     backup = None
     if existed:
         backup = settings + f'.tzbak-{int(time.time())}'
         open(backup, 'wb').write(open(settings, 'rb').read())
-    if 'permissions' in cur and perms is None:
-        raise RuntimeError(f'refusing to edit {settings}: permissions is not an object')
     if perms is None:
         perms = cur['permissions'] = {}
     if deny is None:
-        if 'deny' in perms:
-            raise RuntimeError(f'refusing to edit {settings}: permissions.deny is not a list')
         rec['created_deny'] = True
         deny = perms['deny'] = []
     deny.extend(add)
@@ -224,6 +227,73 @@ def restore(settings):
             _write(settings, cur)
     os.remove(rec_path)
     return added
+
+
+# ---- deferred apply: a changed tool list re-writes the cached history of a resumed chat, so wait for a quiet repo ----
+def config_protect():
+    """fnmatch patterns from config.json "toolprune_protect" (upstream key of the same name)."""
+    try:
+        from tzlib import _conf
+        v = _conf.get('toolprune_protect')
+    except ImportError:
+        return ()
+    return tuple(x for x in v if isinstance(x, str)) if isinstance(v, list) else ()
+
+
+def transcripts_dir(root, project):
+    return os.path.join(root, re.sub(r'[^A-Za-z0-9]', '-', os.path.abspath(project)))
+
+
+def quiet(tdir, minutes, ignore=None):
+    """True when no transcript in `tdir` (except `ignore`) changed within `minutes`."""
+    cut = time.time() - minutes * 60
+    return all(os.path.getmtime(f) <= cut for f in glob.glob(os.path.join(glob.escape(tdir), '*.jsonl')) if f != ignore)
+
+
+def defer(settings, tools, project, minutes=QUIET_MINUTES, protect=()):
+    """Save an approved proposal to be applied once the project is quiet."""
+    _write(os.path.join(os.path.dirname(settings), PENDING),
+           {'tools': tools, 'minutes': minutes, 'protect': list(protect), 'when': int(time.time())})
+    _exclude(project, '.claude/' + PENDING)
+
+
+def run_pending(settings, project, tdir, ignore=None):
+    """-> (status, tools): 'none' | 'expired' | 'apply-pending' | 'applied'."""
+    path = os.path.join(os.path.dirname(settings), PENDING)
+    try:
+        with open(path, encoding='utf-8') as f:
+            p = json.load(f)
+        tools, minutes, when = list(p['tools']), float(p['minutes']), float(p['when'])
+    except (OSError, ValueError, KeyError, TypeError):
+        return 'none', []
+    if time.time() - when > PENDING_CAP_H * 3600:     # stale evidence: ask again instead of applying
+        os.remove(path)
+        return 'expired', []
+    if not quiet(tdir, minutes, ignore):
+        return 'apply-pending', tools
+    add = apply(settings, tools, project, config_protect() + tuple(p.get('protect') or ()))
+    os.remove(path)
+    return 'applied', add
+
+
+def apply_pending(data, root=None):
+    """SessionStart / SessionEnd: apply a saved proposal when the project is quiet; one line or ''. feature('toolprune_pending')."""
+    try:
+        from tzlib import feature
+        if not feature('toolprune_pending'):
+            return ''
+        project = data.get('cwd') or os.getcwd()
+        tp = data.get('transcript_path')
+        tdir = os.path.dirname(tp) if tp else transcripts_dir(root or os.path.expanduser('~/.claude/projects'), project)
+        # a resumed chat is exactly what the wait protects, so only a brand-new or ending chat is ignored
+        ignore = tp if data.get('source') == 'startup' or data.get('hook_event_name') == 'SessionEnd' else None
+        status, tools = run_pending(os.path.join(project, '.claude', 'settings.local.json'), project, tdir, ignore)
+    except (ImportError, OSError, RuntimeError):
+        return ''
+    if status != 'applied' or not tools:
+        return ''
+    return (f'TOKEN ZOMBIE: removed {len(tools)} never-used tool(s) from this project ({", ".join(tools[:5])}); '
+            'takes effect in the next session. Undo: tz toolprune --restore.')
 
 
 # ---- MCP duplicate-call advice (PreToolUse) ----
@@ -303,17 +373,34 @@ def main(argv=None):
     g = ap.add_mutually_exclusive_group()
     g.add_argument('--apply', action='store_true', help='write the proposal into permissions.deny (backup + record)')
     g.add_argument('--restore', action='store_true', help='remove exactly what --apply added')
+    g.add_argument('--apply-pending', action='store_true', help='apply a deferred proposal if the project is quiet')
+    ap.add_argument('--when-idle', type=int, nargs='?', const=QUIET_MINUTES, metavar='MIN',
+                    help=f'with --apply: wait until no chat of the project changed for MIN minutes (default {QUIET_MINUTES})')
     a = ap.parse_args(argv)
     settings = a.settings or os.path.join(a.project, '.claude', 'settings.local.json')
+    protect = tuple(a.protect) + config_protect()
+    tdir = transcripts_dir(a.root, a.project)
+    if a.apply_pending:
+        status, tools = run_pending(settings, a.project, tdir)
+        print(f'{status}: ' + (', '.join(tools) or 'nothing'))
+        return 0
     if a.restore:
+        pending = os.path.join(os.path.dirname(settings), PENDING)
+        if os.path.exists(pending):
+            os.remove(pending)                       # undo also cancels a not-yet-applied proposal
         r = restore(settings)
         print(f'restored {len(r)} entr{"y" if len(r) == 1 else "ies"}: ' + ', '.join(r) if r else 'nothing recorded to restore')
         return 0
-    res = analyse(a.root, a.window, a.evidence, a.min_sessions, a.sessions, tuple(a.protect))
+    res = analyse(a.root, a.window, a.evidence, a.min_sessions, a.sessions, protect)
     print(json.dumps(res, indent=1) if a.json else report(res))
     if a.apply:
+        want = [r['tool'] for r in res['rows'] if r['verdict'] == 'prune']
         try:
-            add = apply(settings, [r['tool'] for r in res['rows'] if r['verdict'] == 'prune'], a.project, tuple(a.protect))
+            if a.when_idle is not None and want and not quiet(tdir, a.when_idle):
+                defer(settings, want, a.project, a.when_idle, protect)
+                print(f'apply-pending: {len(want)} tool(s) saved; applied after {a.when_idle} quiet minutes (cap {PENDING_CAP_H} h)')
+                return 0
+            add = apply(settings, want, a.project, protect)
         except RuntimeError as e:
             print(e, file=sys.stderr); return 1
         print(f'denied {len(add)} tool(s) in {settings}; takes effect in the next session' if add else 'nothing to apply')
