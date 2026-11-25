@@ -4,11 +4,126 @@
 #   tz lock acquire|release|status NAME [--ttl S]   atomic lock dir for a shared resource (live test, device, port); stale after ttl (default 1800s)
 #   tz hsize [DIR] [--json]          handoff size check: daily notes <=30 lines, master top block <=15 lines, weekly merge due
 import json, os, re, sys, time, glob
+from tzlib import feature, mode, _conf
 
 D = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, D)
 SHARED = re.compile(r'\b(live test|e2e|premiere|simulator|device|browser|port \d+|database|db|deploy|install|publish)\b', re.I)
 BUILD_FIRST = 'build the whole batch first with syntax checks only; one live test at the end, holding the lock'
+
+
+# large single build task (keyword heuristic, kept narrow: it can start sessions): "from scratch", or a build verb + determiner + whole product
+LARGE = re.compile(r'\bfrom scratch\b|\b(build|create|implement|redesign|rewrite|migrate|refactor|overhaul)\s+(?:(?:me|us)\s+)?'
+                   r'(?:a|an|the|our|my|this)\s+(?:[\w-]+\s+){0,4}?'
+                   r'(app|application|system|platform|dashboard|website|service|pipeline|plugin|codebase|backend|frontend)\b', re.I)
+QUESTION = re.compile(r'^(why|how|what|where|when|which|who|is|are|does|do|did|explain)\b', re.I)
+BUDGET = ('Ship-fast time budget: hours, not days. State your time estimate in hours before starting and break the work into pieces of '
+          '30 minutes or less. If this session is already one piece of a split, do not start more sessions; use subagents. '
+          'Never push, tag or publish without the owner OK. Off: tz speed off.')
+
+
+def split_hint(ts):
+    """Advice for a prompt holding several independent tasks. auto_split on (owner default): start them in parallel now."""
+    plan = 'Plan: tz split ' + ' '.join('"' + t[:60].replace('"', "'") + '"' for t in ts[:4])
+    if feature('auto_split'):
+        return (f'TOKEN ZOMBIE (owner standing order, auto_split): {len(ts)} independent tasks in this prompt. Start them in parallel NOW, '
+                'no card: start_session initiation user_asked, one session per task (max 5 at once, the rest as cards), cheapest fitting model, '
+                'each in its own git worktree/branch; inside each session split the work into small independent pieces run as parallel '
+                'Sonnet/Haiku subagents; build everything first, test once at the end, commit on its own branch. This session then merges the '
+                'branches, runs the full test suite once and pushes only after the owner OK (no tag/release). ' + plan)
+    return (f'TOKEN ZOMBIE (suggestion): {len(ts)} independent tasks in this prompt. One task per session: '
+            'propose each as its own session card (start_session, own_initiative, cheapest fitting model, own worktree; the owner clicks to start, or says to do it here), '
+            'shared live tests behind tz lock, build everything first, test once at the end. ' + plan)
+
+# prompts that did not come from the owner's keyboard: never an approval, never a reason to auto-start sessions
+NOT_OWNER = re.compile(r'<(cross-session-message|task-notification|scheduled-task|[a-z-]*event)\b|another claude session sent a message', re.I)
+# an approval is a short owner prompt that STARTS with the go-ahead verb (after yes/ok/..); anything hedged, negated or asked is not one
+APPROVE = re.compile(r'^(?:(?:yes|yep|yeah|ok|okay|sure|approved?|lgtm|go ahead|go|please|now|and|you can)\b[\s,.!:;-]*)*'
+                     r'(?:push|ship|release|tag|publish)(?:$|[.!,]|\s+(?:and\b|it\b|this\b|that\b|them\b|all\b|now\b|the (?:branch|release|tag|changes|commits?)\b|'
+                     r'to (?:github|origin|main)\b|v?\d))', re.I)
+HEDGE = re.compile(r"\?|\b(no|not|never|don'?t|do not|wait|hold|stop|cancel|later|after|before|if|when|once|unless|until|but|should|can we|draft|notes?)\b", re.I)
+FLOW = ('Ship flow (automatic): when the pieces finish, merge the branches, run the full suite once, push, watch CI on all OSes and fix '
+        'failures without weakening any test. Push only after the owner says yes in their own prompt; tag or release only when CI is green '
+        'AND the owner approved that tag. Report in short lines: each session link + status, then what is next (merge, test, push).')
+
+
+def approval(prompt):
+    """The owner's own go-ahead to push/ship/tag/release/publish, as their exact words; '' otherwise."""
+    if NOT_OWNER.search(prompt or ''):
+        return ''
+    p = SYS.sub(' ', prompt or '').strip()
+    return p if len(p) <= 200 and APPROVE.search(p) and not HEDGE.search(p) else ''
+
+
+def approval_hint(words):
+    got = {v.lower() for v in re.findall(r'\b(push|ship|tag|release|publish)\b', words, re.I)}
+    tag = got & {'tag', 'release', 'publish'}
+    return ('TOKEN ZOMBIE (ship_fast): owner approval in their own prompt: "' + words.replace('"', "'") + '". It covers only what these words '
+            'name. If another session has the context for this work, forward the approval to it (SendMessage), quoting these words exactly; '
+            'do not redo its work. If this session has it: run the full suite if not run since the last change, then do what was approved, '
+            'watch CI on all OSes and fix failures without weakening any test. '
+            + ('Tag or release only after CI is green, and only the tag these words approve.' if tag else
+               'No tag, release or publish: these words do not approve one.') + ' Report in short lines with each session link and status.')
+
+
+def ship_hint(prompt, ts):
+    """The one split/speed hint per prompt. ship_fast on: multi-part or large build tasks also get parallel orders and an hours budget."""
+    if not feature('ship_fast'):
+        return split_hint(ts) if ts else ''
+    if NOT_OWNER.search(prompt or ''):
+        return ''
+    ok = approval(prompt)
+    if ok:
+        return approval_hint(ok)
+    if ts:
+        head = split_hint(ts)
+    else:
+        p = SYS.sub(' ', prompt or '').strip()
+        if p.startswith('/') or len(p) > 1500 or QUESTION.search(p) or not LARGE.search(p):
+            return ''
+        start = ('Start them in parallel NOW, no card: start_session initiation user_asked, one session per independent piece (max 5 at once, '
+                 'the rest as cards), cheapest fitting model, each in its own git worktree/branch.' if feature('auto_split') else
+                 'Propose each independent piece as its own session card (start_session, own_initiative, cheapest fitting model, own worktree).')
+        head = ('TOKEN ZOMBIE (ship_fast): large build task. Cut it into independent pieces. ' + start + ' Inside each session run small '
+                'parts as parallel Sonnet/Haiku subagents; build everything first, test once at the end, commit on its own branch. This '
+                'session then merges the branches and runs the full test suite once. If it cannot be cut, stay in one session and use subagents.')
+    return head + ' ' + BUDGET + ' ' + FLOW
+
+
+def speed(args):
+    """tz speed on|off|status: the ship_fast switch in config.json "features"."""
+    op = args[0] if args else 'status'
+    if len(args) > 1 or op not in ('on', 'off', 'status'):
+        print('usage: tz speed on|off|status', file=sys.stderr)
+        return 2
+    if op != 'status':
+        p = os.path.expanduser('~/.claude/token-zombie/config.json')
+        conf, old = {}, None
+        if os.path.exists(p):
+            old = open(p).read()
+            try:
+                conf = json.loads(old)
+            except ValueError:
+                conf = None
+        if not isinstance(conf, dict) or not isinstance(conf.get('features', {}), dict):
+            print(f'tz speed: {p} (or its "features") is not a JSON object; refusing to touch it', file=sys.stderr)
+            return 1
+        os.makedirs(os.path.dirname(p), exist_ok=True)
+        if old is not None:
+            open(f'{p}.bak-speed-{time.strftime("%Y%m%d-%H%M%S")}', 'w').write(old)
+        conf.setdefault('features', {})['ship_fast'] = op == 'on'
+        json.dump(conf, open(p + '.tmp', 'w'), indent=2)
+        os.replace(p + '.tmp', p)
+        _conf['features'] = conf['features']
+    print(speed_line())
+    return 0
+
+
+def speed_line():
+    f = _conf.get('features') if isinstance(_conf.get('features'), dict) else {}
+    src = ('mode off' if mode() == 'off' else 'env TZ_FEAT_SHIP_FAST' if os.environ.get('TZ_FEAT_SHIP_FAST') is not None
+           else 'config.json' if 'ship_fast' in f else 'default')
+    return f'speed = {"on" if feature("ship_fast") else "off"} ({src})'
 
 
 def lockdir(name):
@@ -49,7 +164,7 @@ def lock(op, name, ttl=1800):
 
 
 # system text (reminders, notifications, code fences) is data, never a task list
-SYS = re.compile(r'<(system-reminder|task-notification|pasted_content|[a-z-]*event)\b[^>]*>.*?</\1>|&lt;system-reminder>.*?(?=\n\n|$)|```.*?```', re.S | re.I)
+SYS = re.compile(r'<(system-reminder|task-notification|pasted_content|cross-session-message|scheduled-task|[a-z-]*event)\b[^>]*>.*?</\1>|&lt;system-reminder>.*?(?=\n\n|$)|```.*?```', re.S | re.I)
 
 
 def detect(prompt):
@@ -137,6 +252,8 @@ def main(argv):
     c, a = argv[0], argv[1:]
     js = '--json' in a
     a = [x for x in a if x != '--json']
+    if c == 'speed':
+        return speed(a)
     if c == 'lock':
         ttl = 1800
         if '--ttl' in a:

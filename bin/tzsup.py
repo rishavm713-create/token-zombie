@@ -2,7 +2,8 @@
 # Supervisor + shared status bus. tick() is cheap (no tests, no network, no launches): usage level + burn -> auto checkpoint
 # -> handoff prep at CRITICAL -> write ~/.claude/token-zombie/status.json (read by dash/companion/statusline).
 # Honest limit: the host cannot be forced to open a fresh session; next-session emits the exact command/brief. Launch only with --yes.
-import json, os, shlex, subprocess, sys, time
+# One exception, opt-in: feature crash_restart (default OFF) lets tick() resume crashed `tz agent` runs (tzbackoff).
+import json, os, shlex, shutil, subprocess, sys, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import tzusage, tzhandoff
 from tzmascot import mascot_state, EMOJI
@@ -129,6 +130,14 @@ def tick(transcript, cwd, rl=None):
             s['gaps'] = tzlive.detect(tzlive._load(tzlive.path(sid)))
     except Exception:
         pass
+    try:
+        from tzlib import feature
+        if feature('crash_restart'):
+            import tzbackoff
+            acts += ['crash-%s:%s' % (d['did'], d['run']) for d in tzbackoff.check()]
+            s['crash_failed'] = tzbackoff.failed()  # stays visible after the one-off action
+    except Exception:
+        pass  # fail open
     s['activity'], s['activity_src'] = tzbus.activity()
     s['mascot'] = mascot_state(s)
     s['emoji'] = EMOJI[s['mascot']]
@@ -157,6 +166,9 @@ def next_session(cwd):
 
 def main(argv):
     import argparse
+    if argv[:1] == ['restart']:  # own flags (--dry, --every), so handled before argparse
+        import tzbackoff
+        return tzbackoff.main(argv[1:])
     ap = argparse.ArgumentParser(prog='tz sup')
     ap.add_argument('cmd', choices=['start', 'tick', 'status', 'next-session', 'task'])
     ap.add_argument('args', nargs='*')
@@ -188,7 +200,8 @@ def main(argv):
     cmdline = next_session(cwd)
     print(cmdline)
     if a.yes:  # only launch on explicit consent; headless, one prompt
-        subprocess.Popen(['claude', '-p', 'Continue from the handoff. Run `tz resume` and do the next action.'], cwd=cwd,
+        subprocess.Popen([shutil.which('claude') or 'claude', '-p',  # which(): npm ships claude.cmd on Windows
+                          'Continue from the handoff. Run `tz resume` and do the next action.'], cwd=cwd,
                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         print('launched headless claude -p (--yes)')
     return 0

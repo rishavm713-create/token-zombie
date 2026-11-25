@@ -1,0 +1,1762 @@
+{
+ "kind": "tz bench matrix",
+ "label": "MEASURED hook behaviour (offline chars, scripted agent); provider tokens UNKNOWN",
+ "trials": 5,
+ "python": "3.15.2",
+ "when": "2026-11-25 11:03",
+ "rows": [
+  {
+   "arm": "off",
+   "config": {
+    "mode": "off",
+    "read_guard": "deny"
+   },
+   "scenarios": {
+    "dup_read": {
+     "injected": 199,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "second Read allowed",
+     "ms_mean": 83.3,
+     "ms_sd": 17.8,
+     "hook_calls": 3
+    },
+    "idle_1h": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "no expiry advice",
+     "ms_mean": 139.2,
+     "ms_sd": 16.8,
+     "hook_calls": 1
+    },
+    "idle_5m": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "no expiry advice",
+     "ms_mean": 144.6,
+     "ms_sd": 13.0,
+     "hook_calls": 1
+    },
+    "safety": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "10 labelled commands",
+     "ms_mean": 93.1,
+     "ms_sd": 8.2,
+     "hook_calls": 10
+    },
+    "big_output": {
+     "injected": 0,
+     "saved": 47724,
+     "fp": 0,
+     "fn": 0,
+     "note": "trimmed",
+     "ms_mean": 144.3,
+     "ms_sd": 7.0,
+     "hook_calls": 1
+    },
+    "stuck": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "loop advice 0x",
+     "ms_mean": 144.6,
+     "ms_sd": 30.7,
+     "hook_calls": 10
+    },
+    "mcp_dup": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "no advice",
+     "ms_mean": 76.3,
+     "ms_sd": 3.2,
+     "hook_calls": 2
+    }
+   },
+   "total": {
+    "saved": 47724,
+    "injected": 199,
+    "fp": 0,
+    "fn": 0,
+    "ms_per_call": 117.9
+   },
+   "trial_variance": {
+    "net_min": 47525,
+    "net_max": 47525,
+    "net_sd": 0.0,
+    "fp": [
+     0
+    ],
+    "fn": [
+     0
+    ]
+   }
+  },
+  {
+   "arm": "tz20",
+   "config": {
+    "features": {
+     "cache_ttl_auto": 0,
+     "dup_skeleton": 0,
+     "mcp_dedup": 0,
+     "plan_reinject": 0,
+     "safety_net": 0,
+     "stuck_detect": 0
+    },
+    "read_guard": "deny"
+   },
+   "scenarios": {
+    "dup_read": {
+     "injected": 246,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "deny -> full retry",
+     "ms_mean": 102.4,
+     "ms_sd": 38.9,
+     "hook_calls": 4
+    },
+    "idle_1h": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 1,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 162.6,
+     "ms_sd": 9.3,
+     "hook_calls": 1
+    },
+    "idle_5m": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 145.6,
+     "ms_sd": 4.1,
+     "hook_calls": 1
+    },
+    "safety": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "10 labelled commands",
+     "ms_mean": 111.2,
+     "ms_sd": 21.9,
+     "hook_calls": 10
+    },
+    "big_output": {
+     "injected": 0,
+     "saved": 47724,
+     "fp": 0,
+     "fn": 0,
+     "note": "trimmed",
+     "ms_mean": 214.7,
+     "ms_sd": 28.0,
+     "hook_calls": 1
+    },
+    "stuck": {
+     "injected": 63,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "loop advice 1x",
+     "ms_mean": 150.2,
+     "ms_sd": 23.8,
+     "hook_calls": 10
+    },
+    "mcp_dup": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 1,
+     "note": "no advice",
+     "ms_mean": 80.0,
+     "ms_sd": 12.2,
+     "hook_calls": 2
+    }
+   },
+   "total": {
+    "saved": 47724,
+    "injected": 549,
+    "fp": 1,
+    "fn": 1,
+    "ms_per_call": 138.1
+   },
+   "trial_variance": {
+    "net_min": 47175,
+    "net_max": 47175,
+    "net_sd": 0.0,
+    "fp": [
+     1
+    ],
+    "fn": [
+     1
+    ]
+   }
+  },
+  {
+   "arm": "only:cache_ttl_auto",
+   "config": {
+    "features": {
+     "cache_ttl_auto": 1,
+     "dup_skeleton": 0,
+     "mcp_dedup": 0,
+     "plan_reinject": 0,
+     "safety_net": 0,
+     "stuck_detect": 0
+    },
+    "read_guard": "deny"
+   },
+   "scenarios": {
+    "dup_read": {
+     "injected": 246,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "deny -> full retry",
+     "ms_mean": 86.0,
+     "ms_sd": 17.2,
+     "hook_calls": 4
+    },
+    "idle_1h": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "no expiry advice",
+     "ms_mean": 138.1,
+     "ms_sd": 15.5,
+     "hook_calls": 1
+    },
+    "idle_5m": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 155.3,
+     "ms_sd": 15.0,
+     "hook_calls": 1
+    },
+    "safety": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "10 labelled commands",
+     "ms_mean": 102.2,
+     "ms_sd": 21.4,
+     "hook_calls": 10
+    },
+    "big_output": {
+     "injected": 0,
+     "saved": 47724,
+     "fp": 0,
+     "fn": 0,
+     "note": "trimmed",
+     "ms_mean": 147.2,
+     "ms_sd": 15.8,
+     "hook_calls": 1
+    },
+    "stuck": {
+     "injected": 63,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "loop advice 1x",
+     "ms_mean": 103.5,
+     "ms_sd": 10.9,
+     "hook_calls": 10
+    },
+    "mcp_dup": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 1,
+     "note": "no advice",
+     "ms_mean": 64.4,
+     "ms_sd": 5.8,
+     "hook_calls": 2
+    }
+   },
+   "total": {
+    "saved": 47724,
+    "injected": 429,
+    "fp": 0,
+    "fn": 1,
+    "ms_per_call": 113.8
+   },
+   "trial_variance": {
+    "net_min": 47295,
+    "net_max": 47295,
+    "net_sd": 0.0,
+    "fp": [
+     0
+    ],
+    "fn": [
+     1
+    ]
+   }
+  },
+  {
+   "arm": "only:dup_skeleton",
+   "config": {
+    "features": {
+     "cache_ttl_auto": 0,
+     "dup_skeleton": 1,
+     "mcp_dedup": 0,
+     "plan_reinject": 0,
+     "safety_net": 0,
+     "stuck_detect": 0
+    },
+    "read_guard": "deny"
+   },
+   "scenarios": {
+    "dup_read": {
+     "injected": 1411,
+     "saved": 4128,
+     "fp": 0,
+     "fn": 0,
+     "note": "outline -> partial re-read",
+     "ms_mean": 71.9,
+     "ms_sd": 13.1,
+     "hook_calls": 4
+    },
+    "idle_1h": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 1,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 117.6,
+     "ms_sd": 9.8,
+     "hook_calls": 1
+    },
+    "idle_5m": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 122.7,
+     "ms_sd": 14.0,
+     "hook_calls": 1
+    },
+    "safety": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "10 labelled commands",
+     "ms_mean": 76.8,
+     "ms_sd": 13.9,
+     "hook_calls": 10
+    },
+    "big_output": {
+     "injected": 0,
+     "saved": 47724,
+     "fp": 0,
+     "fn": 0,
+     "note": "trimmed",
+     "ms_mean": 143.0,
+     "ms_sd": 17.4,
+     "hook_calls": 1
+    },
+    "stuck": {
+     "injected": 63,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "loop advice 1x",
+     "ms_mean": 128.8,
+     "ms_sd": 23.7,
+     "hook_calls": 10
+    },
+    "mcp_dup": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 1,
+     "note": "no advice",
+     "ms_mean": 63.2,
+     "ms_sd": 3.4,
+     "hook_calls": 2
+    }
+   },
+   "total": {
+    "saved": 51852,
+    "injected": 1714,
+    "fp": 1,
+    "fn": 1,
+    "ms_per_call": 103.4
+   },
+   "trial_variance": {
+    "net_min": 50138,
+    "net_max": 50138,
+    "net_sd": 0.0,
+    "fp": [
+     1
+    ],
+    "fn": [
+     1
+    ]
+   }
+  },
+  {
+   "arm": "only:mcp_dedup",
+   "config": {
+    "features": {
+     "cache_ttl_auto": 0,
+     "dup_skeleton": 0,
+     "mcp_dedup": 1,
+     "plan_reinject": 0,
+     "safety_net": 0,
+     "stuck_detect": 0
+    },
+    "read_guard": "deny"
+   },
+   "scenarios": {
+    "dup_read": {
+     "injected": 246,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "deny -> full retry",
+     "ms_mean": 113.2,
+     "ms_sd": 48.2,
+     "hook_calls": 4
+    },
+    "idle_1h": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 1,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 151.6,
+     "ms_sd": 15.8,
+     "hook_calls": 1
+    },
+    "idle_5m": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 123.4,
+     "ms_sd": 3.1,
+     "hook_calls": 1
+    },
+    "safety": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "10 labelled commands",
+     "ms_mean": 92.4,
+     "ms_sd": 10.7,
+     "hook_calls": 10
+    },
+    "big_output": {
+     "injected": 0,
+     "saved": 47724,
+     "fp": 0,
+     "fn": 0,
+     "note": "trimmed",
+     "ms_mean": 213.4,
+     "ms_sd": 51.5,
+     "hook_calls": 1
+    },
+    "stuck": {
+     "injected": 63,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "loop advice 1x",
+     "ms_mean": 123.0,
+     "ms_sd": 20.2,
+     "hook_calls": 10
+    },
+    "mcp_dup": {
+     "injected": 205,
+     "saved": 3000,
+     "fp": 0,
+     "fn": 0,
+     "note": "advised",
+     "ms_mean": 66.6,
+     "ms_sd": 6.7,
+     "hook_calls": 2
+    }
+   },
+   "total": {
+    "saved": 50724,
+    "injected": 754,
+    "fp": 1,
+    "fn": 0,
+    "ms_per_call": 126.2
+   },
+   "trial_variance": {
+    "net_min": 49970,
+    "net_max": 49970,
+    "net_sd": 0.0,
+    "fp": [
+     1
+    ],
+    "fn": [
+     0
+    ]
+   }
+  },
+  {
+   "arm": "only:plan_reinject",
+   "config": {
+    "features": {
+     "cache_ttl_auto": 0,
+     "dup_skeleton": 0,
+     "mcp_dedup": 0,
+     "plan_reinject": 1,
+     "safety_net": 0,
+     "stuck_detect": 0
+    },
+    "read_guard": "deny"
+   },
+   "scenarios": {
+    "dup_read": {
+     "injected": 246,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "deny -> full retry",
+     "ms_mean": 81.4,
+     "ms_sd": 26.5,
+     "hook_calls": 4
+    },
+    "idle_1h": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 1,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 110.9,
+     "ms_sd": 9.2,
+     "hook_calls": 1
+    },
+    "idle_5m": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 106.8,
+     "ms_sd": 4.8,
+     "hook_calls": 1
+    },
+    "safety": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "10 labelled commands",
+     "ms_mean": 76.6,
+     "ms_sd": 7.7,
+     "hook_calls": 10
+    },
+    "big_output": {
+     "injected": 0,
+     "saved": 47724,
+     "fp": 0,
+     "fn": 0,
+     "note": "trimmed",
+     "ms_mean": 145.0,
+     "ms_sd": 15.9,
+     "hook_calls": 1
+    },
+    "stuck": {
+     "injected": 63,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "loop advice 1x",
+     "ms_mean": 112.2,
+     "ms_sd": 17.5,
+     "hook_calls": 10
+    },
+    "mcp_dup": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 1,
+     "note": "no advice",
+     "ms_mean": 62.2,
+     "ms_sd": 2.7,
+     "hook_calls": 2
+    }
+   },
+   "total": {
+    "saved": 47724,
+    "injected": 549,
+    "fp": 1,
+    "fn": 1,
+    "ms_per_call": 99.3
+   },
+   "trial_variance": {
+    "net_min": 47175,
+    "net_max": 47175,
+    "net_sd": 0.0,
+    "fp": [
+     1
+    ],
+    "fn": [
+     1
+    ]
+   }
+  },
+  {
+   "arm": "only:safety_net",
+   "config": {
+    "features": {
+     "cache_ttl_auto": 0,
+     "dup_skeleton": 0,
+     "mcp_dedup": 0,
+     "plan_reinject": 0,
+     "safety_net": 1,
+     "stuck_detect": 0
+    },
+    "read_guard": "deny"
+   },
+   "scenarios": {
+    "dup_read": {
+     "injected": 246,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "deny -> full retry",
+     "ms_mean": 63.5,
+     "ms_sd": 10.5,
+     "hook_calls": 4
+    },
+    "idle_1h": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 1,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 129.9,
+     "ms_sd": 30.3,
+     "hook_calls": 1
+    },
+    "idle_5m": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 129.8,
+     "ms_sd": 14.9,
+     "hook_calls": 1
+    },
+    "safety": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "10 labelled commands",
+     "ms_mean": 78.7,
+     "ms_sd": 4.4,
+     "hook_calls": 10
+    },
+    "big_output": {
+     "injected": 0,
+     "saved": 47724,
+     "fp": 0,
+     "fn": 0,
+     "note": "trimmed",
+     "ms_mean": 128.2,
+     "ms_sd": 2.1,
+     "hook_calls": 1
+    },
+    "stuck": {
+     "injected": 63,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "loop advice 1x",
+     "ms_mean": 109.3,
+     "ms_sd": 2.4,
+     "hook_calls": 10
+    },
+    "mcp_dup": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 1,
+     "note": "no advice",
+     "ms_mean": 63.3,
+     "ms_sd": 1.6,
+     "hook_calls": 2
+    }
+   },
+   "total": {
+    "saved": 47724,
+    "injected": 549,
+    "fp": 1,
+    "fn": 1,
+    "ms_per_call": 100.4
+   },
+   "trial_variance": {
+    "net_min": 47175,
+    "net_max": 47175,
+    "net_sd": 0.0,
+    "fp": [
+     1
+    ],
+    "fn": [
+     1
+    ]
+   }
+  },
+  {
+   "arm": "only:stuck_detect",
+   "config": {
+    "features": {
+     "cache_ttl_auto": 0,
+     "dup_skeleton": 0,
+     "mcp_dedup": 0,
+     "plan_reinject": 0,
+     "safety_net": 0,
+     "stuck_detect": 1
+    },
+    "read_guard": "deny"
+   },
+   "scenarios": {
+    "dup_read": {
+     "injected": 246,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "deny -> full retry",
+     "ms_mean": 73.2,
+     "ms_sd": 12.6,
+     "hook_calls": 4
+    },
+    "idle_1h": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 1,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 133.2,
+     "ms_sd": 39.3,
+     "hook_calls": 1
+    },
+    "idle_5m": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 113.7,
+     "ms_sd": 0.7,
+     "hook_calls": 1
+    },
+    "safety": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "10 labelled commands",
+     "ms_mean": 75.8,
+     "ms_sd": 5.2,
+     "hook_calls": 10
+    },
+    "big_output": {
+     "injected": 0,
+     "saved": 47724,
+     "fp": 0,
+     "fn": 0,
+     "note": "trimmed",
+     "ms_mean": 133.7,
+     "ms_sd": 8.6,
+     "hook_calls": 1
+    },
+    "stuck": {
+     "injected": 144,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "loop advice 2x",
+     "ms_mean": 97.9,
+     "ms_sd": 8.6,
+     "hook_calls": 10
+    },
+    "mcp_dup": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 1,
+     "note": "no advice",
+     "ms_mean": 53.4,
+     "ms_sd": 1.5,
+     "hook_calls": 2
+    }
+   },
+   "total": {
+    "saved": 47724,
+    "injected": 630,
+    "fp": 1,
+    "fn": 1,
+    "ms_per_call": 97.3
+   },
+   "trial_variance": {
+    "net_min": 47094,
+    "net_max": 47094,
+    "net_sd": 0.0,
+    "fp": [
+     1
+    ],
+    "fn": [
+     1
+    ]
+   }
+  },
+  {
+   "arm": "all",
+   "config": {
+    "features": {
+     "cache_ttl_auto": 1,
+     "dup_skeleton": 1,
+     "mcp_dedup": 1,
+     "plan_reinject": 1,
+     "safety_net": 1,
+     "stuck_detect": 1
+    },
+    "read_guard": "deny"
+   },
+   "scenarios": {
+    "dup_read": {
+     "injected": 1411,
+     "saved": 4128,
+     "fp": 0,
+     "fn": 0,
+     "note": "outline -> partial re-read",
+     "ms_mean": 81.7,
+     "ms_sd": 16.1,
+     "hook_calls": 4
+    },
+    "idle_1h": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "no expiry advice",
+     "ms_mean": 114.2,
+     "ms_sd": 2.9,
+     "hook_calls": 1
+    },
+    "idle_5m": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 124.0,
+     "ms_sd": 16.7,
+     "hook_calls": 1
+    },
+    "safety": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "10 labelled commands",
+     "ms_mean": 82.4,
+     "ms_sd": 9.3,
+     "hook_calls": 10
+    },
+    "big_output": {
+     "injected": 0,
+     "saved": 47724,
+     "fp": 0,
+     "fn": 0,
+     "note": "trimmed",
+     "ms_mean": 113.6,
+     "ms_sd": 3.0,
+     "hook_calls": 1
+    },
+    "stuck": {
+     "injected": 144,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "loop advice 2x",
+     "ms_mean": 124.2,
+     "ms_sd": 13.5,
+     "hook_calls": 10
+    },
+    "mcp_dup": {
+     "injected": 205,
+     "saved": 3000,
+     "fp": 0,
+     "fn": 0,
+     "note": "advised",
+     "ms_mean": 84.7,
+     "ms_sd": 10.8,
+     "hook_calls": 2
+    }
+   },
+   "total": {
+    "saved": 54852,
+    "injected": 1880,
+    "fp": 0,
+    "fn": 0,
+    "ms_per_call": 103.5
+   },
+   "trial_variance": {
+    "net_min": 52972,
+    "net_max": 52972,
+    "net_sd": 0.0,
+    "fp": [
+     0
+    ],
+    "fn": [
+     0
+    ]
+   }
+  },
+  {
+   "arm": "all-minus:cache_ttl_auto",
+   "config": {
+    "features": {
+     "cache_ttl_auto": 0,
+     "dup_skeleton": 1,
+     "mcp_dedup": 1,
+     "plan_reinject": 1,
+     "safety_net": 1,
+     "stuck_detect": 1
+    },
+    "read_guard": "deny"
+   },
+   "scenarios": {
+    "dup_read": {
+     "injected": 1411,
+     "saved": 4128,
+     "fp": 0,
+     "fn": 0,
+     "note": "outline -> partial re-read",
+     "ms_mean": 94.9,
+     "ms_sd": 19.1,
+     "hook_calls": 4
+    },
+    "idle_1h": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 1,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 129.6,
+     "ms_sd": 43.9,
+     "hook_calls": 1
+    },
+    "idle_5m": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 116.0,
+     "ms_sd": 2.7,
+     "hook_calls": 1
+    },
+    "safety": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "10 labelled commands",
+     "ms_mean": 71.8,
+     "ms_sd": 8.3,
+     "hook_calls": 10
+    },
+    "big_output": {
+     "injected": 0,
+     "saved": 47724,
+     "fp": 0,
+     "fn": 0,
+     "note": "trimmed",
+     "ms_mean": 128.7,
+     "ms_sd": 3.4,
+     "hook_calls": 1
+    },
+    "stuck": {
+     "injected": 144,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "loop advice 2x",
+     "ms_mean": 95.9,
+     "ms_sd": 14.8,
+     "hook_calls": 10
+    },
+    "mcp_dup": {
+     "injected": 205,
+     "saved": 3000,
+     "fp": 0,
+     "fn": 0,
+     "note": "advised",
+     "ms_mean": 70.9,
+     "ms_sd": 13.2,
+     "hook_calls": 2
+    }
+   },
+   "total": {
+    "saved": 54852,
+    "injected": 2000,
+    "fp": 1,
+    "fn": 0,
+    "ms_per_call": 101.1
+   },
+   "trial_variance": {
+    "net_min": 52852,
+    "net_max": 52852,
+    "net_sd": 0.0,
+    "fp": [
+     1
+    ],
+    "fn": [
+     0
+    ]
+   }
+  },
+  {
+   "arm": "all-minus:dup_skeleton",
+   "config": {
+    "features": {
+     "cache_ttl_auto": 1,
+     "dup_skeleton": 0,
+     "mcp_dedup": 1,
+     "plan_reinject": 1,
+     "safety_net": 1,
+     "stuck_detect": 1
+    },
+    "read_guard": "deny"
+   },
+   "scenarios": {
+    "dup_read": {
+     "injected": 246,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "deny -> full retry",
+     "ms_mean": 54.2,
+     "ms_sd": 9.6,
+     "hook_calls": 4
+    },
+    "idle_1h": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "no expiry advice",
+     "ms_mean": 80.0,
+     "ms_sd": 4.4,
+     "hook_calls": 1
+    },
+    "idle_5m": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 92.2,
+     "ms_sd": 2.6,
+     "hook_calls": 1
+    },
+    "safety": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "10 labelled commands",
+     "ms_mean": 72.9,
+     "ms_sd": 13.1,
+     "hook_calls": 10
+    },
+    "big_output": {
+     "injected": 0,
+     "saved": 47724,
+     "fp": 0,
+     "fn": 0,
+     "note": "trimmed",
+     "ms_mean": 99.5,
+     "ms_sd": 4.5,
+     "hook_calls": 1
+    },
+    "stuck": {
+     "injected": 144,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "loop advice 2x",
+     "ms_mean": 105.2,
+     "ms_sd": 26.4,
+     "hook_calls": 10
+    },
+    "mcp_dup": {
+     "injected": 205,
+     "saved": 3000,
+     "fp": 0,
+     "fn": 0,
+     "note": "advised",
+     "ms_mean": 57.5,
+     "ms_sd": 8.4,
+     "hook_calls": 2
+    }
+   },
+   "total": {
+    "saved": 50724,
+    "injected": 715,
+    "fp": 0,
+    "fn": 0,
+    "ms_per_call": 80.2
+   },
+   "trial_variance": {
+    "net_min": 50009,
+    "net_max": 50009,
+    "net_sd": 0.0,
+    "fp": [
+     0
+    ],
+    "fn": [
+     0
+    ]
+   }
+  },
+  {
+   "arm": "all-minus:mcp_dedup",
+   "config": {
+    "features": {
+     "cache_ttl_auto": 1,
+     "dup_skeleton": 1,
+     "mcp_dedup": 0,
+     "plan_reinject": 1,
+     "safety_net": 1,
+     "stuck_detect": 1
+    },
+    "read_guard": "deny"
+   },
+   "scenarios": {
+    "dup_read": {
+     "injected": 1411,
+     "saved": 4128,
+     "fp": 0,
+     "fn": 0,
+     "note": "outline -> partial re-read",
+     "ms_mean": 66.2,
+     "ms_sd": 11.5,
+     "hook_calls": 4
+    },
+    "idle_1h": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "no expiry advice",
+     "ms_mean": 87.1,
+     "ms_sd": 3.4,
+     "hook_calls": 1
+    },
+    "idle_5m": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 98.1,
+     "ms_sd": 6.7,
+     "hook_calls": 1
+    },
+    "safety": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "10 labelled commands",
+     "ms_mean": 97.2,
+     "ms_sd": 18.1,
+     "hook_calls": 10
+    },
+    "big_output": {
+     "injected": 0,
+     "saved": 47724,
+     "fp": 0,
+     "fn": 0,
+     "note": "trimmed",
+     "ms_mean": 144.1,
+     "ms_sd": 5.0,
+     "hook_calls": 1
+    },
+    "stuck": {
+     "injected": 144,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "loop advice 2x",
+     "ms_mean": 130.6,
+     "ms_sd": 9.9,
+     "hook_calls": 10
+    },
+    "mcp_dup": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 1,
+     "note": "no advice",
+     "ms_mean": 74.6,
+     "ms_sd": 4.6,
+     "hook_calls": 2
+    }
+   },
+   "total": {
+    "saved": 51852,
+    "injected": 1675,
+    "fp": 0,
+    "fn": 1,
+    "ms_per_call": 99.7
+   },
+   "trial_variance": {
+    "net_min": 50177,
+    "net_max": 50177,
+    "net_sd": 0.0,
+    "fp": [
+     0
+    ],
+    "fn": [
+     1
+    ]
+   }
+  },
+  {
+   "arm": "all-minus:plan_reinject",
+   "config": {
+    "features": {
+     "cache_ttl_auto": 1,
+     "dup_skeleton": 1,
+     "mcp_dedup": 1,
+     "plan_reinject": 0,
+     "safety_net": 1,
+     "stuck_detect": 1
+    },
+    "read_guard": "deny"
+   },
+   "scenarios": {
+    "dup_read": {
+     "injected": 1411,
+     "saved": 4128,
+     "fp": 0,
+     "fn": 0,
+     "note": "outline -> partial re-read",
+     "ms_mean": 85.5,
+     "ms_sd": 13.8,
+     "hook_calls": 4
+    },
+    "idle_1h": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "no expiry advice",
+     "ms_mean": 139.2,
+     "ms_sd": 3.7,
+     "hook_calls": 1
+    },
+    "idle_5m": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 131.3,
+     "ms_sd": 7.2,
+     "hook_calls": 1
+    },
+    "safety": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "10 labelled commands",
+     "ms_mean": 92.2,
+     "ms_sd": 14.4,
+     "hook_calls": 10
+    },
+    "big_output": {
+     "injected": 0,
+     "saved": 47724,
+     "fp": 0,
+     "fn": 0,
+     "note": "trimmed",
+     "ms_mean": 156.8,
+     "ms_sd": 11.5,
+     "hook_calls": 1
+    },
+    "stuck": {
+     "injected": 144,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "loop advice 2x",
+     "ms_mean": 135.1,
+     "ms_sd": 9.9,
+     "hook_calls": 10
+    },
+    "mcp_dup": {
+     "injected": 205,
+     "saved": 3000,
+     "fp": 0,
+     "fn": 0,
+     "note": "advised",
+     "ms_mean": 89.4,
+     "ms_sd": 11.8,
+     "hook_calls": 2
+    }
+   },
+   "total": {
+    "saved": 54852,
+    "injected": 1880,
+    "fp": 0,
+    "fn": 0,
+    "ms_per_call": 118.5
+   },
+   "trial_variance": {
+    "net_min": 52972,
+    "net_max": 52972,
+    "net_sd": 0.0,
+    "fp": [
+     0
+    ],
+    "fn": [
+     0
+    ]
+   }
+  },
+  {
+   "arm": "all-minus:safety_net",
+   "config": {
+    "features": {
+     "cache_ttl_auto": 1,
+     "dup_skeleton": 1,
+     "mcp_dedup": 1,
+     "plan_reinject": 1,
+     "safety_net": 0,
+     "stuck_detect": 1
+    },
+    "read_guard": "deny"
+   },
+   "scenarios": {
+    "dup_read": {
+     "injected": 1411,
+     "saved": 4128,
+     "fp": 0,
+     "fn": 0,
+     "note": "outline -> partial re-read",
+     "ms_mean": 93.4,
+     "ms_sd": 13.7,
+     "hook_calls": 4
+    },
+    "idle_1h": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "no expiry advice",
+     "ms_mean": 142.1,
+     "ms_sd": 11.8,
+     "hook_calls": 1
+    },
+    "idle_5m": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 145.6,
+     "ms_sd": 12.6,
+     "hook_calls": 1
+    },
+    "safety": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "10 labelled commands",
+     "ms_mean": 100.3,
+     "ms_sd": 20.0,
+     "hook_calls": 10
+    },
+    "big_output": {
+     "injected": 0,
+     "saved": 47724,
+     "fp": 0,
+     "fn": 0,
+     "note": "trimmed",
+     "ms_mean": 164.9,
+     "ms_sd": 12.0,
+     "hook_calls": 1
+    },
+    "stuck": {
+     "injected": 144,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "loop advice 2x",
+     "ms_mean": 139.2,
+     "ms_sd": 12.9,
+     "hook_calls": 10
+    },
+    "mcp_dup": {
+     "injected": 205,
+     "saved": 3000,
+     "fp": 0,
+     "fn": 0,
+     "note": "advised",
+     "ms_mean": 99.6,
+     "ms_sd": 29.6,
+     "hook_calls": 2
+    }
+   },
+   "total": {
+    "saved": 54852,
+    "injected": 1880,
+    "fp": 0,
+    "fn": 0,
+    "ms_per_call": 126.4
+   },
+   "trial_variance": {
+    "net_min": 52972,
+    "net_max": 52972,
+    "net_sd": 0.0,
+    "fp": [
+     0
+    ],
+    "fn": [
+     0
+    ]
+   }
+  },
+  {
+   "arm": "all-minus:stuck_detect",
+   "config": {
+    "features": {
+     "cache_ttl_auto": 1,
+     "dup_skeleton": 1,
+     "mcp_dedup": 1,
+     "plan_reinject": 1,
+     "safety_net": 1,
+     "stuck_detect": 0
+    },
+    "read_guard": "deny"
+   },
+   "scenarios": {
+    "dup_read": {
+     "injected": 1411,
+     "saved": 4128,
+     "fp": 0,
+     "fn": 0,
+     "note": "outline -> partial re-read",
+     "ms_mean": 100.8,
+     "ms_sd": 18.3,
+     "hook_calls": 4
+    },
+    "idle_1h": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "no expiry advice",
+     "ms_mean": 145.6,
+     "ms_sd": 5.6,
+     "hook_calls": 1
+    },
+    "idle_5m": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 129.4,
+     "ms_sd": 8.0,
+     "hook_calls": 1
+    },
+    "safety": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "10 labelled commands",
+     "ms_mean": 102.2,
+     "ms_sd": 19.7,
+     "hook_calls": 10
+    },
+    "big_output": {
+     "injected": 0,
+     "saved": 47724,
+     "fp": 0,
+     "fn": 0,
+     "note": "trimmed",
+     "ms_mean": 227.0,
+     "ms_sd": 36.3,
+     "hook_calls": 1
+    },
+    "stuck": {
+     "injected": 63,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "loop advice 1x",
+     "ms_mean": 136.7,
+     "ms_sd": 26.7,
+     "hook_calls": 10
+    },
+    "mcp_dup": {
+     "injected": 205,
+     "saved": 3000,
+     "fp": 0,
+     "fn": 0,
+     "note": "advised",
+     "ms_mean": 78.9,
+     "ms_sd": 12.8,
+     "hook_calls": 2
+    }
+   },
+   "total": {
+    "saved": 54852,
+    "injected": 1799,
+    "fp": 0,
+    "fn": 0,
+    "ms_per_call": 131.5
+   },
+   "trial_variance": {
+    "net_min": 53053,
+    "net_max": 53053,
+    "net_sd": 0.0,
+    "fp": [
+     0
+    ],
+    "fn": [
+     0
+    ]
+   }
+  },
+  {
+   "arm": "all-minus-conflicts",
+   "config": {
+    "features": {
+     "cache_ttl_auto": 1,
+     "dup_skeleton": 1,
+     "mcp_dedup": 1,
+     "plan_reinject": 1,
+     "safety_net": 1,
+     "stuck_detect": 1
+    },
+    "read_guard": "deny"
+   },
+   "scenarios": {
+    "dup_read": {
+     "injected": 1411,
+     "saved": 4128,
+     "fp": 0,
+     "fn": 0,
+     "note": "outline -> partial re-read",
+     "ms_mean": 70.6,
+     "ms_sd": 12.3,
+     "hook_calls": 4
+    },
+    "idle_1h": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "no expiry advice",
+     "ms_mean": 104.4,
+     "ms_sd": 2.7,
+     "hook_calls": 1
+    },
+    "idle_5m": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 111.6,
+     "ms_sd": 6.9,
+     "hook_calls": 1
+    },
+    "safety": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "10 labelled commands",
+     "ms_mean": 73.0,
+     "ms_sd": 4.5,
+     "hook_calls": 10
+    },
+    "big_output": {
+     "injected": 0,
+     "saved": 47724,
+     "fp": 0,
+     "fn": 0,
+     "note": "trimmed",
+     "ms_mean": 110.5,
+     "ms_sd": 8.3,
+     "hook_calls": 1
+    },
+    "stuck": {
+     "injected": 144,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "loop advice 2x",
+     "ms_mean": 133.7,
+     "ms_sd": 33.6,
+     "hook_calls": 10
+    },
+    "mcp_dup": {
+     "injected": 205,
+     "saved": 3000,
+     "fp": 0,
+     "fn": 0,
+     "note": "advised",
+     "ms_mean": 65.5,
+     "ms_sd": 5.6,
+     "hook_calls": 2
+    }
+   },
+   "total": {
+    "saved": 54852,
+    "injected": 1880,
+    "fp": 0,
+    "fn": 0,
+    "ms_per_call": 95.6
+   },
+   "trial_variance": {
+    "net_min": 52972,
+    "net_max": 52972,
+    "net_sd": 0.0,
+    "fp": [
+     0
+    ],
+    "fn": [
+     0
+    ]
+   }
+  },
+  {
+   "arm": "v040",
+   "config": {
+    "read_guard": "deny"
+   },
+   "scenarios": {
+    "dup_read": {
+     "injected": 246,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "deny -> full retry",
+     "ms_mean": 89.0,
+     "ms_sd": 27.0,
+     "hook_calls": 4
+    },
+    "idle_1h": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 1,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 119.2,
+     "ms_sd": 23.4,
+     "hook_calls": 1
+    },
+    "idle_5m": {
+     "injected": 120,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "said expired",
+     "ms_mean": 103.7,
+     "ms_sd": 2.5,
+     "hook_calls": 1
+    },
+    "safety": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 4,
+     "note": "10 labelled commands",
+     "ms_mean": 47.7,
+     "ms_sd": 2.3,
+     "hook_calls": 10
+    },
+    "big_output": {
+     "injected": 0,
+     "saved": 35455,
+     "fp": 0,
+     "fn": 0,
+     "note": "trimmed",
+     "ms_mean": 102.4,
+     "ms_sd": 1.3,
+     "hook_calls": 1
+    },
+    "stuck": {
+     "injected": 63,
+     "saved": 0,
+     "fp": 0,
+     "fn": 0,
+     "note": "loop advice 1x",
+     "ms_mean": 102.3,
+     "ms_sd": 20.0,
+     "hook_calls": 10
+    },
+    "mcp_dup": {
+     "injected": 0,
+     "saved": 0,
+     "fp": 0,
+     "fn": 1,
+     "note": "no advice",
+     "ms_mean": 48.8,
+     "ms_sd": 2.9,
+     "hook_calls": 2
+    }
+   },
+   "total": {
+    "saved": 35455,
+    "injected": 549,
+    "fp": 1,
+    "fn": 5,
+    "ms_per_call": 87.6
+   },
+   "trial_variance": {
+    "net_min": 34906,
+    "net_max": 34906,
+    "net_sd": 0.0,
+    "fp": [
+     1
+    ],
+    "fn": [
+     5
+    ]
+   }
+  }
+ ]
+}

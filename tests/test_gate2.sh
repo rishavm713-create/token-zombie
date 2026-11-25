@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Phase 3 hardening: public-API change detection, tests-actually-ran, regression link, project lint/type/audit detection, resume of killed agent runs.
 cd "$(dirname "$0")/.." || exit 1
-R=$PWD; T=$(mktemp -d); export HOME="$T/home" TZ_DEDUPE=0; mkdir -p "$HOME"; P=0; F=0
+R=$(pwd); T=$(mktemp -d); export HOME="$T/home" TZ_DEDUPE=0; mkdir -p "$HOME"; P=0; F=0
 ok(){ if eval "$1"; then echo "ok $2"; P=$((P+1)); else echo "FAIL $2"; F=$((F+1)); fi; }
 g(){ python3 "$R/bin/tzgate.py" gate "$@"; }
 repo(){ d=$(mktemp -d -p "$T"); cd "$d"; git init -q; printf 'def add(a, b):\n    return a + b\n\ndef _helper(x):\n    return x\n' > calc.py
@@ -48,12 +48,18 @@ repo; printf 'def add(a, b)\n    return a\n' > calc.py
 ok "g t | grep -q 'syntax .*FAIL'" "syntax error in a changed file is caught without any tool installed"
 # --- project-configured lint / type / audit (stub binaries; real ruff/mypy/pip-audit are not required to run this suite)
 S=$T/stub; mkdir -p $S
+command -v cygpath >/dev/null && S=$(cygpath -u "$S")  # MSYS: a D:/ entry splits PATH at the colon
 printf '#!/bin/sh\necho "E501 line too long"; exit 1\n' > $S/ruff; printf '#!/bin/sh\nexit 0\n' > $S/mypy
 printf '#!/bin/sh\necho "Connection error: ENOTFOUND pypi.org"; exit 1\n' > $S/pip-audit; chmod +x $S/*
+NOTOOLS="/usr/bin:/bin"
+case "$(uname -s)" in MINGW*|MSYS*)  # cmd.exe runs only PATHEXT files; python and git live outside /usr/bin
+  printf '@echo E501 line too long\r\n@exit /b 1\r\n' > $S/ruff.cmd; printf '@exit /b 0\r\n' > $S/mypy.cmd
+  printf '@echo Connection error: ENOTFOUND pypi.org\r\n@exit /b 1\r\n' > $S/pip-audit.cmd
+  NOTOOLS="$(dirname "$(command -v python3)"):$(dirname "$(command -v git)"):$NOTOOLS";; esac
 repo; echo '# x' >> calc.py; printf '[lint]\n' > ruff.toml; printf '[mypy]\n' > mypy.ini; echo flask >requirements.txt
 O=$(PATH="$S:$PATH" g t --test "$UT")
 ok "echo \"\$O\" | grep -q 'lint .*FAIL.*ruff check' && echo \"\$O\" | grep -q 'types .*ok' && echo \"\$O\" | grep -q 'audit .*skip.*needs network'" "configured ruff fails the gate, mypy passes, offline pip-audit is reported skipped (not passed)"
-O=$(PATH="/usr/bin:/bin" g t --test "$UT"); ok "echo \"\$O\" | grep -q 'lint .*skip.*not installed'" "configured but uninstalled tool is skipped and said so"
+O=$(PATH="$NOTOOLS" g t --test "$UT"); ok "echo \"\$O\" | grep -q 'lint .*skip.*not installed'" "configured but uninstalled tool is skipped and said so"
 repo; echo '# x' >> calc.py; O=$(PATH="$S:$PATH" g t --test "$UT"); ok "! echo \"\$O\" | grep -qE '^(lint|types|audit)'" "no config means no lint/type/audit check is invented"
 # --- resume of a killed agent run
 repo; export TZ_WORKERS_DIR=$T/w2; L=$T/calls.log; : > $L
@@ -64,7 +70,7 @@ p = sys.argv[sys.argv.index('-p') + 1]; L = os.environ['FAKE_LOG']
 ph = 'build' if 'Phase: build' in p else 'plan' if 'Phase: plan' in p else 'other'
 open(L, 'a').write(ph + (' RESUMED' if 'RESUMED' in p else '') + '\n')
 if ph == 'build' and not os.path.exists(L + '.killed'):
-    open(L + '.killed', 'w').write('1'); os.kill(os.getppid(), signal.SIGKILL); sys.exit(1)
+    open(L + '.killed', 'w').write('1'); os.kill(os.getppid(), getattr(signal, 'SIGKILL', signal.SIGTERM)); sys.exit(1)
 if ph == 'build': open('out.txt', 'w').write('good')
 print(json.dumps({'type': 'assistant', 'message': {'id': 'm1', 'usage': {'input_tokens': 100, 'output_tokens': 1}}}))
 print(json.dumps({'type': 'result', 'result': 'done'}))

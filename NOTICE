@@ -29,3 +29,53 @@ Used in: bin/tzsup.py ready()/blocked_by (dependency-edge + ready-query idea; so
 
 karpathy-skills (Joseph Kim), MIT licence
 Used in: bin/tzops.py diffcheck (idea only: every changed line traces to the task; rules rewritten, no code copied).
+
+--- v2.1 additions (2026-11-25). MIT/Apache permission texts as above apply to each MIT/Apache entry. ---
+
+cc-safety-net (see above), MIT licence
+Copyright (c) 2026 J Liew
+Used in: bin/tzshell.py (rule ids, reasons and verdict fixtures adapted from cc-safety-net; independent Python rebuild, no TypeScript copied) and tests/v21/test_shell_parity.py (parity cases).
+
+microsoft/TokenEconomizer (https://github.com/microsoft/TokenEconomizer), MIT licence
+Copyright (c) Microsoft Corporation
+Used in: bin/tztoolprune.py (evidence rule from plugin/fold.py enough_evidence, protected tool set, deny-list apply/restore bookkeeping; ported to Python with changes). bin/tzmatrix.py (paired-arm / leave-one-out method idea from compare_arms.py; no code copied).
+
+OpenHands software-agent-sdk (https://github.com/OpenHands/software-agent-sdk), MIT licence
+Copyright (c) 2025 All Hands AI
+Used in: bin/tzstuck.py (stuck patterns and thresholds adapted from stuck_detector.py; parity cases from tests/cross/test_stuck_detector.py).
+
+mini-swe-agent (https://github.com/SWE-agent/mini-swe-agent), MIT licence
+Copyright (c) 2025 Kilian A. Lieret and Carlos E. Jimenez
+Used in: bin/tzagent.py (--wall and --max-errors run limits, idea from agents/default.py; own code).
+
+oh-my-claudecode (MIT) and humanlayer (Apache-2.0)
+Used in: bin/tzagent.py claim leases (idea only, no code copied).
+
+claude-mem (https://github.com/thedotmack/claude-mem), Apache License 2.0
+Copyright Alex Newman
+Used in: bin/tzfit.py fit() (hook-output budget idea from ContextBudget.ts; own code).
+
+planning-with-files (see above), MIT licence
+Used in: bin/tzfit.py plan_inject() (plan head + progress tail re-read, gated on content hash change; own code).
+
+Continuous-Claude-v3 (https://github.com/parcadei/Continuous-Claude-v3), MIT licence
+Used in: bin/tzfit.py plan_inject() startup policy (pointer only on a fresh start; behaviour only).
+
+beads (see above), MIT licence
+Used in: bin/tznext.py find_cycle/add_dep (cycle refusal, idea from cycles.go) and ready ordering (hybrid 48 h sort); own Python code.
+
+memsearch (https://github.com/zilliztech/memsearch), MIT licence
+Copyright Zilliz
+Used in: bin/tzmem.py (chunker: 1500 chars, 2-line overlap, sha256[:16] ids; own code, SQLite FTS5 instead of Milvus).
+
+ccusage (https://github.com/ryoppippi/ccusage), MIT licence; ccstatusline (https://github.com/sirmalloc/ccstatusline), MIT licence
+Used in: bin/tzusage.py blocks() (5-hour block rules) and usable() (auto-compact usable-context share); behaviour rebuilt, no code copied.
+
+skills/tz-craft: ideas from superpowers (MIT, Jesse Vincent), mattpocock/skills (MIT), karpathy-skills (MIT), compound-engineering-plugin (MIT, Every Inc), fast-anything (MIT); vercel-labs/agent-skills react guidance (no licence file: rewritten in our own words, no text copied). All reference text is original.
+
+everything-claude-code (https://github.com/affaan-m/everything-claude-code), MIT licence
+Copyright (c) 2026 Affaan Mustafa
+Used in: bin/tzbudget.py (response-depth table and 25/50/75/100% options from skills/token-budget-advisor; stdlib rebuild, no code vendored). Licence: third_party/everything-claude-code/LICENSE
+repomap (https://github.com/SylphxAI/repomap), MIT. Used in: bin/tzimpact.py (idea of the `impact` output only; independent code). Licence: third_party/repomap/LICENSE
+OpenHands software-agent-sdk (https://github.com/OpenHands/software-agent-sdk), MIT. Used in: bin/tzcondense.py (keep-first/keep-last history condensing idea; independent code). Licence: third_party/openhands/LICENSE
+mini-swe-agent (https://github.com/SWE-agent/mini-swe-agent), MIT. Used in: bin/tzcondense.py `cut` (head+tail output cut idea; independent code). Licence: third_party/mini-swe-agent/LICENSE

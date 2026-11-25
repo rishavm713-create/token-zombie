@@ -14,7 +14,10 @@ HELP = """tz <command> [args]
   optimize [--transcript F]                      duplicate reads / repeated commands in the chat log
   filter [--lines N] < text                      shrink noisy command output
   classify <prompt words>                        task mode + cheapest capable model advice
-  stats                                          savings: measured vs estimated, minus tz overhead
+  stats [--breakdown [CHAT.jsonl]]               savings: measured vs estimated, minus tz overhead; --breakdown = context split
+  tips instr|defaults|breakdown|mcp-unused       v2.1 tips commands
+  instr [--fix [--apply|--restore]]              always-loaded instruction files: sizes, duplicates; fix backs up first
+  defaults [apply --yes|restore]                 cheaper default models in settings.json (dry run without apply)
   handoff --task T --done D --left L --next N [--test CMD] [--remember FACT]
   task-wrap [--test CMD] [--summary S] [--remember DECISION] [--force]   close task only if test passes; logs DAILY/MASTER
   checkpoint                                     refresh git snapshot of the active task (no commands run)
@@ -44,6 +47,7 @@ HELP = """tz <command> [args]
   profile <prompt> [--yes]                       which parked skill packs this task needs; --yes runs your skillpack
   mode [off|lite|full|ultra]                     show or set the mode profile (backs up config.json)
   config                                         effective settings and where each comes from
+  speed [on|off|status]                          ship-fast mode (default on): parallel sessions + subagents, hours budget
   report                                         status + optimize + stats + capabilities in one view
   sup start|tick|status|next-session|task      supervisor: usage level -> auto checkpoint -> status bus (status.json)
   route <prompt> [--model M] | --write [FILE] [--yes]   model advice + /model line; --write adds a model-per-task rules block to CLAUDE.md (dry run without --yes)
@@ -118,6 +122,8 @@ def config():
     for k in DEFAULTS:
         src = 'env' if os.environ.get(f'TZ_{k.upper()}') else 'config.json' if _conf.get(k) else 'default'
         print(f'{k} = {cfg(k)} ({src})')
+    import tzsplit
+    print(tzsplit.speed_line())
     return 0
 
 
@@ -130,6 +136,19 @@ def main(argv):
         if c in ('status', 'forecast'):
             import tzusage
             return tzusage.main([c, *rest])
+        if c in ('tips', 'instr', 'defaults') or (c == 'stats' and '--breakdown' in rest):
+            import tztips
+            if c == 'tips':
+                return tztips.main(rest)
+            if c == 'instr':
+                return tztips.main(['instr', *rest])
+            if c == 'defaults':  # tz defaults [apply --yes | restore]
+                return tztips.main(['defaults', *[{'apply': '--apply', 'restore': '--restore'}.get(a, a) for a in rest]])
+            tp = [a for a in rest if a != '--breakdown']
+            if not tp:  # newest chat log of this folder
+                import glob
+                tp = sorted(glob.glob(os.path.expanduser(f'~/.claude/projects/{tztips._slug(os.getcwd())}/*.jsonl')), key=os.path.getmtime)[-1:]
+            return tztips.main(['breakdown', *tp[:1]])
         if c in ('optimize', 'stats', 'filter', 'classify'):
             import tzopt
             return tzopt.main([c, *rest])
@@ -145,7 +164,13 @@ def main(argv):
         if c in ('skills', 'capabilities', 'security', 'audit', 'instructions', 'profile'):
             import tzcap
             return tzcap.main([c, *rest])
-        mods = {'learn': 'tzlearn', 'sup': 'tzsup', 'route': 'tzroute', 'adapters': 'tzadapters', 'reg': 'tzreg', 'dash': 'tzdash', 'companion': 'tzcompanion', 'mascot': 'tzmascot', 'hooks': 'tzhooks', 'live': 'tzlive', 'ledger': 'tzdb', 'compress': 'tzcompress', 'rework': 'tzrework', 'attr': 'tzattr', 'price': 'tzprice', 'policy': 'tzpolicy', 'reconcile': 'tzmore', 'export': 'tzmore', 'workflow': 'tzmore', 'worktree': 'tzmore', 'find': 'tzmore', 'doctor': 'tzmore', 'split': 'tzsplit', 'code': 'tzsplit', 'similar': 'tzsimilar', 'costly': 'tzcost', 'map': 'tzmap', 'sym': 'tzmap', 'rank': 'tzrank', 'exists': 'tzmap', 'agent': 'tzagent', 'xcheck': 'tzmap', 'noise': 'tzcost', 'lock': 'tzsplit', 'hsize': 'tzsplit', 'vault-find': 'tzmore', 'overlap': 'tzmore', 'skills-outcome': 'tzmore', 'conflicts': 'tzattr', 'preflight': 'tzpreflight', 'recall': 'tzout', 'next': 'tznext', 'state': 'tzcont', 'replay': 'tzcont', 'expensive': 'tzcont', 'waste-audit': 'tzcont', 'ondemand': 'tzondemand', 'systems': 'tzsystems', 'shadow': 'tzout'}
+        v21 = {'budget': 'tzbudget', 'ccusage': 'tzccu', 'claim': 'tzclaim', 'stale': 'tzclaw', 'clihelp': 'tzclihelp', 'debt': 'tzdebt', 'diag': 'tzdiag', 'facts': 'tzfacts', 'fast': 'tzfast', 'gitguard': 'tzgitguard', 'line': 'tzline', 'memsearch': 'tzmemsearch', 'obs': 'tzobs', 'sandbox': 'tzsandbox', 'scrub': 'tzscrub', 'sg': 'tzsg', 'spec': 'tzspec', 'squad': 'tzsquad', 'tbench': 'tztbench', 'team': 'tzteam', 'trace': 'tztrace', 'ts': 'tzts', 'depth': 'tzdepth'}
+        if c == 'sym' and rest and (len(rest) > 1 or '/' in rest[0] or rest[0].startswith('-')):  # name paths, flags, trees: serena-style tzsym; a plain name stays with tzmap
+            import tzsym
+            return tzsym.main(rest) or 0
+        if c in v21:
+            return __import__(v21[c]).main(rest) or 0
+        mods = {'learn': 'tzlearn', 'sup': 'tzsup', 'route': 'tzroute', 'adapters': 'tzadapters', 'reg': 'tzreg', 'dash': 'tzdash', 'companion': 'tzcompanion', 'mascot': 'tzmascot', 'hooks': 'tzhooks', 'live': 'tzlive', 'ledger': 'tzdb', 'compress': 'tzcompress', 'rework': 'tzrework', 'attr': 'tzattr', 'price': 'tzprice', 'policy': 'tzpolicy', 'reconcile': 'tzmore', 'export': 'tzmore', 'workflow': 'tzmore', 'worktree': 'tzmore', 'find': 'tzmore', 'doctor': 'tzmore', 'split': 'tzsplit', 'code': 'tzsplit', 'similar': 'tzsimilar', 'costly': 'tzcost', 'map': 'tzmap', 'sym': 'tzmap', 'rank': 'tzrank', 'impact': 'tzimpact', 'condense': 'tzcondense', 'exists': 'tzmap', 'agent': 'tzagent', 'xcheck': 'tzmap', 'noise': 'tzcost', 'lock': 'tzsplit', 'speed': 'tzsplit', 'hsize': 'tzsplit', 'vault-find': 'tzmore', 'overlap': 'tzmore', 'skills-outcome': 'tzmore', 'conflicts': 'tzattr', 'preflight': 'tzpreflight', 'recall': 'tzout', 'next': 'tznext', 'state': 'tzcont', 'replay': 'tzcont', 'expensive': 'tzcont', 'waste-audit': 'tzcont', 'ondemand': 'tzondemand', 'systems': 'tzsystems', 'shadow': 'tzout'}
         if c in mods:
             return __import__(mods[c]).main(([c] if mods[c] in ('tzcont', 'tzout', 'tzattr', 'tzmore', 'tzsplit', 'tzcost', 'tzmap', 'tzagent', 'tzrank') else []) + rest)
         if c == 'overlay':  # build/run the native always-on-top window (Command Line Tools swiftc; installs nothing)
@@ -159,7 +184,7 @@ def main(argv):
                 return 0
             print('usage: tz overlay build | run   (run needs a prior build)', file=sys.stderr)
             return 2
-        mods2 = {'pr': 'tzpr', 'progress': 'tzprogress', 'standards': 'tzstandards', 'features': 'tzfeatures', 'tokens': 'tztokens'}
+        mods2 = {'pr': 'tzpr', 'progress': 'tzprogress', 'standards': 'tzstandards', 'features': 'tzfeatures', 'tokens': 'tztokens', 'toolprune': 'tztoolprune', 'mem': 'tzmem', 'find-code': 'tzfind2'}
         if c in ('reuse', 'gaps', 'missing', 'contract', 'api', 'dbschema', 'coord', 'stack'):
             import tzbuild
             return tzbuild.main([c] + rest)
@@ -181,6 +206,9 @@ def main(argv):
         if c == 'bench' and rest[:1] == ['harbor']:
             import tzharbor
             return tzharbor.main(rest[1:])
+        if c == 'bench' and rest[:1] == ['matrix']:
+            import tzmatrix
+            return tzmatrix.main(rest[1:])
         if c == 'bench' and rest[:1] == ['replay']:
             import tzreplay
             return tzreplay.main(rest[1:])

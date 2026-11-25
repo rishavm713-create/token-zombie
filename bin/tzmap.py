@@ -22,11 +22,37 @@ def defs(path):
     return [m.group(1) for m in re.finditer(r'^(?:function\s+)?(\w+)\(\)\s*\{', s, re.M)] if path.endswith('.sh') else []
 
 
+def defs_methods(path):
+    """defs(path) plus Python class methods as 'Class.method' (nested classes dotted); other languages unchanged."""
+    out = defs(path)
+    if not path.endswith('.py'):
+        return out
+    try:
+        tree = ast.parse(open(path, encoding='utf-8', errors='ignore').read())
+    except Exception:
+        return out
+
+    def walk(body, pre):
+        for n in body:
+            if isinstance(n, ast.ClassDef):
+                walk(n.body, pre + n.name + '.')
+            elif pre and isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                out.append(pre + n.name)
+    for n in tree.body:
+        if isinstance(n, ast.ClassDef):
+            walk(n.body, n.name + '.')
+    return out
+
+
 def _files(root):
     for dp, dn, fn in os.walk(root):
         dn[:] = sorted(d for d in dn if d not in SKIP and not d.startswith('.'))
         for f in sorted(fn):
             yield os.path.join(dp, f)
+
+
+def _rel(p, root):
+    return os.path.relpath(p, root).replace(os.sep, '/')
 
 
 def sym(root, name):
@@ -41,7 +67,7 @@ def sym(root, name):
             lines = open(p, encoding='utf-8', errors='ignore').read().splitlines()
         except Exception:
             continue
-        r = os.path.relpath(p, root); hit = False
+        r = _rel(p, root); hit = False
         for i, l in enumerate(lines, 1):
             if d.search(l):
                 defs_.append(f'{r}:{i}')
@@ -71,7 +97,7 @@ def exists(root, words, n=15):
         for dname in defs(p):
             nm = dname.split()[-1]; k = len(q & _parts(nm))
             if k:
-                out.append((-k, os.path.relpath(p, root), dname))
+                out.append((-k, _rel(p, root), dname))
     return [(f, dn) for _, f, dn in sorted(out)[:n]]
 
 
@@ -82,7 +108,7 @@ def build(root, limit=40):
         for f in sorted(fn):
             d = defs(os.path.join(dp, f))
             if d:
-                out.append('%s: %s' % (os.path.relpath(os.path.join(dp, f), root), ' '.join(d[:limit])))
+                out.append('%s: %s' % (_rel(os.path.join(dp, f), root), ' '.join(d[:limit])))
     return '\n'.join(out)
 
 

@@ -1,4 +1,41 @@
 # Limitations (honest list)
+
+## v2.1 limitations (2026-11-25, code at 8c703c3)
+
+### Measurement
+- Provider tokens for any v2.1 saving: UNKNOWN. No paid baseline-vs-TZ run; no answer-quality A/B.
+- Offline matrix (`tz bench matrix --trials 1`, scripted agent, characters; saved / TZ-injected / net, false positives, false negatives): `tz20` 47,478 / 549 / 46,929, fp 1, fn 1. `all` 53,236 / 1,880 / 51,356, fp 0, fn 0. Difference in net: 4,427 chars in synthetic scenarios. One trial; the 5-trial run is not done.
+- That matrix has no true no-TZ arm: the `off` arm (mode off) still shows 47,724 chars saved from output trimming. So most of the net figure is the 2.0 trim, not v2.1.
+- The matrix runs with `read_guard=deny`; the product default is `advice`.
+- `stuck_detect` has no offline saving: `all-minus:stuck_detect` nets 81 chars more than `all`. Its possible value (shorter loops) is not measured.
+- `tz find-code` gain is small. Earlier recorded hit@10 0.742 -> 0.758 (adding `tzrank`). Rerun 2026-11-25 on 128 commits: 0.742 -> 0.750 (recall@10 0.583 -> 0.589). It depends on the commit history.
+- `tz rank --mention` changes ordering; no retrieval or token gain is measured for it.
+- Hook time in the matrix run: about 108-167 ms per hook on one Mac.
+
+### Features
+- `bin/tzfit.py` caps hook text by keeping head and tail. The dropped middle is not saved for recall.
+- Duplicate-MCP advice (`mcp_dup`) is approximate: "read-only" and "nothing written since" are judged from tool names and the transcript. It cannot see changes made outside the chat. Advice only.
+- `tz toolprune`: idle parking and auto-restore are not done. A denied tool stays denied until `--restore`. Evidence is past chats only.
+- The Bash safety check parses commands; it is not a sandbox and cannot catch every destructive form. In v2.1 it fails closed if the check itself crashes.
+- `tz-craft`: the prompt hint (`tzondemand.craft`) is not called by any hook.
+- `bin/tztips.py` (spec tips) is wired. Most of it is advice with effect EST or UNKNOWN; blocks are opt-in.
+- Not built although research proposed them: budget warning ladder, crash-restart backoff, `tz sym` name paths and `--refs`, AST pattern search, log compressor, `tz debt`, repeat-failure-to-fact memory.
+- REA (reverse engineering) was not used: there were no compiled targets.
+
+### Not possible from a plugin
+- A hook cannot press buttons or run `/clear` or `/model`.
+- It cannot merge or delete messages.
+- It cannot rewrite a prompt; it can only block it or add context.
+- It cannot switch the main model.
+
+### Verification
+- `tests/test_v21.sh`: 411 pass, 0 fail (rerun 2026-11-25, macOS).
+- Full suite: last recorded on the v2.1 branch as 1352 pass, 14 fail (install / uninstall / hook count / state size / vet self-scan). Not rerun for these docs; not confirmed pre-existing. A sibling note says install tests fail when the checkout directory is not named `token-zombie`; that may explain part, unverified.
+- v2.1 not run on Windows CI; not run on Linux for these docs. Not tried in a live Claude Code session for these docs.
+
+---
+
+## Earlier limitations (2.x)
 - Platforms/verification (2026-11-24): macOS, Linux and Windows (Git Bash via bin/tzpy, Python 3.8+); CI on ubuntu/macos/windows-latest. Verified against real Claude Code: hooks fire in a live `claude -p` session, slash commands run, MCP tz_* tools load, GitHub-marketplace install works. Not verified: untested Windows edge cases beyond CI, JS/TS API-drift, real lint/type/audit tools.
 - Savings are NOT yet measured end-to-end. `tz stats` counts only events tz recorded (filter runs, flagged duplicate reads); flagged reads are [est]. No with/without benchmark exists. All TZ advice text (every hook line) is counted as overhead [measured chars/4].
 - 5h/7d and resets: shown only when Claude Code passes rate_limits to the statusline; otherwise "not provided". $ figures (`tz stats` 24h, Session Economics, `tz live agents`) are EST: tokens x list price per model (tzcont.PRICE, edit as prices change), API-equivalent, not your plan quota.

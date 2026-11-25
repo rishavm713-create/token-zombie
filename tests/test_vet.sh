@@ -16,7 +16,8 @@ ok "CI workflow .yml: HIGH (runs in CI)" '[ $r = 1 ] && [[ $o == *"[HIGH] downlo
 new d; mkdir -p "$D/fixtures"; printf '#!/bin/sh\n%s\n' "$PIPE" > "$D/fixtures/setup"; vet "$D"
 ok "extensionless shebang file in fixtures: HIGH" '[ $r = 1 ] && [[ $o == *"[HIGH] downloads"* ]]'
 new e; mkdir -p "$D/fixtures"; echo "$PIPE" > "$D/fixtures/run.json"; chmod +x "$D/fixtures/run.json"; vet "$D"
-ok "exec bit beats a data extension: HIGH" '[ $r = 1 ] && [[ $o == *"[HIGH] downloads"* ]]'
+case "$(uname -s)" in MINGW*|MSYS*) echo "SKIP: exec bit (Windows has none)";;
+*) ok "exec bit beats a data extension: HIGH" '[ $r = 1 ] && [[ $o == *"[HIGH] downloads"* ]]';; esac
 new f; mkdir -p "$D/examples"; echo "$PIPE" > "$D/examples/Makefile"; vet "$D"
 ok "Makefile in examples: HIGH" '[ $r = 1 ]'
 new g; mkdir -p "$D/tests"; printf 'x = 1\n%s\n' "$PIPE" > "$D/tests/t.js"; vet "$D"

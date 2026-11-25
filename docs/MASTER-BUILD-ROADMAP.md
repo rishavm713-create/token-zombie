@@ -42,8 +42,8 @@ Columns: id, requirement and source, class, where, what remains, how tested, acc
 | A6 | Checkpoints and recovery | 2 | `tzagent.checkpoint`, `tzhandoff`, `tz resume` | Checkpoint rows are written and now validated by the gate; there is no `tz agent --resume RUN` that continues a half-finished run | continuity tests 32/32 for handoff; none for resuming a killed agent run | killed run resumes at its next phase | high |
 | A7 | Lint, type, dependency audit, secret scan as gate checks | 3 | `tzgate.py` (secrets only) | Lint/type/dep-audit only via `--build CMD` supplied by the user; no auto-detection of ruff/eslint/pip-audit | none | `tz gate` auto-detects and runs what is installed | medium |
 | A8 | File ownership and worktrees | 1 | `tzagent.claim/release/make_worktree` | Ownership is advisory by file name; two agents on one tree are not prevented by the OS | test_agent ownership + worktree | | done |
-| A9 | Real multi-agent coordination (spawn, duplicate-work detection, report collection) | 3 | `tzagent`, `tzsplit`, `tznext` | Tracking exists; orchestration of parallel workers does not. Host cannot be driven from a mod | none | N tasks run in parallel worktrees, each gated, merged by TZ | high |
-| A10 | Task dependencies in `tz next` (beads model) | 4 | `bin/tznext.py` | Not built | | `tz next` skips tasks whose deps are open | medium |
+| A9 | Real multi-agent coordination (spawn, duplicate-work detection, report collection) | 3 | `tzagent`, `tzsplit`, `tznext` | Tracking exists; `tz worktree add/claim/remove` gives one worktree per task + file ownership (test_worktree_own); orchestration of parallel workers does not. Host cannot be driven from a mod | none | N tasks run in parallel worktrees, each gated, merged by TZ | high |
+| A10 | Task dependencies in `tz next` (beads model) | 4 | `bin/tznext.py` | DONE: deps, ready(), start refused while deps open; near-duplicate titles refused (test_next, test_repo_intel) | | `tz next` skips tasks whose deps are open | medium |
 
 ### B. Token and context optimisation
 | id | Requirement (source) | Class | Files | Remains | Tested by | Pri |
@@ -52,7 +52,7 @@ Columns: id, requirement and source, class, where, what remains, how tested, acc
 | B2 | Reversible compression and cache-aware notes (Headroom) | 2 | `tzcrush`, recall store | Cache-awareness not measured against a provider | unit | medium |
 | B3 | RTK filter coverage gap audit | 4 | none | Compare rtk filter set with `tzout`; add missing | | low |
 | B4 | Bounded output with retrieval (context-mode ideas, clean-room only) | 2 | `tzout recall` | | unit | low |
-| B5 | Repo intelligence: map, finder, impact, similar | 1 for map/finder/impact; 3 for symbol navigation | `tzmap`, `tzfinder`, `tzops.impact` | impact is git-grep word match, not AST or Tree-sitter; no symbol index (Serena idea) | tests | medium |
+| B5 | Repo intelligence: map, finder, impact, similar | 1 for map/finder/impact; 3 for symbol navigation | `tzmap`, `tzfinder`, `tzops.impact` | DONE: `tz sym` (defs file:line + users + tests), `tz exists` (find existing impl), `tz rank` (aider repomap PageRank, Apache-2.0), optional tree-sitter JS/TS in tzcompress (test_repo_intel). Left: refs are word match, not type-aware (no LSP) | tests | medium |
 | B6 | Instruction-file organiser (core vs archive) | 4 | none | | | low |
 | B7 | Savings measured end to end: with/without benchmark, `tz bench`, replay | 3 | `tzbench`, `tzreplay`, `tzab` | A/B needs two logged-in config dirs (external). Only synthetic and offline replay (net 0.58%) are measured | test_bench | high |
 

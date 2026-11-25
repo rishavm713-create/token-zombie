@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tz split / lock / hsize: plan shape, lock exclusion + stale takeover, handoff size flags
 cd "$(dirname "$0")/.." || exit 1
-T=$(mktemp -d); export TZ_LOCK_DIR="$T/locks"; P=0; F=0
+T=$(mktemp -d); export HOME="$T" TZ_LOCK_DIR="$T/locks"; P=0; F=0
 ok(){ if eval "$1"; then echo "ok $2"; P=$((P+1)); else echo "FAIL $2"; F=$((F+1)); fi; }
 O=$(python3 bin/tz split "run live test on simulator" "fix typo in docs" "live test premiere" --json)
 ok "echo '$O' | python3 -c \"import json,sys;r=json.load(sys.stdin);sys.exit(0 if len(r['sessions'])==3 and 'worktree add' in r['sessions'][0]['worktree'] and 'build' in r['rule'] else 1)\"" plan

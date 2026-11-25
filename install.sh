@@ -1,22 +1,24 @@
 #!/bin/bash
 # Token-zombie installer: wires guard (prompt/tool/stop/session-end/precompact), lean-start, compaction-note and statusline hooks into ~/.claude/settings.json.
 # Safe by design: backs up settings first, refuses unparseable/odd-shaped settings or config, atomic write + re-read verification (auto-restores on mismatch),
-# idempotent, touches only commands containing token-zombie/bin/ (or the old chat-size-guard.py). Flags: --dry-run | --uninstall | --restore | --check
+# idempotent, touches only commands containing token-zombie/bin/ or bin/tz-{guard,start,status,compact}.py (or the old chat-size-guard.py). Flags: --dry-run | --uninstall | --restore | --check
 # | --statusline-only (sets only statusLine; for the plugin install, whose hooks come from hooks/hooks.json)
 # Test hook: TZ_INSTALL_CRASH=1 kills the installer right before the final replace (simulates power loss).
 DIR="$(cd "$(dirname "$0")" && pwd)"
 SET="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/settings.json"  # honour an isolated config dir (state under ~/.claude/token-zombie is separate)
+# our commands, whatever the checkout/cache directory is called
+OURS='token-zombie/bin/|/bin/tz-(guard|start|status|compact)\.py'
 if [ "${1:-}" = --restore ]; then
   # newest backup that does NOT already contain token-zombie hooks (a backup made by a repeated install holds them)
-  B=""; for f in $(ls -t "$SET".bak-tz-* 2>/dev/null); do grep -q 'token-zombie/bin' "$f" || { B="$f"; break; }; done
+  B=""; for f in $(ls -t "$SET".bak-tz-* 2>/dev/null); do grep -qE "$OURS" "$f" || { B="$f"; break; }; done
   [ -n "$B" ] || { echo "no pre-install backup found next to $SET"; exit 1; }
   sh "$DIR/bin/tzpy" -c "import json,sys;json.load(open(sys.argv[1]))" "$B" 2>/dev/null || { echo "backup $B is not valid JSON; not restoring"; exit 1; }
   { [ ! -f "$SET" ] || cp "$SET" "$SET.before-restore"; } && cp "$B" "$SET" && echo "restored $B (previous state kept as $SET.before-restore)"; exit 0
 fi
 MODE="${1:-}"
-sh "$DIR/bin/tzpy" - "$SET" "$DIR" "$MODE" <<'PY'
-import json, os, shutil, sys, time
-path, d, mode = sys.argv[1], sys.argv[2], sys.argv[3]
+sh "$DIR/bin/tzpy" - "$SET" "$DIR" "$MODE" "$OURS" <<'PY'
+import json, os, re, shutil, sys, time
+path, d, mode, ours = sys.argv[1:5]
 conf_p = os.path.expanduser('~/.claude/token-zombie/config.json')
 dry, check, slo = mode == '--dry-run', mode == '--check', mode == '--statusline-only'
 die = lambda m: sys.exit(m)
@@ -43,7 +45,7 @@ for ev, gs in h.items():
 before = json.dumps(s, indent=2, sort_keys=True).splitlines()
 guard, start, status, compact = (f'sh "{d}/bin/tzpy" "{d}/bin/{n}"' for n in ('tz-guard.py', 'tz-start.py', 'tz-status.py', 'tz-compact.py'))
 EVENTS = ('UserPromptSubmit', 'PostToolUse', 'PreToolUse', 'SessionStart', 'PreCompact', 'Stop', 'SessionEnd', 'SubagentStop', 'SubagentStart', 'InstructionsLoaded', 'PostCompact', 'PostToolUseFailure', 'PostToolBatch', 'PreModelSwitch', 'PostModelSwitch', 'WorktreeCreate', 'WorktreeRemove', 'FileChanged')
-mine = lambda c: 'token-zombie/bin/' in c or 'chat-size-guard.py' in c
+mine = lambda c: bool(re.search(ours, c)) or 'chat-size-guard.py' in c
 
 
 def installed():

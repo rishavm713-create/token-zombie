@@ -216,8 +216,17 @@ def read_decision(data):
             c.setdefault(key, {})['den'] = 1
             _save(p, c)
             ledger('dup-read-denied', os.path.getsize(f), 'measured', s, 'Read denied (unchanged re-read): ' + f)
+            sk = ''
+            try:
+                from tzlib import feature
+                if feature('dup_skeleton'):
+                    from tzcompress import outline
+                    o = outline(f)
+                    sk = f' Outline (read only the part you need with offset+limit):\n{o}' if o else ''
+            except Exception:
+                sk = ''
             return {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny', 'permissionDecisionReason':
-                    adv + ' Denied once to save tokens; repeat the same Read if you truly need it again.'}
+                    adv + ' Denied once to save tokens; repeat the same Read if you truly need it again.' + sk}
         return {'hookEventName': 'PreToolUse', 'additionalContext': adv}
     except Exception:
         return None
@@ -317,11 +326,14 @@ def _work_dir(path):
     """Project a chat worked in [measured]: its most frequent logged cwd other than home (a chat opened in ~ that works in
     ~/proj belongs to ~/proj). Falls back to the log's own project folder."""
     import collections, re
+    norm = lambda p: os.path.normcase(os.path.normpath(p))  # Windows: case and slash style differ
     home, n = os.path.expanduser('~'), collections.Counter()
     for raw in open(path, 'rb'):
         m = re.search(rb'"cwd":"([^"]+)"', raw)
-        if m and m.group(1).decode('utf-8', 'ignore') != home:
-            n[m.group(1).decode('utf-8', 'ignore')] += 1
+        if m:
+            d = m.group(1).decode('utf-8', 'ignore').replace('\\\\', '\\')  # raw JSON doubles Windows backslashes
+            if norm(d) != norm(home):
+                n[d] += 1
     return n.most_common(1)[0][0] if n else os.path.dirname(path)
 
 

@@ -20,4 +20,10 @@ ok "restore after repeated install returns original, not an installed state" 'gr
 # failed install leaves settings intact (unwritable conf dir is not enough; bad JSON covered above)
 ok "idempotent: install x2 keeps one tz-guard per event" 'i >/dev/null; i >/dev/null; [ "$(grep -c "tz-guard.py" "$S")" = 17 ]'
 ok "statusline of user preserved in config for rollback" 'i --uninstall >/dev/null; ! grep -q tz-status "$S"'
+# a checkout/cache dir not named token-zombie (e.g. .../token-zombie/2.1.0) must still recognise its own hooks
+N="$T/other/2.1.0"; mkdir -p "$N" && cp -R "$Z/install.sh" "$Z/bin" "$N/"; echo '{"model":"orig"}' > "$S"; rm -f "$S".bak-tz-*
+HOME="$H" bash "$N/install.sh" >/dev/null; sleep 1; HOME="$H" bash "$N/install.sh" >/dev/null
+ok "renamed dir: install x2 no duplicates" '[ "$(grep -c "tz-guard.py" "$S")" = 17 ]'
+HOME="$H" bash "$N/install.sh" --restore >/dev/null; ok "renamed dir: restore reaches the pre-install backup" 'grep -q orig "$S" && ! grep -q tz-guard "$S"'
+HOME="$H" bash "$N/install.sh" >/dev/null; HOME="$H" bash "$N/install.sh" --uninstall >/dev/null; ok "renamed dir: uninstall removes all" '! grep -qE "tz-(guard|start|status|compact)" "$S"'
 echo "install: pass $pass fail $fail"; [ $fail = 0 ]

@@ -247,7 +247,9 @@ def lifecycle():
 
 
 def memdir():
-    return os.path.expanduser('~/.claude/projects/' + os.getcwd().replace('/', '-').replace('_', '-') + '/memory')
+    # Windows: Claude Code turns ':' '\\' and every other non-alphanumeric into '-'
+    slug = re.sub(r'[^A-Za-z0-9]', '-', os.getcwd()) if os.name == 'nt' else os.getcwd().replace('/', '-').replace('_', '-')
+    return os.path.expanduser('~/.claude/projects/' + slug + '/memory')
 
 
 def _src(rid):

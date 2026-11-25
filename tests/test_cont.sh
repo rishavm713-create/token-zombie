@@ -43,7 +43,7 @@ with open(sys.argv[1], 'a') as f:
     f.write(json.dumps({'type': 'user', 'message': {'role': 'user', 'content': [{'type': 'text', 'text': 'BRIEF ' * 600}]}}) + '\n')
 EOF
 o=$(tz expensive --cwd "$P" --transcript "$L" --session s1)
-ok "big context => EXPENSIVE + verified checkpoint" '[[ $o == *"EXPENSIVE: context 135k [actual]"* && $o == *"checkpoint VERIFIED: handoffs/STATE.md"* ]]'
+ok "big context => EXPENSIVE + verified checkpoint" '[[ $o == *"EXPENSIVE: context 135k [actual]"* && $o == *"checkpoint VERIFIED: handoffs/STATE.md"* ]] || { echo "tz expensive said: ${o:0:900}"; false; }'
 ok "explicit manual startup step" '[[ $o == *"MANUAL STEP"* && $o == *"Continue from handoffs/STATE.md"* ]]'
 ok "cache reads shown, not called waste" '[[ $o == *"cache_read 193000 [actual]"* && $o != *"cache_read waste"* ]]'
 o=$(tz expensive --cwd "$P" --transcript "$T/none.jsonl"); ok "no log => unknown, not expensive" '[[ $o == *"[unknown]"* && $o == *"not expensive"* ]]'
@@ -218,7 +218,7 @@ d=json.load(open('$S/claims.json'))['/x/g.py']; print(d['pid']>0 and d['exp']>d[
 d2=json.load(open('$S/claims.json')); d2['/x/dead.py']={'sid':'zzzzzzzz','t':__import__('time').time(),'pid':99999999,'exp':__import__('time').time()+9}
 json.dump(d2,open('$S/claims.json','w')); print(c.file_guard(w('bbbbbbbb22','/x/dead.py'))=='')")
 ok "file guard: warns before the write once, own/dead-pid claims silent, claim has pid+exp" '[ "$o" = "$(printf "True True True\nTrue\nTrue")" ]'
-python3 -c "import json;p='$S/claims.json';d=json.load(open(p));d['/x/g.py']['pid']=$$;json.dump(d,open(p,'w'))"
+python3 -c "import json;p='$S/claims.json';d=json.load(open(p));d['/x/g.py']['pid']=$(cat /proc/$$/winpid 2>/dev/null || echo $$);json.dump(d,open(p,'w'))"
 o=$(echo '{"hook_event_name":"PreToolUse","session_id":"gg2","tool_name":"Edit","tool_input":{"file_path":"/x/g.py"}}' | python3 "$Z/bin/tz-guard.py")
 ok "guard hook: PreToolUse Edit emits the warning as context, never deny" '[[ $o == *"another live chat aaaaaaaa"* && $o != *deny* ]]'
 o=$(py "

@@ -1,0 +1,14 @@
+{
+  "name": "token-zombie",
+  "version": "2.1.0",
+  "description": "Stop paying for tokens Claude Code wastes. Local-first token tracking, trimming and handoffs.",
+  "license": "MIT",
+  "author": "Rishav Mishra",
+  "repository": { "type": "git", "url": "git+https://github.com/rishavm713-create/token-zombie.git" },
+  "homepage": "https://rishavm713-create.github.io/token-zombie/",
+  "bugs": "https://github.com/rishavm713-create/token-zombie/issues",
+  "bin": { "tz": "bin/tz.js" },
+  "files": ["bin/", "catalog/", "docs/*.md", "README.md", "LICENSE", "NOTICE", "SECURITY.md", "CHANGELOG.md"],
+  "engines": { "node": ">=14" },
+  "keywords": ["claude-code", "tokens", "cli"]
+}

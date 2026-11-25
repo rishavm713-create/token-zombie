@@ -10,10 +10,15 @@ def run_pg(argv, cwd=None, timeout=900):
     import signal
     win = os.name == 'nt'
     kw = {'creationflags': subprocess.CREATE_NEW_PROCESS_GROUP} if win else {'start_new_session': True}
+    _unmark('%d.quit' % os.getpid())  # left by an earlier process that had this pid
     p = subprocess.Popen(argv, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, **kw)
+    child = '%d-%d' % (os.getpid(), p.pid)
+    _mark(child)
     try:
         out, err = p.communicate(timeout=timeout)
-    except subprocess.TimeoutExpired:
+    except BaseException as e:  # Ctrl-C too: the child has its own group and would outlive us
+        if isinstance(e, KeyboardInterrupt):
+            _mark('%d.quit' % os.getpid())  # stopped by a person: tzbackoff must not restart it
         try:
             if win:  # Windows has no process groups to signal: taskkill /T kills the whole tree
                 subprocess.run(['taskkill', '/T', '/F', '/PID', str(p.pid)], capture_output=True)
@@ -22,7 +27,57 @@ def run_pg(argv, cwd=None, timeout=900):
         except OSError: pass
         p.communicate()
         raise
+    finally:
+        _unmark(child)
     return subprocess.CompletedProcess(argv, p.returncode, out, err)
+
+
+def _mark(name):
+    """Best-effort marker file in STATE/pg; bookkeeping must never break a worker call."""
+    try:
+        os.makedirs(os.path.join(STATE, 'pg'), exist_ok=True)
+        open(os.path.join(STATE, 'pg', name), 'w').close()
+    except OSError:
+        pass
+
+
+def _unmark(name):
+    """Remove a marker if present."""
+    try:
+        os.remove(os.path.join(STATE, 'pg', name))
+    except OSError:
+        pass
+
+
+def quit_marked(parent):
+    """True if process `parent` was stopped with Ctrl-C during a worker call."""
+    return os.path.exists(os.path.join(STATE, 'pg', '%d.quit' % parent))
+
+
+def children_alive(parent):
+    """Worker pids started by `parent` whose process group still lives (it was killed, they were not)."""
+    from tzlive import pid_alive
+    d = os.path.join(STATE, 'pg')
+    live = []
+    for name in os.listdir(d) if os.path.isdir(d) else []:
+        owner, _, pid = name.partition('-')
+        if owner != str(parent) or not pid.isdigit():
+            continue
+        if os.name == 'nt':
+            up = pid_alive(pid)
+        else:
+            try:
+                os.killpg(int(pid), 0)
+                up = True
+            except PermissionError:
+                up = True
+            except OSError:
+                up = False
+        if up:
+            live.append(int(pid))
+        else:
+            _unmark(name)
+    return live
 
 STATE = os.environ.get('TZ_WORKERS_DIR') or os.path.expanduser('~/.claude/token-zombie')
 # Known CLIs and how to call them non-interactively. Flags are the documented headless forms; verify with `tz worker test`.

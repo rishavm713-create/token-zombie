@@ -4,29 +4,11 @@
 
 <p align="center"><b>Stop paying for tokens Claude Code wastes.</b><br>Free · Runs on your computer · Nothing is sent anywhere</p>
 
-[![CI](https://github.com/rishavm713-create/token-zombie/actions/workflows/ci.yml/badge.svg)](https://github.com/rishavm713-create/token-zombie/actions/workflows/ci.yml) [![License](https://img.shields.io/badge/License-MIT-4c9a1a)](LICENSE) [![macOS](https://img.shields.io/badge/macOS-supported-000000?logo=apple&logoColor=white)](COMPAT.md) [![Linux](https://img.shields.io/badge/Linux-CI-1f6feb?logo=linux&logoColor=white)](COMPAT.md) [![Windows](https://img.shields.io/badge/Windows-CI-0078d4?logo=windows&logoColor=white)](COMPAT.md) [![Built on](https://img.shields.io/badge/Built%20on-Claude%20Code-d97757)](docs/INSTALL.md) [![Local first](https://img.shields.io/badge/Local--first-no%20telemetry-83ffa0)](SECURITY.md) [![GitHub Stars](https://img.shields.io/github/stars/rishavm713-create/token-zombie?style=social)](https://github.com/rishavm713-create/token-zombie)
+[![CI](https://github.com/rishavm713-create/token-zombie/actions/workflows/ci.yml/badge.svg)](https://github.com/rishavm713-create/token-zombie/actions/workflows/ci.yml) [![License](https://img.shields.io/badge/License-MIT-4c9a1a)](LICENSE) [![Local first](https://img.shields.io/badge/Local--first-no%20telemetry-83ffa0)](SECURITY.md)
 
-![TOKEN ZOMBIE demo: status, lossless trim, free replay benchmark](docs/img/demo.gif)
+![TOKEN ZOMBIE demo](docs/img/demo-bench.svg)
 
-[Website](https://rishavm713-create.github.io/token-zombie/) · [Install guide](docs/INSTALL.md) · [Docs](#docs) · [Discussions](https://github.com/rishavm713-create/token-zombie/discussions)
-
-![TOKEN ZOMBIE toolbar inside Claude Code](docs/img/toolbar-live.svg)
-
-## Why
-
-Long Claude Code chats burn your usage limit on repeated file reads, noisy tool output, duplicated sub-agent work and context that fills up and is lost. TOKEN ZOMBIE fixes that inside Claude Code, with no AI calls of its own.
-
-## Features
-
-| | Feature | What you get |
-|---|---|---|
-| 📊 | **Token tracking** | See where every token goes. Each number is labelled *measured* or *estimate*. |
-| ✂️ | **Output trimming** | Big tool output is cut before Claude reads it. The full text is kept and `tz recall` brings it back. |
-| ⏱️ | **Early warning** | Tells you before a chat runs out of room, while there is time to save the work. |
-| 🧠 | **Handoff & resume** | A short note lets a fresh chat continue where you stopped, without re-explaining. |
-| 🗺️ | **Repo map** | One compact page of files and definitions, so Claude reads less to find code. |
-| 🛡️ | **Safety guard** | Destructive commands are caught; checkpoints let you roll back a failed change. |
-| 💰 | **Free savings report** | `tz stats` and `tz bench replay` read your own Claude Code logs. Free, no account. Savings are labelled MEASURED / EST / UNKNOWN. |
+TOKEN ZOMBIE (TZ) trims noisy tool output, warns before a chat runs out of room, and saves handoffs so a fresh chat continues where you stopped. It adds no AI calls of its own.
 
 ## Install
 
@@ -35,34 +17,29 @@ claude plugin marketplace add rishavm713-create/token-zombie
 claude plugin install token-zombie@token-zombie
 ```
 
-Restart Claude Code, then run `/token-zombie:tz`. Verify and roll back: [install guide](docs/INSTALL.md).
+Restart Claude Code, then run `/token-zombie:tz`. Or `npm i -g token-zombie` for the `tz` CLI alone (needs python3). Verify and roll back: [install guide](docs/INSTALL.md).
 
-## How it works
+## Commands
 
-| Step | What happens |
+| Command | Use |
 |---|---|
-| **Detect** | Flags repeated reads and sub-agents that duplicate or stall. |
-| **Contain** | Trims noisy output; the original stays recallable. |
-| **Warn** | Signals early in a small bar inside Claude Code. |
-| **Revive** | Saves a handoff so the next chat picks up instantly. |
+| `tz status` `forecast` `stats` | Context, burn, savings (MEASURED / EST / UNKNOWN) |
+| `tz handoff` `resume` `recall` | Save, continue, restore trimmed output |
+| `tz budget` `ccusage` `claim` `stale` | Budgets, usage cross-check, session notes, stale branches |
+| `tz clihelp` `debt` `diag` `facts` `fast` | CLI listing, shortcut ledger, post-edit check, project facts, profiling |
+| `tz gitguard` `line` `memsearch` `obs` | Git safety, status line, note search, observations |
+| `tz sandbox` `scrub` `sg` `spec` | Bounded run, secret scrub, structural search, specs |
+| `tz squad` `tbench` `team` `trace` `ts` | Parallel tasks, benchmarks, multi-worker run, token trace, tags |
+| `tz depth` `impact` `condense` `sym` | Depth advice, callers, history condense, symbol lookup |
 
-## Docs
+One line per command: [docs/COMMANDS.md](docs/COMMANDS.md). Every `tz` subcommand: `tz help`.
 
-| Guide | Purpose |
-|---|---|
-| [Install](docs/INSTALL.md) | Install, verify, roll back |
-| [CLI](docs/CLI.md) | Every command |
-| [Modes](docs/MODES.md) | OFF / LITE / FULL / ULTRA |
-| [Metrics](docs/METRICS.md) | What each number means |
-| [Benchmark method](docs/BENCHMARK-METHOD.md) | How savings are measured |
-| [Limitations](docs/LIMITATIONS.md) | Known constraints |
-| [Security](SECURITY.md) | Privacy and safety |
-| [Contributing](CONTRIBUTING.md) | First contributions | | [Brand policy](BRANDING.md) | Creator, copyright, forks, name use |
+## Safety
 
-## Creator
+Local only, no telemetry. Destructive commands are caught and checkpoints allow rollback. Details: [SECURITY.md](SECURITY.md).
 
-**Created by [Rishav Mishra](https://rishavm713-create.github.io/).** Built by Rishav Mishra. TOKEN ZOMBIE started with a simple idea: make AI coding agents more efficient, reduce wasted context and help developers build better software. The project is developed as a local-first engineering efficiency layer for Claude Code.
+## More
 
-Also see [EditSutra](https://editsutra.github.io/).
+[Overview](docs/OVERVIEW.md) · [Install](docs/INSTALL.md) · [CLI](docs/CLI.md) · [Modes](docs/MODES.md) · [Metrics](docs/METRICS.md) · [Benchmark method](docs/BENCHMARK-METHOD.md) · [Limitations](docs/LIMITATIONS.md) · [Contributing](CONTRIBUTING.md) · [Brand policy](BRANDING.md) · [Website](https://rishavm713-create.github.io/token-zombie/) · [Discussions](https://github.com/rishavm713-create/token-zombie/discussions)
 
-Copyright © 2026 Rishav Mishra. Code: [MIT licence](LICENSE); third-party credits: [NOTICE](NOTICE). Name, logo and forks: [BRANDING.md](BRANDING.md).
+Created by [Rishav Mishra](https://rishavm713-create.github.io/). Copyright © 2026 Rishav Mishra. [MIT licence](LICENSE); credits: [NOTICE](NOTICE).

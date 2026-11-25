@@ -77,6 +77,12 @@ def emit(obj):
     hs = obj.get('hookSpecificOutput') or {}
     if LIVE[0] and 'permissionDecision' not in hs:
         hs['additionalContext'] = (hs.get('additionalContext', '') + '\n' + LIVE[0]).strip()
+    if hs.get('additionalContext'):  # v2.1: never exceed the hook output cap (head+tail kept)
+        try:
+            import tzfit
+            hs['additionalContext'] = tzfit.fit(hs['additionalContext'])
+        except Exception:
+            pass
     LIVE[0] = ''  # one JSON object per hook run: pending advice goes out here or not at all
     try:  # alert evidence -> later outcome (acted/ignored), in the SQLite ledger
         m = (hs.get('additionalContext') or '') + (obj.get('systemMessage') or '')
@@ -85,6 +91,13 @@ def emit(obj):
             tzdb.alert_open(data.get('session_id', 'x'), data.get('hook_event_name') or '', m.strip(), _tsize())
     except Exception:
         pass
+    for holder, k_ in ((obj, 'reason'), (hs, 'permissionDecisionReason')):  # deny/block text obeys the same cap
+        if holder.get(k_):
+            try:
+                import tzfit
+                holder[k_] = tzfit.fit(holder[k_])
+            except Exception:
+                pass
     t = json.dumps(obj); OUT[0] += len(t); print(t)
     CTX[0] += len(hs.get('additionalContext') or '') + len(hs.get('permissionDecisionReason') or '')
 
@@ -132,6 +145,12 @@ try:
             tzbus.record_event(ev, data.get('session_id', ''))
     except Exception:
         _diag('supervisor', ev)
+    if ev == 'UserPromptSubmit':  # a user message resets the stuck-pattern window (OpenHands parity)
+        try:
+            import tzstuck
+            tzstuck.check(data)
+        except Exception:
+            _diag('stuck', ev)
     try:  # SQLite ledger: one row per event; resolve open alerts
         import tzdb
         sid_ = data.get('session_id', 'x')
@@ -147,6 +166,21 @@ try:
             LIVE[0] = ''
     except Exception:
         _diag('live', ev)
+    if ev == 'UserPromptSubmit':  # v2.1 tips: opt-in hard size cap first, then one-line advice merged into this event's output
+        try:
+            import tztips
+            why = tztips.cap_block(data) or tztips.paste_block(data)
+        except Exception:
+            why = ''
+            _diag('sizecap', ev)
+        if why:
+            emit({'decision': 'block', 'reason': why})
+            sys.exit(0)
+        try:
+            import tztips
+            LIVE[0] = (LIVE[0] + '\n' + tztips.prompt_tips(data)).strip()
+        except Exception:
+            _diag('tips', ev)
     if ev == 'Stop' and advice('next_task'):  # turn closed past the limit: tell the user to /compact (advice, once per 25k)
         try:
             import tzcont
@@ -187,13 +221,23 @@ try:
                 LIVE[0] = (LIVE[0] + '\n' + pa).strip()
         except Exception:
             _diag('policy', ev)
+    if ev == 'PreToolUse' and data.get('tool_name') in ('Read', 'Grep', 'Glob'):  # v2.1 opt-in bulk-read block
+        try:
+            import tztips
+            why = tztips.bulk_gate(data)
+        except Exception:
+            why = ''
+            _diag('bulk', ev)
+        if why:
+            emit({'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny', 'permissionDecisionReason': why}})
+            _pflush()
     if ev == 'PreToolUse' and data.get('tool_name', 'Read') != 'Read':
         if data.get('tool_name') == 'Bash' and os.environ.get('TZ_SAFE') != '0':  # destructive-command guard (tz safe); TZ_SAFE=0 turns it off
             try:
                 import tzops
-                ok, why = tzops.safe((data.get('tool_input') or {}).get('command') or '')
-            except Exception:
-                ok, why = True, ''
+                ok, why = tzops.safe((data.get('tool_input') or {}).get('command') or '', data.get('cwd'))
+            except Exception:  # v2.1: fail closed (only a crash in tzops itself lands here; tzshell errors fall back to RULES)
+                ok, why = False, 'safety check crashed (fail closed); retry, or run with TZ_SAFE=0'
                 _diag('safe', ev)
             if not ok:
                 emit({'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny',
@@ -205,6 +249,12 @@ try:
                 LIVE[0] = (LIVE[0] + '\n' + tzcont.file_guard(data)).strip()
             except Exception:
                 _diag('fileguard', ev)
+        if (data.get('tool_name') or '').startswith('mcp__'):  # v2.1: same read-only MCP call already answered (advice only)
+            try:
+                from tztoolprune import mcp_dup
+                LIVE[0] = (LIVE[0] + '\n' + mcp_dup(data)).strip()
+            except Exception:
+                _diag('mcpdup', ev)
         if LIVE[0]:
             emit({'hookSpecificOutput': {'hookEventName': 'PreToolUse'}})
         sys.exit(0)
@@ -245,6 +295,15 @@ try:
                 LIVE[0] = (LIVE[0] + '\n' + m).strip()
         except Exception:
             _diag('breaker', ev)
+    if ev in ('PostToolUse', 'PostToolUseFailure'):  # v2.1 OpenHands-style stuck patterns
+        try:
+            import tzstuck
+            m = tzstuck.check(data)
+            if m and ev in ('PostToolUse', 'PostToolUseFailure'):
+                data['_stuck_said'] = 1
+                LIVE[0] = (LIVE[0] + '\n' + m).strip()
+        except Exception:
+            _diag('stuck', ev)
     if ev == 'PostToolUseFailure':
         if LIVE[0]:
             emit({'hookSpecificOutput': {'hookEventName': ev}})
@@ -351,10 +410,9 @@ try:
             try:  # several independent tasks in one prompt: one session per task, build first, test last
                 import tzsplit
                 ts = tzsplit.detect(data.get('prompt')) if advice('pack_hints') else []
-                if ts:
-                    hint = (hint + ' ' if hint else '') + (f'TOKEN ZOMBIE (suggestion): {len(ts)} independent tasks in this prompt. One task per session: '
-                            'propose each as its own session card (start_session, own_initiative, cheapest fitting model, own worktree; the owner clicks to start, or says to do it here), shared live tests behind tz lock, build everything first, test once at the end. '
-                            'Plan: tz split ' + ' '.join('"' + t[:60].replace('"', "'") + '"' for t in ts[:4]))
+                sh = tzsplit.ship_hint(data.get('prompt'), ts) if advice('pack_hints') else ''
+                if sh:
+                    hint = (hint + ' ' if hint else '') + sh
             except Exception:
                 _diag('split', ev)
             try:  # engineering prompt: point at the coding pipeline once (advice)

@@ -2,6 +2,13 @@
 # Run a TZ Python script with a working Python 3: python3 on macOS/Linux; on Windows (Git Bash, which Claude Code
 # uses for hooks) the first of `py -3`, python, python3 that really runs (python3 there may be a Store stub). Cached.
 if [ "$OS" != "Windows_NT" ]; then exec python3 "$@"; fi
+if [ "$1" = "--install" ]; then  # explicit consent only: `sh bin/tzpy --install` installs Python 3.12 with winget, then clears the cache
+  rm -f "${TEMP:-${TMP:-/tmp}}/tz-python"
+  winget install -e --id Python.Python.3.12 --silent --accept-package-agreements --accept-source-agreements \
+    || { echo "TOKEN ZOMBIE: winget failed; install Python 3.8+ from https://www.python.org/downloads/ (tick 'Add to PATH')" >&2; exit 1; }
+  echo "Python installed. Close and reopen Claude Code so PATH refreshes, then run TZ again."; exit 0
+fi
+export PYTHONUTF8=1  # hooks read/write UTF-8, not the Windows code page
 c="${TEMP:-${TMP:-/tmp}}/tz-python"
 if [ -s "$c" ]; then read -r p < "$c"; exec $p "$@"; fi
 for p in "py -3" python python3; do
@@ -9,5 +16,5 @@ for p in "py -3" python python3; do
     printf '%s\n' "$p" > "$c" 2>/dev/null; exec $p "$@"
   fi
 done
-echo "TOKEN ZOMBIE: Python 3.8+ not found; install it from python.org" >&2
+echo "TOKEN ZOMBIE: Python 3.8+ not found. Fix in one step: run  sh \"$(dirname \"$0\")/tzpy\" --install  (uses winget), or install from python.org, then reopen Claude Code." >&2
 exit 0

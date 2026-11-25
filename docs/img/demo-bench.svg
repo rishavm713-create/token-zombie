@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 348" width="1120" role="img" aria-label="tz bench replay output"><rect width="1120" height="348" rx="10" fill="#0d1117"/>
+<text x="24" y="36" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="16" xml:space="preserve" fill="#ff7a45" font-weight="bold">TOKEN ZOMBIE</text>
+<text x="24" y="64" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="16" xml:space="preserve" fill="#83ffa0">$ tz bench replay   # free: replays your real chat logs offline</text>
+<text x="24" y="92" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="16" xml:space="preserve" fill="#e6edf3">replay benchmark [zero cost: real logs, offline, no model call]</text>
+<text x="24" y="120" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="16" xml:space="preserve" fill="#e6edf3">  tz_off  878 chats  42379 replies  baseline 1,276,156k input-eq  ~$6,533 [EST]</text>
+<text x="24" y="148" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="16" xml:space="preserve" fill="#e6edf3">  tz_on   363 chats  12077 replies  baseline   184,542k input-eq    ~$888 [EST]</text>
+<text x="24" y="176" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="16" xml:space="preserve" fill="#e6edf3">  TZ-on logs MEASURED: trimmed 1,208k, refetched 41k, overhead 1,346k</text>
+<text x="24" y="204" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="16" xml:space="preserve" fill="#ffd866">  RESULT: without TZ 1,460,520k input-eq</text>
+<text x="24" y="232" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="16" xml:space="preserve" fill="#ffd866">          trims saved 13,263k - TZ overhead 6,071k = NET 7,191k = 0.49% (~$36.54 EST)</text>
+<text x="24" y="260" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="16" xml:space="preserve" fill="#9aa7b4">  repeat-search advice (only if the model follows it): up to 280k = 0.02%</text>
+<text x="24" y="288" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="16" xml:space="preserve" fill="#9aa7b4">  trims keep the original (tz recall); refetches count as cost.</text>
+<text x="24" y="316" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="16" xml:space="preserve" fill="#9aa7b4">  Not measured: answer quality (needs live A/B).</text>
+</svg>

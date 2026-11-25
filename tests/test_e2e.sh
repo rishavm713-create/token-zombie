@@ -2,9 +2,11 @@
 # E2E: supervisor lifecycle through the real tz-guard hook with fake HOME + stub claude. Plus perf and security checks.
 Z="$(cd "$(dirname "$0")/.." && pwd)"; T="$(mktemp -d)"; H="$T/home"; pass=0; fail=0; mkdir -p "$H/.claude" "$T/proj" "$T/bin"
 ok() { if eval "$2"; then pass=$((pass+1)); else fail=$((fail+1)); echo "FAIL: $1"; fi; }
-tz() { HOME="$H" PATH="$T/bin:$PATH" python3 "$Z/bin/tz" "$@"; }
+TB="$T/bin"; command -v cygpath >/dev/null && TB=$(cygpath -u "$TB")  # MSYS: a D:/ entry splits PATH at the colon
+tz() { HOME="$H" PATH="$TB:$PATH" python3 "$Z/bin/tz" "$@"; }
 BUS="$H/.claude/token-zombie/status.json"
 printf '#!/bin/bash\necho "$@" >>"%s/claude.log"\n' "$T" >"$T/bin/claude"; chmod +x "$T/bin/claude"
+[[ $(uname -s) == MINGW* || $(uname -s) == MSYS* ]] && printf '@bash "%%~dp0claude" %%*\r\n' >"$T/bin/claude.cmd"  # Windows: PATH lookup finds claude.cmd (how npm installs it), not a shell script
 python3 - "$T/c.jsonl" <<'PY'
 import json,sys
 open(sys.argv[1],'w').write(json.dumps({"message":{"id":"a","usage":{"input_tokens":150000,"output_tokens":5}}})+'\n'+json.dumps({"message":{"id":"b","usage":{"input_tokens":192000,"output_tokens":5}}})+'\n')

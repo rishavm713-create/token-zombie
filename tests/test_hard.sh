@@ -12,7 +12,7 @@ PY
 }
 mkc 30000; (cd "$T/proj"; git init -q; HOME="$H" python3 "$Z/bin/tz" handoff --task h --done a --left b --next c >/dev/null)
 # --- activity from hook events (measured), never from mtime
-ok "no events => activity UNKNOWN, mascot not CHOMP" '[[ $(tz mascot) != *CHOMP* ]] && python3 -c "import sys;sys.path.insert(0,\"$Z/bin\");import os;os.environ[\"HOME\"]=\"$H\";import tzbus;assert tzbus.activity()[0]==\"UNKNOWN\""'
+ok "no events => activity UNKNOWN, mascot not CHOMP" '[[ $(tz mascot) != *CHOMP* ]] && python3 -c "import sys;sys.path.insert(0,\"$Z/bin\");import os;os.environ[\"HOME\"]=os.environ[\"USERPROFILE\"]=\"$H\";import tzbus;assert tzbus.activity()[0]==\"UNKNOWN\""'
 hook UserPromptSubmit >/dev/null; ok "UserPromptSubmit => working (hook)" '[ "$(python3 -c "import json;print(json.load(open(\"$ST/status.json\"))[\"activity\"])")" = working ]'
 ok "status.json says activity source" 'grep -q "\"activity_src\": \"hook\"" "$BUS"'
 ok "working => CHOMP" '[[ $(tz mascot) == *CHOMP* ]]'
@@ -23,7 +23,7 @@ python3 - "$ST/activity.json" <<'PY'
 import json,sys,time
 json.dump({"event":"PostToolUse","ts":int(time.time())-5000,"session":"s1"},open(sys.argv[1],'w'))
 PY
-ok "stale working (no Stop for 5000s: crash/interrupt) => UNKNOWN, not working" 'python3 -c "import sys;sys.path.insert(0,\"$Z/bin\");import os;os.environ[\"HOME\"]=\"$H\";import tzbus;a=tzbus.activity();assert a[0]==\"UNKNOWN\" and \"stale\" in a[1]"'
+ok "stale working (no Stop for 5000s: crash/interrupt) => UNKNOWN, not working" 'python3 -c "import sys;sys.path.insert(0,\"$Z/bin\");import os;os.environ[\"HOME\"]=os.environ[\"USERPROFILE\"]=\"$H\";import tzbus;a=tzbus.activity();assert a[0]==\"UNKNOWN\" and \"stale\" in a[1]"'
 # --- TZ_SUP=0 disables everything
 rm -rf "$ST/status.json" "$ST/activity.json"; echo "{\"hook_event_name\":\"UserPromptSubmit\",\"transcript_path\":\"$T/c.jsonl\",\"cwd\":\"$T/proj\",\"prompt\":\"x\"}" | TZ_SUP=0 HOME="$H" python3 "$Z/bin/tz-guard.py" >/dev/null
 ok "TZ_SUP=0: no status.json, no activity.json" '[ ! -f "$BUS" ] && [ ! -f "$ST/activity.json" ]'
@@ -123,6 +123,6 @@ o=$(tz bench compare --baseline "$T/b.jsonl" --optimized "$T/o.jsonl" --both-pas
 # --- perf / resource
 s=$(python3 -c "import time,subprocess,os;t=time.time();[subprocess.run(['python3','$Z/bin/tz-guard.py'],input='{\"hook_event_name\":\"PostToolUse\",\"cwd\":\"$T/proj\"}',text=True,env=dict(os.environ,HOME='$H'),capture_output=True) for _ in range(10)];print(int((time.time()-t)*100))")
 ok "tool-event hook < 200 ms avg incl. python start (got ${s}ms)" '[ $s -lt 200 ]'
-ok "state dir small (< 100 KB)" '[ $(du -sk "$ST" | cut -f1) -lt 100 ]'
+ok "state dir small (< 100 KB real bytes; du block rounding ignored)" '[ $(python3 -c "import os,sys;print(sum(os.path.getsize(os.path.join(r,f)) for r,_,fs in os.walk(sys.argv[1]) for f in fs))" "$ST") -lt 102400 ]'
 ok "activity.json < 300 bytes" '[ $(wc -c <"$ST/activity.json") -lt 300 ]'
 echo "hard: pass $pass fail $fail"

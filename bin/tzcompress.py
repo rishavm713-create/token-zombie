@@ -228,6 +228,40 @@ def js_skeleton(src):
         return src, False
 
 
+_OUT_RX = __import__('re').compile(r'^\s*(?:export\s+)?(?:default\s+)?(?:async\s+)?(?:(?:def|class|function|func|fn|interface|type|struct|enum|impl|trait|module)\s|const\s+\w+\s*=\s*(?:async\s*)?\(|#{1,3}\s)')
+
+
+def outline(path, cap=1200):
+    """Line-numbered outline of a file ('L12 def foo(a, b)'), at most cap chars; '' if none. Python via ast
+    (exact spans), other text via a definition-line regex. Used when a duplicate Read is denied: the model already
+    holds the content, the outline tells it which offset/limit to read instead of the whole file again."""
+    try:
+        src = open(path, encoding='utf-8', errors='replace').read()
+    except OSError:
+        return ''
+    rows = []
+    if path.endswith('.py'):
+        try:
+            for n in ast.walk(ast.parse(src)):
+                if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                    kind = 'class' if isinstance(n, ast.ClassDef) else 'def'
+                    rows.append((n.lineno, f'L{n.lineno}-{getattr(n, "end_lineno", n.lineno)} {kind} {n.name}'))
+        except Exception:
+            rows = []
+    if not rows:
+        for i, l in enumerate(src.splitlines(), 1):
+            if _OUT_RX.match(l) and (not l.lstrip().startswith('#') or path.endswith(('.md', '.markdown'))):
+                rows.append((i, f'L{i} {l.strip()[:90]}'))
+    out, n = [], 0
+    for _, r in sorted(rows):
+        if n + len(r) + 1 > cap:
+            out.append(f'... (+{len(rows) - len(out)} more)')
+            break
+        out.append(r)
+        n += len(r) + 1
+    return '\n'.join(out)
+
+
 def main(argv):
     JS = ('.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs')
     if not argv or not os.path.isfile(argv[0]) or not argv[0].endswith(('.py',) + JS):

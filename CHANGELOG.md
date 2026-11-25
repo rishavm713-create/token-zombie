@@ -1,4 +1,31 @@
 # Changelog
+## v2.1.0 (unreleased; branch feat/v2.1.0, not tagged or released)
+- Fix: install.sh recognises its own hooks whatever the checkout/cache directory is named (was: duplicates, failed uninstall/restore unless the path contained token-zombie/bin).
+- Fix: stuck detector deletes its state file on reset and ignores tool hooks without a tool name.
+
+Added:
+- Feature switches (`TZ_FEAT_<NAME>`, config `features`).
+- Prompt-cache life measured (1 h or 5 min) for idle and fresh-chat advice.
+- Duplicate-read denial (`read_guard: deny`) carries a file outline.
+- Shell command parser behind the safety check (`tzshell`).
+- Stuck-pattern advice (`tzstuck`, adapted from OpenHands, MIT).
+- `tz toolprune` (rules ported from TokenEconomizer, MIT) and duplicate read-only MCP call advice.
+- Hook text cap (`tzfit`), optional plan re-injection (off by default).
+- `tz mem index|search`, task dependency cycle refusal, `tz find-code`, `tz impact --diff`, `tz rank --tokens/--mention`.
+- `tz agent --wall/--max-errors`, claim leases.
+- 5 h usage blocks, cache hit rate, usable context % in `tzusage`.
+- Offline `tz bench matrix`; optional harbor adapter.
+- `skills/tz-craft`.
+- `bin/tztips.py` (spec tips) wired into the hooks and `tz tips | instr | defaults | stats --breakdown`; advice on by default, blocks opt-in.
+
+Changed:
+- Bash safety check fails closed if it crashes (before: allowed), and uses the working directory.
+- One loop warning per call (stuck detect replaces the older line).
+
+Measured (offline, 1 trial, characters, scripted agent): net 46,929 with 2.0 behaviour (fp 1, fn 1) vs 51,356 with all v2.1 features (fp 0, fn 0). Most of both comes from the 2.0 output trim. Provider tokens: UNKNOWN. See `docs/LIMITATIONS.md`.
+
+Docs: `docs/LEDGER.md`, `docs/COMPETITIVE-ANALYSIS.md`, `docs/USAGE-V2.1.md`.
+
 ## v2.0.1 (2026-11-24)
 - Windows supported via `bin/tzpy` (Git Bash; Python 3.8+ via python3/python/py -3); CI runs on ubuntu-latest, macos-latest and windows-latest.
 - Verified 2026-11-24 against real Claude Code: hooks fire in a live `claude -p` session, slash commands run, MCP tz_* tools load, install from the GitHub-hosted marketplace works.

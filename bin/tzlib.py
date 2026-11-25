@@ -7,6 +7,9 @@ DEFAULTS = {'limit': 100000,    # growth past first reply: suggest fresh session
             'read_warn': 40000, # bytes: first whole Read of a bigger file asks for a targeted read once
             'plan_warn': 90, 'plan_stop': 97,  # plan-usage % (only from real provider data)
             'startup_warn': 60000,
+            # v2.1 tips (tztips): token numbers are chat size; each block also has a feature switch below
+            'instr_warn_tokens': 3000, 'bulk_read_n': 8, 'size_soft': [50000, 100000], 'size_cap': 150000,
+            'paste_warn_chars': 8000, 'mcp_unused_sessions': 5,
             'fresh_overlap': 30, # %: prompt words already seen in this chat at or above this => follow-up, stay
             'cache_ttl': 300,   # seconds: provider prompt-cache life; idle longer => staying re-writes the whole history
             'ctx_window': 200000}  # tokens: ESTIMATE of the model context window (logs do not state it)  # tokens: --startup warns when the median new-chat size is above this
@@ -35,8 +38,48 @@ def advice(name):
     return name in PROFILES[mode()]['advice']
 
 
+# v2.1 feature registry (one place): name -> default. env TZ_FEAT_<NAME>=0/1 beats config.json "features" beats this.
+# mode "off" turns every feature off. Hook-side features only; commands (tz toolprune, tz mem, ...) always work on demand.
+FEATURES = {'cache_ttl_auto': 1,  # measured 1 h vs 5 min prompt-cache life (tzcont.cache_ttl)
+            'dup_skeleton': 1,    # read_guard=deny: the deny carries the file skeleton instead of nothing
+            'safety_net': 1,      # parsed destructive-command / secret-path checks (tzsafety) inside the policy engine
+            'stuck_detect': 1,    # OpenHands-style stuck patterns (tzstuck) on tool results
+            'mcp_dedup': 1,       # advice when an identical read-only MCP call already succeeded with no write since (tztoolprune.mcp_dup)
+            'auto_split': 1,      # several independent tasks: start parallel sessions now (0 = propose cards only)
+            'ship_fast': 1,       # multi-part/large build: parallel sessions + subagents, hours budget (tz speed on|off)
+            'plan_reinject': 0,   # re-inject capped plan head after compaction (opt-in: adds context)
+            # v2.1 tips: advice is on; anything that blocks or can steer quality down is opt-in
+            'size_gate': 0,       # opt-in, once per tier: soft warning on total chat size (the default growth warning stays)
+            'size_cap': 0,        # BLOCKS new prompts at size_cap tokens (handoff saved first)
+            'task_switch': 1,     # unrelated new task detected: offer a fresh chat
+            'idle_cost': 1,       # idle past the cache life: show the re-write cost and offer a fresh chat
+            'home_cwd': 1,        # chat started in ~: suggest the project folder
+            'paste_warn': 1,      # very large pasted prompt
+            'paste_block': 0,     # BLOCKS a very large pasted prompt after saving it to handoffs/paste-<time>.md
+            'small_msgs': 1,      # several short prompts in a row: send one full message
+            'archive_advice': 1,  # once per chat at a task end: offer the app's auto-archive setting (asks first)
+            'model_advice': 1,    # mechanical task on a big model
+            'plan_advice': 1,     # big vague task: plan first
+            'instr_advice': 1,    # oversized or duplicate always-loaded instruction files
+            'defaults_advice': 0, # one-time offer of `tz defaults` (suggests cheaper default models)
+            'bulk_read_block': 0} # BLOCKS one Read/Grep/Glob after bulk_read_n in a row (use an Explore subagent)
+
+
+def feature(name):
+    if mode() == 'off':
+        return False
+    e = os.environ.get(f'TZ_FEAT_{name.upper()}')
+    if e is not None:
+        return e.strip() not in ('0', '', 'off', 'false')
+    f = _conf.get('features') if isinstance(_conf.get('features'), dict) else {}
+    return bool(f.get(name, FEATURES.get(name, 0)))
+
+
 def cfg(key):
-    return int(os.environ.get(f'TZ_{key.upper()}') or _conf.get(key) or PROFILES[mode()].get(key) or DEFAULTS[key])
+    v = os.environ.get(f'TZ_{key.upper()}') or _conf.get(key) or PROFILES[mode()].get(key) or DEFAULTS[key]
+    if isinstance(DEFAULTS[key], list):
+        return [int(x) for x in (json.loads(v) if isinstance(v, str) else v)]
+    return int(v)
 
 
 LIMIT, HARD = cfg('limit'), cfg('hard')
