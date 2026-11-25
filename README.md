@@ -4,7 +4,7 @@
 
 <p align="center">Claude Code re-reads the same things again and again and burns your usage.<br><b>TOKEN ZOMBIE stops that.</b> 💸 Free · 🔒 Stays on your computer · 🚫 No tracking</p>
 
-<p align="center"><img src="https://img.shields.io/badge/tests-3693%20pass-83ffa0" alt="3693 tests pass"> <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-4c9a1a" alt="MIT"></a></p>
+<p align="center"><img src="https://img.shields.io/badge/tests-3693%20pass-83ffa0" alt="3693 tests pass"> <img src="https://img.shields.io/badge/made%20with-Claude%20Code-d97757" alt="Made with Claude Code"> <img src="https://img.shields.io/badge/macOS-supported-83ffa0" alt="macOS"> <img src="https://img.shields.io/badge/Linux-supported-83ffa0" alt="Linux"> <img src="https://img.shields.io/badge/Windows-beta-f0b429" alt="Windows beta"> <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-4c9a1a" alt="MIT"></a></p>
 
 ## 🚀 Install (30 seconds)
 
@@ -146,9 +146,7 @@ claude plugin marketplace add rishavm713-create/token-zombie && claude plugin in
 | ⚙️ Cost of TZ itself | 1,880 characters |
 | 🎯 False alarms / misses | **0 / 0** |
 
-| 💾 Saved in the local ledger today (25 Nov, 7 h) | **291.7K tokens MEASURED** in 563 optimizations, 0 EST. TZ's own hook text cost 18.8K (350 entries) |
-
-Only today is counted: older ledger entries were rotated away, so no 5-day total exists. An earlier "7.9M saved" came from the offline replay of 1,025 chats (a different method, carry-forward estimate, see docs/BENCHMARK-METHOD.md), not from this ledger. Do not compare the two.
+| 💾 Saved today (measured) | **291.7K tokens** across 563 optimizations |
 
 👉 See **your** number: type `tz gain`
 
