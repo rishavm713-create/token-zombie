@@ -14,7 +14,7 @@ claude plugin marketplace add rishavm713-create/token-zombie && claude plugin in
 
 Restart Claude Code. Done. Remove any time: `/plugin uninstall token-zombie`.
 
-![TOKEN ZOMBIE demo](docs/img/demo-bench.svg)
+![TOKEN ZOMBIE demo](docs/img/demo-live.svg)
 
 ## Before / after
 
