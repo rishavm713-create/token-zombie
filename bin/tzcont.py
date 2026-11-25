@@ -957,7 +957,13 @@ def idle_advice(data, used, gap, ttl=None):
     from tzlib import cfg
     if used <= IDLE_MIN_USED or gap <= (ttl or cfg('cache_ttl')):
         return ''
-    return (f'TOKEN ZOMBIE: idle {int(gap // 60)} min, the prompt cache likely expired: this message re-writes '
+    from tzlib import feature
+    offer = ''
+    if feature('idle_cost'):  # one idle line only: the offer goes inside it, when tztips agrees the cache is gone
+        import tztips
+        if tztips.idle_cost(used, int(gap), int(ttl or cfg('cache_ttl'))):
+            offer = ' (offer a "Fresh chat" button: a fresh start is ~20k [est])'
+    return (f'TOKEN ZOMBIE: idle {int(gap // 60)} min, the prompt cache likely expired{offer}: this message re-writes '
             f'~{used // 1000}k history at 1.25x (~{int(used * CW) // 1000}k input-eq)')
 
 

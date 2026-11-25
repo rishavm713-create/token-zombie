@@ -14,7 +14,10 @@ HELP = """tz <command> [args]
   optimize [--transcript F]                      duplicate reads / repeated commands in the chat log
   filter [--lines N] < text                      shrink noisy command output
   classify <prompt words>                        task mode + cheapest capable model advice
-  stats                                          savings: measured vs estimated, minus tz overhead
+  stats [--breakdown [CHAT.jsonl]]               savings: measured vs estimated, minus tz overhead; --breakdown = context split
+  tips instr|defaults|breakdown|mcp-unused       v2.1 tips commands
+  instr [--fix [--apply|--restore]]              always-loaded instruction files: sizes, duplicates; fix backs up first
+  defaults [apply --yes|restore]                 cheaper default models in settings.json (dry run without apply)
   handoff --task T --done D --left L --next N [--test CMD] [--remember FACT]
   task-wrap [--test CMD] [--summary S] [--remember DECISION] [--force]   close task only if test passes; logs DAILY/MASTER
   checkpoint                                     refresh git snapshot of the active task (no commands run)
@@ -130,6 +133,19 @@ def main(argv):
         if c in ('status', 'forecast'):
             import tzusage
             return tzusage.main([c, *rest])
+        if c in ('tips', 'instr', 'defaults') or (c == 'stats' and '--breakdown' in rest):
+            import tztips
+            if c == 'tips':
+                return tztips.main(rest)
+            if c == 'instr':
+                return tztips.main(['instr', *rest])
+            if c == 'defaults':  # tz defaults [apply --yes | restore]
+                return tztips.main(['defaults', *[{'apply': '--apply', 'restore': '--restore'}.get(a, a) for a in rest]])
+            tp = [a for a in rest if a != '--breakdown']
+            if not tp:  # newest chat log of this folder
+                import glob
+                tp = sorted(glob.glob(os.path.expanduser(f'~/.claude/projects/{tztips._slug(os.getcwd())}/*.jsonl')), key=os.path.getmtime)[-1:]
+            return tztips.main(['breakdown', *tp[:1]])
         if c in ('optimize', 'stats', 'filter', 'classify'):
             import tzopt
             return tzopt.main([c, *rest])
