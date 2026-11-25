@@ -104,3 +104,7 @@ Used in: bin/tzrules.py (rule ids, matcher semantics and rulebook format; rebuil
 beads (https://github.com/gastownhall/beads), MIT licence
 Copyright (c) 2025 Beads Contributors
 Used in: bin/tzbeads.py (base36 hash id and adaptive length; claim/readiness/compaction behaviour in own code). Licence: third_party/beads/LICENSE
+
+karpathy-skills (https://github.com/jokim1/karpathy-skills), MIT licence
+Copyright (c) 2026 Joseph Kim
+Used in: bin/tzreplayrank.py (token-size x replay ranking and verified-slice baseline/snapshot/auto-revert rules from skills/karpathy-audit and karpathy-refactor SKILL.md; Python written for TZ). Licence: third_party/karpathy/LICENSE
