@@ -208,8 +208,7 @@ def run(trials=3, extra=None, v040=False):
         tmp = tempfile.mkdtemp(prefix='tzm-v040-')
         old = v040_guard(tmp)
         todo.append(('v040', {}))
-    for name, conf in todo:
-        GUARD = old if name == 'v040' else cur
+    def one(name, conf):
         conf = dict(conf, **(extra or {}))
         res, per = {}, [dict(saved=0, injected=0, fp=0, fn=0) for _ in range(trials)]
         for sn, fn in SCEN:
@@ -232,7 +231,16 @@ def run(trials=3, extra=None, v040=False):
         nets = [p['saved'] - p['injected'] for p in per]
         var = dict(net_min=min(nets), net_max=max(nets), net_sd=round(S.pstdev(nets), 1),
                    fp=sorted({p['fp'] for p in per}), fn=sorted({p['fn'] for p in per}))
-        rows.append(dict(arm=name, config=conf, scenarios=res, total=tot, trial_variance=var))
+        return dict(arm=name, config=conf, scenarios=res, total=tot, trial_variance=var)
+    # arms are independent (own fake HOME per run), so run them on a thread pool; the v040 arm swaps GUARD, so it runs last, alone.
+    from concurrent.futures import ThreadPoolExecutor
+    main = [t for t in todo if t[0] != 'v040']
+    with ThreadPoolExecutor(max_workers=min(8, os.cpu_count() or 4)) as ex:
+        rows = list(ex.map(lambda t: one(*t), main))
+    for t in todo:
+        if t[0] == 'v040':
+            GUARD = old
+            rows.append(one(*t))
     GUARD = cur
     if tmp:
         shutil.rmtree(tmp, ignore_errors=True)
