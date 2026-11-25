@@ -533,21 +533,35 @@ def chat_size(path):
     return 0, ''
 
 
-def _state_path(sid):
-    return os.path.expanduser('~/.claude/token-zombie/tips-%s.json' % re.sub(r'[^A-Za-z0-9_-]', '_', str(sid)))
+def _state_path(sid=None):
+    """One file for all sessions (per-session files piled up in the state dir); the last 50 sessions are kept."""
+    return os.path.expanduser('~/.claude/token-zombie/tips.json')
 
 
-def load_state(sid):
+def _all():
     try:
-        return json.load(open(_state_path(sid)))
+        d = json.load(open(_state_path()))
+        return d if isinstance(d, dict) else {}
     except Exception:
         return {}
 
 
+def load_state(sid):
+    st = _all().get(str(sid))
+    return st if isinstance(st, dict) else {}
+
+
 def save_state(sid, st):
     try:
-        os.makedirs(os.path.dirname(_state_path(sid)), exist_ok=True)
-        json.dump(st, open(_state_path(sid), 'w'))
+        d = _all()
+        d.pop(str(sid), None)
+        d[str(sid)] = st  # newest last; dicts keep insertion order
+        for k in list(d)[:-50]:
+            del d[k]
+        os.makedirs(os.path.dirname(_state_path()), exist_ok=True)
+        tmp = _state_path() + '.tmp%d' % os.getpid()
+        json.dump(d, open(tmp, 'w'))
+        os.replace(tmp, _state_path())
     except Exception:
         pass
 

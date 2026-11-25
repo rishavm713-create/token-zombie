@@ -70,7 +70,7 @@ ok('paste warn', 'paste' in c.lower())
 _, c = prompt('s6', 'hello there', small, {'TZ_FEAT_PASTE_WARN': '0'})
 ok('quiet on a plain prompt', 'paste' not in c.lower())
 prompt('s7', 'fix the login button colour in src/auth/login.tsx styles', small)
-st = open(os.path.join(HOME, '.claude', 'token-zombie', 'tips-s7.json')).read()
+st = json.dumps(json.load(open(os.path.join(HOME, '.claude', 'token-zombie', 'tips.json')))['s7'])
 ok('state keeps words, not the raw prompt', 'login' in st and 'fix the login button colour in' not in st)
 
 # bulk reads
