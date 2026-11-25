@@ -1,0 +1,4 @@
+Source looked at: https://github.com/vercel-labs/agent-skills, commit 5a37a6329fbad3666c3207392a6a7c0110e92efb.
+Licence check 2026-11-25: no LICENSE / COPYING / NOTICE file anywhere in the tree; GitHub reports no licence.
+README says "MIT" in one line, with no licence text and no copyright line.
+Result: no upstream text, code or assets are stored or copied here. TZ files are original, written for TZ.
