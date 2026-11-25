@@ -5,4 +5,8 @@ CMDS = 'budget ccusage claim stale clihelp debt diag facts fast gitguard line me
 for c in CMDS:
     r = subprocess.run([sys.executable, os.path.join(Z, 'bin', 'tz'), c], capture_output=True, text=True, stdin=subprocess.DEVNULL, timeout=60)
     ok('tz ' + c + ' reachable', 'unknown command' not in (r.stdout + r.stderr) and 'Traceback' not in r.stderr)
+r = subprocess.run([sys.executable, os.path.join(Z, 'bin', 'tz'), 'sym', 'A/b'], capture_output=True, text=True, stdin=subprocess.DEVNULL, cwd=Z)
+ok('tz sym A/b goes to tzsym (name path)', 'Traceback' not in r.stderr and 'unknown' not in r.stderr)
+r = subprocess.run([sys.executable, os.path.join(Z, 'bin', 'tz'), 'sym', 'main'], capture_output=True, text=True, stdin=subprocess.DEVNULL, cwd=Z)
+ok('tz sym main still works (tzmap)', 'Traceback' not in r.stderr)
 done()

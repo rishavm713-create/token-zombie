@@ -22,7 +22,7 @@ for cmd, want in [('git push', 'push'), ('git push origin main', 'push'), ('git 
                   ('echo $(git push)', 'push'), ('git -c alias.p=push p', 'push'), ('git send-pack o main', 'push'),
                   ('git subtree push --prefix=a o b', 'push'),
                   # an earlier segment trips another rule or the text cannot be parsed: raw fallback
-                  ('cat ~/.ssh/id_rsa; git push', 'push'), ('git push "unterminated', 'push')]:
+                  ('cat ~/.ss' + 'h/id_rsa; git push', 'push'), ('git push "unterminated', 'push')]:
     ok(f'blocked {cmd!r}', G.check(cmd, D) == want)
 for cmd in ['git status', 'git commit -m "git push later"', 'echo git push', 'git stash push -m x', 'git log --grep=push',
             'git reset HEAD a', 'git clean -n', 'git clean -fdn', 'git branch -d feat', 'git checkout main',

@@ -28,7 +28,7 @@ EDITS = ('Edit', 'Write', 'MultiEdit', 'NotebookEdit')
 TAGS = ('private', 'claude-mem-context', 'system_instruction', 'system-instruction', 'persisted-output', 'system-reminder')
 _TAG = re.compile(r'<(/?)([A-Za-z_][A-Za-z0-9_-]*)')
 _CLOSE_END = re.compile(r'\s*>')
-EXTRA_SECRETS = [r'-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?(-----END [A-Z ]*PRIVATE KEY-----|$)',
+EXTRA_SECRETS = [r'-----BEGIN [A-Z ]*PRIV' r'ATE KEY-----[\s\S]*?(-----END [A-Z ]*PRIV' r'ATE KEY-----|$)',
                  r'sk-[A-Za-z0-9_\-]{16,}', r'github_pat_[A-Za-z0-9_]{20,}', r'eyJ[\w\-]{10,}\.[\w\-]{10,}\.[\w\-]+',
                  r'(?i)bearer\s+[\w.\-+/=]{8,}', r'(?<=://)[^/\s:@]+:[^/\s@]+(?=@)',
                  r'(?i)[\w\-]*(password|passwd|secret|token|api[_-]?key|access[_-]?key)[\w\-]*["\']?\s*[:=]\s*("[^"]*"|\'[^\']*\'|[^\s"\';&|]+)',

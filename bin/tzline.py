@@ -81,7 +81,7 @@ def plain(text):
 
 def _cw(c):
     """Terminal columns of one character."""
-    if unicodedata.combining(c) or c in '‍️':
+    if unicodedata.combining(c) or c in '\u200d\ufe0f':
         return 0
     return 2 if unicodedata.east_asian_width(c) in 'WF' else 1
 
