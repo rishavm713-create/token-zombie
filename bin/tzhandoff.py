@@ -242,6 +242,37 @@ def daily(cwd, line):
     open(p, 'w', encoding='utf-8').write(old.rstrip('\n') + f"\n- {time.strftime('%H:%M')} {line}\n")
 
 
+AUTO = '<!-- tz-auto -->'
+
+
+def auto_note(cwd, used=0):
+    """At the chat-size limit: write handoffs/YYYY-MM-DD.md (done / left / next, <=30 lines) from the newest task state and git.
+    Never overwrites a note the owner wrote (no tz-auto marker). Returns the path or None."""
+    p = os.path.join(hdir(cwd), time.strftime('%Y-%m-%d') + '.md')
+    try:
+        if os.path.exists(p) and AUTO not in open(p, encoding='utf-8', errors='ignore').read(200):
+            return None
+        try:
+            st = json.load(open(newest_task(cwd) or ''))
+        except (OSError, ValueError, TypeError):
+            st = {}
+        snap = snapshot(cwd)
+        ch = list(snap.get('changed') or [])
+        lines = [AUTO, f"# Handoff {time.strftime('%Y-%m-%d %H:%M')} (auto, chat reached {used // 1000}k tokens)",
+                 'Task: ' + (st.get('task') or 'see Done'),
+                 'Done: ' + ('; '.join(st.get('done') or []) or (f"{len(ch)} files changed" if ch else 'nothing recorded')),
+                 'Left: ' + ('; '.join(st.get('left') or []) or 'nothing recorded'),
+                 'Next: ' + (st.get('next') or 'continue from Done/Left; run tz resume'),
+                 (f"Git: {snap['branch']}@{snap['head']}, {len(ch)} uncommitted" if snap.get('repo') else 'Git: not a repo'),
+                 'Changed: ' + (', '.join(ch[:12]) + (f' +{len(ch) - 12} more' if len(ch) > 12 else '') if ch else 'none'),
+                 'Resume: start a fresh chat, read this note, run tz resume.']
+        os.makedirs(hdir(cwd), exist_ok=True)
+        open(p, 'w', encoding='utf-8').write('\n'.join(lines[:30]) + '\n')
+        return p
+    except Exception:
+        return None
+
+
 def checkpoint(cwd):
     """Cheap safe checkpoint (no test run, no commands): refresh git snapshot of the newest task state. Keeps notes and test record.
     Returns state path or None if there is no task state yet."""

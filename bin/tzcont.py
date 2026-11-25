@@ -810,10 +810,29 @@ def compact_hint(data, used):
         return True
     if not _churn_rw(data.get('session_id', 'x'), chk):
         return ''
-    line = compact_line(data.get('cwd') or os.getcwd())
-    return (f'TOKEN ZOMBIE: chat is {used // 1000}k tokens. If this task is done, run /compact now '
-            '(the note keeps only done, left and next), then send the next task.'
-            + (f'\nPaste this: {line}' if line else '\nNo handoff yet: run tz handoff save --next "<next step>" first, then /compact.'))
+    cwd = data.get('cwd') or os.getcwd()
+    try:
+        import tzhandoff
+        note = tzhandoff.auto_note(cwd, used)
+    except Exception:
+        note = None
+    line = compact_line(cwd)
+    return (f'TOKEN ZOMBIE: chat is {used // 1000}k tokens. Best next step: start a fresh chat'
+            + (f' (handoff saved: {os.path.relpath(note, cwd)}).' if note else ' (run tz handoff save first).')
+            + ' If this task is done, tell the owner in one line, or run /compact now (the note keeps only done, left and next).'
+            + (f'\nPaste this: {line}' if line else ''))
+
+
+def newchat_flag(data, used):
+    """Stop: tiny state file the bar reads. over=True once the chat passed the limit; a fresh chat rewrites it to False."""
+    from tzlib import cfg
+    from tzopt import STATE
+    try:
+        os.makedirs(STATE, exist_ok=True)
+        open(os.path.join(STATE, 'newchat.json'), 'w').write(json.dumps(
+            {'ts': int(time.time()), 'k': used // 1000, 'over': used >= cfg('limit'), 'sid': data.get('session_id', 'x')}))
+    except OSError:
+        pass
 
 
 # Loop detection, claim board, idle-cache and cleanup advice (advice only, never blocks).

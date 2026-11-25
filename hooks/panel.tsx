@@ -22,7 +22,7 @@ const FI = { plugin: 'token-zombie', key: 'files' } as const
 const AC = { plugin: 'token-zombie', key: 'acts' } as const
 const NO = { plugin: 'token-zombie', key: 'note' } as const
 const stats = atom(ST, { inp: 0, out: 0, cr: 0, cw: 0, ms: 0, turns: 0, spawns: 0, model: '' }, { shape: 'stats-1' })
-const files = atom(FI, { sig: '', status: null, isStale: false, host: null, isHostFresh: false, mode: 'full', mood: null }, { shape: 'files-1' })
+const files = atom(FI, { sig: '', status: null, isStale: false, host: null, isHostFresh: false, mode: 'full', mood: null, newChat: 0 }, { shape: 'files-2' })
 const acts = atom(AC, [], { shape: 'acts-1' })
 const note = atom(NO, { label: '', lines: [], err: '' }, { shape: 'note-1' })
 const BA = { plugin: 'token-zombie', key: 'bar' } as const
@@ -110,7 +110,7 @@ async function poll($: any) {
     const home = await $.env.get('HOME')
     if (!home) return
     const d = `${home}/.claude/token-zombie`
-    const [s, h, c, lg, md, fr, ec, hi, cp, cd, us] = await Promise.all([
+    const [s, h, c, lg, md, fr, ec, hi, cp, cd, us, nc] = await Promise.all([
       readOr($, `${d}/status.json`),
       readOr($, `${d}/host.json`),
       readOr($, `${d}/config.json`),
@@ -122,6 +122,7 @@ async function poll($: any) {
       readOr($, `${d}/caps.jsonl`),
       readOr($, `${d}/coding.json`),
       readOr($, `${d}/usage.json`),
+      readOr($, `${d}/newchat.json`),
     ])
     const now = (await $.clock.now()) / 1000
     const status = obj(s)
@@ -137,6 +138,8 @@ async function poll($: any) {
     const mj = obj(md)
     const mts = num(mj?.ts)
     const mood = mts !== undefined && typeof mj?.kind === 'string' ? { kind: mj.kind, ts: mts } : null
+    const ncj = obj(nc) // newchat.json (bin/tzcont.py newchat_flag): chat past the limit, seen in the last 6 h -> k tokens, else 0
+    const newChat = ncj?.over === true && (num(ncj.ts) ?? 0) >= now - 21600 ? Math.max(1, num(ncj.k) ?? 0) : 0
     const agents = await writeAgents($, d, now)
     const skills = await countSkills($, d)
     const fj = obj(fr)
@@ -166,9 +169,9 @@ async function poll($: any) {
     const b = { agents, skills, ...ledger(lg, now), fresh, econ, day, coding, used }
     const bsig = JSON.stringify(b)
     if (bsig !== (await read($, bar)).sig) await update($, bar, () => ({ sig: bsig, ...b }))
-    const sig = JSON.stringify([s, h, mode, isStale, isHostFresh, md])
+    const sig = JSON.stringify([s, h, mode, isStale, isHostFresh, md, newChat])
     if (sig === (await read($, files)).sig) return
-    await update($, files, () => ({ sig, status, isStale, host, isHostFresh, mode, mood }))
+    await update($, files, () => ({ sig, status, isStale, host, isHostFresh, mode, mood, newChat }))
     if (!isPlaced) void $.ui.status(await oneliner($))
   } catch {
     /* a poll never breaks the session */
@@ -337,6 +340,7 @@ export const register: Register = on => {
               <Text dimColor> {l.toLowerCase()}</Text>
             </Text>
           ))}
+          {f.newChat ? <Text color={G} bold>Start a new chat: handoff saved</Text> : null}
           <Text color={dot}>●</Text>
           {expand}
         </Box>
@@ -375,6 +379,11 @@ export const register: Register = on => {
               </Text>
             </Box>
           ))}
+          {f.newChat ? (
+            <Text weight="semibold" color={G} wrap="truncate-end">
+              Start a new chat · handoff saved
+            </Text>
+          ) : null}
           <Text color={dot}>●</Text>
           <Button
             key="tz-mode"
