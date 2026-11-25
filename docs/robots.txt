@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://rishavm713-create.github.io/token-zombie/sitemap.xml
