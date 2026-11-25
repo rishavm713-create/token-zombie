@@ -62,7 +62,12 @@ FEATURES = {'cache_ttl_auto': 1,  # measured 1 h vs 5 min prompt-cache life (tzc
             'plan_advice': 1,     # big vague task: plan first
             'instr_advice': 1,    # oversized or duplicate always-loaded instruction files
             'defaults_advice': 0, # one-time offer of `tz defaults` (suggests cheaper default models)
-            'bulk_read_block': 0} # BLOCKS one Read/Grep/Glob after bulk_read_n in a row (use an Explore subagent)
+            'bulk_read_block': 0,
+            # v2.1 group 2 repo ports: all opt-in (they block or add context / change output)
+            'git_guard': 0,        # BLOCKS risky git commands on PreToolUse (tzgitguard)
+            'unverified_claim': 0, # Stop: one advice line when success is claimed with no passing check (tzclaim)
+            'micro_skills': 0,     # facts learned from repeated failures, added at SessionStart (tzfacts)
+            'rtk_filters': 0}      # extra per-command output filters in tzcrush (tzrtk) # BLOCKS one Read/Grep/Glob after bulk_read_n in a row (use an Explore subagent)
 
 
 def feature(name):

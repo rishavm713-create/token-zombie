@@ -181,17 +181,29 @@ try:
             LIVE[0] = (LIVE[0] + '\n' + tztips.prompt_tips(data)).strip()
         except Exception:
             _diag('tips', ev)
+    claim = ''
+    if ev == 'Stop':  # opt-in (unverified_claim): success claimed with no passing check; advice only
+        try:
+            import tzclaim
+            claim = tzclaim.stop_advice(data)
+        except Exception:
+            _diag('claim', ev)
+    if ev == 'Stop' and claim and not advice('next_task'):
+        emit({'systemMessage': claim})
     if ev == 'Stop' and advice('next_task'):  # turn closed past the limit: tell the user to /compact (advice, once per 25k)
         try:
             import tzcont
             m = tzcont.compact_hint(data, used_tokens(data))
             pc = tzcont.pack_cleanup(data)
-            m = '\n'.join(x for x in (m, pc, tzcont.untested_advice(data)) if x)
+            m = '\n'.join(x for x in (m, pc, tzcont.untested_advice(data), claim) if x)
             if m:
-                tzbus_mood('compact')
+                if m != claim:
+                    tzbus_mood('compact')
                 emit({'systemMessage': m, **({'hookSpecificOutput': {'hookEventName': ev}} if LIVE[0] else {})})
         except Exception:
             _diag('compact', ev)
+            if claim:
+                emit({'systemMessage': claim})
     if ev == 'Stop':  # keep the fresh-chat saving in TOKENS SAVED current (scan of recent logs, at most every 5 min)
         try:
             import tzopt
@@ -200,6 +212,12 @@ try:
                 tzopt.fresh_file()
         except Exception:
             _diag('fresh', ev)
+    if ev == 'SessionEnd':  # opt-in (micro_skills): learn facts from the finished transcript
+        try:
+            import tzfacts
+            tzfacts.session_end(data)
+        except Exception:
+            _diag('facts', ev)
     if ev == 'SessionEnd':  # on-demand: turn off what this chat turned on (verified, logged)
         try:
             import tzondemand
@@ -228,6 +246,16 @@ try:
         except Exception:
             why = ''
             _diag('bulk', ev)
+        if why:
+            emit({'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny', 'permissionDecisionReason': why}})
+            _pflush()
+    if ev == 'PreToolUse' and data.get('tool_name') == 'Bash':  # opt-in (git_guard): hook() fails closed while on
+        try:
+            import tzgitguard
+            why = tzgitguard.hook(data)
+        except Exception:
+            why = ''
+            _diag('gitguard', ev)
         if why:
             emit({'hookSpecificOutput': {'hookEventName': 'PreToolUse', 'permissionDecision': 'deny', 'permissionDecisionReason': why}})
             _pflush()
