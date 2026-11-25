@@ -10,4 +10,4 @@ Plan only as much as the risk needs; small, obvious tasks need none.
 - List files to touch and files to leave alone.
 - Simplest approach that meets the goal; note one rejected alternative and why.
 - Plan changes: rewrite it, don't drift.
-- Behaviour that must outlive this session: `tz spec new|check|status|archive <name>`.
+- Behaviour that must outlive this session: `tz spec new <name>`, `check`, `tz spec status <name>` (next step only), `archive`.
