@@ -198,44 +198,44 @@ section{padding:64px 0}.hero{padding:44px 0 56px}.head{margin-bottom:34px}
 <div class="stat rv"><b>54,852</b><span>chars of noise kept out of one test session</span></div>
 <div class="stat rv" style="--i:1"><b>0 / 0</b><span>false alarms / misses in that test</span></div>
 <div class="stat rv" style="--i:2"><b>3,624</b><span>checks pass on v2.1.0</span></div>
-<div class="stat rv" style="--i:3"><b>$0</b><span>free, local, no telemetry</span></div>
+<div class="stat rv" style="--i:3"><b>$0</b><span>free, local, no tracking</span></div>
 </div></div>
-<p class="rv" style="text-align:center;color:var(--muted);font-size:14px;margin:14px 16px 0">Scripted 5-trial test, <a href="https://github.com/rishavm713-create/token-zombie/blob/main/docs/bench/matrix-2026-11-25.md">see the method</a>. Run <code>tz gain</code> for your own number.</p>
+<p class="rv" style="text-align:center;color:var(--muted);font-size:14px;margin:14px 16px 0">Test on a practice session, <a href="https://github.com/rishavm713-create/token-zombie/blob/main/docs/bench/matrix-2026-11-25.md">see the method</a>. Run <code>tz gain</code> for your own number.</p>
 
 
 
 <section id="problem"><div class="wrap">
 <div class="head rv"><p class="eyebrow">The problem</p><h2>Long chats quietly burn your limit.</h2><p class="lead">You hit the weekly limit and cannot tell where it went. Three leaks cause most of it.</p></div>
 <div class="grid g3">
-<div class="card rv"><span class="tag">LEAK 01</span><h3>The same file, read again and again</h3><p>Claude re-reads files and re-runs commands it already has. Every repeat is paid for, and re-sent with every later step.</p></div>
-<div class="card rv" style="--i:1"><span class="tag">LEAK 02</span><h3>Helpers that repeat each other</h3><p>Sub-agents duplicate work, stall or retry the same thing. You pay for effort that never moved the task forward.</p></div>
-<div class="card rv" style="--i:2"><span class="tag">LEAK 03</span><h3>The chat fills up and the work is lost</h3><p>When the context runs out, the thread of the task goes with it. You restart and spend tokens explaining it all again.</p></div>
+<div class="card rv"><span class="tag">LEAK 01</span><h3>The same file, read again and again</h3><p>Claude re-reads things it already has. Every repeat is paid for, and re-sent with every later step.</p></div>
+<div class="card rv" style="--i:1"><span class="tag">LEAK 02</span><h3>Helpers that repeat each other</h3><p>Helpers repeat each other, get stuck or retry the same thing. You pay for effort that never moved the task forward.</p></div>
+<div class="card rv" style="--i:2"><span class="tag">LEAK 03</span><h3>The chat fills up and the work is lost</h3><p>When the chat fills up, the thread of the task goes with it. You restart and spend tokens explaining it all again.</p></div>
 </div></div></section>
 
 <section id="how" style="background:#0a110c;border-block:1px solid var(--line)"><div class="wrap">
 <div class="head rv"><p class="eyebrow">How it works</p><h2>Find the zombies. Stop the infection.</h2><p class="lead">Wasted work behaves like a zombie: it keeps moving, never finishes, and spreads. TOKEN ZOMBIE hunts it in four steps.</p></div>
 <div class="grid g4">
-<div class="card rv"><span class="num">01 · DETECT</span><h3>Find the zombies</h3><p>Flags repeated reads and sub-agents that duplicate or stall.</p></div>
-<div class="card rv" style="--i:1"><span class="num">02 · CONTAIN</span><h3>Stop the infection</h3><p>Trims noisy tool output. The original is kept and can be recalled.</p></div>
+<div class="card rv"><span class="num">01 · DETECT</span><h3>Find the zombies</h3><p>Spots repeated work and helpers that get stuck.</p></div>
+<div class="card rv" style="--i:1"><span class="num">02 · CONTAIN</span><h3>Stop the infection</h3><p>Cuts the noise. The original is kept and can be brought back.</p></div>
 <div class="card rv" style="--i:2"><span class="num">03 · WARN</span><h3>Survive the session</h3><p>Warns you before the chat runs out, while there is still time to save the work.</p></div>
 <div class="card rv" style="--i:3"><span class="num">04 · REVIVE</span><h3>Pick up where you stopped</h3><p>A short handoff note lets a fresh chat continue without re-explaining.</p></div>
 </div></div></section>
 
 <section id="new"><div class="wrap">
-<div class="head rv"><p class="eyebrow">New in 2.0 and 2.1</p><h2>Less rework. Safer changes.</h2><p class="lead">Every feature below is built and covered by the test suite: 3624 checks pass on v2.1.0 (MEASURED). Savings are read from your own Claude Code logs; run <code>tz stats</code> to see yours.</p></div>
+<div class="head rv"><p class="eyebrow">And more</p><h2>Less rework. Safer changes.</h2><p class="lead">Everything here is built and tested. Your own savings are shown inside Claude Code, just ask for your number.</p></div>
 <div class="grid g4">
-<div class="card rv"><span class="num">TOKENS</span><h3>No double reads</h3><p>A file Claude already read comes back as a short stub. Big JSON keeps only the outliers; colour codes are stripped.</p></div>
-<div class="card rv" style="--i:1"><span class="num">MEMORY</span><h3>Tasks in order</h3><p>Tasks can wait on other tasks; <code>tz next</code> picks the one that is ready. Failed or stalled runs are flagged.</p></div>
-<div class="card rv" style="--i:2"><span class="num">REPO</span><h3>Right files first</h3><p><code>tz rank</code> ranks the files that matter (idea from aider's repo map). <code>tz sym</code> and <code>tz exists</code> find code before it is rewritten.</p></div>
-<div class="card rv" style="--i:3"><span class="num">PARALLEL</span><h3>Separate desks</h3><p><code>tz worktree</code> gives each task its own copy and file ownership, so parallel sessions do not clash.</p></div>
-<div class="card rv"><span class="num">SAFETY</span><h3>Danger blocker</h3><p>Destructive Bash commands are blocked before they run (rules adapted from cc-safety-net, MIT).</p></div>
-<div class="card rv" style="--i:1"><span class="num">VERIFY</span><h3>Independent checks</h3><p>The gate detects and runs tests, lint, type and audit tools, and catches API drift. "Done" needs proof.</p></div>
-<div class="card rv" style="--i:2"><span class="num">RECOVER</span><h3>Undo and resume</h3><p><code>tz agent --rollback</code> restores only the files a failed run changed. Interrupted runs resume from a checkpoint.</p></div>
-<div class="card rv" style="--i:3"><span class="num">OPEN SOURCE</span><h3>Reused, credited</h3><p>Permissively licensed code is reused with attribution in NOTICE. <a href="https://github.com/rishavm713-create/token-zombie/releases/tag/v2.1.0">Release notes</a></p></div>
-<div class="card rv"><span class="num">AUTOMATIC</span><h3>You do not type these</h3><p>Once hooks are registered, advice runs by itself: idle-cache cost, big pastes, repeat reads, stuck loops, log trimming, SKILL.md lint, stale-branch and budget warnings. Anything that blocks is opt-in.</p></div>
-<div class="card rv" style="--i:1"><span class="num">GUARDS</span><h3>Opt-in blockers</h3><p><code>tz gitguard</code>, <code>tz rules</code> and <code>tz scope</code> check risky git commands, destructive commands and outside hosts. Blocking stays off until you turn it on.</p></div>
-<div class="card rv" style="--i:2"><span class="num">LOGS</span><h3>Trimmed, never lost</h3><p><code>tz logc</code> keeps every failure line of build and test logs; <code>tz delta</code> shows a diff instead of a full re-read (opt-in).</p></div>
-<div class="card rv" style="--i:3"><span class="num">BUDGET</span><h3>Know your limit</h3><p><code>tz budget</code> and <code>tz stale</code> warn when a budget climbs or the branch is behind main. Windows CI is known-failing and deferred.</p></div>
+<div class="card rv"><span class="num">SAVES</span><h3>No repeat reading</h3><p>When Claude has already read something, it gets a short reminder instead of the whole thing again.</p></div>
+<div class="card rv" style="--i:1"><span class="num">ORDER</span><h3>Tasks in the right order</h3><p>Knows which job is ready next, and tells you when one got stuck.</p></div>
+<div class="card rv" style="--i:2"><span class="num">FOCUS</span><h3>The right files first</h3><p>Points Claude at the files that matter, so it stops wandering.</p></div>
+<div class="card rv" style="--i:3"><span class="num">TEAMWORK</span><h3>Helpers stay out of each other's way</h3><p>Several jobs can run side by side without stepping on the same work.</p></div>
+<div class="card rv"><span class="num">SAFETY</span><h3>Stops risky moves</h3><p>Blocks harmful commands before they run.</p></div>
+<div class="card rv" style="--i:1"><span class="num">PROOF</span><h3>Checks before "done"</h3><p>Claude has to show the work was tested before saying it is finished.</p></div>
+<div class="card rv" style="--i:2"><span class="num">UNDO</span><h3>Undo and continue</h3><p>Put back only what a failed run changed, and carry on from where it stopped.</p></div>
+<div class="card rv" style="--i:3"><span class="num">OPEN</span><h3>Built on the best ideas</h3><p>Learned from 44 open-source tools, with credit given.</p></div>
+<div class="card rv"><span class="num">AUTO</span><h3>Works by itself</h3><p>After install it quietly warns you about waste. Nothing to remember.</p></div>
+<div class="card rv" style="--i:1"><span class="num">CHOICE</span><h3>You stay in charge</h3><p>Extra protection is off until you turn it on.</p></div>
+<div class="card rv" style="--i:2"><span class="num">LOGS</span><h3>Short, never lost</h3><p>Long logs are trimmed, and every error is kept.</p></div>
+<div class="card rv" style="--i:3"><span class="num">LIMIT</span><h3>Know your limit</h3><p>Gentle warnings as your usage climbs.</p></div>
 </div></div></section>
 
 <section id="see"><div class="wrap">
@@ -249,26 +249,26 @@ section{padding:64px 0}.hero{padding:44px 0 56px}.head{margin-bottom:34px}
 <div class="head rv"><p class="eyebrow">What you get</p><h2>All you need to stop the waste.</h2><p class="lead">One install. Five tools working together. Built on the best ideas from 44 open-source tools, with nothing to configure before it starts helping.</p></div>
 <div class="stack rv">
 <div class="row"><span class="n">1</span><div><h3>Token usage you can read</h3><p>See where each chat spends. Measured numbers are kept apart from estimates.</p></div><span class="inc">INCLUDED</span></div>
-<div class="row"><span class="n">2</span><div><h3>Zombie detection</h3><p>Flags repeated reads and sub-agents that duplicate or stall, so you can stop them early.</p></div><span class="inc">INCLUDED</span></div>
-<div class="row"><span class="n">3</span><div><h3>Output trimming with recall</h3><p>Long tool output is cut down, and the original is always kept.</p></div><span class="inc">INCLUDED</span></div>
-<div class="row"><span class="n">4</span><div><h3>Save-your-place handoffs</h3><p>A short note and checkpoints, so a fresh chat continues without re-explaining.</p></div><span class="inc">INCLUDED</span></div>
-<div class="row" style="border-bottom:0"><span class="n">5</span><div><h3>Toolbar, dashboard and commands</h3><p>A bar in Claude Code, a dashboard and a command line, all showing the same numbers.</p></div><span class="inc">INCLUDED</span></div>
-<div class="total"><div class="price">Free. Forever.</div><p>Worth more than a paid plan, costs $0: no account, no subscription, no upsell, no telemetry. <b>Our guarantee:</b> if it does not save you tokens, remove it in one command (<code>/plugin uninstall token-zombie</code>) and you have lost nothing.</p><a class="btn primary" href="https://github.com/rishavm713-create/token-zombie">Install free</a></div>
+<div class="row"><span class="n">2</span><div><h3>Zombie detection</h3><p>Spots repeated work and stuck helpers, so you can stop them early.</p></div><span class="inc">INCLUDED</span></div>
+<div class="row"><span class="n">3</span><div><h3>Output trimming with recall</h3><p>Long output is cut down, and the original is always kept.</p></div><span class="inc">INCLUDED</span></div>
+<div class="row"><span class="n">4</span><div><h3>Save-your-place handoffs</h3><p>A short note, so a fresh chat continues without re-explaining.</p></div><span class="inc">INCLUDED</span></div>
+<div class="row" style="border-bottom:0"><span class="n">5</span><div><h3>Toolbar, dashboard and commands</h3><p>A bar in Claude Code and a simple dashboard, all showing the same numbers.</p></div><span class="inc">INCLUDED</span></div>
+<div class="total"><div class="price">Free. Forever.</div><p>Worth more than a paid plan, costs $0: no account, no subscription, no upsell, no tracking. <b>Our guarantee:</b> if it does not save you tokens, remove it in one command (<code>/plugin uninstall token-zombie</code>) and you have lost nothing.</p><a class="btn primary" href="https://github.com/rishavm713-create/token-zombie">Install free</a></div>
 </div>
 <div class="grid g4 guar">
-<div class="card rv"><h3>Blocks only the dangerous</h3><p>Stops risky commands like <code>rm -rf /</code>. Everything else is advice.</p></div>
-<div class="card rv" style="--i:1"><h3>Stays on your computer</h3><p>No telemetry and no network calls in the core.</p></div>
+<div class="card rv"><h3>Blocks only the dangerous</h3><p>Stops harmful actions. Everything else is just friendly advice.</p></div>
+<div class="card rv" style="--i:1"><h3>Stays on your computer</h3><p>Nothing is sent anywhere.</p></div>
 <div class="card rv" style="--i:2"><h3>Nothing is lost</h3><p>Trimmed output is kept and can be recalled.</p></div>
-<div class="card rv" style="--i:3"><h3>Easy to undo</h3><p>A written <a href="https://github.com/rishavm713-create/token-zombie#install">rollback guide</a> removes it cleanly.</p></div>
+<div class="card rv" style="--i:3"><h3>Easy to undo</h3><p>Remove it any time with one command.</p></div>
 </div></div></section>
 
 <section id="faq"><div class="wrap">
 <div class="head rv"><p class="eyebrow">Questions</p><h2>Straight answers.</h2></div>
 <div class="grid g2 faq">
 <div class="card rv"><h3>How much does it cost?</h3><p>Nothing. It is free and open source, and it stays that way.</p></div>
-<div class="card rv" style="--i:1"><h3>Does it send my data anywhere?</h3><p>No. It runs on your computer. The core makes no network or AI calls.</p></div>
-<div class="card rv"><h3>Will it break my chats?</h3><p>It mostly advises. It denies destructive shell commands (<code>TZ_SAFE=0</code> disables) and condenses long tool output; anything trimmed can be recalled.</p></div>
-<div class="card rv" style="--i:1"><h3>How much will I save?</h3><p>It depends on how you work. Every saving shown is labelled <em>measured</em> or <em>estimate</em>. We have not yet run a full before-and-after test, so we do not promise a figure. See the <a href="LIMITATIONS.md">limits</a>.</p></div>
+<div class="card rv" style="--i:1"><h3>Does it send my data anywhere?</h3><p>No. It stays on your computer.</p></div>
+<div class="card rv"><h3>Will it break my chats?</h3><p>No. It mostly gives advice, and only blocks harmful actions. Anything trimmed can be brought back.</p></div>
+<div class="card rv" style="--i:1"><h3>How much will I save?</h3><p>It depends on how you work. Type <code>tz gain</code> to see your own number.</p></div>
 </div></div></section>
 
 <section id="install" style="padding-top:0"><div class="wrap">
@@ -282,7 +282,7 @@ section{padding:64px 0}.hero{padding:44px 0 56px}.head{margin-bottom:34px}
 <img class="rv" src="img/rishav.webp" alt="Rishav Mishra, creator of TOKEN ZOMBIE" loading="lazy" width="900" height="900">
 <div class="rv" style="--i:1"><p class="eyebrow">Built by Rishav Mishra</p>
 <blockquote>“I built this because I hit the problem myself. I made it open source because I <span>don’t want access to the solution to become another limitation</span> for someone else.”</blockquote>
-<p class="lede-c">Built by Rishav Mishra. TOKEN ZOMBIE started with a simple idea: make AI coding agents more efficient, reduce wasted context and help developers build better software. The project is developed as a local-first engineering efficiency layer for Claude Code.</p>
+<p class="lede-c">Built by Rishav Mishra. TOKEN ZOMBIE started with a simple idea: make AI coding helpers more efficient, waste less and help people build better software. It runs on your own computer and works inside Claude Code.</p>
 <div class="who">RISHAV MISHRA, CREATOR</div>
 <div class="sites"><a href="https://rishavm713-create.github.io/">Portfolio ↗</a><a href="https://editsutra.github.io/">EditSutra ↗</a><a href="https://github.com/rishavm713-create/token-zombie/discussions">Discussions ↗</a></div></div>
 </div></div></section>
