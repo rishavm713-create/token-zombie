@@ -32,6 +32,10 @@ Used in: bin/tzops.py diffcheck (idea only: every changed line traces to the tas
 
 --- v2.1 additions (2026-11-25). MIT/Apache permission texts as above apply to each MIT/Apache entry. ---
 
+cc-safety-net (see above), MIT licence
+Copyright (c) 2026 J Liew
+Used in: bin/tzshell.py (rule ids, reasons and verdict fixtures adapted from cc-safety-net; independent Python rebuild, no TypeScript copied) and tests/v21/test_shell_parity.py (parity cases).
+
 microsoft/TokenEconomizer (https://github.com/microsoft/TokenEconomizer), MIT licence
 Copyright (c) Microsoft Corporation
 Used in: bin/tztoolprune.py (evidence rule from plugin/fold.py enough_evidence, protected tool set, deny-list apply/restore bookkeeping; ported to Python with changes). bin/tzmatrix.py (paired-arm / leave-one-out method idea from compare_arms.py; no code copied).

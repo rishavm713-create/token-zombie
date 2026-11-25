@@ -1,4 +1,7 @@
 # Changelog
+## v2.1.0 (unreleased)
+- Fix: install.sh recognises its own hooks whatever the checkout/cache directory is named (was: duplicates, failed uninstall/restore unless the path contained token-zombie/bin).
+- Fix: stuck detector deletes its state file on reset and ignores tool hooks without a tool name.
 ## v2.0.1 (2026-11-24)
 - Windows supported via `bin/tzpy` (Git Bash; Python 3.8+ via python3/python/py -3); CI runs on ubuntu-latest, macos-latest and windows-latest.
 - Verified 2026-11-24 against real Claude Code: hooks fire in a live `claude -p` session, slash commands run, MCP tz_* tools load, install from the GitHub-hosted marketplace works.

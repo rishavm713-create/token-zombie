@@ -76,11 +76,11 @@ bash "$Z/bin/tz-vet.sh" "$Z" > /dev/null; r=$?; ok "vet: no self-detection" '[ $
 echo '{"model":"x","statusLine":{"type":"command","command":"echo prevstatus"},"hooks":{"UserPromptSubmit":[{"hooks":[{"type":"command","command":"python3 ~/.claude/hooks/chat-size-guard.py"}]}]}}' > "$H/.claude/settings.json"
 cp "$H/.claude/settings.json" "$T/fixture.json"
 HOME="$H" bash "$Z/install.sh" >/dev/null && HOME="$H" bash "$Z/install.sh" >/dev/null
-ok "install twice: one hook per event, Read matcher, old guard gone" "python3 - '$H/.claude/settings.json' <<'PY'
+ok "install twice: one hook per event, Read matcher, old guard gone" "python3 - '$H/.claude/settings.json' '$Z/bin/' <<'PY'
 import json,sys; s=json.load(open(sys.argv[1])); h=s['hooks']
 c=lambda ev,n: sum(n in x.get('command','') for g in h.get(ev,[]) for x in g['hooks'])
-assert all(c(e,'token-zombie/bin/')==1 for e in ('UserPromptSubmit','PostToolUse','PreToolUse','SessionStart','Stop','SessionEnd','SubagentStop'))
-assert c('PreCompact','token-zombie/bin/')==2  # guard (supervisor tick) + compaction note
+assert all(c(e,sys.argv[2])==1 for e in ('UserPromptSubmit','PostToolUse','PreToolUse','SessionStart','Stop','SessionEnd','SubagentStop'))
+assert c('PreCompact',sys.argv[2])==2  # guard (supervisor tick) + compaction note
 assert any('Read' in (g.get('matcher') or '').split('|') and 'tz-guard' in g['hooks'][0]['command'] for g in h['PreToolUse'])
 assert sum(c(e,'chat-size-guard') for e in h)==0 and 'tz-status' in s['statusLine']['command']
 PY"
