@@ -1,5 +1,6 @@
 import { atom, read, update } from 'claude-code'
 import type { Register } from 'claude-code'
+import { PY } from './pycmd'
 import { registerTools, startTools } from './tools'
 
 import type { Act, Bar, Files, Note, Stats } from '../types'
@@ -374,7 +375,7 @@ export const register: Register = on => {
             plain
             onPress={async () => {
               sfx($, nextMode)
-              await $.process.run(['python3', `${$.plugin.root}/bin/tz`, 'mode', nextMode], { timeoutMs: 30000 }).catch(() => {})
+              await $.process.run([...PY, `${$.plugin.root}/bin/tz`, 'mode', nextMode], { timeoutMs: 30000 }).catch(() => {})
               await poll($)
             }}
           >
@@ -414,7 +415,7 @@ export const register: Register = on => {
         await update($, note, () => ({ label, lines: [], err: oneLine(x) }))
       }
     }
-    const tz = (...args: string[]) => ['python3', `${$.plugin.root}/bin/tz`, ...args]
+    const tz = (...args: string[]) => [...PY, `${$.plugin.root}/bin/tz`, ...args]
     const btn = (key: string, label: string, onPress: () => Promise<void>) => (
       <Button key={key} onPress={onPress}>
         {label}
