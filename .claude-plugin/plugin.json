@@ -7,5 +7,31 @@
     "url": "https://github.com/rishavm713-create"
   },
   "types": "./types/index.d.ts",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": [
+    "tz-assumption-check",
+    "tz-auto-prompter",
+    "tz-blast-radius",
+    "tz-browser-saver",
+    "tz-cache-clock",
+    "tz-chat-thermometer",
+    "tz-design-picker",
+    "tz-effort-optimizer",
+    "tz-fake-data-mode",
+    "tz-folder-tracker",
+    "tz-handoff",
+    "tz-idea-shelf",
+    "tz-image-viewer",
+    "tz-input-router",
+    "tz-jargon-buster",
+    "tz-load",
+    "tz-next-steps",
+    "tz-plain-english",
+    "tz-plan-progress",
+    "tz-prompt-enhancer",
+    "tz-rule-enforcer",
+    "tz-session-monitor",
+    "tz-subagent-model",
+    "tz-theme-switcher"
+  ]
 }

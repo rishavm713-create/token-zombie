@@ -2,7 +2,7 @@
 # Context continuity: STATE.md, expensive-chat detection, waste audit, stats accounting, guard output-trim ledger.
 # Fake HOME + temp git repo + synthetic chat log. Offline; no model calls; live ~/.claude untouched.
 Z="$(cd "$(dirname "$0")/.." && pwd)"; T="$(mktemp -d)"; trap 'rm -rf "$T"' EXIT
-export HOME="$T/home"; P="$T/proj"; S="$HOME/.claude/token-zombie"; pass=0; fail=0
+export TZ_DEDUPE=0; export HOME="$T/home"; P="$T/proj"; S="$HOME/.claude/token-zombie"; pass=0; fail=0
 mkdir -p "$S" "$P/bin" "$P/handoffs"
 ok() { if eval "$2"; then pass=$((pass+1)); else fail=$((fail+1)); echo "FAIL: $1"; fi; }
 tz() { python3 "$Z/bin/tz" "$@"; }

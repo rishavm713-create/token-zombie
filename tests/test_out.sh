@@ -2,7 +2,7 @@
 # tzout (output trim + recall) and tzopt.read_decision (read guard). Temp HOME: live ~/.claude untouched. No model calls.
 set -u
 D=$(cd "$(dirname "$0")/.." && pwd); B=$D/bin
-T=$(mktemp -d); export HOME="$T"; trap 'rm -rf "$T"' EXIT
+export TZ_DEDUPE=0; T=$(mktemp -d); export HOME="$T"; trap 'rm -rf "$T"' EXIT
 mkdir -p "$HOME/.claude/token-zombie"
 F=0; NP=0; NF=0; ok(){ echo "PASS $1"; NP=$((NP+1)); }; no(){ echo "FAIL $1"; F=1; NF=$((NF+1)); }
 py(){ c=$1; shift; python3 -I -c "import sys,json; sys.path.insert(0,'$B'); $c" "$@"; }
