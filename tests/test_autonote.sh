@@ -23,4 +23,9 @@ ok "resume does not get it" '[[ $(echo "${S/startup/resume}" | HOME="$H" TZ_FRES
 sed -i.bak 's/Next step: .*/Next step: all listed steps done/' "$H/.claude/token-zombie/$K"
 o=$(echo "$S" | HOME="$H" TZ_FRESH_BG=0 python3 "$Z/bin/tz-start.py")
 ok "finished work is not re-injected" '[[ $o != *"previous chat here"* ]]'
+mkdir -p "$W/handoffs"; echo "${P/PostToolUse/Stop}" | sed 's/}$/,"trigger":"auto"}/' | HOME="$H" TZ_DEDUPE=0 python3 "$Z/bin/tz-compact.py"
+HF=$(ls "$W"/handoffs/*-auto.md 2>/dev/null | head -1)
+ok "offline daily handoff written" '[ -n "$HF" ]'
+ok "handoff lists done and left" 'grep -q "step A" "$HF" && grep -q "step B open" "$HF"'
+ok "handoff <= 30 lines" '[ "$(wc -l < "$HF")" -le 30 ]'
 echo "autonote: pass $pass fail $fail"; [ $fail -eq 0 ]

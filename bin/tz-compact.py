@@ -15,6 +15,7 @@ def text(c):  # tool_result content: str or list of {type:text}
     return c if isinstance(c, str) else ''
 
 
+PLAN = []  # last task list seen in the log
 ASK = None  # owner's newest typed message (first 200 chars)
 
 
@@ -81,6 +82,8 @@ def scan(path):
                     nx = next((x for x in plan if x.get('status') == 'pending'), None)
                     if nx:
                         nx['status'] = 'in_progress'
+    global PLAN
+    PLAN = plan
     open_ = [x for x in plan if x.get('status') != 'completed']
     cur = next((x for x in open_ if x.get('status') == 'in_progress'), open_[0] if open_ else None)
     if cur:
@@ -131,6 +134,19 @@ try:
         pass
     body = '\n'.join(note)[:1500] + '\n'
     open(os.path.join(OUT, f"compact-{d.get('session_id', 'x')}.md"), 'w').write(body)
+    hd = os.path.join(cwd, 'handoffs')
+    if d.get('trigger') == 'auto' and os.path.isdir(hd) and (PLAN or changed):  # offline daily handoff (<=30 lines), only in projects that already keep handoffs/
+        def it(x):
+            return '- ' + str(x.get('content') or x.get('activeForm') or '?')[:110]
+        done = [it(x) for x in PLAN if x.get('status') == 'completed']
+        left = [it(x) for x in PLAN if x.get('status') != 'completed']
+        h = [f"# Handoff {time.strftime('%Y-%m-%d %H:%M')} (auto, offline: from task list + git + log, no model)",
+             '## Done'] + (done[:8] or ['- (no task list recorded)']) + ['## Left'] + (left[:8] or ['- nothing open in the task list']) + [
+             '## Next', '- ' + (nxt or 'not recorded'),
+             '## State', 'Changed (uncommitted): ' + (', '.join(changed[:10]) if changed else 'none'),
+             'Last test: ' + (f"`{cmd}` -> {'ok' if ok else 'FAILED'}" if cmd and ok is not None else 'none in recent log'),
+             'Owner last asked: ' + (ASK or 'not found')[:160]]
+        open(os.path.join(hd, time.strftime('%Y-%m-%d') + '-auto.md'), 'w').write('\n'.join(h[:30]) + '\n')
     import hashlib  # newest note per project folder: a new chat (after a limit hit or a crash) reads just this small file
     open(os.path.join(OUT, 'last-' + hashlib.sha1(cwd.encode()).hexdigest()[:10] + '.md'), 'w').write(body)
 except Exception:

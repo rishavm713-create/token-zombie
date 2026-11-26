@@ -17,6 +17,13 @@ Paste these two lines into Claude Code (the chat box). That's it.
 /plugin install token-zombie@token-zombie
 ```
 
+Or from a terminal:
+
+```
+claude plugin marketplace add rishavm713-create/token-zombie
+claude plugin install token-zombie@token-zombie
+```
+
 **Our guarantee:** if it does not save you tokens, remove it in one command (`/plugin uninstall token-zombie`) and you have lost nothing.
 
 ![TOKEN ZOMBIE demo](docs/img/demo-live.svg)
