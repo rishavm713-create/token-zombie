@@ -1,4 +1,4 @@
-Archived 2026-11-24: out of current scope.
+Owner decision, reaffirmed 2026-11-24 (BRANDING.md section 6): TZ Core stays MIT in this repo; TZ Studio is a possible future product in a separate repo with its own licence. No Studio work happens here. Prices below are planning notes, not published.
 
 # TZ Core / TZ Studio: open-core decision (2026-11-24)
 TZ Studio vision, scope and open questions: [STUDIO-VISION.md](STUDIO-VISION.md) (PARKED, out of current scope).
