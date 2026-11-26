@@ -161,6 +161,11 @@ try:
         _diag('ledger', ev)
     try:  # live ledger: skill states, agent lifecycle, conservative dedupe (advice only)
         import tzlive
+        if ev in ('PreModelSwitch', 'PostModelSwitch'):  # context size at the switch: a model change re-reads it uncached (EST)
+            try:
+                data['tz_ctx_tokens'] = used_tokens(data)
+            except Exception:
+                pass
         LIVE[0] = tzlive.on_event(data) or ''
         if LIVE[0] and ev == 'PreToolUse' and not advice('dup_advice'):
             LIVE[0] = ''

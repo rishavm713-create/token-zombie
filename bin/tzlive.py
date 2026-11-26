@@ -196,7 +196,7 @@ def on_event(data, now=None):
             _bump(s.setdefault('events', {}), 'tool_batches')
         elif ev in ('PreModelSwitch', 'PostModelSwitch'):  # attempt vs actual model, both recorded as given by the host
             m = str(data.get('model') or data.get('new_model') or data.get('to') or '')[:60]
-            s.setdefault('models', []).append(dict(t=int(now), ev=ev, model=m or 'not-in-payload'))
+            s.setdefault('models', []).append(dict(t=int(now), ev=ev, model=m or 'not-in-payload', ctx=int(data.get('tz_ctx_tokens') or 0)))
             s['models'] = s['models'][-20:]
         elif ev in ('WorktreeCreate', 'WorktreeRemove'):
             w = str(data.get('worktree_path') or data.get('path') or data.get('name') or '?')[:120]
