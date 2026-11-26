@@ -1,0 +1,1 @@
+{ "name": "tz-blast-radius", "version": "0.1.0", "description": "Warns before destructive Bash commands" }

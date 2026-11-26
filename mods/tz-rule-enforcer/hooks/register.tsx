@@ -20,7 +20,7 @@ export const register: Register = on => {
   })
   on('tool.call', { tool: 'Bash' }, async ($, e, next) => {
     const rules = ((await $.store.get('rules')) as string[] | undefined) ?? []
-    const cmd = String((e.input as { command?: string }).command ?? '')
+    const cmd = String(e.command ?? '')
     for (const src of rules) {
       let hit = false
       try { hit = new RegExp(src).test(cmd) } catch {}
