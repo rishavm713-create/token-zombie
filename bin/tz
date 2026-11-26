@@ -18,6 +18,7 @@ HELP = """tz <command> [args]
   planphase status|next|gate PLAN.md   phase-by-phase plan reading with a verify gate
   scope HOST... [--file F]             authorized-scope check (deny wins, default deny)
   logc [FILE] | rules explain|verify|list | depth <prompt>  staged runs, code search, usage, logs, safety rules, depth
+  te <args> | te backfill [--dry-run]            bundled TokenEconomizer CLI; backfill = import earlier sessions for every project now
   startup [N]                                    what a new chat loads (startup audit)
   optimize [--transcript F]                      duplicate reads / repeated commands in the chat log
   filter [--lines N] < text                      shrink noisy command output
@@ -241,6 +242,9 @@ def main(argv):
             return tzbench.main(rest)
         if c == 'startup':
             return run_script('tz-status.py', ['--startup', *rest])
+        if c == 'te':
+            import tzte
+            return tzte.main(rest)
         if c == 'mode':
             import tzmode
             return tzmode.main(rest)

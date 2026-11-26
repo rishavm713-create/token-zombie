@@ -12,6 +12,15 @@
             "timeout": 5
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/third_party/tokeneconomizer/scripts/te-hook\"",
+            "timeout": 20
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -22,6 +31,15 @@
             "type": "command",
             "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
             "timeout": 5
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/third_party/tokeneconomizer/scripts/te-hook\"",
+            "timeout": 60
           }
         ]
       }
@@ -45,6 +63,15 @@
             "type": "command",
             "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-start.py\"",
             "timeout": 5
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/third_party/tokeneconomizer/scripts/te-hook\"",
+            "timeout": 15
           }
         ]
       }
@@ -78,6 +105,15 @@
             "timeout": 5
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/third_party/tokeneconomizer/scripts/te-hook\"",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "SessionEnd": [
@@ -87,6 +123,15 @@
             "type": "command",
             "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
             "timeout": 5
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/third_party/tokeneconomizer/scripts/te-hook\"",
+            "timeout": 10
           }
         ]
       }
@@ -142,6 +187,15 @@
             "type": "command",
             "command": "sh \"${CLAUDE_PLUGIN_ROOT}/bin/tzpy\" \"${CLAUDE_PLUGIN_ROOT}/bin/tz-guard.py\"",
             "timeout": 5
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/third_party/tokeneconomizer/scripts/te-hook\"",
+            "timeout": 60
           }
         ]
       }
