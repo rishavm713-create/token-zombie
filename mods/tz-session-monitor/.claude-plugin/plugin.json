@@ -1,0 +1,1 @@
+{ "name": "tz-session-monitor", "version": "0.1.0", "description": "/sessions lists running Claude Code sessions: working, waiting or idle. Reads local files only." }

@@ -1,0 +1,1 @@
+{ "name": "tz-assumption-check", "version": "0.1.0", "description": "/assumptions asks Claude to list its guesses; /assumptions wrong 2 4 sends the wrong ones back. Only costs tokens when used." }

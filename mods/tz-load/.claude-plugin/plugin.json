@@ -1,0 +1,1 @@
+{ "name": "tz-load", "version": "0.1.0", "description": "/load <pack>|off <pack>|list: turn Token Zombie skill packs on or off through ~/.claude/skillpack." }

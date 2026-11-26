@@ -1,0 +1,1 @@
+{ "name": "tz-chat-thermometer", "version": "0.1.0", "description": "Status line showing chat size (cool/warm/hot at the owner's 100k rule) from turn usage. No model call." }

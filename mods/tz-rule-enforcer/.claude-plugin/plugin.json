@@ -1,0 +1,1 @@
+{ "name": "tz-rule-enforcer", "version": "0.1.0", "description": "/rule add <regex>: refuse Bash commands matching stored rules. Local, no model call." }

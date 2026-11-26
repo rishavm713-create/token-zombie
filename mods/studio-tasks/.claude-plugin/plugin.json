@@ -1,0 +1,1 @@
+{ "name": "studio-tasks", "version": "0.1.0", "description": "TZ Studio: /studio-tasks pane showing each Studio project's tasks and their status; reads files only when drawn." }

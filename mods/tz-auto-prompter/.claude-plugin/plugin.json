@@ -1,0 +1,1 @@
+{ "name": "tz-auto-prompter", "version": "0.1.0", "description": "/queue add <prompt>: prompts sent one by one after each turn finishes. Idle until used." }
