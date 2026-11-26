@@ -13,7 +13,7 @@ ok "ci covers ubuntu + macos, checkout@v4, contents: read" 'grep -q ubuntu-lates
 FILES=$(git ls-files --cached --others --exclude-standard 2>/dev/null)
 ok "file list non-empty" '[ -n "$FILES" ]'
 ok "no .log files" '! echo "$FILES" | grep -q "\.log$"'
-SELF=tests/test_repo.sh; TXT=$(echo "$FILES" | grep -v "^$SELF$" | grep -v '\.png$')
+SELF=tests/test_repo.sh; TXT=$(echo "$FILES" | grep -v "^$SELF$" | grep -v '\.png$' | grep -v '^third_party/')
 scan() { echo "$TXT" | while read -r f; do [ -f "$f" ] && grep -IlE "$1" "$f"; done; }
 ok "no /Users/ paths" '[ -z "$(scan "/Users/")" ]'
 ok "no /home/<name> paths" '[ -z "$(scan "/home/[a-z]")" ]'

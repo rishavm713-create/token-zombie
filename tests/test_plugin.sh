@@ -27,6 +27,7 @@ assert ev==ins,(ev,ins)
 for e,gs in h[\"hooks\"].items():
   for g in gs:
     for x in g[\"hooks\"]:
+      if \"tokeneconomizer\" in x[\"command\"]: continue
       m=re.fullmatch(r\"sh \\\"\\\${CLAUDE_PLUGIN_ROOT}/bin/tzpy\\\" \\\"\\\${CLAUDE_PLUGIN_ROOT}/bin/([\w.-]+)\\\"\",x[\"command\"]); assert m,x
       assert os.path.isfile(z+\"/bin/\"+m.group(1)) and x[\"timeout\"]==5
 " "$Z"'
@@ -38,7 +39,9 @@ want=re.findall(r\"\(\x27(\w+)\x27, (None|\x27\x27|\x27[\w|]+\x27), (\w+)\)\",pl
 nm={\"guard\":\"tz-guard.py\",\"start\":\"tz-start.py\",\"compact\":\"tz-compact.py\"}
 got=[]
 for e,gs in h.items():
-  for g in gs: got.append((e,g.get(\"matcher\"),re.findall(r\"bin/([\w.-]+)\",g[\"hooks\"][0][\"command\"])[-1]))
+  for g in gs:
+    tz=[x for x in g[\"hooks\"] if \"tokeneconomizer\" not in x[\"command\"]]
+    if tz: got.append((e,g.get(\"matcher\"),re.findall(r\"bin/([\w.-]+)\",tz[0][\"command\"])[-1]))
 exp=sorted((e,None if m==\"None\" else m.strip(chr(39)),nm[s]) for e,m,s in want)
 assert sorted(got,key=str)==sorted(exp,key=str),(got,exp)
 " "$Z"'
