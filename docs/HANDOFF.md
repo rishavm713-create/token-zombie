@@ -1,7 +1,7 @@
-# HANDOFF (authoritative, 2026-11-24 22:33, reason: ctx 80%)
+# HANDOFF (authoritative, 2026-11-26 21:11, reason: ctx 70%)
 Objective: TZ: complete capability plan
 Phase: build, then test
-Git: main@5b36bd6 (5b36bd6 README: drop tz map/xcheck/agent paragraphs from the main page); 14 uncommitted, 0 staged
+Git: main@01d0a11 (01d0a11 Offline daily handoff, README CLI install line, register test_autonote); 5 uncommitted, 0 staged
 ## Done
 - handoff integrity layer
 ## Partial (NOT complete)
@@ -13,20 +13,11 @@ Git: main@5b36bd6 (5b36bd6 README: drop tz map/xcheck/agent paragraphs from the 
 - policy engine
 - quality-adjusted optimization
 ## Uncommitted files
-- bin/tzmore.py (a7834d73ab:17139)
-- docs/BUILD-LOG.md (62442f8c44:1830)
-- docs/DEVELOPMENT-STATE.md (f4792ff1e7:316)
-- docs/HANDOFF.md (51928ecdb4:1178)
-- docs/LIMITATIONS.md (cd49c0e25d:5305)
-- docs/NEXT-SESSION.md (ba82d1b867:410)
-- docs/QUICKSTART.md (b77f1d843f:2118)
-- docs/index.html (61f477edbe:26021)
-- tests/test_cont.sh (7c0701b920:29358)
-- tests/test_cost.sh (04ecd78a9d:4641)
-- tests/test_gaps.sh (c51d21a699:10311)
-- tests/test_out.sh (7a74b9ea82:10888)
-- tests/test_rollback.sh (2949988c35:1406)
-- tests/measure_oss_wins.py (d0628bd5c3:3006)
+- docs/BUILD-LOG.md (0c405bb661:3476)
+- docs/DEVELOPMENT-STATE.md (d7244293a6:316)
+- docs/HANDOFF.md (d8d49c288a:1005)
+- docs/NEXT-SESSION.md (42e99acf82:410)
+- docs/OPEN-CORE-DECISION.md (ae20b73308:13965)
 ## Blockers / unresolved
 - none
 ## Errors and findings
