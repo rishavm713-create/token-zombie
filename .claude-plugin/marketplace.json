@@ -9,6 +9,131 @@
       "name": "token-zombie",
       "source": "./",
       "description": "Local-first token saver for Claude Code: guard hooks, supervisor, handoffs, optimizer, skill audit."
+    },
+    {
+      "name": "studio-tasks",
+      "source": "./mods/studio-tasks",
+      "description": "TZ Studio: /studio-tasks pane showing each Studio project's tasks and their status; reads files only when drawn."
+    },
+    {
+      "name": "tz-assumption-check",
+      "source": "./mods/tz-assumption-check",
+      "description": "/assumptions asks Claude to list its guesses; /assumptions wrong 2 4 sends the wrong ones back. Only costs tokens when used."
+    },
+    {
+      "name": "tz-auto-prompter",
+      "source": "./mods/tz-auto-prompter",
+      "description": "/queue add <prompt>: prompts sent one by one after each turn finishes. Idle until used."
+    },
+    {
+      "name": "tz-blast-radius",
+      "source": "./mods/tz-blast-radius",
+      "description": "Warns before destructive Bash commands"
+    },
+    {
+      "name": "tz-browser-saver",
+      "source": "./mods/tz-browser-saver",
+      "description": "Warns after repeated screenshots"
+    },
+    {
+      "name": "tz-cache-clock",
+      "source": "./mods/tz-cache-clock",
+      "description": "Warns when the prompt cache has gone cold"
+    },
+    {
+      "name": "tz-chat-thermometer",
+      "source": "./mods/tz-chat-thermometer",
+      "description": "Status line showing chat size (cool/warm/hot at the owner's 100k rule) from turn usage. No model call."
+    },
+    {
+      "name": "tz-design-picker",
+      "source": "./mods/tz-design-picker",
+      "description": "/design-picker writes a visual page of design styles to open and choose from. Static, no model call."
+    },
+    {
+      "name": "tz-effort-optimizer",
+      "source": "./mods/tz-effort-optimizer",
+      "description": "Suggests an effort level from the task wording"
+    },
+    {
+      "name": "tz-fake-data-mode",
+      "source": "./mods/tz-fake-data-mode",
+      "description": "/fake on|off: opt-in rule to use obvious placeholder data, never real personal data."
+    },
+    {
+      "name": "tz-folder-tracker",
+      "source": "./mods/tz-folder-tracker",
+      "description": "/here lists the other sessions in this same folder and their status so they do not undo each other. Local files only."
+    },
+    {
+      "name": "tz-handoff",
+      "source": "./mods/tz-handoff",
+      "description": "Writes the daily handoff note"
+    },
+    {
+      "name": "tz-idea-shelf",
+      "source": "./mods/tz-idea-shelf",
+      "description": "Token Zombie: park ideas per project with /idea instead of derailing the chat; zero cost until used."
+    },
+    {
+      "name": "tz-image-viewer",
+      "source": "./mods/tz-image-viewer",
+      "description": "Opens an image file in the system viewer"
+    },
+    {
+      "name": "tz-input-router",
+      "source": "./mods/tz-input-router",
+      "description": "Suggests model, effort and skill pack for a task"
+    },
+    {
+      "name": "tz-jargon-buster",
+      "source": "./mods/tz-jargon-buster",
+      "description": "/jargon <term or text>: one Haiku call explains it in plain words."
+    },
+    {
+      "name": "tz-load",
+      "source": "./mods/tz-load",
+      "description": "/load <pack>|off <pack>|list: turn Token Zombie skill packs on or off through ~/.claude/skillpack."
+    },
+    {
+      "name": "tz-next-steps",
+      "source": "./mods/tz-next-steps",
+      "description": "Suggests three next actions on request"
+    },
+    {
+      "name": "tz-plain-english",
+      "source": "./mods/tz-plain-english",
+      "description": "/plain on|off: opt-in plain-English reply rules (short words, summary last, next steps). Off by default so it adds no tokens."
+    },
+    {
+      "name": "tz-plan-progress",
+      "source": "./mods/tz-plan-progress",
+      "description": "Shows the work as a checklist on request"
+    },
+    {
+      "name": "tz-prompt-enhancer",
+      "source": "./mods/tz-prompt-enhancer",
+      "description": "Opt-in /enhance: one cheap Haiku call turns a rough prompt into a structured one (skills to load, questions first, done criteria). No cost until used."
+    },
+    {
+      "name": "tz-rule-enforcer",
+      "source": "./mods/tz-rule-enforcer",
+      "description": "/rule add <regex>: refuse Bash commands matching stored rules. Local, no model call."
+    },
+    {
+      "name": "tz-session-monitor",
+      "source": "./mods/tz-session-monitor",
+      "description": "/sessions lists running Claude Code sessions: working, waiting or idle. Reads local files only."
+    },
+    {
+      "name": "tz-subagent-model",
+      "source": "./mods/tz-subagent-model",
+      "description": "Runs search-type subagents on Haiku"
+    },
+    {
+      "name": "tz-theme-switcher",
+      "source": "./mods/tz-theme-switcher",
+      "description": "/skin paper|midnight|forest: switch the app look (desktop/mobile only; terminal draws none)."
     }
   ],
   "description": "TOKEN ZOMBIE: local-first token saver plugin for Claude Code."
