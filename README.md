@@ -6,7 +6,7 @@
 
 <p align="center">Claude Code token optimization: context management, usage tracking and session handoff in one local plugin.</p>
 
-<p align="center"><img src="https://img.shields.io/badge/tests-3693%20pass-7cfc00" alt="3693 tests pass"> <img src="https://img.shields.io/badge/made%20with-Claude%20Code-d97757" alt="Made with Claude Code"> <img src="https://img.shields.io/badge/macOS-supported-7cfc00" alt="macOS"> <img src="https://img.shields.io/badge/Linux-supported-7cfc00" alt="Linux"> <img src="https://img.shields.io/badge/Windows-beta-f0b429" alt="Windows beta"> <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-4c9a1a" alt="MIT"></a></p>
+<p align="center"><a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT"></a> <a href="docs/COMPAT.md"><img src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6?logo=windows" alt="Windows"></a> <a href="docs/COMPAT.md"><img src="https://img.shields.io/badge/macOS-supported-000000?logo=apple" alt="macOS"></a> <a href="https://claude.com/claude-code"><img src="https://img.shields.io/badge/Built%20on-Claude%20Code-D97757" alt="Built on Claude Code"></a> <a href="https://github.com/rishavm713-create/token-zombie/stargazers"><img src="https://img.shields.io/github/stars/rishavm713-create/token-zombie?style=social" alt="Stars"></a></p>
 
 ## 🚀 Install (30 seconds)
 
