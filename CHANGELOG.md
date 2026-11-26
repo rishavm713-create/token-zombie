@@ -1,5 +1,8 @@
 # Changelog
 ## Unreleased
+- Offline auto-note: a hook refreshes a small continuation note (git changes, last test, last ask, next step) after each turn and every 2 min of work, with no model call. A new chat in the same folder reads only that note, and only when work was left open (limit hit or crash). Switch: `TZ_FEAT_AUTO_NOTE=0`.
+- Model switches now record the chat size at the switch, so the uncached re-read cost is visible.
+- Fix: `tests/test_live.sh` sent an identical payload twice within 5 s and the hook dedupe dropped it (5 false failures); the test now sets `TZ_DEDUPE=0`.
 - Auto handoff at 100k tokens: the end-of-turn hint writes `handoffs/YYYY-MM-DD.md` (done / left / next, at most 30 lines) and tells the owner to start a fresh chat; the bar shows "Start a new chat · handoff saved".
 - Reading and searching go to cheap subagents (one line in the core rules); output trim now also covers stderr and Agent/Task results.
 

@@ -3,7 +3,7 @@
 Z="$(cd "$(dirname "$0")/.." && pwd)"; T="$(mktemp -d)"; H="$T/home"; pass=0; fail=0; mkdir -p "$H/.claude/skills/demo"
 ok() { if eval "$2"; then pass=$((pass+1)); else fail=$((fail+1)); echo "FAIL: $1"; fi; }
 echo -e "---\nname: demo\ndescription: d\n---" > "$H/.claude/skills/demo/SKILL.md"
-g() { echo "$1" | HOME="$H" TZ_SUP=0 python3 "$Z/bin/tz-guard.py"; }
+g() { echo "$1" | HOME="$H" TZ_SUP=0 TZ_DEDUPE=0 python3 "$Z/bin/tz-guard.py"; }
 ev() { echo "{\"session_id\":\"s1\",\"cwd\":\"$T\",\"hook_event_name\":\"$1\"${2:+,$2}}"; }
 L() { HOME="$H" python3 -c "import json;s=json.load(open('$H/.claude/token-zombie/live-s1.json'));print($1)"; }
 GREP='"tool_name":"Grep","tool_input":{"pattern":"foo","path":"."}'

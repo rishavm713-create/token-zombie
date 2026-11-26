@@ -114,7 +114,7 @@ try:
     cwd = d.get('cwd') or os.getcwd()
     changed = [l[3:] for l in git(cwd, 'status', '--porcelain', '-uall').splitlines() if l.strip()]
     cmd, ok, res, nxt = scan(d.get('transcript_path') or '')
-    note = [f"# Continuation ({time.strftime('%Y-%m-%d %H:%M')}, {d.get('trigger', '?')} compact) in {cwd}",
+    note = [f"# Continuation ({time.strftime('%Y-%m-%d %H:%M')}, " + ('auto-saved, no model call' if d.get('trigger') == 'auto' else f"{d.get('trigger', '?')} compact") + f") in {cwd}",
             'Changed files (git, uncommitted): ' + (', '.join(changed[:15]) + (f' +{len(changed) - 15} more' if len(changed) > 15 else '')
                                                      if changed else 'none or not a git repo'),
             'Last test: ' + (f"`{cmd}` -> {'exit 0' if ok else 'FAILED'}: {res}" if cmd and ok is not None else
@@ -129,6 +129,9 @@ try:
         tzhandoff.checkpoint(cwd)
     except Exception:
         pass
-    open(os.path.join(OUT, f"compact-{d.get('session_id', 'x')}.md"), 'w').write('\n'.join(note)[:1500] + '\n')
+    body = '\n'.join(note)[:1500] + '\n'
+    open(os.path.join(OUT, f"compact-{d.get('session_id', 'x')}.md"), 'w').write(body)
+    import hashlib  # newest note per project folder: a new chat (after a limit hit or a crash) reads just this small file
+    open(os.path.join(OUT, 'last-' + hashlib.sha1(cwd.encode()).hexdigest()[:10] + '.md'), 'w').write(body)
 except Exception:
     sys.exit(0)

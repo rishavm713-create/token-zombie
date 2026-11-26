@@ -2,7 +2,7 @@
 # Token-zombie lean start: inject only HANDOFF.md's top block (up to the first '---' line, max 15 lines)
 # and the head of the newest handoffs/*.md (max 30 lines), so a huge HANDOFF.md is never read whole.
 # source=compact: inject only the continuation note from tz-compact.py.
-import glob, json, os, sys
+import glob, json, os, sys, time
 
 TOP, DAILY, CAP = 15, 30, 2500  # lines, lines, chars
 # TZ core rules: one compact block merging the useful caveman, ponytail and Karpathy rules plus the owner's CLAUDE.md
@@ -139,6 +139,19 @@ try:
         if txt:
             print(json.dumps({'hookSpecificOutput': {'hookEventName': 'SessionStart', 'additionalContext': txt}}))
         sys.exit(0)
+    last = ''
+    if d.get('source') == 'startup' and _tzl.feature('auto_note'):  # previous chat in this folder ended unfinished (limit hit, crash): its small note only
+        try:
+            import hashlib
+            lp = os.path.expanduser('~/.claude/token-zombie/last-' + hashlib.sha1(cwd.encode()).hexdigest()[:10] + '.md')
+            if os.path.isfile(lp) and time.time() - os.path.getmtime(lp) < 48 * 3600:
+                t = open(lp).read()[:1500]
+                if 'Next step: all listed steps done' not in t:
+                    last = 'TOKEN ZOMBIE: previous chat here ended with work open (auto-saved note, ' + time.strftime('%d %b %H:%M', time.localtime(os.path.getmtime(lp))) + '). Continue from it; do not re-read the old chat.\n' + t
+        except Exception:
+            last = ''
+    if last:
+        parts.append(last)
     master = os.path.join(cwd, 'HANDOFF.md')
     if os.path.isfile(master):
         parts.append(f'## {master} (top block only)\n' + head(master, TOP, True))

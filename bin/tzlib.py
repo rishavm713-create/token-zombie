@@ -42,6 +42,7 @@ def advice(name):
 # mode "off" turns every feature off. Hook-side features only; commands (tz toolprune, tz mem, ...) always work on demand.
 FEATURES = {'banner': 1,           # one visible 'Token Zombie is on' line at session start (systemMessage); off = silent
             'cache_ttl_auto': 1,  # measured 1 h vs 5 min prompt-cache life (tzcont.cache_ttl)
+            'auto_note': 1,       # refresh the small offline continuation note after each turn / every 2 min of work (no model call)
             'dup_skeleton': 1,    # read_guard=deny: the deny carries the file skeleton instead of nothing
             'safety_net': 1,      # parsed destructive-command / secret-path checks (tzsafety) inside the policy engine
             'stuck_detect': 1,    # OpenHands-style stuck patterns (tzstuck) on tool results

@@ -233,6 +233,18 @@ try:
             _diag('compact', ev)
             if claim:
                 emit({'systemMessage': claim})
+    if ev in ('Stop', 'PostToolUse') and not data.get('agent_id'):  # offline note refresh: a limit hit or crash still leaves done/next on disk
+        try:
+            if _tzl.feature('auto_note'):
+                st = os.path.expanduser(f"~/.claude/token-zombie/notestamp-{data.get('session_id', 'x')}")
+                if not os.path.exists(st) or time.time() - os.path.getmtime(st) > (45 if ev == 'Stop' else 120):
+                    os.makedirs(os.path.dirname(st), exist_ok=True); open(st, 'w').close()
+                    import subprocess  # detached: never delays the hook; no model call
+                    pr = subprocess.Popen([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tz-compact.py')],
+                                          stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+                    pr.stdin.write(json.dumps(dict(data, trigger='auto')).encode()); pr.stdin.close()
+        except Exception:
+            _diag('autonote', ev)
     if ev == 'Stop':  # keep the fresh-chat saving in TOKENS SAVED current (scan of recent logs, at most every 5 min)
         try:
             import tzopt
