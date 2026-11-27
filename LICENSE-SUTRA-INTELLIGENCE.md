@@ -18,7 +18,13 @@ orchestration.
   commercial licence from Rishav Mishra.
 - Credit to "SUTRA INTELLIGENCE by Rishav Mishra" must be kept in any copy,
   fork or product that uses it.
-- Third-party components keep their own licences (see `NOTICE`).
+- Third-party components (the open-source projects collected in this
+  repository) may be used commercially, but only under their own licences (see
+  `NOTICE`). That permission covers those components alone. It does not
+  extend to Sutra Intelligence, the original ideas, or the way they are
+  combined.
+- All credit for the design, fine-tuning and the way the components work
+  together goes to SUTRA INTELLIGENCE by Rishav Mishra.
 
 Commercial licence requests: contact the owner via the GitHub profile
 rishavm713-create.
