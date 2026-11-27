@@ -4,7 +4,9 @@ import json, sys, datetime, pathlib
 p = pathlib.Path("docs/clones.json")
 d = json.loads(p.read_text()) if p.exists() else {"days": {}}
 t = json.load(sys.stdin)
-d["unique14"] = t["uniques"]  # unique cloners in GitHub's 14-day window (cannot be summed across days)
+# GitHub only gives uniques for a rolling 14 days and they cannot be summed without double counting,
+# so keep the highest value ever seen: a true lower bound that never goes down.
+d["unique14"] = max(d.get("unique14", 0), t["uniques"])
 for c in t["clones"]:
     day = c["timestamp"][:10]
     # keep the larger value: the newest partial day grows, older days are final
