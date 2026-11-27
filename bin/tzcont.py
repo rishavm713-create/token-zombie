@@ -973,9 +973,15 @@ def release_claims(sid):
     _claims_rw(rel)
 
 
+STALE_CHAT_S = 6 * 3600  # shortcut: fixed 6 h, make it a cfg key if owners want to tune it
+
+
 def idle_advice(data, used, gap, ttl=None):
     """UserPromptSubmit: idle past cache_ttl with a big history -> the prompt cache expired; once per gap. gap = seconds idle."""
     from tzlib import cfg
+    if gap >= STALE_CHAT_S:  # a chat left for hours is stale whatever its size: files/branch may have moved on
+        return (f'TOKEN ZOMBIE: chat idle {int(gap // 3600)} h, so it may be stale: re-check git status/branch and the '
+                f'newest handoff before acting on old context, or start a fresh chat')
     if used <= IDLE_MIN_USED or gap <= (ttl or cfg('cache_ttl')):
         return ''
     from tzlib import feature

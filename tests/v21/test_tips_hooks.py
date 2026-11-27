@@ -149,6 +149,7 @@ import tzcont
 line = tzcont.idle_advice({}, 50000, 900, 300)
 ok('idle: one line with offer', 'Fresh chat' in line and 'likely expired' in line and '\n' not in line)
 os.environ['TZ_FEAT_IDLE_COST'] = '0'
+ok('long idle (7 h) on a small chat: stale-chat line', 'may be stale' in tzcont.idle_advice({}, 100, 7 * 3600, 300) and tzcont.idle_advice({}, 100, 3600, 300) == '')
 ok('idle offer switchable', 'Fresh chat' not in tzcont.idle_advice({}, 50000, 900, 300))
 import tzlib
 ok('list config value', tzlib.cfg('size_soft') == [50000, 100000])
