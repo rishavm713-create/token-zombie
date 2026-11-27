@@ -148,6 +148,11 @@ claude plugin install token-zombie@token-zombie
 
 </details>
 
+### Compact long chats automatically (optional)
+```bash
+python3 bin/tz-autocompact.py        # shows the change, asks y/N, then applies; default 150000 tokens
+```
+
 ## 📊 In one test session
 
 | 📋 What we measured | Result |
