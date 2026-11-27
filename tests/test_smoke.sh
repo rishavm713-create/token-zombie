@@ -9,12 +9,13 @@ run() { o=$(TMPDIR="$T/tmp" TZ_PF_LIVE="$T/live.json" FAKE_LIVE="$T/live.json" T
   S="$T/ev-$1$2/smoke/smoke-summary.json"; }
 sm() { python3 -c "import json;d=json.load(open('$S'));print($1)"; }
 left() { ls "$T/tmp" | grep -c tzsmoke; }
+leftls() { ls -la "$T/tmp" 2>&1 | head -5; }
 run good
 ok "good: S1 S2 S3 S4 PASS" '[[ $o == *"S1 PASS"* && $o == *"S2 PASS"* && $o == *"S3 PASS"* && $o == *"S4 PASS"* && $o == *"PASS smoke run"* ]]'
 ok "good: model echoed a recall id that exists in the store" '[[ $o == *"S2 PASS"*"model echoed recall id True"* ]]'
 ok "good: summary ok, live unchanged, temp removed" '[ "$(sm "d[\"ok\"], d[\"live_config_unchanged\"], d[\"temp_removed\"]")" = "True True True" ]'
 ok "good: shared tokens counted across scenarios" '[ "$(sm "d[\"tokens\"]")" = 404 ]'
-ok "good: no temp dirs left" '[ "$(left)" = 0 ]'
+ok "good: no temp dirs left" '[ "$(left)" = 0 ] || { leftls >&2; false; }'
 run bash; ok "S2 used Bash: FAIL, stops before S3" '[[ $o == *"S2 FAIL"*"other tools ["*"Bash"* && $o != *"S3 "* && $o == *"NOT READY"* ]]'
 run noid; ok "S2 trimmed but model gave no id: FAIL" '[[ $o == *"S2 FAIL"*"echoed recall id False"* ]]'
 run leak; ok "S4 model saw the middle code word: FAIL" '[[ $o == *"S4 FAIL"*"forbidden text seen True"* ]]'

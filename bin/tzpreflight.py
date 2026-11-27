@@ -4,7 +4,7 @@
 # `tz preflight --validate D`           read-only check of a finished run: per arm status ok, 0 permission denials, >=1 file changed.
 # `tz preflight --smoke --yes [--evidence D]`  PAID (capped, shared 900k): S1 edit + command + acceptance; S2 Read, S3 WebFetch,
 #   S4 local MCP: the trimmed output must reach the model (it echoes the recall id). Never runs without --yes.
-import glob, json, os, shutil, subprocess, sys, tempfile
+import time, glob, json, os, shutil, subprocess, sys, tempfile
 
 D = os.path.dirname(os.path.abspath(__file__))
 Z = os.path.dirname(D)
@@ -256,8 +256,12 @@ def smoke(evidence, yes=False):
     except BaseException as e:  # Ctrl-C or a crash: still clean up and check live config below
         rows.append(('error', 'FAIL', f'{type(e).__name__}: {str(e)[:160]}'))
     finally:
-        for d in tmp:
-            shutil.rmtree(d, ignore_errors=True)
+        for d in tmp:  # retry: a just-killed child can still hold or recreate files for a moment (macOS/Windows runners)
+            for _ in range(8):
+                shutil.rmtree(d, ignore_errors=True)
+                if not os.path.exists(d):
+                    break
+                time.sleep(0.25)
         live_ok = live_sum() == before
     used = tzab.agg_used(ev)
     st = {n: s for n, s, _ in rows}
