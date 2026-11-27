@@ -21,7 +21,7 @@ const ST = { plugin: 'token-zombie', key: 'stats' } as const
 const FI = { plugin: 'token-zombie', key: 'files' } as const
 const AC = { plugin: 'token-zombie', key: 'acts' } as const
 const NO = { plugin: 'token-zombie', key: 'note' } as const
-const stats = atom(ST, { inp: 0, out: 0, cr: 0, cw: 0, ms: 0, turns: 0, spawns: 0, model: '' }, { shape: 'stats-1' })
+const stats = atom(ST, { inp: 0, out: 0, cr: 0, cw: 0, ms: 0, turns: 0, spawns: 0, model: '', last: 0, at: 0 }, { shape: 'stats-1' })
 const files = atom(FI, { sig: '', status: null, isStale: false, host: null, isHostFresh: false, mode: 'full', mood: null, newChat: 0 }, { shape: 'files-2' })
 const acts = atom(AC, [], { shape: 'acts-1' })
 const note = atom(NO, { label: '', lines: [], err: '' }, { shape: 'note-1' })
@@ -269,6 +269,8 @@ export const register: Register = on => {
         ms: s.ms + e.durationMs,
         turns: s.turns + 1,
         model: u.model || s.model,
+        last: u.input_tokens + u.cache_read_input_tokens + u.cache_creation_input_tokens, // chat size now: input side of the latest turn
+        at: Date.now(), // when the latest turn ended: drives the cache timer
       }))
     }
     return next(e)
@@ -307,18 +309,22 @@ export const register: Register = on => {
     const { Box, Text, Button } = $.ui.resolve(e)
     const f = await read($, files)
     const b = await read($, bar)
+    const stt = await read($, stats)
+    const cs = stt.last ?? 0
     const now = (await $.clock.now()) / 1000
+    const left = stt.at ? 300 - (now - stt.at / 1000) : 0 // shortcut: fixed 5-min cache life, 1-h TTL users see cold early
     const vs = visual(f, b, e.props.isWorking, now)
     const G = '#7cfc00'
+    const csColor = cs >= 100000 ? 'red' : cs >= 60000 ? 'yellow' : cs > 0 ? G : undefined
     const mode = f.mode.toUpperCase()
     const isOff = f.mode === 'off'
     const MC = MODE_COLOR[f.mode] ?? G
     const dot = vs === 'alert' ? 'yellow' : isOff || f.isStale ? 'gray' : G
     const nums: [string, string, string, boolean][] = [
-      ['agents', b.agents === null ? '—' : String(b.agents), 'AGENTS', false],
-      ['skills', b.skills === null ? '—' : String(b.skills), 'SKILLS USED', false],
+      ['ctx', cs > 0 ? big(cs) : '—', 'CHAT TOKENS', false], // owner 2026-11-27: the live chat size, coloured below
+      ['next', cs > 0 ? '~' + big(cs) : '—', 'NEXT MSG', false], // what the next message sends as input if the cache is cold
+      ['cache', stt.at ? (left > 0 ? Math.ceil(left / 60) + 'm' : 'cold') : '—', 'CACHE LEFT', false],
       ['saved', b.hasLedger || b.fresh?.tok ? big(b.saved + (b.fresh?.tok ?? 0)) : '0', 'TOKENS SAVED', true],
-      ['opts', String(b.opts), 'OPTIMIZATIONS', false],
     ]
     const expand = (
       <Button key="tz-expand" label="Open TOKEN ZOMBIE details" plain onPress={() => void open($)}>
@@ -336,7 +342,7 @@ export const register: Register = on => {
           </Text>
           {nums.map(([k, v, l, isG]) => (
             <Text key={`t-${k}`}>
-              <Text bold color={isG ? G : undefined}>{v}</Text>
+              <Text bold color={k === 'ctx' ? csColor : isG ? G : undefined}>{v}</Text>
               <Text dimColor> {l.toLowerCase()}</Text>
             </Text>
           ))}
@@ -371,7 +377,7 @@ export const register: Register = on => {
           </Text>
           {nums.map(([k, v, l, isG]) => (
             <Box key={`n-${k}`} flexDirection="column" alignItems="center" flexShrink={1}>
-              <Text weight="semibold" tabular color={isG ? G : undefined}>
+              <Text weight="semibold" tabular color={k === 'ctx' ? csColor : isG ? G : undefined}>
                 {v}
               </Text>
               <Text size="caption" dimColor wrap="truncate-end">
