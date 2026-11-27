@@ -56,7 +56,7 @@ def skill_find_hint(data):
             return ''
         open(state, 'a').write('skillfind ')
         return ('TOKEN ZOMBIE: no installed skill pack matches this task. If an installed skill does not already cover it, use the find-skills skill: '
-                '`npx skills find <query>`; install the best result with `npx skills add <owner/repo@skill> -y` only if it has >=1K installs '
+                '`npx skills find <query>`; install the best result with `npx skills add <owner/repo@skill> -g -y` only if it has >=1K installs '
                 'from a known owner, and say in one line what you installed. Otherwise skip and do the task.')
     except Exception:
         return ''
