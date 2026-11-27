@@ -6,7 +6,7 @@
 
 <p align="center">Claude Code token optimization: context management, usage tracking and session handoff in one local plugin.</p>
 
-<p align="center"><a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT"></a> <a href="docs/COMPAT.md"><img src="https://img.shields.io/badge/Windows-10%20%7C%2011%20beta-0078D6?logo=windows" alt="Windows (beta)"></a> <a href="docs/COMPAT.md"><img src="https://img.shields.io/badge/macOS-supported-000000?logo=apple" alt="macOS"></a> <a href="https://claude.com/claude-code"><img src="https://img.shields.io/badge/Built%20on-Claude%20Code-D97757" alt="Built on Claude Code"></a> <a href="https://github.com/rishavm713-create/token-zombie/stargazers"><img src="https://img.shields.io/github/stars/rishavm713-create/token-zombie?style=social" alt="Stars"></a></p>
+<p align="center"><a href="LICENSE"><img src="https://img.shields.io/badge/License-Non--commercial%20%2B%20third--party-orange.svg" alt="License: non-commercial for SUTRA originals; third-party parts keep own licences"></a> <a href="docs/COMPAT.md"><img src="https://img.shields.io/badge/Windows-10%20%7C%2011%20beta-0078D6?logo=windows" alt="Windows (beta)"></a> <a href="docs/COMPAT.md"><img src="https://img.shields.io/badge/macOS-supported-000000?logo=apple" alt="macOS"></a> <a href="https://claude.com/claude-code"><img src="https://img.shields.io/badge/Built%20on-Claude%20Code-D97757" alt="Built on Claude Code"></a> <a href="https://github.com/rishavm713-create/token-zombie/stargazers"><img src="https://img.shields.io/github/stars/rishavm713-create/token-zombie?style=social" alt="Stars"></a></p>
 
 ## 🚀 Install (30 seconds)
 
@@ -161,7 +161,7 @@ Noise is counted in characters, savings in tokens, and each number is labelled m
 
 ## 🧠 Built on SUTRA INTELLIGENCE
 
-TOKEN ZOMBIE is the open body. [SUTRA INTELLIGENCE](SUTRA-INTELLIGENCE.md) is the mind that makes it work together: the design, the fine-tuning and the way the parts combine. SUTRA INTELLIGENCE is proprietary (see [its licence](LICENSE-SUTRA-INTELLIGENCE.md)); the TOKEN ZOMBIE code here is MIT. [All products and repos](SUTRA-INTELLIGENCE.md#products).
+TOKEN ZOMBIE runs on open-source parts plus SUTRA originals. [SUTRA INTELLIGENCE](SUTRA-INTELLIGENCE.md) is the mind that makes it work together: the design, the fine-tuning and the way the parts combine. SUTRA INTELLIGENCE (the glue code, skills and mods) is NON-COMMERCIAL: free for personal use, no commercial use without a written licence (see [LICENSE](LICENSE)). The third-party open-source parts keep their own licences ([NOTICE](NOTICE)) and can be used separately. Earlier releases published as MIT stay MIT. [All products and repos](SUTRA-INTELLIGENCE.md#products).
 
 ## 📚 Learn more
 
