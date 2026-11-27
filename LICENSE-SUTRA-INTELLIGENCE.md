@@ -12,6 +12,12 @@ SUTRA INTELLIGENCE contains all the ideas and the engine that make TOKEN ZOMBIE
 work together as one system: the original design, fine-tuning, skills and
 orchestration.
 
+- The 15 skills and 28 mods that make up TOKEN ZOMBIE (`skills/` and `mods/`)
+  are original works of SUTRA INTELLIGENCE, copyright Rishav Mishra. TOKEN
+  ZOMBIE is built on Sutra Intelligence, and all credit for them goes to it.
+  Copies of these files already published in this repository were released
+  under the MIT licence and stay under it; the rest of Sutra Intelligence (the
+  engine and the ideas that tie everything together) is not released.
 - Personal use of TOKEN ZOMBIE is welcome.
 - Sutra Intelligence may not be copied, redistributed, or sold, and may not be
   used in or with a commercial product or service, without a separate written
