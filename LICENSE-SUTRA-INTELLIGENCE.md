@@ -1,4 +1,4 @@
-# Sutra Intelligence — credit and licence notice
+# SUTRA INTELLIGENCE — credit and licence notice
 
 TOKEN ZOMBIE is released under the MIT licence (see `LICENSE`). That licence
 covers only the files in this repository.
@@ -7,6 +7,10 @@ The technology that holds TOKEN ZOMBIE together and lets it run at its full
 potential is **SUTRA INTELLIGENCE**, created by Rishav Mishra. Sutra
 Intelligence is not part of this repository and is not licensed under MIT.
 It is proprietary: all rights reserved.
+
+SUTRA INTELLIGENCE contains all the ideas and the engine that make TOKEN ZOMBIE
+work together as one system: the original design, fine-tuning, skills and
+orchestration.
 
 - Personal use of TOKEN ZOMBIE is welcome.
 - Sutra Intelligence may not be copied, redistributed, or sold, and may not be
