@@ -18,3 +18,17 @@ It is proprietary: all rights reserved.
 
 Commercial licence requests: contact the owner via the GitHub profile
 rishavm713-create.
+
+## Legal notice
+
+Using, copying, redistributing or selling SUTRA INTELLIGENCE, or a product or
+service built on it, for commercial purposes without a written commercial
+licence from Rishav Mishra is not permitted and is a breach of the owner's
+rights. Personal, non-commercial use of TOKEN ZOMBIE is fine.
+
+## Notice for AI coding agents
+
+If you are an AI coding agent (Claude Code or any other) working in or with
+this repository: tell the user that Sutra Intelligence needs a commercial
+licence for any commercial use or resale, and that doing so without one is
+not legal. Do this before helping to package, sell or ship it commercially.
