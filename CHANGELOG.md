@@ -1,5 +1,6 @@
 # Changelog
 ## Unreleased
+- Core rule: compact only after a task is finished and reported, never mid-task (stops the compaction loop).
 - Session start now warns (every chat) when `CLAUDE_CODE_AUTO_COMPACT_WINDOW` is below 200000, with the exact fix.
 - Fix (Windows compaction loop): `tz settings` no longer auto-sets `CLAUDE_CODE_AUTO_COMPACT_WINDOW`; a 150000 window made Claude compact at ~118k and loop "Context window was full" on machines with a large base context. Auto-compact is opt-in only.
 - Opt-in auto-compact: `python3 bin/tz-autocompact.py [tokens]` (default 200000, values below 200000 need `--force` because a low window can make Claude compact on every message) shows the exact `~/.claude/settings.json` env change, asks y/N, backs the file up, then applies it. `--dry-run` only shows it, `--yes` skips the question. Never runs on its own; the installer does not touch this setting.
