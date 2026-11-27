@@ -1,0 +1,1 @@
+{ "name": "tz-danger-guard", "version": "0.1.0", "description": "Blocks destructive Bash by default: rm -rf on / or ~. Local, no model call." }

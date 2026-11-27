@@ -1,0 +1,1 @@
+{ "name": "tz-turn-nudge", "version": "0.1.0", "description": "Counts turns; toasts a handoff reminder every 25 turns so chats stay small. No model call." }

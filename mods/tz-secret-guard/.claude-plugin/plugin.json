@@ -1,0 +1,1 @@
+{ "name": "tz-secret-guard", "version": "0.1.0", "description": "Blocks Bash commands that print or send secrets (.env, keys, tokens). Local, no model call." }

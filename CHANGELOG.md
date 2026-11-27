@@ -1,5 +1,6 @@
 # Changelog
 ## Unreleased
+- 4 new mods (30 in total): `tz-secret-guard` (blocks commands that would expose secrets), `tz-danger-guard` (blocks destructive commands; `/danger off|on`), `tz-turn-nudge` (toast every N turns to save a handoff; `/nudge <turns>`), `tz-auto-checkpoint` (`/checkpoint` shows the last prompt to resume from). Website updated.
 - The 24 `mods/` ship with the plugin: `plugin.json` lists them as dependencies and `marketplace.json` registers each, so `claude plugin install token-zombie@token-zombie` installs them all (checked in a clean config dir).
 - Skills `careful-zones` and `breaker-agent` added (from TZ Studio).
 - Fix: `test_cont` and `test_out` set `TZ_DEDUPE=0`; the 5 s hook dedupe swallowed their repeated payloads (8 false failures).
