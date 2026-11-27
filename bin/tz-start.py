@@ -18,7 +18,7 @@ LEAN = ('TOKEN ZOMBIE core rules (lean rules). Replies: answer first, terse; no 
         'loop until it passes. Review, audit and commit skills only on demand. '
         'Reading, searching and bulk-scanning go to a cheap subagent (Agent with model haiku for search, sonnet for analysis); the main chat only wires and checks. '
         'Advisor (only if "Advisor Tool" is on): consult it only for hard work: a design choice between approaches, the same error twice, '
-        'a multi-file build, or before declaring a big task done. Never for small edits, questions or lookups. Compaction: never compact or suggest /compact mid-task; only after the task is finished and its result is reported, then say once: Type /compact now. '
+        'a multi-file build, or before declaring a big task done. Never for small edits, questions or lookups. Compaction: never compact or suggest /compact mid-task; only after the task is finished and its result is reported, then say once: Type /compact now. If the next task is big (several independent parts), suggest new sessions for the parts instead of one long chat. '
         'Mark a deliberate shortcut in a code comment as `shortcut: <limit>, <when to upgrade>`; never cut input '
         'validation or data-loss error handling. '
         'End with one line: what you skipped or did not check.')
