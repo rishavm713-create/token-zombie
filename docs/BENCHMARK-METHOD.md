@@ -89,3 +89,9 @@ Per-arm and per-scenario saved / injected / net / FP / FN are in the report.
 Provider tokens (input, output, cache read, cache write), cost, cache hits, model behaviour (whether it follows advice or re-reads 1/5),
 task success, answer quality, turn count, real-session frequency of each scenario. No percentage or token saving may be claimed from this matrix.
 Those need the paid A/B (`tz ab`, `bin/tzab.py`, protocol above). It spends the owner's usage, **needs the owner's approval, and was not run**.
+
+## Saving estimate (2026-11-27) — labelled
+- MEASURED: 0.58% net input-equivalent on 1,025 real chats (offline replay, this machine). Covers output trimming, repeat-read stubs and the like that replay can see.
+- NOT MEASURED: the 30 mods, skills, and backend features (handoff, budget, tool pruning, model advice). They save by avoiding waste (long chats, loops, unused tools), which an offline replay of old chats cannot see.
+- ESTIMATE: no honest percentage can be derived from the measured number alone. The only credible figure for the full stack comes from `tz ab` (same task, with and without TZ). Until that is run, the public claim stays: "measured 0.58%; full-stack saving unmeasured; no fixed saving promised".
+- The 5,000,000-token single-session figure is owner-reported and unverified.
