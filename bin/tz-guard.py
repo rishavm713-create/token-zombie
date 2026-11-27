@@ -33,7 +33,7 @@ def pack_hint(data):
     except Exception:
         pass
     return ('TOKEN ZOMBIE (suggestion): skill pack(s) that match words in this prompt: ' + ', '.join(hit)
-            + '. Turn one on (~/.claude/skillpack on <pack>) only if the task really needs it and installed skills do not cover it; off when done.')
+            + '. If the task needs it: tz brief pack on <pack> (now); `tz brief done` turns it off.')
 
 def _diag(where, ev=''):
     """Append one local diagnostic line to ~/.claude/token-zombie/errors.log; never raises, never blocks the hook.
