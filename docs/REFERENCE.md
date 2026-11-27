@@ -85,7 +85,17 @@ Everything below also works on demand. You only need these when you want the det
 
 One line per command: [docs/COMMANDS.md](docs/COMMANDS.md). Every `tz` subcommand: `tz help`.
 
-CI: the badge above is live. The Windows CI job is known to fail and is deferred; macOS and Linux are the supported platforms.
+CI: the badge above is live; every push runs the full suite on Ubuntu, macOS and Windows.
+
+## Windows
+
+TOKEN ZOMBIE runs on Windows through [Git for Windows](https://gitforwindows.org) (Git Bash), which Claude Code already uses to run hooks.
+
+1. Install Git for Windows and Python 3.8+ (python.org installer or `winget install Python.Python.3.12`).
+2. Install the plugin in Claude Code: `/plugin marketplace add rishavm713-create/token-zombie`, then `/plugin install token-zombie`. Hooks call `sh bin/tzpy`, which finds `python3`, `python` or `py -3` for you.
+3. Run the CLI from Git Bash: `bash bin/tz status` (or add `bin` to PATH).
+4. Panel and tools start Python as `py -3`, so the Python launcher from the python.org installer must be present.
+5. State lives in `%USERPROFILE%\.claude\token-zombie`. File modes are not used on Windows.
 
 ## Safety
 

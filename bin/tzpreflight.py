@@ -178,6 +178,18 @@ def _recall_check(ev, name, r, st, tools, forbid=None):
     return ('PASS' if said else 'FAIL'), d
 
 
+def _rm_tree(d):
+    """rmtree that also works on Windows: clear read-only bits and retry while a child still holds a handle."""
+    import stat, time
+    def _w(fn, path, _exc):
+        try: os.chmod(path, stat.S_IWRITE); fn(path)
+        except OSError: pass
+    for _ in range(10):
+        shutil.rmtree(d, onerror=_w)
+        if not os.path.exists(d): return
+        time.sleep(0.3)
+
+
 def _s1(ev, cfg, tmp, salt):
     import tzab
     w = tempfile.mkdtemp(prefix='tzsmoke-'); tmp.append(w)
@@ -257,7 +269,7 @@ def smoke(evidence, yes=False):
         rows.append(('error', 'FAIL', f'{type(e).__name__}: {str(e)[:160]}'))
     finally:
         for d in tmp:
-            shutil.rmtree(d, ignore_errors=True)
+            _rm_tree(d)
         live_ok = live_sum() == before
     used = tzab.agg_used(ev)
     st = {n: s for n, s, _ in rows}

@@ -155,7 +155,8 @@ try:
     master = os.path.join(cwd, 'HANDOFF.md')
     if os.path.isfile(master):
         parts.append(f'## {master} (top block only)\n' + head(master, TOP, True))
-    daily = sorted(glob.glob(os.path.join(cwd, 'handoffs', '*.md')), key=os.path.getmtime)
+    daily = sorted((f for f in glob.glob(os.path.join(cwd, 'handoffs', '*.md')) if os.path.basename(f) != 'MASTER.md'),
+                    key=lambda f: (os.path.getmtime(f), f))  # MASTER.md is the memory file, written in the same instant: never the 'newest handoff'
     if daily:
         parts.append(f'## {daily[-1]} (newest handoff)\n' + head(daily[-1], DAILY, False))
     st = os.path.join(cwd, 'handoffs', 'STATE.md')

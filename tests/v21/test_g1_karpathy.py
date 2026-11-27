@@ -3,9 +3,10 @@ import io, json, os, subprocess, sys, tempfile, contextlib
 from harness import ok, done, Z
 import tzreplayrank as R
 
+WIN = os.name == 'nt'  # no exec bit; symlinks need a privilege: those checks are POSIX-only
 tmp = os.path.realpath(tempfile.mkdtemp())
 home = os.path.join(tmp, 'home'); os.makedirs(home)
-os.environ['HOME'] = home
+os.environ['HOME'] = os.environ['USERPROFILE'] = home
 os.environ.pop('TZ_SLICE_REVERT', None)
 
 
@@ -90,12 +91,16 @@ def git(*x):
 
 
 git('init', '-q')
+git('config', 'core.autocrlf', 'false')  # Windows git defaults to CRLF conversion; the test compares exact bytes
 w(os.path.join(repo, 'app.txt'), 'ok\n')
 w(os.path.join(repo, 'user.txt'), 'v1\n')
 w(os.path.join(repo, 'run.sh'), '#!/bin/sh\n', 0o755)
 w(os.path.join(repo, 'gone.txt'), 'g\n')
 w(os.path.join(repo, 'dir', 'a [1].txt'), 'a\n')
-os.symlink('app.txt', os.path.join(repo, 'ln'))
+try:
+    os.symlink('app.txt', os.path.join(repo, 'ln'))
+except OSError:
+    w(os.path.join(repo, 'ln'), 'app.txt')  # Windows without symlink privilege: plain file
 git('add', '-A'); git('commit', '-qm', 'i')
 # the user's own uncommitted work, staged and not, and an untracked file
 w(os.path.join(repo, 'user.txt'), 'staged\n'); git('add', 'user.txt')
@@ -118,8 +123,8 @@ def damage():
 def pristine():
     return (rd('app.txt') == b'ok\n' and rd('user.txt') == b'staged\nunstaged\n' and rd('notes.txt') == b'mine\x00\xff'
             and not os.path.exists('gone.txt') and not os.path.exists('new') and rd('dir/a [1].txt') == b'a\n'
-            and rd('run.sh') == b'#!/bin/sh\n' and os.stat('run.sh').st_mode & 0o111 and os.path.islink('ln')
-            and os.readlink('ln') == 'app.txt' and git('diff', '--cached') == index)
+            and rd('run.sh') == b'#!/bin/sh\n' and (WIN or (os.stat('run.sh').st_mode & 0o111 and os.path.islink('ln')
+            and os.readlink('ln') == 'app.txt')) and git('diff', '--cached') == index)
 
 
 rc, out = cli('slice', 'start', 'R1', '--', *check)
