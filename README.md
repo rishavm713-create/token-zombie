@@ -163,12 +163,4 @@ Noise is counted in characters, savings in tokens, and each number is labelled m
 
 🌐 [Website](https://rishavm713-create.github.io/token-zombie/) · 📖 [Full guide](docs/REFERENCE.md) · ✅ [Test evidence](docs/TEST_EVIDENCE.md) · 🔐 [Security](.github/SECURITY.md) · 🤝 [Contribute](.github/CONTRIBUTING.md)
 
-## ⚖️ Credit and branding
-
-TOKEN ZOMBIE is open source under the MIT License, © 2026 Rishav Mishra.
-
-- **Credit is required.** Any copy, fork or product built on this code must keep the copyright and license notice (`LICENSE`) and the credit to **TOKEN ZOMBIE** and **Rishav Mishra**.
-- **The brand is not part of the license.** "TOKEN ZOMBIE", the zombie mascot and the logo belong to Rishav Mishra. Do not use them as the name or look of another product, or present a rebranded copy as your own.
-- To sell or redistribute a modified version, name it differently and state clearly that it is based on TOKEN ZOMBIE by Rishav Mishra.
-
 Created by [Rishav Mishra](https://github.com/rishavm713-create) · 🌐 [Portfolio](https://rishavm713-create.github.io/) · ✂️ [EditSutra](https://editsutra.github.io/)
