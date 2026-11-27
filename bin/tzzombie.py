@@ -5,7 +5,7 @@
 # Visual states: idle | working | excited | alert | sleep  (see visual_state()).
 import time
 
-VSTATES = ('idle', 'working', 'excited', 'alert', 'sleep')
+VSTATES = ('idle', 'working', 'excited', 'alert', 'sleep', 'scratch')  # scratch = click pose only, never from visual_state()
 EDGE_Y, VB_W, VB_H = 170, 260, 320  # the card's top edge sits at y=170 of the viewBox
 
 DEFS = """<defs>
@@ -44,31 +44,33 @@ def _leg(m):
             '</g></g>')
 
 
-def _arm(m):
+def _arm(m, up=False):
     t = ' transform="translate(260 0) scale(-1 1)"' if m else ''
+    d = 'M80 122 Q38 112 96 90' if up else 'M80 122 Q30 128 48 164'  # up: hand raised to the cheek
     return (f'<g{t}>'
-            '<path d="M80 122 Q30 128 48 164" fill="none" stroke="#2c4a1b" stroke-width="20" stroke-linecap="round"/>'
-            '<path d="M80 122 Q30 128 48 164" fill="none" stroke="url(#tzSkinB)" stroke-width="16" stroke-linecap="round"/>'
+            f'<path d="{d}" fill="none" stroke="#2c4a1b" stroke-width="20" stroke-linecap="round"/>'
+            f'<path d="{d}" fill="none" stroke="url(#tzSkinB)" stroke-width="16" stroke-linecap="round"/>'
             '<path d="M58 126 Q44 136 46 150" fill="none" stroke="#d5f29b" stroke-width="2.4" stroke-linecap="round" opacity=".45"/>'
-            '<path d="M88 114 Q60 116 50 134 L58 140 L62 132 L68 139 L71 130 L80 134 Q84 122 92 120 Z" fill="url(#tzShirt)"/>'
-            '</g>')
+            + ('' if up else '<path d="M88 114 Q60 116 50 134 L58 140 L62 132 L68 139 L71 130 L80 134 Q84 122 92 120 Z" fill="url(#tzShirt)"/>')  # up: sleeve torn off, bare arm
+            + '</g>')
 
 
-def _hand(m):
+def _hand(m, up=False, wig=False):
     """Palm on top of the edge, four fingers curling over it toward the viewer."""
     t = ' transform="translate(260 0) scale(-1 1)"' if m else ''
     fingers = ''.join(
         f'<rect x="{x}" y="{EDGE_Y - 3}" width="7.2" height="{h}" rx="3.6" fill="url(#tzSkinB)" stroke="#2c4a1b" stroke-width="1"/>'
         f'<rect x="{x + 1.4}" y="{EDGE_Y - 3 + h - 5}" width="4.4" height="4" rx="1.6" fill="#d9dcb8" opacity=".85"/>'
         for x, h in ((42, 15), (49.5, 18), (57, 17), (64.5, 14)))
-    return (f'<g class="tz-hand"><g{t}><g transform="translate(-8 0)">'
+    pre, post = (('<g transform="translate(44 -78)"><g class="tz-scratchhand">', '</g></g>') if up else ('', ''))  # up: placed at the cheek, inner group is animated
+    return (f'<g class="tz-hand{" tz-wig" if wig else ""}"><g{t}>{pre}<g transform="translate(-8 0)">'
             f'<ellipse cx="56" cy="{EDGE_Y + 14}" rx="20" ry="5" fill="#000" opacity=".35" filter="url(#tzSoft)"/>'
             f'<ellipse cx="56" cy="{EDGE_Y - 6}" rx="17" ry="9.5" fill="url(#tzSkinB)" stroke="#2c4a1b" stroke-width="1.2"/>'
             f'<path d="M44 {EDGE_Y - 11} Q54 {EDGE_Y - 15} 66 {EDGE_Y - 11}" fill="none" stroke="#d5f29b" stroke-width="1.6" opacity=".5"/>'
             + fingers +
             f'<path d="M68 {EDGE_Y - 9} Q76 {EDGE_Y - 8} 74 {EDGE_Y - 1}" fill="none" stroke="#2c4a1b" stroke-width="5" stroke-linecap="round"/>'
             f'<path d="M68 {EDGE_Y - 9} Q76 {EDGE_Y - 8} 74 {EDGE_Y - 1}" fill="none" stroke="url(#tzSkinB)" stroke-width="3.4" stroke-linecap="round"/>'
-            '</g></g></g>')
+            f'</g>{post}</g></g>')
 
 
 def _torso():
@@ -171,12 +173,36 @@ def _head(vs):
 
 def svg_zombie(vs='idle'):
     vs = vs if vs in VSTATES else 'idle'
+    sc = vs == 'scratch'
     return (f'<svg class="tz-zombie tz-{vs}" viewBox="0 0 {VB_W} {VB_H}" role="img" aria-label="TOKEN ZOMBIE mascot: {vs}">'
-            + DEFS +
+            + DEFS + (SCRATCH_DEFS if sc else '') +
+            ('<rect x="-40" y="-20" width="340" height="360" fill="url(#tzVig)" filter="url(#tzBlurBg)"/>' if sc else '') +
             f'<ellipse cx="130" cy="{EDGE_Y + 8}" rx="100" ry="10" fill="#000" opacity=".5" filter="url(#tzSoft)"/>'
             f'<path d="M8 {EDGE_Y} H252" stroke="#9dff3a" stroke-opacity=".22" stroke-width="1.2"/>'
-            + _leg(False) + _leg(True) + _torso() + _arm(False) + _arm(True) + _head(vs) + _hand(False) + _hand(True)
-            + '</svg>')
+            + _leg(False) + _leg(True) + _torso() + _arm(False, sc) + _arm(True) + _head('idle' if sc else vs) + _hand(False, sc) + _hand(True, wig=sc)
+            + (CLAW if sc else '') + '</svg>')
+
+
+# click pose extras: a dark-red blurred vignette around him, three claw slashes, three thin blood drips
+SCRATCH_DEFS = ('<defs><radialGradient id="tzVig" cx="50%" cy="45%" r="60%"><stop offset=".35" stop-color="#2a0508" stop-opacity="0"/>'
+                '<stop offset="1" stop-color="#2a0508" stop-opacity=".6"/></radialGradient>'
+                '<filter id="tzBlurBg"><feGaussianBlur stdDeviation="9"/></filter></defs>')
+CLAW = ('<g class="tz-claw">'
+        + ''.join(f'<path d="M{x} 34 L{x - 30} 156" fill="none" stroke="#7d0a12" stroke-width="5.5" stroke-linecap="round"/>'
+                  f'<path d="M{x} 34 L{x - 30} 156" fill="none" stroke="#e0242f" stroke-width="2.4" stroke-linecap="round"/>' for x in (168, 188, 208))
+        + ''.join(f'<path class="tz-drip" d="M{x - 30} 156 L{x - 30} {y}" fill="none" stroke="#c4161f" stroke-width="2" stroke-linecap="round"/>'
+                  f'<circle class="tz-drip" cx="{x - 30}" cy="{y + 3}" r="2.6" fill="#c4161f"/>' for x, y in ((168, 178), (188, 168), (208, 186)))
+        + '</g>')
+
+
+def claw_file():
+    """Wide transparent overlay for the click pose: three claw slashes across the whole bar with a few thin blood drips (the bar width is not known, so it is drawn wide and left-anchored)."""
+    sl = ''.join(f'<path d="M{x} 2 L{x - 34} 96" fill="none" stroke="#7d0a12" stroke-width="6" stroke-linecap="round"/>'
+                 f'<path d="M{x} 2 L{x - 34} 96" fill="none" stroke="#e0242f" stroke-width="2.6" stroke-linecap="round"/>' for x in (150, 176, 202))
+    dr = ''.join(f'<path d="M{x - 34} 96 L{x - 34} {y}" fill="none" stroke="#c4161f" stroke-width="2" stroke-linecap="round"/>'
+                 f'<circle cx="{x - 34}" cy="{y + 3}" r="2.6" fill="#c4161f"/>' for x, y in ((150, 112), (176, 106), (202, 116)))
+    return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 124" width="400" height="124" role="img" aria-label="claw marks">'
+            + sl + dr + '</svg>')
 
 
 CSS = """
@@ -220,6 +246,13 @@ CSS = """
 .tz-sleep .tz-torso{animation:tzBreath 6s ease-in-out infinite}
 .tz-sleep .tz-halo{opacity:.25}
 .tz-sleep .tz-z text{animation:tzZ 3.2s ease-in-out infinite}.tz-sleep .tz-z text+text{animation-delay:1.6s}
+@keyframes tzScratch{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(14deg)}}
+.tz-scratch .tz-scratchhand{transform-origin:48px 170px;animation:tzScratch .3s ease-in-out infinite}
+.tz-scratch .tz-head{animation:tzShake .5s ease-in-out infinite}
+@keyframes tzWig{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+@keyframes tzDrip{0%{transform:translateY(0);opacity:1}100%{transform:translateY(7px);opacity:.55}}
+.tz-scratch .tz-wig{transform-origin:212px 170px;animation:tzWig .4s ease-in-out infinite}
+.tz-scratch .tz-drip{animation:tzDrip 1.4s ease-in infinite}
 @media (prefers-reduced-motion:reduce){.tz-zombie *{animation:none!important}}
 """
 
@@ -263,3 +296,4 @@ if __name__ == '__main__':  # python3 bin/tzzombie.py assets/  -> writes zombie-
     os.makedirs(out, exist_ok=True)
     for v in VSTATES:
         open(os.path.join(out, f'zombie-{v}.svg'), 'w').write(svg_file(v))
+    open(os.path.join(out, 'zombie-claw.svg'), 'w').write(claw_file())

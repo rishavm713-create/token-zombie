@@ -82,6 +82,8 @@ def _fit(txt):
 
 def _warn():
     """HARD RULE: one line when this plugin checkout is not on main or panel files are edited, so a stale/broken bar load is visible. Silent outside git."""
+    if os.environ.get('TZ_NO_WARN') == '1':  # tests: the size limit must not depend on this checkout's git state
+        return ''
     try:
         import subprocess
         root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')

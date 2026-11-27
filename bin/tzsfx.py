@@ -24,6 +24,21 @@ def tone(f, s, gain=.35):
     return out
 
 
+def groan():
+    """Zombie groan for a mascot click: low voice (95 -> 55 Hz) with a slow wobble, rough harmonics, a little noise. Deterministic."""
+    n, seed, ph, out = int(RATE * 1.1), 12345, 0.0, []
+    for i in range(n):
+        t = i / RATE
+        f = 95 - 40 * (t / 1.1) + 6 * math.sin(2 * math.pi * 7 * t)
+        ph += 2 * math.pi * f / RATE
+        seed = (seed * 1103515245 + 12345) & 0x7fffffff
+        noise = seed / 0x7fffffff - .5
+        v = math.sin(ph) + .6 * math.sin(2 * ph) + .4 * math.sin(3 * ph) + .25 * noise
+        env = min(1, i / 1500) * min(1, (n - i) / (n * .45))
+        out.append(int(32767 * .45 * env * v / 2.2))
+    return out
+
+
 def main(out):
     os.makedirs(out, exist_ok=True)
     for mode, notes in NOTES.items():
@@ -33,6 +48,12 @@ def main(out):
             w.setsampwidth(2)
             w.setframerate(RATE)
             w.writeframes(struct.pack(f'<{len(pcm)}h', *pcm))
+    pcm = groan()
+    with wave.open(os.path.join(out, 'groan.wav'), 'wb') as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(RATE)
+        w.writeframes(struct.pack(f'<{len(pcm)}h', *pcm))
 
 
 if __name__ == '__main__':

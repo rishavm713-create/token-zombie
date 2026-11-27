@@ -212,6 +212,22 @@ test('slim bar: one row on terminal, no feed, unknowns as dashes', async ($, on)
   await ui.unmount()
 })
 
+test('clicking the mascot plays the groan and shows the scratch pose', async ($, on) => {
+  world(on, { 'zombie-sleep.svg': '<svg>sleep</svg>', 'zombie-scratch.svg': '<svg>scratch</svg>' })
+  const clips: any[] = []
+  on('audio.play', (_: any, e: any) => {
+    clips.push(e.clip)
+    return { value: undefined }
+  })
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  const ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
+  expect((await ui.find({ type: 'Svg' }))?.props.source).not.toBe('<svg>scratch</svg>')
+  await ui.press({ plugin: 'token-zombie', key: 'tz-poke' })
+  expect(clips).toEqual([{ asset: 'sounds/groan.wav' }])
+  expect((await ui.find({ type: 'Svg' }))?.props.source).toBe('<svg>scratch</svg>')
+  await ui.unmount()
+})
+
 test('slim bar on desktop: real numbers, green saved, svg mascot, chevron opens the pane', async ($, on) => {
   const opened: string[] = []
   world(

@@ -105,7 +105,7 @@ for J in '{"hook_event_name":"SubagentStart","session_id":"roi1","agent_id":"r1"
 o=$(HOME="$H" python3 "$Z/bin/tz" live roi --session roi1); ok "agent ROI: cost joined by agent_id, small spawn flagged" '[[ $o == *"1 agents"* && $o == *"calls 1"* && $o == *small* ]]'
 printf '# Continuation x\nChanged files (git, uncommitted): bin/tzlive.py, bin/tzout.py\nOwner last asked: verify compaction summaries\n' > "$H/.claude/token-zombie/compact-cv1.md"
 g '{"hook_event_name":"PostCompact","session_id":"cv1","trigger":"auto","compact_summary":"unrelated text"}' >/dev/null
-o=$(g '{"hook_event_name":"UserPromptSubmit","session_id":"cv1","prompt":"go"}'); ok "weak compaction summary: one advice naming the note" '[[ $o == *"compaction summary kept only"* && $o == *compact-cv1.md* ]]'
+o=$(TZ_COMPACT_CHECK=1 g '{"hook_event_name":"UserPromptSubmit","session_id":"cv1","prompt":"go"}'); ok "weak compaction summary: one advice naming the note" '[[ $o == *"compaction summary kept only"* && $o == *compact-cv1.md* ]]'
 o=$(g '{"hook_event_name":"UserPromptSubmit","session_id":"cv1","prompt":"go"}'); ok "compaction advice only once" '[[ $o != *"compaction summary kept only"* ]]'
 g '{"hook_event_name":"PostCompact","session_id":"cv2","trigger":"auto"}' >/dev/null
 ok "no summary text: verdict unknown, never guessed" '[ "$(HOME="$H" python3 -c "import json;print(json.load(open(\"$H/.claude/token-zombie/live-cv2.json\"))[\"compact\"][-1][\"verdict\"])")" = unknown ]'

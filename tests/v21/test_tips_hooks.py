@@ -143,7 +143,8 @@ ok('tz defaults is a dry run', open(os.path.join(HOME, '.claude', 'settings.json
 rc, out = tz('defaults', 'apply', '--yes')
 ok('tz defaults apply', rc == 0 and open(os.path.join(HOME, '.claude', 'settings.json')).read() != settings)
 rc, out = tz('defaults', 'restore')
-ok('tz defaults restore', rc == 0 and json.loads(open(os.path.join(HOME, '.claude', 'settings.json')).read()) == {})
+_after = json.loads(open(os.path.join(HOME, '.claude', 'settings.json')).read())  # TZ's own start-up settings (thinking cap, tool search) stay; only the keys 'defaults apply' set must go
+ok('tz defaults restore', rc == 0 and 'model' not in _after and 'CLAUDE_CODE_SUBAGENT_MODEL' not in (_after.get('env') or {}))
 
 import tzcont
 line = tzcont.idle_advice({}, 50000, 900, 300)

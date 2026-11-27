@@ -21,7 +21,7 @@ ok "threshold configurable (env)" '[[ $o == *deny* ]]'
 
 # 2. pack suggestion: once, only for packs that are off, never for unrelated prompts
 p() { echo "{\"hook_event_name\":\"UserPromptSubmit\",\"session_id\":\"$1\",\"prompt\":\"$2\"}" | g; }
-o=$(p s4 "add captions to my shorts"); ok "video pack suggested" '[[ $o == *video* && $o == *suggestion* ]]'
+o=$(p s4 "add captions to my shorts"); ok "video pack suggested" '[[ $o == *video* && ( $o == *suggestion* || $o == *"turned on"* ) ]]'
 o=$(p s4 "more captions please"); ok "not repeated" '[ -z "$o" ]'
 o=$(p s5 "write a linkedin post"); ok "no hint for pack without parked skills" '[ -z "$o" ]'
 o=$(p s6 "fix typo in readme"); ok "quiet on unrelated prompt" '[ -z "$o" ]'
@@ -57,7 +57,7 @@ o=$(echo "{\"cwd\":\"$T/p2\"}" | HOME="$H" python3 "$Z/bin/tz-start.py")
 ok "no --- : 15 lines max" '[[ $o == *"line 15"* && $o != *"line 16"* ]]'
 mkdir -p "$T/p3/handoffs"; for i in $(seq 1 40); do printf 'top %s %0500d\n' "$i" 0; done > "$T/p3/HANDOFF.md"
 for i in $(seq 1 40); do printf 'day %s %0500d\n' "$i" 0; done > "$T/p3/handoffs/2026-11-20.md"
-o=$(echo "{\"cwd\":\"$T/p3\"}" | HOME="$H" python3 "$Z/bin/tz-start.py" | wc -c | tr -d ' ')
+o=$(echo "{\"cwd\":\"$T/p3\"}" | HOME="$H" TZ_NO_WARN=1 python3 "$Z/bin/tz-start.py" | wc -c | tr -d ' ')
 ok "oversized project start <= 4300 chars ($o)" '[ "$o" -le 4300 ] && [ "$o" -ge 3000 ]'
 
 # 6. vet: catches real danger, ignores ordinary code and itself

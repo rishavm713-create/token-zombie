@@ -15,6 +15,7 @@ const zombie = (Text: any, bold = false) => 'ZOMBIE'.split('').map((c, i) => <Te
 const MODE_COLOR: Record<string, string | undefined> = { off: undefined, lite: '#5ad1ff', full: '#7cfc00', ultra: '#ff8a1f' }
 const TAGLINE = 'MAKE EVERY SINGLE TOKEN COUNT.'
 // sounds/mode-*.wav come from bin/tzsfx.py; never block or fail a mode switch on audio
+const groan = ($: any) => void $.audio.play({ asset: 'sounds/groan.wav' }, { gain: 0.7 }).catch(() => {})
 const sfx = ($: any, m: string) => void $.audio.play({ asset: `sounds/mode-${m}.wav` }, { gain: 0.6 }).catch(() => {})
 
 const ST = { plugin: 'token-zombie', key: 'stats' } as const
@@ -25,6 +26,7 @@ const stats = atom(ST, { inp: 0, out: 0, cr: 0, cw: 0, ms: 0, turns: 0, spawns: 
 const files = atom(FI, { sig: '', status: null, isStale: false, host: null, isHostFresh: false, mode: 'full', mood: null, newChat: 0 }, { shape: 'files-2' })
 const acts = atom(AC, [], { shape: 'acts-1' })
 const note = atom(NO, { label: '', lines: [], err: '' }, { shape: 'note-1' })
+const scratch = atom({ plugin: 'token-zombie', key: 'scratch' }, 0, { shape: 'scratch-1' }) // ms time of the last mascot click: scratch pose for 3 s
 const tick = atom({ plugin: 'token-zombie', key: 'tick' }, 0, { shape: 'tick-1' }) // written every poll so the cache countdown re-renders
 const BA = { plugin: 'token-zombie', key: 'bar' } as const
 const bar = atom(BA, { sig: '', agents: null, skills: null, saved: 0, opts: 0, hasLedger: false, recentAt: 0 } as Bar, { shape: 'bar-2' })
@@ -316,11 +318,13 @@ export const register: Register = on => {
     const f = await read($, files)
     const b = await read($, bar)
     await read($, tick)
+    const clickAt = await read($, scratch)
     const stt = await read($, stats)
     const cs = stt.last ?? 0
     const now = (await $.clock.now()) / 1000
     const left = stt.at ? (stt.ttl ?? 300) - (now - stt.at / 1000) : 0
     const vs = visual(f, b, e.props.isWorking, now)
+    const pose = clickAt && now * 1000 - clickAt < 3000 ? 'scratch' : vs // click pose only; the state itself still comes from chat size / saving events
     const G = '#7cfc00'
     const csColor = cs >= 100000 ? 'red' : cs >= 60000 ? 'yellow' : cs > 0 ? G : undefined
     const mode = f.mode.toUpperCase()
@@ -361,7 +365,8 @@ export const register: Register = on => {
     }
 
     const { Svg } = $.ui.resolve(e)
-    const src = await mascot($, vs)
+    const src = await mascot($, pose)
+    const claws = pose === 'scratch' ? await readOr($, `${$.plugin.root}/assets/zombie-claw.svg`) : ''
     // owner: no gap between head and the border: drop the empty top 60 units of the 260x385 art, same height => zombie ~18% bigger
     const crop = src && src.replace('viewBox="0 0 260 385"', 'viewBox="0 60 260 325"')
     const nextMode = MODES[(MODES.indexOf(f.mode as (typeof MODES)[number]) + 1) % MODES.length]
@@ -412,8 +417,32 @@ export const register: Register = on => {
           </Button>
         </Box>
         <Box key="tz-mascot" position="absolute" top={0} left={1}>
-          {src ? <Svg source={crop} alt={`TOKEN ZOMBIE mascot: ${vs}`} width={81} height={101} /> : <Text>🧟</Text>}
+          {src ? <Svg source={crop} alt={`TOKEN ZOMBIE mascot: ${pose}`} width={81} height={101} /> : <Text>🧟</Text>}
         </Box>
+        {claws ? (
+          <Box key="tz-claws" position="absolute" top={0} left={1}>
+            <Svg source={claws} alt="claw marks" width={400} height={124} />
+          </Box>
+        ) : null}
+        {src ? (
+          // a Button cannot hold an Svg, so a clear (blank-text) click target sits on top of the mascot
+          <Box key="tz-poke-box" position="absolute" top={0} left={1}>
+            <Button
+              key="tz-poke"
+              label="Poke the zombie"
+              plain
+              onPress={async () => {
+                groan($)
+                const t = await $.clock.now() // same clock the render compares against
+                await update($, scratch, () => t)
+                // back to the normal pose after 3 s; the 5 s poll would also do it, this just makes it prompt
+                if (typeof setTimeout === 'function') setTimeout(() => void update($, tick, () => Date.now()).catch(() => {}), 3100)
+              }}
+            >
+              {Array.from({ length: 5 }, () => '        ').join('\n')}
+            </Button>
+          </Box>
+        ) : null}
       </Box>
     )
   })

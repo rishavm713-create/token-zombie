@@ -57,5 +57,6 @@ printf '{"mode":"off"}' >"$S/config.json"
 ok "bar: mode off => dim pill + Off state" 'tz dash --out "$T/o.html" >/dev/null && grep -q "class=\"pill off\">OFF<" "$T/o.html" && grep -q "class=\"dot off\"" "$T/o.html"'
 rm -f "$S/config.json"
 ok "Mod mascot assets match bin/tzzombie.py (regen: python3 bin/tzzombie.py assets)" 'python3 "$Z/bin/tzzombie.py" "$T/as" && diff -r "$T/as" "$Z/assets" >/dev/null && grep -q "<style>" "$Z/assets/zombie-idle.svg" && [ $(wc -c <"$Z/assets/zombie-excited.svg") -lt 131072 ]'
+ok "mascot click: scratch pose (raised hand) + groan sound wired in the panel" 'grep -q tz-scratchhand "$Z/assets/zombie-scratch.svg" && [ -s "$Z/sounds/groan.wav" ] && grep -q "sounds/groan.wav" "$Z/hooks/panel.tsx" && grep -q "pose = clickAt" "$Z/hooks/panel.tsx" && ! python3 -c "import sys;sys.path.insert(0,\"$Z/bin\");import tzzombie as z;sys.exit(0 if z.visual_state({},\"IDLE\")==\"scratch\" else 1)"'
 ok "mascot override env for previews" 'TZ_MASCOT_STATE=alert tz dash --out "$T/a.html" >/dev/null && grep -q "tz-zombie tz-alert" "$T/a.html"'
 echo "dash2: pass $pass fail $fail"; rm -rf "$T"; [ $fail = 0 ]

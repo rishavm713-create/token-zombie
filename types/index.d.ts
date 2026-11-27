@@ -43,6 +43,8 @@ declare module 'claude-code' {
       acts: Shaped<Act[]>
       note: Shaped<Note>
       bar: Shaped<Bar>
+      tick: Shaped<number>
+      scratch: Shaped<number>
     }
   }
 }
