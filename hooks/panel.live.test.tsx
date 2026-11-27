@@ -51,7 +51,7 @@ test('bar numbers follow agent.list, skills invoked this session and ledger.json
     return all[all.findIndex(x => label.test(x.text)) - 1]?.text
   }
   expect(await val(/^CACHE WINDOW$/)).toBe('—')
-  expect(await val(/^CHAT TOKENS$/)).toBeDefined()
+  expect(await val(/^CHAT SIZE$/)).toBeDefined()
   expect(JSON.parse(w.writes['/h/.claude/token-zombie/agents-s1.json']!).running).toBe(1)
 
   // sources change; the next poll picks them up

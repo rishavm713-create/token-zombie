@@ -100,17 +100,36 @@ def _warn():
         return ''
 
 
+_TUT = {}
+def _tut():
+    """First start after install only: what each panel tile means (marker file gates it; cached so both _vis calls agree)."""
+    if 'v' not in _TUT:
+        _TUT['v'] = ''
+        try:
+            m = os.path.expanduser('~/.claude/token-zombie/tutorial-seen')
+            if not os.path.exists(m):
+                _TUT['v'] = ('Welcome to Token Zombie. Panel tiles: CHAT SIZE = tokens in this chat now (big = costly, start a fresh chat). '
+                             'NEXT MSG = what your next message sends if the cache went cold. CACHE WINDOW = minutes left before the prompt cache expires (cheap while open). '
+                             'TOKENS SAVED = tokens Token Zombie saved you. Details: tz gain')
+                os.makedirs(os.path.dirname(m), exist_ok=True)
+                open(m, 'w').write('1')
+        except Exception:
+            _TUT['v'] = ''
+    return _TUT['v']
+
+
 def _vis():
     """One user-visible line (systemMessage) so TZ shows in every UI, incl. the desktop app; feature banner, default on."""
     try:
         if not _tzl.feature('banner'):
             return _warn()
+        t = _tut()
         v = ''
         try:
             v = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.claude-plugin', 'plugin.json'))).get('version', '')
         except Exception:
             pass
-        return 'Token Zombie ' + (('v' + v + ' ') if v else '') + 'is on: saves tokens automatically. See savings: tz gain' + (' | ' + _warn() if _warn() else '')
+        return 'Token Zombie ' + (('v' + v + ' ') if v else '') + 'is on: saves tokens automatically. See savings: tz gain' + (' | ' + _warn() if _warn() else '') + ('\n' + t if t else '')
     except Exception:
         return ''
 

@@ -321,7 +321,7 @@ export const register: Register = on => {
     const MC = MODE_COLOR[f.mode] ?? G
     const dot = vs === 'alert' ? 'yellow' : isOff || f.isStale ? 'gray' : G
     const nums: [string, string, string, boolean][] = [
-      ['ctx', cs > 0 ? big(cs) : '—', 'CHAT TOKENS', false], // owner 2026-11-27: the live chat size, coloured below
+      ['ctx', cs > 0 ? big(cs) : '—', 'CHAT SIZE', false], // owner 2026-11-27: the live chat size, coloured below
       ['next', cs > 0 ? '~' + big(cs) : '—', 'NEXT MSG', false], // what the next message sends as input if the cache is cold
       ['cache', stt.at ? (left > 0 ? Math.ceil(left / 60) + 'm' : 'ended') : '—', 'CACHE WINDOW', false],
       ['saved', b.hasLedger || b.fresh?.tok ? big(b.saved + (b.fresh?.tok ?? 0)) : '0', 'TOKENS SAVED', true],

@@ -194,7 +194,7 @@ test('slim bar: one row on terminal, no feed, unknowns as dashes', async ($, on)
   const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
   expect(await ui.find({ type: 'Text', text: /^TOKEN ZOMBIE$/ })).toBeDefined()
   expect(await ui.find({ type: 'Text', text: /^FULL$/ })).toBeUndefined() // owner: no mode chip on the bar
-  expect(await ui.find({ type: 'Text', text: /— chat tokens/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /— chat size/ })).toBeDefined()
   expect(await ui.find({ type: 'Text', text: /— cache window/ })).toBeDefined()
   expect(await ui.find({ type: 'Text', text: /recent|none yet|supervisor|model/ })).toBeUndefined()
   expect(await ui.find({ type: 'Button', key: 'tz-expand' })).toBeDefined()
@@ -219,7 +219,7 @@ test('slim bar on desktop: real numbers, green saved, svg mascot, chevron opens 
   expect((await val(/^CACHE WINDOW$/))?.text).toBe('—') // no turn yet: dashes, never made-up numbers
   expect(await val(/^TOKENS SAVED$/)).toBeDefined()
   expect(await ui.find({ type: 'Text', text: /24H|· EST/ })).toBeUndefined() // label has no 24H · EST suffix
-  expect((await val(/^CHAT TOKENS$/))?.text).toBe('—') // no turn yet: dash, never a made-up number
+  expect((await val(/^CHAT SIZE$/))?.text).toBe('—') // no turn yet: dash, never a made-up number
   expect((await ui.find({ type: 'Button', key: 'tz-mode' }))?.props.label).toBe('ULTRA') // mode replaces the Open button; press cycles it
   expect(await ui.find({ type: 'Text', text: /\[EST\]/ })).toBeUndefined()
   const svg = await ui.find({ type: 'Svg' })
