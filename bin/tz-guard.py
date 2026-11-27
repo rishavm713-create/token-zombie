@@ -12,6 +12,33 @@ from tzlib import chat_tokens, cfg, LIMIT, HARD, advice
 from tzlib import PACKS  # skill pack keyword map, shared with tz route
 
 
+def pack_idle_off(data):
+    """Turn a pack off after 3 prompts in a row that do not match its words (task over). Fail open."""
+    import re
+    if os.environ.get('TZ_AUTOPACK') == '0':
+        return ''
+    try:
+        import tzbrief
+        on = tzbrief._packs()
+        if not on:
+            return ''
+        f = os.path.expanduser(f"~/.claude/token-zombie/packidle-{data.get('session_id', 'x')}.json")
+        idle = json.load(open(f)) if os.path.exists(f) else {}
+        text = (data.get('prompt') or '').lower()
+        off = []
+        for p in on:
+            idle[p] = 0 if re.search(PACKS.get(p, p), text) else idle.get(p, 0) + 1
+            if idle[p] >= 3:
+                off.append(p)
+        for p in off:
+            tzbrief.pack('off', p)
+            idle.pop(p, None)
+        json.dump(idle, open(f, 'w'))
+        return ('TOKEN ZOMBIE: skill pack(s) turned off, task looks done: ' + ', '.join(off)) if off else ''
+    except Exception:
+        return ''
+
+
 def pack_hint(data):
     import re
     if not os.path.exists(os.path.expanduser('~/.claude/skillpack')):
@@ -530,7 +557,7 @@ try:
             emit({'hookSpecificOutput': {'hookEventName': ev, 'additionalContext': cont}})
             sys.exit(0)
         if used < LIMIT:
-            hint = pack_hint(data) if advice('pack_hints') else ''
+            hint = ' '.join(x for x in (pack_idle_off(data), pack_hint(data) if advice('pack_hints') else '') if x)
             try:  # on-demand: optional capability the prompt needs is off
                 import tzondemand
                 w = tzondemand.want(data.get('prompt')) if advice('pack_hints') else []
