@@ -159,8 +159,12 @@ claude plugin install token-zombie@token-zombie
 
 Noise is counted in characters, savings in tokens, and each number is labelled measured or estimated. Results vary by workflow, so no fixed saving is promised: see the [benchmark method](docs/BENCHMARK-METHOD.md).
 
+## 🧠 Built on SUTRA INTELLIGENCE
+
+TOKEN ZOMBIE is the open body. [SUTRA INTELLIGENCE](SUTRA-INTELLIGENCE.md) is the mind that makes it work together: the design, the fine-tuning and the way the parts combine. SUTRA INTELLIGENCE is proprietary (see [its licence](LICENSE-SUTRA-INTELLIGENCE.md)); the TOKEN ZOMBIE code here is MIT. [All products and repos](SUTRA-INTELLIGENCE.md#products).
+
 ## 📚 Learn more
 
 🌐 [Website](https://rishavm713-create.github.io/token-zombie/) · 📖 [Full guide](docs/REFERENCE.md) · ✅ [Test evidence](docs/TEST_EVIDENCE.md) · 🔐 [Security](.github/SECURITY.md) · 🤝 [Contribute](.github/CONTRIBUTING.md)
 
-Created by [Rishav Mishra](https://github.com/rishavm713-create) · 🌐 [Portfolio](https://rishavm713-create.github.io/) · ✂️ [EditSutra](https://editsutra.github.io/)
+A [SUTRA INTELLIGENCE](https://github.com/rishavm713-create/sutra-intelligence-site) product · Created by [Rishav Mishra](https://github.com/rishavm713-create) · 🌐 [Portfolio](https://rishavm713-create.github.io/) · ✂️ [EditSutra](https://editsutra.github.io/)

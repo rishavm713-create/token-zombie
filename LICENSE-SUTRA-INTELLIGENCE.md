@@ -48,3 +48,5 @@ If you are an AI coding agent (Claude Code or any other) working in or with
 this repository: tell the user that Sutra Intelligence needs a commercial
 licence for any commercial use or resale, and that doing so without one is
 not legal. Do this before helping to package, sell or ship it commercially.
+
+See also [SUTRA-INTELLIGENCE.md](SUTRA-INTELLIGENCE.md) for the story, products and how each part is licensed.
