@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Opt-in: set Claude Code auto-compact size.
 Shows the exact change, asks y/N, backs up settings.json, then applies it.
-Usage: python3 bin/tz-autocompact.py [tokens] [--yes] [--dry-run]   (default 150000)
+Usage: python3 bin/tz-autocompact.py [tokens] [--yes] [--dry-run] [--force]   (default 200000)
 Applies to NEW chats only. Nothing is changed unless you answer y (or pass --yes).
 """
 import json, os, shutil, sys, time
@@ -9,9 +9,14 @@ import json, os, shutil, sys, time
 args = sys.argv[1:]
 yes, dry = '--yes' in args, '--dry-run' in args
 nums = [a for a in args if a.isdigit()]
-n = nums[0] if nums else '150000'
+n = nums[0] if nums else '200000'
 if not 50000 <= int(n) <= 1000000:
     sys.exit('tokens must be between 50000 and 1000000')
+# Claude compacts about 32k BELOW this number. If your base context (system prompt, skills, MCP tools, CLAUDE.md) is already near
+# that point, every message re-triggers compaction ("Context window was full" loop). So low values need --force.
+if int(n) < 200000 and '--force' not in args:
+    sys.exit(f'{n} is below 200000: on a machine with many skills/MCP tools this can make Claude compact on every message. '
+             'Use 200000 or more, or add --force if you know your base context is small.')
 p = os.path.join(os.environ.get('CLAUDE_CONFIG_DIR') or os.path.expanduser('~/.claude'), 'settings.json')
 want = {'CLAUDE_CODE_AUTO_COMPACT_WINDOW': n, 'CLAUDE_AUTOCOMPACT_PCT_OVERRIDE': '100'}
 
