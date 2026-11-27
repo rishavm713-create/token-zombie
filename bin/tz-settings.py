@@ -43,17 +43,32 @@ def revert():
     return added
 
 
+def loop_warn():
+    """Every session: a small auto-compact window makes Claude compact on every message ("Context window was full" loop)."""
+    try:
+        env = (json.load(open(P)).get('env') or {}) if os.path.exists(P) else {}
+        w = os.environ.get('CLAUDE_CODE_AUTO_COMPACT_WINDOW') or env.get('CLAUDE_CODE_AUTO_COMPACT_WINDOW')
+        if w and w.isdigit() and int(w) < 200000:
+            return (f'TOKEN ZOMBIE WARNING: CLAUDE_CODE_AUTO_COMPACT_WINDOW={w} is below 200000 and can make Claude compact on every '
+                    'message. Fix: delete that key (and CLAUDE_AUTOCOMPACT_PCT_OVERRIDE) from the "env" block of ' + P + ', or run: '
+                    'python3 bin/tz-autocompact.py 200000')
+    except Exception:
+        pass
+    return ''
+
+
 def auto():
-    """SessionStart: once per machine; returns a one-line note or ''."""
+    """SessionStart: loop warning every time; recommended settings once per machine. Returns a note or ''."""
+    w = loop_warn()
     if os.environ.get('TZ_SETTINGS_AUTO') == '0' or os.path.exists(MARK):
-        return ''
+        return w
     try:
         add = apply()
         os.makedirs(os.path.dirname(MARK), exist_ok=True)
         if not os.path.exists(MARK):
             json.dump({}, open(MARK, 'w'))
         return ('TOKEN ZOMBIE set in settings.json (new chats, backup made): ' + ', '.join(f'{k}={v}' for k, v in add.items())
-                + '. Undo: tz settings --revert') if add else ''
+                + '. Undo: tz settings --revert' + ('\n' + w if w else '')) if add else w
     except Exception:
         return ''
 
