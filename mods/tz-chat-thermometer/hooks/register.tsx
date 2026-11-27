@@ -6,8 +6,7 @@ export const register: Register = on => {
     const u = e.usage
     if (u) {
       const k = Math.round(((u.input_tokens ?? 0) + (u.cache_read_input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0)) / 1000)
-      const w = k >= 175 ? 'HOT stop' : k >= 100 ? 'hot, hand off' : k >= 60 ? 'warm' : 'cool'
-      $.ui.status(`chat ${k}k ${w}`)
+      // status line hidden (owner 2026-11-27): the chat size now lives in the TZ bar tile; only the 100k toast stays
       if (k >= 100 && k < 110) $.ui.toast(`Chat is ${k}k tokens: finish the task, then /compact or a fresh chat`)
     }
     return next(e)
