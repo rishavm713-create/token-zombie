@@ -196,3 +196,5 @@ memsearch (https://github.com/zilliztech/memsearch), MIT licence
 Copyright (c) 2025 Zilliz Inc.
 Used in: bin/tzmemsearch.py (chunking, cleaning, section extraction and incremental-index rules adapted from src/memsearch/chunker.py, core.py, cli.py, scanner.py, ported to Python).
 
+
+Sutra Intelligence: see LICENSE-SUTRA.md (separate proprietary licence; credit required).
