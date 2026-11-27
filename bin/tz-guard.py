@@ -39,6 +39,29 @@ def pack_idle_off(data):
         return ''
 
 
+def skill_find_hint(data):
+    """No installed pack matches a real task -> tell the model to use find-skills and install a trusted skill. Once per chat."""
+    import re
+    if os.environ.get('TZ_AUTOFIND') == '0':
+        return ''
+    try:
+        text = (data.get('prompt') or '').lower()
+        explicit = re.search(r'(find|install|get|add) (me )?(a |the )?skills?\b|is there a skill|skill for', text)
+        task = len(text) >= 40 and re.search(r'\b(make|build|create|design|generate|convert|analy[sz]e|automate|scrape|translate|summari[sz]e|deploy|edit)\b', text)
+        if not (explicit or task) or any(re.search(rx, text) for rx in PACKS.values()):
+            return ''
+        state = os.path.expanduser(f"~/.claude/token-zombie/packs-{data.get('session_id', 'x')}")
+        seen = open(state).read().split() if os.path.exists(state) else []
+        if 'skillfind' in seen:
+            return ''
+        open(state, 'a').write('skillfind ')
+        return ('TOKEN ZOMBIE: no installed skill pack matches this task. If an installed skill does not already cover it, use the find-skills skill: '
+                '`npx skills find <query>`; install the best result with `npx skills add <owner/repo@skill> -y` only if it has >=1K installs '
+                'from a known owner, and say in one line what you installed. Otherwise skip and do the task.')
+    except Exception:
+        return ''
+
+
 def pack_hint(data):
     import re
     if not os.path.exists(os.path.expanduser('~/.claude/skillpack')):
@@ -557,7 +580,7 @@ try:
             emit({'hookSpecificOutput': {'hookEventName': ev, 'additionalContext': cont}})
             sys.exit(0)
         if used < LIMIT:
-            hint = ' '.join(x for x in (pack_idle_off(data), pack_hint(data) if advice('pack_hints') else '') if x)
+            hint = ' '.join(x for x in (pack_idle_off(data), pack_hint(data) if advice('pack_hints') else '', skill_find_hint(data)) if x)
             try:  # on-demand: optional capability the prompt needs is off
                 import tzondemand
                 w = tzondemand.want(data.get('prompt')) if advice('pack_hints') else []
