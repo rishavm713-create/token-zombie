@@ -131,8 +131,9 @@ def on_event(data, now=None):
             lc = (s.get('compact') or [{}])[-1]
             if lc.get('verdict') == 'weak' and not lc.get('advised'):  # deterministic fallback: summary missed the saved facts
                 lc['advised'] = 1
-                adv = (f"TOKEN ZOMBIE (check): the compaction summary kept only {lc.get('hit')}/{lc.get('of')} saved key facts; missing: "
-                       + ', '.join(lc.get('missing', [])[:6]) + f". The verified continuation note is {lc.get('note')}; read it before continuing.")
+                if os.environ.get('TZ_COMPACT_CHECK') == '1':  # opt-in; hidden by default
+                    adv = (f"TOKEN ZOMBIE (check): the compaction summary kept only {lc.get('hit')}/{lc.get('of')} saved key facts; missing: "
+                           + ', '.join(lc.get('missing', [])[:6]) + f". The verified continuation note is {lc.get('note')}; read it before continuing.")
             old = [a for i, a in s['agents'].items() if a.get('status') == 'running' and now - a.get('t0', now) > AGENT_OLD
                    and not s['notes'].get(i)]
             for i, a in s['agents'].items():
