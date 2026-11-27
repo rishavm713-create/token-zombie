@@ -119,6 +119,17 @@ test('turn.complete accumulates tokens and agent time; spawns and tools show', a
   await ui.unmount()
 })
 
+test('cache window shows 1h when the turn created 1h cache', async ($, on) => {
+  world(on, {})
+  on('turn.complete', (_: any, e: any) => ({ text: e.answer }))
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  const usage = { input_tokens: 10, output_tokens: 5, cache_read_input_tokens: 1000, cache_creation_input_tokens: 5, cache_creation: { ephemeral_1h_input_tokens: 5 }, model: 'claude-x' }
+  await $.turn.complete({ answer: '', durationMs: 1000, isAborted: false, turnId: 't1', usage, reason: 'end_turn' } as any)
+  const ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
+  expect(await ui.find({ type: 'Text', text: /^1h$/ })).toBeDefined()
+  await ui.unmount()
+})
+
 test('buttons run the expected argv, copy and compact', async ($, on) => {
   const ran: string[][] = []
   const copies: string[] = []
@@ -268,7 +279,7 @@ test('TOKENS SAVED split: measured + fresh chats (EST) last 24h; old fresh.json 
   world(on, fs)
   await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
   let ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
-  expect(await ui.find({ type: 'Text', text: /0 measured \+ 150K fresh chats \[EST input-eq\], last 24h/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /0 measured \+ 150K fresh chats \[EST input-eq\] \+ 0 compaction drop \[EST\], last 24h/ })).toBeDefined()
   await ui.unmount()
   fs['fresh.json'] = JSON.stringify({ ts: NOW - 90000, tok: 5, n: 1, today: 5 })
   await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })

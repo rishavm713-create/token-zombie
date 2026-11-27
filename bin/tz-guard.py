@@ -32,6 +32,14 @@ def pack_hint(data):
         tzlive.discovered(data.get('session_id', 'x'), hit)
     except Exception:
         pass
+    if os.environ.get('TZ_AUTOPACK') != '0':  # automate: turn the matching pack on now (logged; tz brief done / chat end turn it off)
+        try:
+            import tzbrief
+            done = [p for p in hit if not str(tzbrief.pack('on', p)).startswith('tz brief pack')]
+            if done:
+                return 'TOKEN ZOMBIE: skill pack(s) turned on for this task: ' + ', '.join(done) + ' (use their skills now; tz brief done turns them off).'
+        except Exception:
+            pass
     return ('TOKEN ZOMBIE (suggestion): skill pack(s) that match words in this prompt: ' + ', '.join(hit)
             + '. If the task needs it: tz brief pack on <pack> (now); `tz brief done` turns it off.')
 

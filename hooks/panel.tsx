@@ -21,10 +21,11 @@ const ST = { plugin: 'token-zombie', key: 'stats' } as const
 const FI = { plugin: 'token-zombie', key: 'files' } as const
 const AC = { plugin: 'token-zombie', key: 'acts' } as const
 const NO = { plugin: 'token-zombie', key: 'note' } as const
-const stats = atom(ST, { inp: 0, out: 0, cr: 0, cw: 0, ms: 0, turns: 0, spawns: 0, model: '', last: 0, at: 0 }, { shape: 'stats-1' })
+const stats = atom(ST, { inp: 0, out: 0, cr: 0, cw: 0, ms: 0, turns: 0, spawns: 0, model: '', last: 0, at: 0, ttl: 300, cmp: [] as [number, number][] }, { shape: 'stats-1' })
 const files = atom(FI, { sig: '', status: null, isStale: false, host: null, isHostFresh: false, mode: 'full', mood: null, newChat: 0 }, { shape: 'files-2' })
 const acts = atom(AC, [], { shape: 'acts-1' })
 const note = atom(NO, { label: '', lines: [], err: '' }, { shape: 'note-1' })
+const tick = atom({ plugin: 'token-zombie', key: 'tick' }, 0, { shape: 'tick-1' }) // written every poll so the cache countdown re-renders
 const BA = { plugin: 'token-zombie', key: 'bar' } as const
 const bar = atom(BA, { sig: '', agents: null, skills: null, saved: 0, opts: 0, hasLedger: false, recentAt: 0 } as Bar, { shape: 'bar-2' })
 
@@ -107,6 +108,7 @@ function ledger(t: string, now: number) {
 
 async function poll($: any) {
   try {
+    await update($, tick, () => Date.now())
     const home = await $.env.get('HOME')
     if (!home) return
     const d = `${home}/.claude/token-zombie`
@@ -260,6 +262,7 @@ export const register: Register = on => {
   on('turn.complete', async ($, e, next) => {
     const u = e.usage
     if (u && !e.agentId) {
+      const tnow = await $.clock.now()
       await update($, stats, s => ({
         ...s,
         inp: s.inp + u.input_tokens,
@@ -270,7 +273,10 @@ export const register: Register = on => {
         turns: s.turns + 1,
         model: u.model || s.model,
         last: u.input_tokens + u.cache_read_input_tokens + u.cache_creation_input_tokens, // chat size now: input side of the latest turn
-        at: Date.now(), // when the latest turn ended: drives the cache timer
+        ttl: (u as any).cache_creation?.ephemeral_1h_input_tokens > 0 ? 3600 : s.ttl ?? 300, // real cache life: 1 h when the API billed a 1-h write
+        // measured: chat size dropped by 30%+ (compact / fresh chat) -> the drop is input every later message no longer sends
+        cmp: [...(s.cmp ?? []).filter(c => tnow - c[0] < 86400000), ...(s.last > 20000 && u.input_tokens + u.cache_read_input_tokens + u.cache_creation_input_tokens < s.last * 0.7 ? [[tnow, s.last - (u.input_tokens + u.cache_read_input_tokens + u.cache_creation_input_tokens)] as [number, number]] : [])],
+        at: tnow, // when the latest turn ended: drives the cache timer
       }))
     }
     return next(e)
@@ -309,10 +315,11 @@ export const register: Register = on => {
     const { Box, Text, Button } = $.ui.resolve(e)
     const f = await read($, files)
     const b = await read($, bar)
+    await read($, tick)
     const stt = await read($, stats)
     const cs = stt.last ?? 0
     const now = (await $.clock.now()) / 1000
-    const left = stt.at ? 300 - (now - stt.at / 1000) : 0 // shortcut: fixed 5-min cache life, 1-h TTL users see cold early
+    const left = stt.at ? (stt.ttl ?? 300) - (now - stt.at / 1000) : 0
     const vs = visual(f, b, e.props.isWorking, now)
     const G = '#7cfc00'
     const csColor = cs >= 100000 ? 'red' : cs >= 60000 ? 'yellow' : cs > 0 ? G : undefined
@@ -323,8 +330,8 @@ export const register: Register = on => {
     const nums: [string, string, string, boolean][] = [
       ['ctx', cs > 0 ? big(cs) : '—', 'CHAT SIZE', false], // owner 2026-11-27: the live chat size, coloured below
       ['next', cs > 0 ? '~' + big(cs) : '—', 'NEXT MSG', false], // what the next message sends as input if the cache is cold
-      ['cache', stt.at ? (left > 0 ? Math.ceil(left / 60) + 'm' : 'ended') : '—', 'CACHE WINDOW', false],
-      ['saved', b.hasLedger || b.fresh?.tok ? big(b.saved + (b.fresh?.tok ?? 0)) : '0', 'TOKENS SAVED', true],
+      ['cache', stt.at ? (left > 0 ? (left >= 3000 ? Math.ceil(left / 3600) + 'h' : Math.ceil(left / 60) + 'm') : 'ended') : '—', 'CACHE WINDOW', false],
+      ['saved', b.hasLedger || b.fresh?.tok ? big(b.saved + (b.fresh?.tok ?? 0) + (stt.cmp ?? []).filter(c => now * 1000 - c[0] < 86400000).reduce((a, c) => a + c[1], 0)) : '0', 'TOKENS SAVED', true],
     ]
     const expand = (
       <Button key="tz-expand" label="Open TOKEN ZOMBIE details" plain onPress={() => void open($)}>
@@ -472,7 +479,7 @@ export const register: Register = on => {
         {row('model', t.model || 'n/a', 'model')}
         {row('agent', `${dur(t.ms)} / ${t.turns} turns, ${t.spawns} subagents`, 'agent')}
         {row('cost', hostCost, 'cost')}
-        {row('saved', `${big(fb.saved)} measured + ${big(fb.fresh?.tok ?? 0)} fresh chats [EST input-eq], last 24h`, 'saved')}
+        {row('saved', `${big(fb.saved)} measured + ${big(fb.fresh?.tok ?? 0)} fresh chats [EST input-eq] + ${big((t.cmp ?? []).filter(c => (t.at || 0) - c[0] < 86400000).reduce((a, c) => a + c[1], 0))} compaction drop [EST], last 24h`, 'saved')}
         {fb.coding &&
           row(
             'coding',

@@ -175,6 +175,8 @@ def main(argv):
         if c == 'handoff' and rest[:1] in (['save'], ['status'], ['verify'], ['resume'], ['ctx']):
             import tzintegrity
             return tzintegrity.main([rest[0], *rest[1:]])
+        if c == 'settings':
+            import runpy; sys.argv = ['tz-settings'] + rest; runpy.run_path(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tz-settings.py'), run_name='__main__'); return 0
         if c == 'brief':
             import tzbrief
             return tzbrief.main(rest)

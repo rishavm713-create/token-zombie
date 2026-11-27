@@ -109,7 +109,7 @@ def _tut():
             m = os.path.expanduser('~/.claude/token-zombie/tutorial-seen')
             if not os.path.exists(m):
                 _TUT['v'] = ('Welcome to Token Zombie. Panel tiles: CHAT SIZE = tokens in this chat now (big = costly, start a fresh chat). '
-                             'NEXT MSG = what your next message sends if the cache went cold. CACHE WINDOW = minutes left before the prompt cache expires (cheap while open). '
+                             'NEXT MSG = what your next message sends if the cache went cold. CACHE WINDOW = time left before the prompt cache expires, from the real cache life (5 min or 1 h) (cheap while open). '
                              'TOKENS SAVED = tokens Token Zombie saved you. Details: tz gain')
                 os.makedirs(os.path.dirname(m), exist_ok=True)
                 open(m, 'w').write('1')
@@ -124,6 +124,13 @@ def _vis():
         if not _tzl.feature('banner'):
             return _warn()
         t = _tut()
+        try:  # first run on a machine: add the recommended env settings (thinking budget, tool search, auto-compact), once
+            import importlib.util as _iu
+            _sp = _iu.spec_from_file_location('tzsettings', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tz-settings.py'))
+            _m = _iu.module_from_spec(_sp); _sp.loader.exec_module(_m)
+            t = '\n'.join(x for x in (t, _m.auto()) if x)
+        except Exception:
+            pass
         v = ''
         try:
             v = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.claude-plugin', 'plugin.json'))).get('version', '')
