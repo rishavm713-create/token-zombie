@@ -346,7 +346,7 @@ export const register: Register = on => {
               <Text dimColor> {l.toLowerCase()}</Text>
             </Text>
           ))}
-          {f.newChat ? <Text color={G} bold>Start a new chat: handoff saved</Text> : null}
+          {f.newChat ? <Text color={G} bold>New chat: saved</Text> : null}
           <Text color={dot}>●</Text>
           {expand}
         </Box>
@@ -387,7 +387,7 @@ export const register: Register = on => {
           ))}
           {f.newChat ? (
             <Text weight="semibold" color={G} wrap="truncate-end">
-              Start a new chat · handoff saved
+              New chat · saved
             </Text>
           ) : null}
           <Text color={dot}>●</Text>
