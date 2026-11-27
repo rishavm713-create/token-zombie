@@ -4,7 +4,7 @@ Z="$(cd "$(dirname "$0")/.." && pwd)"; pass=0; fail=0; cd "$Z"
 ok() { if eval "$2"; then pass=$((pass+1)); else fail=$((fail+1)); echo "FAIL: $1"; fi; }
 for f in README.md LICENSE .github/CONTRIBUTING.md .github/SECURITY.md CHANGELOG.md docs/COMPAT.md .github/ISSUE_TEMPLATE/bug_report.md .github/ISSUE_TEMPLATE/feature_request.md .github/ISSUE_TEMPLATE/config.yml .github/workflows/ci.yml; do
   ok "exists $f" '[ -s "$f" ]'; done
-ok "LICENSE is MIT" 'grep -q "^MIT License" LICENSE && grep -q "Permission is hereby granted" LICENSE'
+ok "LICENSE is the SUTRA INTELLIGENCE licence and the earlier MIT text is kept" 'grep -q "SUTRA INTELLIGENCE" LICENSE && grep -q "Permission is hereby granted" LICENSE-MIT-earlier-releases'
 ok "CHANGELOG has 0.3.0" 'grep -q "v0.3.0" CHANGELOG.md'
 ok "COMPAT says EXPERIMENTAL" 'grep -q EXPERIMENTAL docs/COMPAT.md'
 ok "ci runs tests/run_all.sh" 'grep -q "bash tests/run_all.sh" .github/workflows/ci.yml'
