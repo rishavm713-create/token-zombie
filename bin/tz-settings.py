@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Recommended Claude Code settings for Token Zombie (thinking budget, MCP tool search, auto-compact).
+"""Recommended Claude Code settings for Token Zombie (thinking budget, MCP tool search).
 Adds only keys you have not set yourself, backs up settings.json first, never overwrites a value of yours.
 Usage: tz settings [--dry-run] [--revert]   Env TZ_SETTINGS_AUTO=0 stops the automatic first-run apply.
 Applies to NEW chats only."""
 import json, os, shutil, sys, time
 
 WANT = {'MAX_THINKING_TOKENS': '10000',          # simple work stops thinking at 10k; raise or delete for hard builds
-        'ENABLE_TOOL_SEARCH': 'auto',            # MCP tool definitions load on demand instead of every turn
-        'CLAUDE_CODE_AUTO_COMPACT_WINDOW': '150000',
-        'CLAUDE_AUTOCOMPACT_PCT_OVERRIDE': '100'}
+        'ENABLE_TOOL_SEARCH': 'auto'}            # MCP tool definitions load on demand instead of every turn
+# Auto-compact is NOT here: a window of 150000 makes Claude compact at ~118k and, on a machine with a big base context
+# (many skills/MCP tools), it loops "Context window was full". Opt-in only: python3 bin/tz-autocompact.py
 HOME = os.path.expanduser('~/.claude')
 P = os.path.join(os.environ.get('CLAUDE_CONFIG_DIR') or HOME, 'settings.json')
 MARK = os.path.join(HOME, 'token-zombie', 'settings-applied.json')

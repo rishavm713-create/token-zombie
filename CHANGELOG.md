@@ -1,5 +1,6 @@
 # Changelog
 ## Unreleased
+- Fix (Windows compaction loop): `tz settings` no longer auto-sets `CLAUDE_CODE_AUTO_COMPACT_WINDOW`; a 150000 window made Claude compact at ~118k and loop "Context window was full" on machines with a large base context. Auto-compact is opt-in only.
 - Opt-in auto-compact: `python3 bin/tz-autocompact.py [tokens]` (default 150000) shows the exact `~/.claude/settings.json` env change, asks y/N, backs the file up, then applies it. `--dry-run` only shows it, `--yes` skips the question. Never runs on its own; the installer does not touch this setting.
 - 4 new mods (30 in total): `tz-secret-guard` (blocks commands that would expose secrets), `tz-danger-guard` (blocks destructive commands; `/danger off|on`), `tz-turn-nudge` (toast every N turns to save a handoff; `/nudge <turns>`), `tz-auto-checkpoint` (`/checkpoint` shows the last prompt to resume from). Website updated.
 - The 24 `mods/` ship with the plugin: `plugin.json` lists them as dependencies and `marketplace.json` registers each, so `claude plugin install token-zombie@token-zombie` installs them all (checked in a clean config dir).
