@@ -292,9 +292,11 @@ h1,h2,h3,.price{text-wrap:balance}p,li,.lead{text-wrap:pretty}</style>
 
 <footer><div class="wrap">
 <span class="brand"><img src="img/mascot.svg" alt="">TOKEN ZOMBIE</span>
+<span id="cl" hidden></span>
 <span><a href="https://rishavm713-create.github.io/sutra-intelligence-site/"><b>SUTRA INTELLIGENCE</b></a> makes it all work together: open-source parts plus its design and glue in one system. Originals non-commercial.</span>
 <span>Copyright © 2026 Rishav Mishra · <a href="https://github.com/rishavm713-create/token-zombie/blob/main/docs/BRANDING.md">Brand policy</a> · <a href="https://github.com/rishavm713-create/token-zombie">GitHub ↗</a></span>
-</div></footer>
+</div><script>fetch("clones.json").then(r=>r.json()).then(d=>{var e=document.getElementById("cl");e.textContent=d.total.toLocaleString("en-US")+" git clones since "+d.since+" (includes bots and CI)";e.hidden=false}).catch(function(){})</script>
+</footer>
 
 <script>
 (function(){var d=document,pg=d.getElementById('prog');
