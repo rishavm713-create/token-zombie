@@ -129,7 +129,8 @@ def _hooks(st, env=''):
     for gs in d.values():
         for g in gs:
             for x in g['hooks']:
-                x['command'] = f'HOME={shlex.quote(st)} {env}' + x['command'].replace('${CLAUDE_PLUGIN_ROOT}', Z)
+                # no detached auto-note writer: it would recreate files in st after cleanup
+                x['command'] = f'HOME={shlex.quote(st)} TZ_FEAT_AUTO_NOTE=0 {env}' + x['command'].replace('${CLAUDE_PLUGIN_ROOT}', Z)
     p = os.path.join(st, 'settings.json')
     json.dump({'hooks': d}, open(p, 'w'))
     return p

@@ -16,6 +16,7 @@ IMPORT_RX = re.compile(r'(?:import|from|use|pub use|using|package|require|requir
 
 def _secret(path):
     for p in (os.path.abspath(path), os.path.realpath(path)):
+        p = p.replace('\\', '/')  # Windows separators: the secret rules match '/'
         # tzshell._secret skips tokens containing whitespace (shell words); mask it so such paths are still checked
         q = re.sub(r'\s', '_', p)
         for v in (p, q, q.lower()):

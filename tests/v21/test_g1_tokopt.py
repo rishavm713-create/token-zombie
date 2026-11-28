@@ -22,7 +22,8 @@ def pay(p=F, sid='s1', tool='Read', **ti):
 write(BASE)
 ok('first read allowed', T.delta(pay()) is None)
 ok('remember stores', T.remember(pay()))
-ok('snapshot is private', stat.S_IMODE(os.stat(T._path('s1')).st_mode) == 0o600)
+# shortcut: Windows has no POSIX mode bits, so the 0600 check is POSIX only
+ok('snapshot is private', os.name == 'nt' or stat.S_IMODE(os.stat(T._path('s1')).st_mode) == 0o600)
 ok('unchanged left to other guards', T.delta(pay()) is None)
 new = list(BASE)
 for i in (5, 90, 180):

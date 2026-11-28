@@ -61,6 +61,7 @@ for n in ('.env', 'my dir/.env', 'my dir/k.pem', 'U.PEM', os.path.join(H, '.ssh'
     ok('secret refused ' + n, rc == 2 and 'TOPSECRET' not in o and not os.path.exists(R._snap(p)))
 os.symlink(os.path.join(D, '.env'), os.path.join(D, 'link.txt'))
 ok('symlink to secret refused', run(os.path.join(D, 'link.txt'))[0] == 2)
-ok('state under HOME, owner-only', R._snap(f).startswith(H + '/.claude/token-zombie/') and os.stat(R._snap(f)).st_mode & 0o77 == 0)
+# shortcut: Windows has no POSIX mode bits, so owner-only is checked on POSIX only
+ok('state under HOME, owner-only', R._snap(f).replace('\\', '/').startswith(H.replace('\\', '/') + '/.claude/token-zombie/') and (os.name == 'nt' or os.stat(R._snap(f)).st_mode & 0o77 == 0))
 ok('missing file / bad mode', run(f + '.no')[0] == 1 and run(f, 'nope')[0] == 2 and run(f, 'lines')[0] == 2)
 done()

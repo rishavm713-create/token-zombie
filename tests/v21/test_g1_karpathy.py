@@ -115,10 +115,11 @@ def damage():
     os.remove('ln'); w(os.path.join(repo, 'ln'), 'not a link')
 
 
+# shortcut: the exec-bit check below is POSIX only (Windows has no exec bit)
 def pristine():
     return (rd('app.txt') == b'ok\n' and rd('user.txt') == b'staged\nunstaged\n' and rd('notes.txt') == b'mine\x00\xff'
             and not os.path.exists('gone.txt') and not os.path.exists('new') and rd('dir/a [1].txt') == b'a\n'
-            and rd('run.sh') == b'#!/bin/sh\n' and os.stat('run.sh').st_mode & 0o111 and os.path.islink('ln')
+            and rd('run.sh') == b'#!/bin/sh\n' and (os.name == 'nt' or os.stat('run.sh').st_mode & 0o111) and os.path.islink('ln')
             and os.readlink('ln') == 'app.txt' and git('diff', '--cached') == index)
 
 
